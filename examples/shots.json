@@ -1,0 +1,8 @@
+[
+  {"file":"wt/01_sport_hero.png","dur":4.0,"zoom":0.9,"center":"0.5,0.5"},
+  {"file":"wt/02_howto.png","dur":4.0,"zoom":0.9,"center":"0.5,0.5"},
+  {"file":"wt/03_report_form.png","dur":4.0,"zoom":0.9,"center":"0.5,0.5"},
+  {"file":"wt/04_login.png","dur":3.5,"zoom":1.1,"center":"0.5,0.5"},
+  {"file":"wt/05_login_filled.png","dur":3.5,"zoom":0.9,"center":"0.5,0.5"},
+  {"file":"wt/06_register.png","dur":3.5,"zoom":1.1,"center":"0.5,0.5"}
+]

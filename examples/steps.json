@@ -1,0 +1,8 @@
+[
+  {"url":"https://khosrowan.ir/sport/","wait":1.5,"shot":"01_sport_hero.png"},
+  {"url":"https://khosrowan.ir/sport/","scroll_to":700,"wait":0.8,"shot":"02_howto.png"},
+  {"url":"https://khosrowan.ir/sport/","scroll_into":"report","wait":1.0,"shot":"03_report_form.png"},
+  {"url":"https://khosrowan.ir/wp-login.php?redirect_to=https%3A%2F%2Fkhosrowan.ir%2Fsport%2F%23report","wait":1.5,"shot":"04_login.png"},
+  {"url":"https://khosrowan.ir/wp-login.php?redirect_to=https%3A%2F%2Fkhosrowan.ir%2Fsport%2F%23report","fill":{"#user_login":"user","#user_pass":"secret"},"wait":0.5,"shot":"05_login_filled.png"},
+  {"url":"https://khosrowan.ir/wp-login.php?action=register","wait":1.5,"shot":"06_register.png"}
+]
