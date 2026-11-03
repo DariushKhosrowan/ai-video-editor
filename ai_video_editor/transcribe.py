@@ -2,9 +2,27 @@
 import sys
 
 
+def _patch_av_open():
+    """Compatibility shim for PyAV builds that don't expose the
+    `metadata_errors` kwarg passed by faster-whisper (e.g. PyAV 19.x).
+
+    We strip the kwarg and delegate to the original opener. Dropping it is
+    safe: "ignore" is the intended default behaviour anyway.
+    """
+    import av
+    _orig = av.open
+
+    def _open(file, mode="r", **kwargs):
+        kwargs.pop("metadata_errors", None)
+        return _orig(file, mode=mode, **kwargs)
+
+    av.open = _open
+
+
 def transcribe(path: str, model: str = "small", language: str | None = None,
                beam: int = 5, vad: bool = True):
     """Return list of dicts: {start, end, text}."""
+    _patch_av_open()
     from faster_whisper import WhisperModel
     m = WhisperModel(model, device="cpu", compute_type="int8")
     segs, info = m.transcribe(path, language=language, beam_size=beam, vad_filter=vad)

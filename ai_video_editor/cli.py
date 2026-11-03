@@ -7,12 +7,13 @@ Subcommands:
   walkthrough  <steps.json> [-o dir]
   motion       <shots.json> [-o out.mp4]
   compose      <base> <overlays.json> [-o out.mp4]
+  intro       <edited.mp4> [-o out.mp4]
 """
 import argparse
 import json
 import sys
 
-from . import transcribe, timeline, overlay, walkthrough, motion, compose
+from . import transcribe, timeline, overlay, walkthrough, motion, compose, intro
 
 
 def main():
@@ -38,6 +39,16 @@ def main():
     sp = sub.add_parser("compose")
     sp.add_argument("base"); sp.add_argument("overlays")
     sp.add_argument("-o", default="edited.mp4")
+
+    sp = sub.add_parser("intro")
+    sp.add_argument("edited"); sp.add_argument("-o", default="with_intro.mp4")
+    sp.add_argument("--title", default="با درود دوستان")
+    sp.add_argument("--subtitle", default="به کانال من خوش آمدید")
+
+    sp = sub.add_parser("lowerthird")
+    sp.add_argument("--title", default="با درود دوستان")
+    sp.add_argument("--subtitle", default="به کانال من خوش آمدید")
+    sp.add_argument("-o", dest="frames", default="/tmp/lowerthird_frames")
 
     a = p.parse_args()
     if a.cmd == "transcribe":
@@ -65,6 +76,22 @@ def main():
         ovs = json.load(open(a.overlays))
         compose.compose(a.base, ovs, out=a.o)
         print("wrote", a.o)
+    elif a.cmd == "intro":
+        import os as _os
+        frames = "/tmp/lowerthird_frames"
+        sound = "/tmp/intro_sound.wav"
+        if not _os.path.exists(frames):
+            intro.make_lowerthird_animation(title=a.title, subtitle=a.subtitle,
+                                            frames_dir=frames)
+            intro.make_sound(out=sound)
+            print("wrote", frames)
+        intro.prepend(a.edited, frames_dir=frames, sound=sound, out=a.o)
+        print("wrote", a.o)
+    elif a.cmd == "lowerthird":
+        frames = a.frames or "/tmp/lowerthird_frames"
+        intro.make_lowerthird_animation(title=a.title, subtitle=a.subtitle,
+                                        frames_dir=frames)
+        print("wrote", frames)
     else:
         p.print_help()
 
