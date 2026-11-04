@@ -16,6 +16,7 @@ dependencies = [
     "python-bidi>=0.4",
     "scenedetect>=0.7",
     "playwright>=1.40",
+    "opentimelineio>=0.17",
 ]
 
 [project.optional-dependencies]

@@ -4,6 +4,10 @@
 این پروژه از گردش‌کار (pipeline) کاملاً خودکار و قطعی (deterministic) استفاده می‌کند تا هر مدل زبانی
 یا انسان بتواند با دستور زبان طبیعی، ویدیو را ویرایش کند: رونویسی → تحلیل → اُوِرلی → ضبط walkthrough → کامپوزیت.
 
+این نسخه (۰.۲) فراتر از یک اسکریپتِ ترکیب، یک **ویرایشگر غیر-مخرب (non-destructive) واقعی** است:
+یک مدل تایم‌لاین، شبیه NLE های حرفه‌ای، دارد و می‌تواند ویرایش را به فرمت‌های استاندارد صنعت
+(OTIO / FCPXML / CMX3600 EDL) خروجی دهد.
+
 > این پروژه در عمل برای ویرایش ویدیوی معرفی «چالش ورزش همگانی» خسروان استفاده شد
 > (`khosrowan.ir/sport/`) و خروجی واقعی آن تولید شد.
 
@@ -26,6 +30,27 @@
 5) motion        ساخت ویدیو از اسکرین‌شات‌ها (Ken Burns + crossfade)
 6) compose       کامپوزیت نهایی: اُوِرلی + ویدیوی فرعی (PiP) + نرمال‌سازی صدا
 ```
+
+## قابلیت‌های پیشرفته (نسخه ۰.۲)
+
+حالت «ویرایشگر حرفه‌ای» — با یک مدل تایم‌لاین غیر-مخرب، رندر GPU (NVENC)، زیرنویس
+کلمه‌به-کلمه، و یک سرور MCP تا ایجنت‌های هوش مصنوعی مستقیماً ویرایش را برانند:
+
+| دستور | شرح |
+|---|---|
+| `shots <video>` | تشخیص نما/سکانس با PySceneDetect → لیست نماها |
+| `jumpcut <transcript.json> <source>` | ساخت خودکار برش jump-cut (حذف سکوت/پُرکننده‌ها) |
+| `subtitles <transcript.json>` | خروجی زیرنویس SRT + VTT |
+| `burn <video> <transcript.json>` | سوزاندن زیرنویس کلمه‌به-کلمه (کش‌برد) روی خود ویدیو |
+| `export <project.json>` | خروجی غیر-مخرب: OTIO + FCPXML + CMX3600 EDL |
+| `render <project.json>` | رندر تایم‌لاین به MP4 (GPU NVENC، یا `--cpu` برای CPU) |
+| `info <project.json>` | متادیتای پروژه |
+| `mcp` | سرور MCP (stdio) برای ایجنت‌ها |
+
+**مدل تایم‌لاین** (`ai_video_editor/model.py`): پروژه = لیستی از Track ها، هر Track = لیستی
+از Clip ها. هر Clip رفرنسِ غیر-مخرب به منبع + نقطه‌های in/out + transition + overlay ها است.
+چون منبع هرگز تغییر نمی‌کند، همان پروژه را می‌توان دوباره با انکودر متفاوت رندر کرد، یا به
+DaVinci Resolve / Premiere خروجی داد.
 
 ## نصب
 
@@ -125,12 +150,21 @@ ai_video_editor/
   walkthrough.py   # ضبط مرورگر
   motion.py        # Ken Burns + crossfade
   compose.py       # کامپوزیت نهایی
+  intro.py         # اینتروی پایین-سوم
+  model.py         # مدل تایم‌لاین غیر-مخرب (Clip / Track / Project)
+  scenes.py        # تشخیص نما (PySceneDetect)
+  jumpcut.py       # ویرایش خودکار jump-cut از رونویسی
+  captions.py      # زیرنویس کلمه‌به-کلمه + SRT/VTT
+  export_timeline.py # خروجی OTIO / FCPXML / CMX3600 EDL
+  render.py        # رندر تایم‌لاین (GPU NVENC)
+  mcp_server.py    # سرور MCP برای ایجنت‌ها
   cli.py           # CLI
 pyproject.toml
 examples/
   steps.json
   shots.json
   overlays.json
+  transcript.json
 tests/
 ```
 
