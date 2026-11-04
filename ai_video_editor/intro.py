@@ -219,7 +219,9 @@ def prepend(edited, frames_dir="/tmp/lowerthird_frames",
     VENC = ["-c:v", "libx264", "-preset", "veryfast", "-crf", "20"]
     AENC = ["-c:a", "aac", "-b:a", "192k", "-ar", "48000"]
 
-    # 1) intro video: footage + title overlay (frames), first INTRO seconds
+    # 1) intro video: footage (gentle cinematic push-in) + title overlay (frames),
+    #    first INTRO seconds. The footage is never covered — a slow zoom settles to
+    #    full frame by t=INTRO while the lower-third title animates over it.
     intro_v = "/tmp/intro_v.mp4"
     subprocess.run(["ffmpeg", "-y", "-v", "error",
                     "-ss", "0", "-t", str(INTRO),
@@ -228,7 +230,11 @@ def prepend(edited, frames_dir="/tmp/lowerthird_frames",
                     "-i", os.path.join(frames_dir, "f%04d.png"),
                     "-filter_complex",
                     "[0:v]scale=1080:1920:force_original_aspect_ratio=decrease,"
-                    "pad=1080:1920:(ow-iw)/2:(oh-ih)/2,setsar=1[base];"
+                    "pad=1080:1920:(ow-iw)/2:(oh-ih)/2,setsar=1,"
+                    "scale=1280:2276:force_original_aspect_ratio=decrease,"
+                    f"crop=w='round(1280-200*min(t/{INTRO},1))':"
+                    f"h='round(2276-356*min(t/{INTRO},1))':"
+                    "x='(1280-ow)/2':y='(2276-oh)/2',setsar=1[base];"
                     "[1:v]format=yuva420p[ov];"
                     "[base][ov]overlay=0:0:format=auto[out]",
                     "-map", "[out]", "-map", "0:a",
