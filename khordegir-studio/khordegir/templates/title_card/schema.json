@@ -1,0 +1,64 @@
+{
+  "name": "title_card",
+  "label": "کارت عنوان",
+  "description": "یک عنوان بزرگ با تیتر کوچک و زیرعنوان؛ می‌تواند روی یک عکس تمام‌صفحه‌ی تیره باشد. برای شروع ویدیو یا شروع هر بخش.",
+  "aliases": [
+    "title-card",
+    "عنوان"
+  ],
+  "category": "متن",
+  "fields": [
+    {
+      "key": "eyebrow",
+      "label": "تیتر کوچک بالا",
+      "type": "text"
+    },
+    {
+      "key": "title",
+      "label": "عنوان اصلی (*زرد* ، ~قرمز~)",
+      "type": "text",
+      "required": true
+    },
+    {
+      "key": "subtitle",
+      "label": "زیرعنوان",
+      "type": "textarea"
+    },
+    {
+      "key": "image",
+      "label": "عکس پس‌زمینه (اختیاری)",
+      "type": "image"
+    },
+    {
+      "key": "dim",
+      "label": "تیرگی عکس (۰ تا ۱)",
+      "type": "number",
+      "default": 0.55
+    },
+    {
+      "key": "align",
+      "label": "جای متن",
+      "type": "select",
+      "options": [
+        [
+          "bottom",
+          "پایین"
+        ],
+        [
+          "center",
+          "وسط"
+        ]
+      ],
+      "default": "bottom"
+    }
+  ],
+  "example": {
+    "eyebrow": "یک سؤال ساده",
+    "title": "پول می‌دی یا به *پلیس* زنگ می‌زنی؟",
+    "subtitle": "قانونی که پشت همه‌ی باج‌گیری‌ها هست",
+    "image": "",
+    "layout": "SLIDE"
+  },
+  "order": 0,
+  "version": 1
+}

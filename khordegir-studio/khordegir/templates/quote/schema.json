@@ -1,0 +1,62 @@
+{
+  "name": "quote",
+  "label": "جمله‌ی کلیدی",
+  "description": "یک جمله‌ی بزرگ و پررنگ (با کلمه‌ی زرد/قرمز) و یک خط توضیح کوچک‌تر. برای قانون‌ها و جمع‌بندی‌ها.",
+  "aliases": [
+    "statement",
+    "جمله",
+    "نقل‌قول"
+  ],
+  "category": "متن",
+  "fields": [
+    {
+      "key": "text",
+      "label": "جمله (*زرد* ، ~قرمز~)",
+      "type": "textarea",
+      "required": true
+    },
+    {
+      "key": "highlight",
+      "label": "خط دوم بزرگ‌تر (اختیاری)",
+      "type": "text"
+    },
+    {
+      "key": "highlight_color",
+      "label": "رنگ خط دوم",
+      "type": "select",
+      "options": [
+        [
+          "accent",
+          "زرد"
+        ],
+        [
+          "danger",
+          "قرمز"
+        ],
+        [
+          "text",
+          "سفید"
+        ]
+      ],
+      "default": "accent"
+    },
+    {
+      "key": "caption",
+      "label": "توضیح کوچک",
+      "type": "textarea"
+    },
+    {
+      "key": "author",
+      "label": "گوینده (اختیاری)",
+      "type": "text"
+    }
+  ],
+  "example": {
+    "text": "هر رفتاری که پاداشش بدی،",
+    "highlight": "بیشتر می‌شه",
+    "caption": "",
+    "layout": "SCAM"
+  },
+  "order": 80,
+  "version": 1
+}

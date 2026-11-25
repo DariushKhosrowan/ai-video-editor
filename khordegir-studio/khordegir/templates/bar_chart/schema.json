@@ -1,0 +1,118 @@
+{
+  "name": "bar_chart",
+  "label": "نمودار میله‌ای",
+  "description": "میله‌ها از پایین رشد می‌کنند و عددها روی‌شان می‌شمارند. افقی هم می‌شود (برای برچسب‌های بلند).",
+  "aliases": [
+    "bar-chart",
+    "bar",
+    "نمودار میله‌ای",
+    "میله‌ای"
+  ],
+  "category": "نمودار",
+  "fields": [
+    {
+      "key": "title",
+      "label": "عنوان",
+      "type": "text"
+    },
+    {
+      "key": "subtitle",
+      "label": "زیرعنوان",
+      "type": "text"
+    },
+    {
+      "key": "data",
+      "label": "داده‌ها",
+      "type": "table",
+      "columns": [
+        [
+          "label",
+          "برچسب"
+        ],
+        [
+          "value",
+          "عدد"
+        ],
+        [
+          "color",
+          "رنگ (accent/danger/muted)"
+        ],
+        [
+          "display",
+          "متن به‌جای عدد"
+        ]
+      ]
+    },
+    {
+      "key": "prefix",
+      "label": "قبل از عدد (مثل +)",
+      "type": "text"
+    },
+    {
+      "key": "suffix",
+      "label": "بعد از عدد (مثل ٪)",
+      "type": "text"
+    },
+    {
+      "key": "highlight",
+      "label": "میله‌ی برجسته (برچسب یا شماره)",
+      "type": "text"
+    },
+    {
+      "key": "orientation",
+      "label": "جهت",
+      "type": "select",
+      "options": [
+        [
+          "vertical",
+          "عمودی"
+        ],
+        [
+          "horizontal",
+          "افقی"
+        ]
+      ],
+      "default": "vertical"
+    },
+    {
+      "key": "ymax",
+      "label": "سقف محور (اختیاری)",
+      "type": "number"
+    },
+    {
+      "key": "axis",
+      "label": "محور و خطوط راهنما",
+      "type": "select",
+      "options": [
+        [
+          "true",
+          "نمایش"
+        ],
+        [
+          "false",
+          "پنهان"
+        ]
+      ],
+      "default": "true"
+    }
+  ],
+  "example": {
+    "title": "آدم‌ربایی‌های ثبت‌شده در ایتالیا",
+    "data": [
+      {
+        "label": "۱۹۶۹ تا ۱۹۹۱",
+        "value": 630,
+        "color": "danger"
+      },
+      {
+        "label": "۷ سال بعد از قانون ۱۹۹۱",
+        "value": 38,
+        "color": "accent"
+      }
+    ],
+    "source": "Bohlen / NYT, 1998; Avraham & Porat, 2023",
+    "layout": "SLIDE"
+  },
+  "order": 30,
+  "version": 1
+}

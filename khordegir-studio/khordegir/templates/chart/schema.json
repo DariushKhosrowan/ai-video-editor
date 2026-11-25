@@ -1,0 +1,36 @@
+{
+  "name": "chart",
+  "label": "نمودار از فایل spec",
+  "description": "نمودار از روی یک فایل JSON (spec) با فیلدهای type/title/data/series؛ برای نمودارهای پیچیده‌تر.",
+  "aliases": [
+    "spec"
+  ],
+  "category": "نمودار",
+  "fields": [
+    {
+      "key": "spec",
+      "label": "مسیر فایل spec (JSON)",
+      "type": "text"
+    }
+  ],
+  "example": {
+    "chart": {
+      "type": "bar",
+      "data": [
+        {
+          "label": "الف",
+          "value": 10
+        },
+        {
+          "label": "ب",
+          "value": 25,
+          "color": "accent"
+        }
+      ]
+    },
+    "title": "نمونه",
+    "layout": "SLIDE"
+  },
+  "order": 140,
+  "version": 1
+}

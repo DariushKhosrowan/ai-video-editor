@@ -1,0 +1,72 @@
+{
+  "name": "bullet_list",
+  "label": "فهرست / کارت‌ها",
+  "description": "چند مورد که یکی‌یکی وارد می‌شوند؛ با شماره یا بدون آن، یک یا دو ستون.",
+  "aliases": [
+    "list",
+    "bullets",
+    "فهرست"
+  ],
+  "category": "متن",
+  "fields": [
+    {
+      "key": "eyebrow",
+      "label": "تیتر کوچک",
+      "type": "text"
+    },
+    {
+      "key": "title",
+      "label": "عنوان",
+      "type": "text"
+    },
+    {
+      "key": "items",
+      "label": "موردها (هر خط یکی؛ *زرد* ~قرمز~)",
+      "type": "list",
+      "required": true
+    },
+    {
+      "key": "numbered",
+      "label": "شماره‌دار",
+      "type": "select",
+      "options": [
+        [
+          "true",
+          "بله"
+        ],
+        [
+          "false",
+          "نه"
+        ]
+      ],
+      "default": "true"
+    },
+    {
+      "key": "columns",
+      "label": "تعداد ستون",
+      "type": "select",
+      "options": [
+        [
+          "1",
+          "۱"
+        ],
+        [
+          "2",
+          "۲"
+        ]
+      ],
+      "default": "1"
+    }
+  ],
+  "example": {
+    "title": "سه سؤالِ قبل از کوتاه اومدن",
+    "items": [
+      "کی زیر فشاره و کی داره از بقیه خرج می‌کنه؟",
+      "اولین بارشه یا تبدیل به عادت شده؟",
+      "پناه و اهرم داری یا واقعاً ~گروگانِ بقایی؟~"
+    ],
+    "layout": "SLIDE"
+  },
+  "order": 40,
+  "version": 1
+}

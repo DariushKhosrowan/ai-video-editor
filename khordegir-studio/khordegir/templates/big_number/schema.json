@@ -1,0 +1,114 @@
+{
+  "name": "big_number",
+  "label": "عدد بزرگ",
+  "description": "یک عدد خیلی بزرگ که از صفر می‌شمارد (مثل ۸۰٪) با یک جمله زیرش؛ اختیاری با عکس کنارش.",
+  "aliases": [
+    "big-number",
+    "counter",
+    "عدد"
+  ],
+  "category": "عدد",
+  "fields": [
+    {
+      "key": "number",
+      "label": "عدد",
+      "type": "text",
+      "required": true
+    },
+    {
+      "key": "prefix",
+      "label": "قبل از عدد (مثل + یا حدود)",
+      "type": "text"
+    },
+    {
+      "key": "suffix",
+      "label": "بعد از عدد (مثل ٪ یا نفر)",
+      "type": "text"
+    },
+    {
+      "key": "from",
+      "label": "شروع شمارش از",
+      "type": "number",
+      "default": 0
+    },
+    {
+      "key": "color",
+      "label": "رنگ عدد",
+      "type": "select",
+      "options": [
+        [
+          "accent",
+          "زرد (مثبت/کلیدی)"
+        ],
+        [
+          "danger",
+          "قرمز (بد)"
+        ],
+        [
+          "text",
+          "سفید"
+        ]
+      ],
+      "default": "accent"
+    },
+    {
+      "key": "eyebrow",
+      "label": "تیتر کوچک بالای عدد",
+      "type": "text"
+    },
+    {
+      "key": "caption",
+      "label": "جمله‌ی زیر عدد",
+      "type": "textarea"
+    },
+    {
+      "key": "detail",
+      "label": "توضیح کوچک",
+      "type": "text"
+    },
+    {
+      "key": "image",
+      "label": "عکس کنار (اختیاری)",
+      "type": "image"
+    },
+    {
+      "key": "motion",
+      "label": "حرکت عکس",
+      "type": "select",
+      "options": [
+        [
+          "breathe",
+          "نفس‌کشیدن"
+        ],
+        [
+          "zoom-out",
+          "زوم به بیرون"
+        ],
+        [
+          "pan-left",
+          "حرکت به چپ"
+        ],
+        [
+          "pan-right",
+          "حرکت به راست"
+        ],
+        [
+          "none",
+          "ثابت"
+        ]
+      ],
+      "default": "breathe"
+    }
+  ],
+  "example": {
+    "number": "80",
+    "suffix": "٪",
+    "color": "danger",
+    "caption": "شرکت‌هایی که باج دادند، دوباره هدف حمله قرار گرفتند",
+    "detail": "نظرسنجی از نزدیک به ۱٬۵۰۰ مدیر امنیت",
+    "source": "Cybereason, 2022",
+    "layout": "SCAM"
+  },
+  "order": 10,
+  "version": 1
+}

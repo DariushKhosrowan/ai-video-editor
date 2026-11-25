@@ -1,0 +1,36 @@
+{
+  "name": "section_break",
+  "label": "جداکننده‌ی بخش",
+  "description": "صفحه‌ی ساده بین دو بخش: شماره/اسم بخش و یک عنوان کوتاه. برای لحظه‌هایی که بیشتر خودت حرف می‌زنی.",
+  "aliases": [
+    "section-break",
+    "section",
+    "بخش"
+  ],
+  "category": "متن",
+  "fields": [
+    {
+      "key": "eyebrow",
+      "label": "بالای عنوان (مثل: بخش ۲)",
+      "type": "text"
+    },
+    {
+      "key": "title",
+      "label": "عنوان",
+      "type": "text",
+      "required": true
+    },
+    {
+      "key": "subtitle",
+      "label": "زیرعنوان",
+      "type": "text"
+    }
+  ],
+  "example": {
+    "eyebrow": "بخش سوم",
+    "title": "«خودش طلبکار می‌شه!»",
+    "layout": "SCAM"
+  },
+  "order": 90,
+  "version": 1
+}

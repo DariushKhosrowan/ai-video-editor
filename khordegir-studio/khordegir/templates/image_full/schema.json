@@ -1,0 +1,99 @@
+{
+  "name": "image_full",
+  "label": "عکس تمام‌صفحه",
+  "description": "عکس بزرگ با زیرنویس پررنگ؛ در حالت SCAM عکس در قاب بزرگ بالا-راست می‌نشیند تا جای دوربین خالی بماند. می‌شود روی عکس نقطه گذاشت (مثل نقشه).",
+  "aliases": [
+    "image-full",
+    "full-image",
+    "عکس کامل"
+  ],
+  "category": "تصویر",
+  "fields": [
+    {
+      "key": "image",
+      "label": "عکس",
+      "type": "image",
+      "required": true
+    },
+    {
+      "key": "title",
+      "label": "زیرنویس / عنوان (*زرد*)",
+      "type": "text"
+    },
+    {
+      "key": "text",
+      "label": "متن کوچک",
+      "type": "text"
+    },
+    {
+      "key": "dim",
+      "label": "تیرگی عکس (۰ تا ۱)",
+      "type": "number",
+      "default": 0.25
+    },
+    {
+      "key": "dots",
+      "label": "نقطه‌ها روی عکس: x,y,رنگ (درصد) هر خط یکی",
+      "type": "list"
+    },
+    {
+      "key": "motion",
+      "label": "حرکت عکس",
+      "type": "select",
+      "options": [
+        [
+          "breathe",
+          "نفس‌کشیدن"
+        ],
+        [
+          "zoom-out",
+          "زوم به بیرون"
+        ],
+        [
+          "pan-left",
+          "حرکت به چپ"
+        ],
+        [
+          "pan-right",
+          "حرکت به راست"
+        ],
+        [
+          "none",
+          "ثابت"
+        ]
+      ],
+      "default": "breathe"
+    },
+    {
+      "key": "title_position",
+      "label": "جای عنوان",
+      "type": "select",
+      "options": [
+        [
+          "bottom",
+          "پایین"
+        ],
+        [
+          "top",
+          "بالا"
+        ]
+      ],
+      "default": "bottom"
+    }
+  ],
+  "example": {
+    "image": "",
+    "title": "*تنبیه ضداجتماعی* در ۱۶ شهر دنیا",
+    "text": "ضعیف‌تر بودن اعتماد و قانون ← حمله‌ی مفت‌خور به آدمِ درستکار",
+    "dots": [
+      "20,40",
+      "26,36",
+      "48,32,danger",
+      "52,30",
+      "60,45,danger"
+    ],
+    "layout": "SLIDE"
+  },
+  "order": 100,
+  "version": 1
+}

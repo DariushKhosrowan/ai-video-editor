@@ -1,0 +1,108 @@
+{
+  "name": "image_text",
+  "label": "عکس + متن",
+  "description": "یک عکس در قاب گرد (آرام نفس می‌کشد) و کنارش تیتر کوچک، عنوان، متن و چند نکته.",
+  "aliases": [
+    "image-text",
+    "تصویر"
+  ],
+  "category": "تصویر",
+  "fields": [
+    {
+      "key": "image",
+      "label": "عکس",
+      "type": "image",
+      "required": true
+    },
+    {
+      "key": "eyebrow",
+      "label": "تیتر کوچک (زرد)",
+      "type": "text"
+    },
+    {
+      "key": "title",
+      "label": "عنوان",
+      "type": "text"
+    },
+    {
+      "key": "text",
+      "label": "متن",
+      "type": "textarea"
+    },
+    {
+      "key": "points",
+      "label": "نکته‌ها / کارت‌ها (هر خط یکی)",
+      "type": "list"
+    },
+    {
+      "key": "motion",
+      "label": "حرکت عکس",
+      "type": "select",
+      "options": [
+        [
+          "breathe",
+          "نفس‌کشیدن"
+        ],
+        [
+          "zoom-out",
+          "زوم به بیرون"
+        ],
+        [
+          "pan-left",
+          "حرکت به چپ"
+        ],
+        [
+          "pan-right",
+          "حرکت به راست"
+        ],
+        [
+          "none",
+          "ثابت"
+        ]
+      ],
+      "default": "breathe"
+    },
+    {
+      "key": "fit",
+      "label": "جای‌گیری عکس",
+      "type": "select",
+      "options": [
+        [
+          "cover",
+          "پر کردن قاب"
+        ],
+        [
+          "contain",
+          "کامل دیده شود"
+        ]
+      ],
+      "default": "cover"
+    },
+    {
+      "key": "shape",
+      "label": "شکل قاب",
+      "type": "select",
+      "options": [
+        [
+          "portrait",
+          "عمودی"
+        ],
+        [
+          "landscape",
+          "افقی (بالا)"
+        ]
+      ],
+      "default": "portrait"
+    }
+  ],
+  "example": {
+    "image": "",
+    "eyebrow": "بی. اف. اسکینر، ۱۹۵۷",
+    "title": "پاداشِ گاه‌به‌گاه",
+    "text": "سرسخت‌ترین رفتار وقتی ساخته می‌شه که *فقط گاهی* جواب بگیره",
+    "source": "Ferster & Skinner, 1957",
+    "layout": "SCAM"
+  },
+  "order": 20,
+  "version": 1
+}

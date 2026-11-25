@@ -1,0 +1,46 @@
+{
+  "name": "layers",
+  "label": "لایه‌ای (JSON)",
+  "description": "اسلایدی که از فایل لایه‌ای JSON می‌آید: هر المان با مختصات دقیق. برای طرح‌های خاص.",
+  "aliases": [
+    "layer"
+  ],
+  "category": "ویژه",
+  "fields": [
+    {
+      "key": "file",
+      "label": "مسیر فایل لایه‌ای JSON",
+      "type": "text"
+    }
+  ],
+  "example": {
+    "elements": [
+      {
+        "type": "text",
+        "text": "نمونه‌ی لایه‌ای",
+        "font": "Black",
+        "size": 90,
+        "color": "#FFFFFF",
+        "x": 1840,
+        "y": 300,
+        "anchor": "rs"
+      },
+      {
+        "type": "counter",
+        "from": 0,
+        "to": 79,
+        "suffix": "٪",
+        "font": "Black",
+        "size": 220,
+        "color": "#FFD600",
+        "x": 1840,
+        "y": 640,
+        "anchor": "rs",
+        "delay": 0.2
+      }
+    ],
+    "layout": "SLIDE"
+  },
+  "order": 150,
+  "version": 1
+}

@@ -1,0 +1,74 @@
+{
+  "name": "counter_grid",
+  "label": "کارت‌های عددی",
+  "description": "دو تا چهار کارت، هر کدام یک عدد که می‌شمارد و توضیح زیرش (مثل مقایسه‌ی دو گروه).",
+  "aliases": [
+    "counter-grid",
+    "cards-numbers",
+    "اعداد"
+  ],
+  "category": "عدد",
+  "fields": [
+    {
+      "key": "title",
+      "label": "عنوان",
+      "type": "text"
+    },
+    {
+      "key": "cards",
+      "label": "کارت‌ها",
+      "type": "table",
+      "columns": [
+        [
+          "value",
+          "عدد"
+        ],
+        [
+          "prefix",
+          "قبل"
+        ],
+        [
+          "suffix",
+          "بعد"
+        ],
+        [
+          "label",
+          "توضیح"
+        ],
+        [
+          "sub",
+          "توضیح کوچک"
+        ],
+        [
+          "color",
+          "رنگ"
+        ]
+      ]
+    }
+  ],
+  "example": {
+    "title": "آزمایش بیمه‌ی سلامت RAND",
+    "cards": [
+      {
+        "value": 50,
+        "prefix": "+",
+        "suffix": "٪",
+        "label": "مصرف بیشترِ خدمات درمانی وقتی برای افراد عادی رایگان شد",
+        "sub": "خطر اخلاقی",
+        "color": "accent"
+      },
+      {
+        "value": 14,
+        "prefix": "+",
+        "suffix": "٪",
+        "label": "احتمال پیش‌بینی‌شده‌ی مرگ در کم‌درآمدهای دارای فشار خون بالا",
+        "sub": "وقتی هزینه روی دوششون گذاشتند",
+        "color": "danger"
+      }
+    ],
+    "source": "Manning et al., 1987; Newhouse, 1993",
+    "layout": "SLIDE"
+  },
+  "order": 70,
+  "version": 1
+}
