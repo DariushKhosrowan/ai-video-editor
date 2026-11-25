@@ -132,6 +132,89 @@
         if (!hasFa(str) && /[A-Za-z]/.test(String(str))) e.setAttribute("dir", "ltr");
         return e;
       },
+      /* Wrap an editable element in an outer [data-field-wrap=key] container that holds user
+         overrides (x, y, scale) from slide.overrides[key], while GSAP entrance animations act on
+         the inner node so user transforms and animation transforms never collide. */
+      field(key, el) {
+        if (!el) return el;
+        if (el.parentElement && el.parentElement.dataset && el.parentElement.dataset.fieldWrap === String(key)) {
+          return el.parentElement;
+        }
+        const wrap = document.createElement("div");
+        wrap.dataset.fieldWrap = String(key);
+        el.dataset.field = String(key);
+
+        const parent = el.parentNode;
+        if (parent) parent.insertBefore(wrap, el);
+        wrap.appendChild(el);
+
+        const st = el.style;
+        const hasInlinePos = !!(st.left || st.top || st.right || st.bottom);
+        const isAbs = st.position === "absolute" ||
+          (el.classList && (el.classList.contains("abs") || el.classList.contains("frame") || el.classList.contains("col"))) ||
+          (typeof getComputedStyle === "function" && el.isConnected && getComputedStyle(el).position === "absolute");
+
+        if (isAbs && hasInlinePos) {
+          wrap.style.position = "absolute";
+          for (const p of ["left", "top", "right", "bottom", "zIndex"]) {
+            if (st[p]) {
+              wrap.style[p] = st[p];
+              st[p] = p === "zIndex" ? "" : "auto";
+            }
+          }
+          if (st.width && /%$/.test(st.width)) {
+            wrap.style.width = st.width;
+            st.width = "100%";
+          }
+          if (st.height && /%$/.test(st.height)) {
+            wrap.style.height = st.height;
+            st.height = "100%";
+          } else if (wrap.style.top && wrap.style.bottom && !st.height) {
+            st.height = "100%";
+          }
+          if (el.tagName && el.tagName.toLowerCase() === "svg" && !st.display) {
+            st.display = "block";
+          }
+          st.position = "relative";
+        } else if (!isAbs) {
+          for (const p of ["flex", "flexGrow", "flexShrink", "flexBasis", "alignSelf", "order", "gridArea", "gridColumn", "gridRow", "marginTop", "marginRight", "marginBottom", "marginLeft"]) {
+            if (st[p]) {
+              wrap.style[p] = st[p];
+              st[p] = "";
+            }
+          }
+          if (st.width && (/%$/.test(st.width) || wrap.style.marginLeft === "auto" || wrap.style.marginRight === "auto")) {
+            wrap.style.width = st.width;
+            st.width = "100%";
+          }
+        }
+
+        const allOv = slide && slide.overrides;
+        const layoutKey = scam ? "SCAM" : "SLIDE";
+        let ov = null;
+        if (allOv && typeof allOv === "object") {
+          if (allOv[layoutKey] && typeof allOv[layoutKey] === "object" && allOv[layoutKey][key] != null) {
+            ov = allOv[layoutKey][key];
+          } else if (allOv[key] != null) {
+            const raw = allOv[key];
+            if (raw && typeof raw === "object" && (raw[layoutKey] != null || raw.SLIDE != null || raw.SCAM != null)) {
+              ov = raw[layoutKey] || null;
+            } else {
+              ov = raw;
+            }
+          }
+        }
+        if (ov && typeof ov === "object") {
+          const x = (ov.x != null && ov.x !== "" && Number.isFinite(+ov.x)) ? +ov.x : 0;
+          const y = (ov.y != null && ov.y !== "" && Number.isFinite(+ov.y)) ? +ov.y : 0;
+          const sc = (ov.scale != null && ov.scale !== "" && Number.isFinite(+ov.scale)) ? +ov.scale : 1;
+          if (x !== 0 || y !== 0 || sc !== 1) {
+            wrap.style.transform = `translate(${x}px, ${y}px) scale(${sc})`;
+          }
+        }
+
+        return wrap;
+      },
       /* shrink every text inside box until nothing overflows */
       fit(box, min = 0.55) {
         const kids = [...box.querySelectorAll("[class*='t-']")].concat(box.className.includes("t-") ? [box] : []);
@@ -156,6 +239,7 @@
       /* entrance by role: eyebrow | title | body | card | bubble | badge | image | note */
       enter(e, role, i = 0, extra = 0, over) {
         if (!e) return 0;
+        if (e.dataset && e.dataset.fieldWrap && e.firstElementChild) e = e.firstElementChild;
         const m = Object.assign({}, M[role] || M.body, over || {});
         const explicit = over && (over.x != null || over.y != null || over.scale != null);
         let from;
@@ -176,6 +260,7 @@
       stagger(list, role, extra = 0) { list.forEach((e, i) => A.enter(e, role, i, extra)); },
       /* number counting up; tabular Persian digits; scale .92 -> 1 */
       count(e, o) {
+        if (e && e.dataset && e.dataset.fieldWrap && e.firstElementChild) e = e.firstElementChild;
         const m = M.number;
         const to = toNum(o.to), from = toNum(o.from ?? 0), dec = o.decimals ?? decOf(o.to), th1 = o.thousands !== false;
         const pre = o.prefix ?? "", suf = o.suffix ?? "";

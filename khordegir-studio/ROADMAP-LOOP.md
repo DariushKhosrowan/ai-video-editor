@@ -7,7 +7,7 @@ Revised order (beginner loop first, templates later): editor + local server → 
 
 - [x] 1. Local HTTP server `khordegir/server.py` (stdlib) + `khordegir editor` subcommand; serves /editor/, /stage/, /api/health. Test: GET returns 200 + {"ok": true}.
 - [x] 2. Project CRUD + YAML validation + image upload endpoints. Test: pytest; invalid YAML → 400 and file untouched.
-- [ ] 3. `A.field(key, el)`: outer wrapper holds user (x, y, scale) overrides, inner node gets GSAP entrance (no transform collision). Test: override transform constant at t=0, 0.5, 5.9.
+- [x] 3. `A.field(key, el)`: outer wrapper holds user (x, y, scale) overrides, inner node gets GSAP entrance (no transform collision). Test: override transform constant at t=0, 0.5, 5.9.
 - [ ] 4. Wire `A.field` + `editable` flags in title_card, big_number, image_text, bullet_list, quote, section_break. Test: empty overrides pixel-identical to baseline.
 - [ ] 5. Real editor shell: project picker, slide list, Persian schema forms, drag reorder, live preview, save. Test: Playwright E2E.
 - [ ] 6. Canvas drag/resize handles, SCAM safe-zone overlay, «انیمیشن دیگر» reroll button. Test: persisted coords match render.
