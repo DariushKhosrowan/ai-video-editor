@@ -5,8 +5,8 @@ Rule: one task per cycle, on branch `studio-roadmap-loop`, small commits, pushed
 
 Revised order (beginner loop first, templates later): editor + local server → WYSIWYG overrides → themes → smart importer → render speed → template families.
 
-- [ ] 1. Local HTTP server `khordegir/server.py` (stdlib) + `khordegir editor` subcommand; serves /editor/, /stage/, /api/health. Test: GET returns 200 + {"ok": true}.
-- [ ] 2. Project CRUD + YAML validation + image upload endpoints. Test: pytest; invalid YAML → 400 and file untouched.
+- [x] 1. Local HTTP server `khordegir/server.py` (stdlib) + `khordegir editor` subcommand; serves /editor/, /stage/, /api/health. Test: GET returns 200 + {"ok": true}.
+- [x] 2. Project CRUD + YAML validation + image upload endpoints. Test: pytest; invalid YAML → 400 and file untouched.
 - [ ] 3. `A.field(key, el)`: outer wrapper holds user (x, y, scale) overrides, inner node gets GSAP entrance (no transform collision). Test: override transform constant at t=0, 0.5, 5.9.
 - [ ] 4. Wire `A.field` + `editable` flags in title_card, big_number, image_text, bullet_list, quote, section_break. Test: empty overrides pixel-identical to baseline.
 - [ ] 5. Real editor shell: project picker, slide list, Persian schema forms, drag reorder, live preview, save. Test: Playwright E2E.

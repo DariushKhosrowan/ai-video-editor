@@ -243,11 +243,10 @@ def cmd_index(a):
 
 def cmd_editor(a):
     from .index import build_index
+    from .server import serve
     build_index()
-    import webbrowser
-    url = (PKG / "editor" / "index.html").as_uri()
-    print("ویرایشگر:", url)
-    webbrowser.open(url)
+    videos = Path(a.videos) if a.videos else PKG.parent / "videos"
+    serve(videos, port=a.port, open_browser=not a.no_browser)
     return 0
 
 
@@ -292,7 +291,11 @@ def main(argv=None):
     n.add_argument("folder"); n.set_defaults(fn=cmd_new)
     t = sub.add_parser("templates", help="فهرست قالب‌ها"); t.set_defaults(fn=cmd_templates)
     x = sub.add_parser("index", help="به‌روزرسانی فهرست قالب‌ها و تم‌ها (بعد از اضافه کردن پوشه‌ی قالب)"); x.set_defaults(fn=cmd_index)
-    e = sub.add_parser("editor", help="باز کردن ویرایشگر در مرورگر"); e.set_defaults(fn=cmd_editor)
+    e = sub.add_parser("editor", help="اجرای ویرایشگر محلی در مرورگر (http://127.0.0.1:8765)")
+    e.add_argument("--port", type=int, default=8765)
+    e.add_argument("--no-browser", action="store_true", help="مرورگر را خودکار باز نکن")
+    e.add_argument("--videos", help="پوشهٔ پروژه‌ها (پیش‌فرض: videos/)")
+    e.set_defaults(fn=cmd_editor)
     g = sub.add_parser("gallery", help="ساخت تصویر پیش‌نمایش قالب‌ها")
     g.add_argument("--jobs", type=int, default=2); g.set_defaults(fn=cmd_gallery)
     a = ap.parse_args(argv)
