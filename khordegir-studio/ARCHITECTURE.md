@@ -1,5 +1,7 @@
 # Architecture
 
+> Current engine below. **Target architecture for the MVP and Phase 2** is at the end of this file. Principles: PRINCIPLES.md.
+
 ```mermaid
 flowchart LR
   subgraph Authoring
@@ -51,3 +53,30 @@ flowchart LR
 | `outputs.py` | `steps_data.lua`, `steps.json`, `prompter.txt`, `prompter.html` (from `obs/prompter_template.html`), `slides.pdf` |
 | `importer.py` | script-with-markers → video.yaml (JS twin: `editor/importer.js`) |
 | `gallery.py` | renders each template's `example` → `templates/<n>/preview.png`, `gallery/gallery.png`, `gallery/GALLERY.md` |
+
+
+## Target architecture (v2, 2026-11-25)
+
+```mermaid
+flowchart LR
+  L[Desktop launcher<br/>khordegir-studio.desktop / .bat] --> SV
+  subgraph Local["khordegir editor (127.0.0.1:8765)"]
+    SV[server.py · stdlib ThreadingHTTPServer]
+    API[/api: health · projects CRUD · images · import-script · build jobs + progress/]
+    SV --> API
+  end
+  B[Browser: editor/index.html<br/>slide list · Persian forms from schema.json · canvas handles] -->|fetch JSON| API
+  B -->|iframe, postMessage| ST[stage/stage.html · same as renderer]
+  API -->|atomic write| Y[videos/&lt;name&gt;/video.yaml + img/]
+  API -->|job thread| R[render.py → ffmpeg]
+  API --> IM[importer.py · single parser]
+  R --> OUT[out/: MP4 · PNG · PDF · prompter · steps_data.lua]
+```
+
+### Contracts
+* **Field wrapper:** `A.field(key, el)` returns an outer `[data-field-wrap=key]` element. Overrides `slides[i].overrides.<key> = {x, y, scale}` (px on the 1920×1080 stage, scoped per layout `SLIDE|SCAM`) are applied to the wrapper only; `fx.js` animates the inner node.
+* **Schema flags:** `schema.json` fields gain `editable: true` (canvas-movable text/image) vs data-only.
+* **Theme tokens:** `themes/<id>.js` exports `{tokens: {bg, surface, text, muted, accent, danger, isDark}, type, motion, fx}`; `theme: random` resolves with the video seed.
+* **Reroll:** `slides[i].seed` integer; the editor's «انیمیشن دیگر» increments it.
+* **Build jobs:** `POST /api/projects/<n>/build` → `{job}`; `GET /api/jobs/<id>` → `{state, progress 0..1, outputs[]}`.
+* **Safety:** server binds 127.0.0.1 only, rejects path traversal, writes YAML via temp file + `os.replace`, returns 400 on invalid YAML without touching the file.
