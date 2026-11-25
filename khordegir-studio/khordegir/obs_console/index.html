@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>کنسول تله‌پرامپتر و OBS — خرده‌گیر استودیو</title>
+  <link rel="stylesheet" href="./console.css">
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <!-- Top Bar -->
+    <header class="topbar">
+      <div class="topbar-brand">
+        <span class="brand-mark" aria-hidden="true">HS</span>
+        <div>
+          <h1 class="brand-title">کنسول تله‌پرامپتر و OBS</h1>
+          <div id="projectSubtitle" class="brand-sub">در حال بارگذاری پروژه...</div>
+        </div>
+      </div>
+
+      <div class="topbar-controls">
+        <label class="field-inline">
+          <span class="field-label">پروژه:</span>
+          <select id="projectSelect" class="select-input" aria-label="انتخاب پروژه"></select>
+        </label>
+
+        <button id="btnReloadSteps" type="button" class="btn btn-ghost" title="بازخوانی مراحل از video.yaml">
+          بازخوانی YAML
+        </button>
+
+        <button id="btnToggleDock" type="button" class="btn btn-ghost" title="مخفی کردن سایدبار برای تمرکز روی پرامپتر و نمای کلی">
+          نمای تمام‌عرض پرامپتر
+        </button>
+
+        <button id="btnFocusMode" type="button" class="btn btn-amber-outline" aria-pressed="false" title="حالت تمرکز / حداکثر متن (F)">
+          حالت تمرکز (F)
+        </button>
+
+        <button id="btnOpenExport" type="button" class="btn btn-amber-outline">
+          خروجی بستهٔ OBS
+        </button>
+
+        <a href="/editor/" class="btn btn-ghost">بازگشت به ویرایشگر</a>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="workspace">
+      <!-- Right / Main Column: Live Teleprompter & Script Overview Stage -->
+      <section class="prompter-panel card" aria-label="تله‌پرامپتر و نمای کلی">
+        <!-- Step Cue Header -->
+        <div class="cue-header">
+          <div class="cue-meta">
+            <span id="cueAct" class="cue-act">پرده ۱</span>
+            <span class="sep">·</span>
+            <span id="cueStep" class="cue-step">مرحله ۰ از ۰</span>
+            <span class="sep">·</span>
+            <span id="cueLayout" class="cue-layout">—</span>
+            <span id="cueSlideWrap" class="cue-slide hidden">
+              <span class="sep">·</span>
+              <span id="cueSlide">اسلاید ۱</span>
+            </span>
+            <span id="cueTimeWrap" class="cue-time hidden">
+              <span class="sep">·</span>
+              <span id="cueTime" dir="ltr">00:00</span>
+            </span>
+          </div>
+
+          <div class="cue-timers">
+            <div class="view-tabs" role="tablist" aria-label="حالت نمایش">
+              <button id="btnModePrompter" type="button" class="view-tab active" data-view="prompter">تله‌پرامپتر</button>
+              <button id="btnModeOverview" type="button" class="view-tab" data-view="overview">نمای کلی</button>
+              <button id="btnModeSplit" type="button" class="view-tab" data-view="split">ترکیبی</button>
+            </div>
+
+            <span class="timer-pill">
+              <span class="timer-lbl">تایمر پرده:</span>
+              <strong id="actTimer" class="mono-num">۰۰:۰۰</strong>
+            </span>
+            <span id="recBadge" class="rec-badge hidden">
+              <span class="rec-dot"></span>
+              <span>REC <span id="recTimer" class="mono-num">۰۰:۰۰</span></span>
+            </span>
+            <span id="wsBadge" class="ws-badge ws-standalone">حالت مستقل (بدون OBS)</span>
+          </div>
+        </div>
+
+        <!-- Next Step Hint -->
+        <div id="nextCueBar" class="next-cue-bar">در حال آماده‌سازی...</div>
+
+        <!-- Graceful Standalone Fallback Banner (shown only if WS fails/refused, dismissible) -->
+        <div id="fallbackBanner" class="fallback-banner hidden" role="status">
+          <div class="fallback-text">
+            <strong>حالت مستقل فعال است:</strong>
+            <span id="fallbackMessage">
+              اتصال OBS WebSocket در دسترس نیست یا رد شد؛ تله‌پرامپتر و نمای کلی بدون نیاز به OBS با کلیک، کیبورد و پدال کار می‌کنند.
+            </span>
+          </div>
+          <div class="fallback-actions">
+            <button id="btnBannerFocus" type="button" class="btn btn-sm">تمام‌عرض پرامپتر</button>
+            <button id="btnBannerRetry" type="button" class="btn btn-sm">تلاش مجدد OBS</button>
+            <button id="btnBannerDismiss" type="button" class="btn btn-sm btn-ghost">بستن</button>
+          </div>
+        </div>
+
+        <!-- Stage Body (Prompter + Script Overview) -->
+        <div id="stageBody" class="stage-body mode-prompter">
+          <!-- Reading Viewport + Countdown Overlay -->
+          <div id="prompterWrap" class="prompter-wrap" tabindex="0">
+            <div class="reading-guide" aria-hidden="true">
+              <span class="guide-dot"></span>
+              <span class="guide-line"></span>
+            </div>
+            <div id="prompterText" class="prompter-text"></div>
+
+            <div id="countdownOverlay" class="countdown-overlay hidden" role="status" aria-live="polite">
+              <div class="countdown-box">
+                <div class="countdown-label">شروع ضبط تا...</div>
+                <div id="countdownNumber" class="countdown-number">۳</div>
+                <button id="btnCancelCountdown" type="button" class="btn btn-ghost">انصراف</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- RTL Script Overview Pane -->
+          <div id="overviewPane" class="overview-pane hidden" aria-label="نمای کلی اسکریپت">
+            <div class="overview-head">
+              <strong>نمای کلی مراحل (کلیک روی هر مرحله = پرش فوری)</strong>
+              <span id="overviewCount" class="overview-count"></span>
+            </div>
+            <div id="overviewList" class="overview-list"></div>
+          </div>
+        </div>
+
+        <!-- Primary Action Bar -->
+        <div class="action-bar">
+          <div class="primary-actions">
+            <button id="btnNext" type="button" class="btn-primary-next">
+              <span>مرحله بعد (پرامپتر + اسلاید)</span>
+              <span aria-hidden="true">◀</span>
+            </button>
+            <button id="btnPrev" type="button" class="btn btn-secondary">
+              <span aria-hidden="true">▶</span>
+              <span>قبلی</span>
+            </button>
+            <button id="btnActStart" type="button" class="btn btn-secondary" title="برگشت به اول این پرده (F9)">
+              اول پرده (F9)
+            </button>
+            <button id="btnRecord" type="button" class="btn btn-record">
+              ● شروع ضبط
+            </button>
+          </div>
+
+          <!-- Teleprompter Controls -->
+          <div class="secondary-actions">
+            <div class="control-group">
+              <button id="btnAutoScroll" type="button" class="btn btn-sm">
+                ▶ اسکرول خودکار
+              </button>
+              <button id="btnSpeedDown" type="button" class="btn btn-sm" title="کاهش سرعت (↑)">سرعت −</button>
+              <span id="speedReadout" class="readout mono-num" dir="ltr">1.2x</span>
+              <button id="btnSpeedUp" type="button" class="btn btn-sm" title="افزایش سرعت (↓)">سرعت +</button>
+            </div>
+
+            <div class="control-group">
+              <button id="btnFontDown" type="button" class="btn btn-sm" title="کوچک کردن فونت (-)">فونت −</button>
+              <span id="fontReadout" class="readout mono-num" dir="ltr">۴۶px</span>
+              <button id="btnFontUp" type="button" class="btn btn-sm" title="بزرگ کردن فونت (+)">فونت +</button>
+              <button id="btnMirror" type="button" class="btn btn-sm" title="آینه افقی (M)">آینه (M)</button>
+            </div>
+
+            <div class="control-group">
+              <label class="field-inline compact">
+                <span>شمارش معکوس:</span>
+                <select id="countdownSelect" class="select-input compact">
+                  <option value="0">خاموش</option>
+                  <option value="3" selected>۳ ثانیه</option>
+                  <option value="5">۵ ثانیه</option>
+                </select>
+              </label>
+
+              <label class="check-inline">
+                <input id="chkClickAdvance" type="checkbox" checked>
+                <span>کلیک روی متن = مرحله بعد</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Act Timeline -->
+        <div class="timeline-section">
+          <div class="timeline-head">
+            <span id="totalRecordedLabel">مجموع ضبط‌شده: ۰۰:۰۰</span>
+            <span class="shortcuts-hint">
+              کلیدها و پدال: PageDown / ← جلو · PageUp / → عقب · Space اسکرول · ↑/↓ سرعت · M آینه · O نمای کلی · F تمرکز · F9 اول پرده
+            </span>
+          </div>
+          <div id="actTimeline" class="act-timeline"></div>
+        </div>
+      </section>
+
+      <!-- Left Sidebar: Optional OBS Status, Scene/Slide Controls, Take Log -->
+      <aside id="sidebarPanel" class="sidebar">
+        <!-- OBS Connection & Status Panel -->
+        <section class="card panel-block" aria-label="اتصال اختیاری OBS">
+          <div class="panel-header">
+            <h2>اتصال اختیاری OBS (WebSocket)</h2>
+            <span id="obsConnLabel" class="status-text">حالت مستقل</span>
+          </div>
+
+          <p class="panel-note">
+            WebSocket اختیاری است؛ بدون OBS هم تمام امکانات تله‌پرامپتر، نمای کلی و ثبت برداشت‌ها کار می‌کنند.
+          </p>
+
+          <div class="status-grid">
+            <div class="stat-item">
+              <span class="stat-k">نسخه OBS</span>
+              <strong id="statVersion" class="stat-v" dir="ltr">—</strong>
+            </div>
+            <div class="stat-item">
+              <span class="stat-k">صحنهٔ فعال</span>
+              <strong id="statScene" class="stat-v">—</strong>
+            </div>
+            <div class="stat-item">
+              <span class="stat-k">حالت استودیو</span>
+              <strong id="statStudio" class="stat-v">—</strong>
+            </div>
+            <div class="stat-item">
+              <span class="stat-k">وضعیت ضبط</span>
+              <strong id="statRec" class="stat-v">متوقف</strong>
+            </div>
+          </div>
+
+          <div class="form-stack">
+            <label class="field-block">
+              <span>آدرس WebSocket</span>
+              <input id="wsUrlInput" type="text" dir="ltr" class="text-input" placeholder="ws://127.0.0.1:4455">
+            </label>
+            <label class="field-block">
+              <span>رمز عبور WebSocket</span>
+              <input id="wsPassInput" type="password" dir="ltr" class="text-input" placeholder="اختیاری">
+            </label>
+            <label class="field-block">
+              <span>پوشهٔ اسلایدها در سیستم (برای Source اسلاید)</span>
+              <input id="slidesDirInput" type="text" dir="ltr" class="text-input" placeholder="اختیاری، مثلاً /path/to/slides">
+            </label>
+
+            <div class="inline-checks">
+              <label class="check-inline">
+                <input id="chkAutoReconnect" type="checkbox" checked>
+                <span>تلاش مجدد هنگام قطع ارتباط زنده</span>
+              </label>
+              <label class="check-inline">
+                <input id="chkSyncObsOnStep" type="checkbox" checked>
+                <span>همگام‌سازی صحنه و اسلاید در هر مرحله</span>
+              </label>
+            </div>
+
+            <div id="obsNoticeBox" class="alert-info hidden" role="status"></div>
+
+            <div class="btn-row">
+              <button id="btnConnectObs" type="button" class="btn btn-amber">اتصال به OBS</button>
+              <button id="btnDisconnectObs" type="button" class="btn btn-ghost hidden">قطع اتصال</button>
+              <button id="btnStudioSync" type="button" class="btn btn-secondary obs-only-btn">
+                پیش‌نمایش پرامپتر (Studio Mode)
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Scene, Slide & Zoom Controls -->
+        <section class="card panel-block" aria-label="کنترل صحنه و اسلاید">
+          <div class="panel-header">
+            <h2>کنترل صحنه، اسلاید و زوم</h2>
+            <span id="zoomStateLabel" class="status-text">عادی</span>
+          </div>
+
+          <div class="scene-buttons">
+            <button id="btnSceneSlide" type="button" class="btn btn-scene obs-only-btn" data-layout="SLIDE">
+              ۰۱ اسلاید
+            </button>
+            <button id="btnSceneScam" type="button" class="btn btn-scene obs-only-btn" data-layout="SCAM">
+              ۰۲ اسلاید + من
+            </button>
+            <button id="btnSceneCam" type="button" class="btn btn-scene obs-only-btn" data-layout="CAM">
+              ۰۳ فقط من
+            </button>
+          </div>
+
+          <div class="btn-row">
+            <button id="btnZoomToggle" type="button" class="btn btn-secondary obs-only-btn">زوم این / اوت (F5)</button>
+            <button id="btnZoomOut" type="button" class="btn btn-ghost obs-only-btn">بازگشت زوم (F6)</button>
+            <button id="btnMotionToggle" type="button" class="btn btn-ghost obs-only-btn">حرکت اسلاید (F7)</button>
+          </div>
+
+          <div class="btn-row">
+            <button id="btnPushSlide" type="button" class="btn btn-ghost obs-only-btn">ارسال تصویر اسلاید فعلی به OBS</button>
+          </div>
+        </section>
+
+        <!-- Take Log -->
+        <section class="card panel-block takes-block" aria-label="ثبت برداشت‌ها">
+          <div class="panel-header">
+            <h2>گزارش برداشت‌ها (Takes)</h2>
+            <button id="btnClearTakes" type="button" class="btn btn-sm">پاک کردن</button>
+          </div>
+          <div id="takeSummaryList" class="take-summary-chips"></div>
+          <div class="take-log-wrap">
+            <table class="take-table">
+              <thead>
+                <tr>
+                  <th>پرده</th>
+                  <th>برداشت</th>
+                  <th>مدت</th>
+                  <th>ساعت</th>
+                </tr>
+              </thead>
+              <tbody id="takeLogBody">
+                <tr><td colspan="4" class="empty-cell">هنوز برداشتی ثبت نشده است.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </aside>
+    </main>
+
+    <!-- OBS Package Export Modal -->
+    <div id="exportModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+      <div class="modal-card card">
+        <div class="panel-header">
+          <h2 id="exportTitle">ساخت بستهٔ آمادهٔ OBS</h2>
+          <button id="btnCloseExport" type="button" class="btn btn-sm">بستن</button>
+        </div>
+        <p class="modal-desc">
+          تمام فایل‌های لازم برای OBS شامل <code>hark_studio_v8.lua</code>، <code>steps_data.lua</code>،
+          <code>prompter.html</code> (تله‌پرامپتر راست‌چین مستقل بدون نیاز به WebSocket برای Browser Source یا نمایشگر دوم)،
+          <code>prompter_dock.html</code> و اسکریپت نصب داخل پوشهٔ خروجی پروژه ساخته می‌شوند.
+        </p>
+
+        <div class="form-stack">
+          <label class="field-block">
+            <span>سیستم‌عامل هدف</span>
+            <select id="exportOsSelect" class="select-input">
+              <option value="linux">Linux (FreeType 2 — replace_hark_v8.sh)</option>
+              <option value="windows">Windows (GDI+ — replace_hark_v8.bat)</option>
+              <option value="macos">macOS (FreeType 2 — replace_hark_v8.sh)</option>
+            </select>
+          </label>
+
+          <label class="check-inline">
+            <input id="chkExportPng" type="checkbox" checked>
+            <span>ساخت تصاویر ۱۹۲۰×۱۰۸۰ پرامپتر (در صورت نصب بودن Playwright)</span>
+          </label>
+
+          <div id="exportResult" class="export-result hidden"></div>
+
+          <div class="btn-row">
+            <button id="btnRunExport" type="button" class="btn btn-amber">ساخت بستهٔ OBS</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./console.js"></script>
+</body>
+</html>

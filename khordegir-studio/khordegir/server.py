@@ -17,15 +17,21 @@ from urllib.parse import parse_qs, quote, unquote, urlsplit
 try:
     import yaml
 except ImportError:  # pragma: no cover
-    raise SystemExit("خطا: کتابخانه‌ی pyyaml نصب نیست. بزن: pip install pyyaml")
+    raise SystemExit("خطا: کتابخانه‌ی pyyaml نصب نیست. بزن:  pip install pyyaml")
+
+from . import obs_export
+from .project import Project
 
 PKG = Path(__file__).resolve().parent
 STATIC_DIRS = ("editor", "stage", "templates", "themes", "vendor", "fonts")
+STATIC_ALIASES = {"obs": "obs_console"}
 YAML_CANDIDATES = ("video.yaml", "video.yml", "project.yaml", "project.json")
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".avif"}
+
 MAX_JSON_BYTES = 1 * 1024 * 1024
 MAX_YAML_BYTES = 5 * 1024 * 1024
 MAX_IMAGE_BYTES = 50 * 1024 * 1024
+
 MIME_TYPES = {
     ".html": "text/html; charset=utf-8",
     ".htm": "text/html; charset=utf-8",
@@ -87,8 +93,8 @@ def _validate_project_name(name: object) -> tuple[str | None, int, str]:
     cleaned = name.strip()
     if not cleaned or len(cleaned) > 120:
         return None, HTTPStatus.BAD_REQUEST, "Invalid project name"
-    if cleaned in {".", ".."} or cleaned.startswith("."):
-        return None, HTTPStatus.FORBIDDEN if cleaned in {".", ".."} else HTTPStatus.BAD_REQUEST, "Invalid project name"
+    if cleaned in (".", "..") or cleaned.startswith("."):
+        return None, HTTPStatus.FORBIDDEN if cleaned in (".", "..") else HTTPStatus.BAD_REQUEST, "Invalid project name"
     if any(ch in cleaned for ch in ("/", "\\", "\x00")) or ".." in cleaned:
         return None, HTTPStatus.FORBIDDEN, "Invalid characters in project name"
     if any(ord(ch) < 32 or ord(ch) == 127 for ch in cleaned):
@@ -96,15 +102,15 @@ def _validate_project_name(name: object) -> tuple[str | None, int, str]:
     return cleaned, HTTPStatus.OK, ""
 
 
-def _sanitize_image_filename(raw_name: str) -> str | None:
+def _sanitise_image_filename(raw_name: str) -> str | None:
     if not raw_name or "\x00" in raw_name or "/" in raw_name or "\\" in raw_name or ".." in raw_name:
         return None
     p = Path(raw_name.strip())
     ext = p.suffix.lower()
     if ext not in IMAGE_EXTS:
         return None
-    stem = re.sub(r"[^\w.\-]", "_", p.stem, flags=re.UNICODE)
-    stem = stem.strip("._-")
+    stem = re.sub(r"[^\w\-.]", "_", p.stem, flags=re.UNICODE)
+    stem = stem.strip("._- ")
     if not stem:
         stem = "image"
     stem = stem[:80]
@@ -121,7 +127,7 @@ def _find_project_yaml(proj_dir: Path) -> Path | None:
 
 def _atomic_write_text(target: Path, content: str) -> None:
     target.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp_name = tempfile.mkstemp(prefix=".video-", suffix=".tmp", dir=str(target.parent))
+    fd, tmp_name = tempfile.mkstemp(prefix=".video.", suffix=".tmp", dir=str(target.parent))
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as fh:
             fh.write(content)
@@ -178,13 +184,10 @@ class KhordegirHandler(BaseHTTPRequestHandler):
         except ValueError:
             self.close_connection = True
             return
-        try:
-            if 0 < length <= 65536:
-                self.rfile.read(length)
-                self._body_read = True
-            elif length > 65536:
-                self.close_connection = True
-        except OSError:
+        if 0 < length <= 65536:
+            self.rfile.read(length)
+            self._body_read = True
+        elif length > 65536:
             self.close_connection = True
 
     def _send_json(self, status: int, payload: dict) -> None:
@@ -267,7 +270,11 @@ class KhordegirHandler(BaseHTTPRequestHandler):
             if "/" not in rest and rest:
                 self._handle_get_project(rest)
                 return
-
+            if rest.endswith("/steps"):
+                proj_name = rest[:-len("/steps")]
+                if proj_name and "/" not in proj_name:
+                    self._handle_get_project_steps(proj_name)
+                    return
             self._send_json(HTTPStatus.NOT_FOUND, {"error": "Not found"})
             return
 
@@ -276,15 +283,15 @@ class KhordegirHandler(BaseHTTPRequestHandler):
             return
 
         parts = [p for p in decoded_path.split("/") if p]
-        if parts and parts[0] in STATIC_DIRS:
+        if parts and (parts[0] in STATIC_DIRS or parts[0] in STATIC_ALIASES):
             if len(parts) == 1 and not decoded_path.endswith("/"):
                 self.send_response(HTTPStatus.FOUND)
                 self.send_header("Location", f"/{parts[0]}/")
                 self.send_header("Content-Length", "0")
                 self.end_headers()
                 return
-
-            self._handle_static(parts[0], parts[1:])
+            static_root = STATIC_ALIASES.get(parts[0], parts[0])
+            self._handle_static(static_root, parts[1:])
             return
 
         self._send_json(HTTPStatus.NOT_FOUND, {"error": "Not found"})
@@ -309,6 +316,11 @@ class KhordegirHandler(BaseHTTPRequestHandler):
                 self._handle_upload_image(inner, parsed.query)
                 return
 
+        if decoded_path.startswith("/api/projects/") and decoded_path.endswith("/obs-export"):
+            inner = decoded_path[len("/api/projects/"):-len("/obs-export")]
+            if inner and "/" not in inner:
+                self._handle_obs_export(inner)
+                return
 
         self._send_json(HTTPStatus.NOT_FOUND, {"error": "Not found"})
 
@@ -331,11 +343,9 @@ class KhordegirHandler(BaseHTTPRequestHandler):
         self._send_json(HTTPStatus.NOT_FOUND, {"error": "Not found"})
 
     # ------------------------------------------------------------------ static
-
     def _handle_static(self, root_name: str, rel_parts: list[str]) -> None:
         base = self.server.pkg_root / root_name
         if not base.is_dir():
-
             self._send_json(HTTPStatus.NOT_FOUND, {"error": "Not found"})
             return
         target = _safe_resolve_inside(base, rel_parts)
@@ -355,13 +365,11 @@ class KhordegirHandler(BaseHTTPRequestHandler):
         self._send_file(target)
 
     # ------------------------------------------------------------------ projects
-
     def _resolve_project_dir(self, raw_name: str) -> Path | None:
         valid_name, err_status, err_msg = _validate_project_name(raw_name)
         if valid_name is None:
             self._send_json(err_status, {"error": err_msg})
             return None
-
         proj_dir = _safe_resolve_inside(self.server.videos_root, [valid_name])
         if proj_dir is None or proj_dir.parent != self.server.videos_root:
             self._send_json(HTTPStatus.FORBIDDEN, {"error": "Invalid project path"})
@@ -389,7 +397,6 @@ class KhordegirHandler(BaseHTTPRequestHandler):
                         theme = data.get("theme")
                         slides = data.get("slides")
                         if isinstance(slides, list):
-
                             slides_count = len(slides)
                 except Exception:
                     pass
@@ -400,7 +407,6 @@ class KhordegirHandler(BaseHTTPRequestHandler):
                     "slides_count": slides_count,
                     "updated_at": yaml_path.stat().st_mtime,
                 })
-
         self._send_json(HTTPStatus.OK, {"projects": items})
 
     def _handle_create_project(self) -> None:
@@ -441,7 +447,6 @@ class KhordegirHandler(BaseHTTPRequestHandler):
         dst_yaml = proj_dir / "video.yaml"
         shutil.copy2(starter_yaml, dst_yaml)
         yaml_text = dst_yaml.read_text(encoding="utf-8")
-
         data = yaml.safe_load(yaml_text) or {}
         self._send_json(HTTPStatus.CREATED, {
             "ok": True,
@@ -466,7 +471,6 @@ class KhordegirHandler(BaseHTTPRequestHandler):
             yaml_error = str(exc)
         else:
             yaml_error = None
-
 
         img_dir = proj_dir / "img"
         images = []
@@ -494,7 +498,6 @@ class KhordegirHandler(BaseHTTPRequestHandler):
             self._send_json(HTTPStatus.NOT_FOUND, {"error": "Project not found"})
             return
 
-
         body, status, msg = self._read_body(MAX_YAML_BYTES)
         if body is None:
             self._send_json(status, {"error": msg})
@@ -510,7 +513,6 @@ class KhordegirHandler(BaseHTTPRequestHandler):
             if not isinstance(obj, dict):
                 self._send_json(HTTPStatus.BAD_REQUEST, {"error": "JSON body must be an object"})
                 return
-
             if "yaml" in obj:
                 if not isinstance(obj["yaml"], str):
                     self._send_json(HTTPStatus.BAD_REQUEST, {"error": "'yaml' must be a string"})
@@ -544,7 +546,6 @@ class KhordegirHandler(BaseHTTPRequestHandler):
             self._send_json(HTTPStatus.BAD_REQUEST, {"error": "YAML must contain a 'slides' list"})
             return
 
-
         target_yaml = proj_dir / "video.yaml" if yaml_path.suffix == ".json" else yaml_path
         _atomic_write_text(target_yaml, raw_yaml)
         self._send_json(HTTPStatus.OK, {
@@ -554,8 +555,86 @@ class KhordegirHandler(BaseHTTPRequestHandler):
             "data": parsed,
         })
 
-    # ------------------------------------------------------------------ images
+    def _handle_get_project_steps(self, raw_name: str) -> None:
+        proj_dir = self._resolve_project_dir(raw_name)
+        if proj_dir is None:
+            return
+        if _find_project_yaml(proj_dir) is None:
+            self._send_json(HTTPStatus.NOT_FOUND, {"error": "Project not found"})
+            return
+        try:
+            pr = Project(proj_dir)
+        except SystemExit as exc:
+            self._send_json(HTTPStatus.BAD_REQUEST, {"error": str(exc)})
+            return
+        steps = obs_export.steps_for_obs(pr)
+        self._send_json(HTTPStatus.OK, {
+            "ok": True,
+            "name": proj_dir.name,
+            "title": pr.title,
+            "steps": steps,
+            "warnings": pr.warnings,
+        })
 
+    def _handle_obs_export(self, raw_name: str) -> None:
+        proj_dir = self._resolve_project_dir(raw_name)
+        if proj_dir is None:
+            return
+        if _find_project_yaml(proj_dir) is None:
+            self._send_json(HTTPStatus.NOT_FOUND, {"error": "Project not found"})
+            return
+
+        opts: dict = {}
+        raw_len = self.headers.get("Content-Length")
+        if raw_len is not None:
+            body, status, msg = self._read_body(MAX_JSON_BYTES)
+            if body is None:
+                self._send_json(status, {"error": msg})
+                return
+            if body.strip():
+                try:
+                    parsed = json.loads(body.decode("utf-8"))
+                except (UnicodeDecodeError, json.JSONDecodeError):
+                    self._send_json(HTTPStatus.BAD_REQUEST, {"error": "Invalid JSON body"})
+                    return
+                if not isinstance(parsed, dict):
+                    self._send_json(HTTPStatus.BAD_REQUEST, {"error": "JSON body must be an object"})
+                    return
+                opts = parsed
+
+        os_target = str(opts.get("os") or "linux").lower()
+        if os_target not in obs_export.VALID_OS:
+            self._send_json(HTTPStatus.BAD_REQUEST, {"error": f"Unsupported OS target: {os_target}"})
+            return
+
+        out_dir = None
+        if opts.get("out_dir"):
+            rel = str(opts["out_dir"])
+            if _has_traversal_syntax(rel) or Path(rel).is_absolute():
+                self._send_json(HTTPStatus.FORBIDDEN, {"error": "Invalid out_dir"})
+                return
+            out_dir = _safe_resolve_inside(proj_dir, [p for p in rel.split("/") if p])
+            if out_dir is None:
+                self._send_json(HTTPStatus.FORBIDDEN, {"error": "Invalid out_dir"})
+                return
+
+        try:
+            pr = Project(proj_dir)
+            result = obs_export.export_obs_package(
+                pr,
+                out_dir=out_dir,
+                os_target=os_target,
+                ws_url=str(opts.get("ws_url") or "ws://127.0.0.1:4455"),
+                ws_password=str(opts.get("ws_password") or ""),
+                auto_studio_preview_sync=bool(opts.get("auto_studio_preview_sync", True)),
+                render_png=opts.get("render_png", "auto"),
+            )
+        except (SystemExit, ValueError, RuntimeError) as exc:
+            self._send_json(HTTPStatus.BAD_REQUEST, {"error": str(exc)})
+            return
+        self._send_json(HTTPStatus.OK, result)
+
+    # ------------------------------------------------------------------ images
     def _handle_upload_image(self, raw_name: str, query_str: str) -> None:
         proj_dir = self._resolve_project_dir(raw_name)
         if proj_dir is None:
@@ -571,11 +650,10 @@ class KhordegirHandler(BaseHTTPRequestHandler):
             return
 
         if "\x00" in raw_filename or "/" in raw_filename or "\\" in raw_filename or ".." in raw_filename:
-
             self._send_json(HTTPStatus.FORBIDDEN, {"error": "Invalid filename"})
             return
 
-        safe_name = _sanitize_image_filename(raw_filename)
+        safe_name = _sanitise_image_filename(raw_filename)
         if safe_name is None:
             self._send_json(HTTPStatus.BAD_REQUEST, {"error": "Unsupported or invalid image filename"})
             return
@@ -584,7 +662,6 @@ class KhordegirHandler(BaseHTTPRequestHandler):
         if body is None:
             self._send_json(status, {"error": msg})
             return
-
         if not body:
             self._send_json(HTTPStatus.BAD_REQUEST, {"error": "Empty image body"})
             return
@@ -622,10 +699,10 @@ class KhordegirHandler(BaseHTTPRequestHandler):
             self._send_json(HTTPStatus.FORBIDDEN, {"error": "Path traversal blocked"})
             return
         if not target.is_file():
-
             self._send_json(HTTPStatus.NOT_FOUND, {"error": "Image not found"})
             return
         self._send_file(target)
+
 
 def create_server(
     videos_root: str | Path,
@@ -645,10 +722,9 @@ def serve(videos_root: str | Path, port: int = 8765, open_browser: bool = True) 
     print(f"سرور خرده‌گیر استودیو آماده است: {url}", flush=True)
     if open_browser:
         threading.Timer(0.2, webbrowser.open, args=(url,)).start()
-
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
-        print("سرور متوقف شد.")
+        print("\nسرور متوقف شد.")
     finally:
         httpd.server_close()
