@@ -1,99 +1,227 @@
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head>
-<meta charset="utf-8">
-<title>ویرایشگر اسلاید خرده‌گیر</title>
-<link rel="stylesheet" href="editor.css">
-<script src="../vendor/gsap.min.js"></script>
-<script src="../vendor/js-yaml.min.js"></script>
-<script src="../stage/core.js"></script>
-<script src="../stage/charts.js"></script>
-<script src="../stage/fx.js"></script>
-<script src="../themes/_list.js"></script>
-<script src="../stage/template-lib.js"></script>
-<script src="../templates/_index.js"></script>
-<script>Stage.writeIncludes();</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>خرده‌گیر استودیو — ویرایشگر موشن‌گرافیک فارسی</title>
+  <link rel="stylesheet" href="./editor.css">
 </head>
 <body>
-<header>
-  <div class="brand">🎬 ویرایشگر اسلاید <b>خرده‌گیر</b></div>
-  <input id="title" class="title-in" placeholder="اسم ویدیو">
-  <label class="btn">📂 باز کردن video.yaml<input type="file" id="openYaml" accept=".yaml,.yml,.json" hidden></label>
-  <button class="btn primary" id="saveYaml">💾 ذخیره‌ی video.yaml</button>
-  <button class="btn" id="importBtn">📝 ساخت از متن اسکریپت</button>
-  <label class="btn">🖼️ پوشه‌ی عکس‌ها<input type="file" id="imgDir" webkitdirectory multiple hidden></label>
-  <select id="theme" title="تم"></select>
-  <button class="btn" id="helpBtn">❔ راهنما</button>
-</header>
+  <div class="studio-shell">
+    <!-- Top Bar -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-badge" aria-hidden="true">خ</div>
+        <div class="brand-text">
+          <h1>خرده‌گیر استودیو</h1>
+          <span id="statusText" class="brand-sub">آماده برای ویرایش</span>
+        </div>
+      </div>
 
-<main>
-  <aside id="left">
-    <div class="side-head"><span>اسلایدها</span><button class="btn small primary" id="addBtn">＋ اسلاید</button></div>
-    <ol id="slides"></ol>
-    <div class="hint">برای جابه‌جا کردن، اسلاید را بکش و رها کن.</div>
-  </aside>
+      <div class="topbar-center">
+        <label class="control-pill">
+          <span>پروژه:</span>
+          <select id="projectSelect" class="select-ctrl" aria-label="انتخاب پروژه"></select>
+        </label>
 
-  <section id="center">
-    <div id="stageWrap"><iframe id="stage" src="../stage/stage.html"></iframe></div>
-    <div class="controls">
-      <button class="btn" id="play">▶ پخش دوباره</button>
-      <input type="range" id="scrub" min="0" max="6" step="0.01" value="0">
-      <span id="tlabel">۰٫۰ ث</span>
-      <label class="chk"><input type="checkbox" id="camGuide" checked> نمایش جای دوربین</label>
+        <button id="btnNewProject" type="button" class="btn btn-ghost">+ پروژه جدید</button>
+
+        <label class="control-pill">
+          <span>تم:</span>
+          <select id="themeSelect" class="select-ctrl" aria-label="انتخاب تم"></select>
+        </label>
+
+        <button id="btnProjectStyle" type="button" class="btn btn-ghost">🎨 سبک و لوگو</button>
+        <button id="btnRandomAll" type="button" class="btn btn-amber" title="انتخاب تصادفی قطعی برای تم، سبک حرکت، ترنزیشن و لوگو با تغییر بذر">🎲 ترکیب تصادفی</button>
+      </div>
+
+      <div class="topbar-actions">
+        <span id="dirtyBadge" class="dirty-badge hidden">تغییرات ذخیره نشده</span>
+        <button id="btnSave" type="button" class="btn btn-primary" disabled>ذخیره video.yaml</button>
+        <a id="linkObs" href="/obs/" class="btn btn-amber-outline">کنسول OBS و تله‌پرامپتر</a>
+      </div>
+    </header>
+
+    <!-- Main 3-Column Studio -->
+    <main class="workspace">
+      <!-- Right Column: Slides List -->
+      <aside class="pane pane-slides" aria-label="فهرست اسلایدها">
+        <div class="pane-head">
+          <h2>اسلایدها <span id="slidesCount" class="count-chip">۰</span></h2>
+          <div class="add-slide-wrap">
+            <select id="addTemplateSelect" class="select-ctrl compact" aria-label="نوع اسلاید جدید"></select>
+            <button id="btnAddSlide" type="button" class="btn btn-sm btn-primary">+ افزودن</button>
+          </div>
+        </div>
+        <div id="slidesList" class="slides-list"></div>
+      </aside>
+
+      <!-- Center Column: Stage Preview & Deterministic Timeline -->
+      <section class="pane pane-stage" aria-label="پیش‌نمایش زنده و خط زمان">
+        <div class="stage-toolbar">
+          <div class="layout-switch" role="group" aria-label="چیدمان دوربین">
+            <button type="button" class="seg-btn" data-layout="SLIDE">تمام‌صفحه</button>
+            <button type="button" class="seg-btn" data-layout="SCAM">اسلاید + من (SCAM)</button>
+            <button type="button" class="seg-btn" data-layout="CAM">فقط دوربین</button>
+          </div>
+
+          <div class="stage-tools-right">
+            <label class="toggle-chip">
+              <input id="chkCamGuide" type="checkbox" checked>
+              <span>نمایش قاب دوربین</span>
+            </label>
+            <span id="camStatusChip" class="status-chip ok">ناحیه دوربین آزاد</span>
+            <button id="btnReroll" type="button" class="btn btn-amber">🎲 انیمیشن دیگر</button>
+          </div>
+        </div>
+
+        <div id="stageViewport" class="stage-viewport">
+          <div id="stageFrameBox" class="stage-frame-box">
+            <iframe id="stageFrame" src="../stage/stage.html" title="پیش‌نمایش صحنه"></iframe>
+            <div id="camOnlyOverlay" class="cam-only-overlay hidden">
+              <div class="cam-only-card">
+                <strong>حالت «فقط دوربین» (CAM)</strong>
+                <p>در این مرحله اسلایدی رندر نمی‌شود و تمام تصویر متعلق به دوربین و تله‌پرامپتر است.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transport-bar">
+          <div class="transport-left">
+            <button id="btnPlayPause" type="button" class="btn btn-primary btn-play">▶ پخش</button>
+            <button id="btnReplay" type="button" class="btn btn-ghost btn-sm" title="پخش از ابتدا">↺ از اول</button>
+            <span id="timeReadout" class="time-readout mono-num" dir="ltr">0.00s / 6.00s</span>
+          </div>
+
+          <div class="scrubber-wrap">
+            <input id="timeScrubber" type="range" min="0" max="6" step="0.02" value="0" aria-label="موقعیت زمانی صحنه">
+          </div>
+
+          <div class="transport-right">
+            <span id="presetChip" class="meta-chip" title="سبک فعال حرکت">سبک: —</span>
+            <span id="transitionChip" class="meta-chip" title="ترنزیشن فعال">ترنزیشن: —</span>
+            <span id="logoChip" class="meta-chip" title="حرکت لوگو">لوگو: —</span>
+            <span id="sayDurChip" class="meta-chip" title="زمان تخمینی گفتار از روی متن say">گفتار: —</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Left Column: Schema-Driven Inspector & Editable Field Overrides -->
+      <aside class="pane pane-inspector" aria-label="ویرایشگر ویژگی‌ها">
+        <div class="pane-head">
+          <h2>تنظیمات اسلاید</h2>
+          <span id="activeSlideBadge" class="count-chip">—</span>
+        </div>
+
+        <div id="inspectorBody" class="inspector-body">
+          <div class="empty-state">یک پروژه را انتخاب کنید یا پروژه جدید بسازید.</div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <!-- Project Style & Logo Modal -->
+  <div id="styleModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="styleModalTitle">
+    <div class="modal-card modal-wide">
+      <div class="modal-head">
+        <h3 id="styleModalTitle">انتخابگر سبک کل ویدیو و لوگوی متحرک</h3>
+        <button id="btnCloseStyleModal" type="button" class="btn btn-sm btn-ghost">بستن</button>
+      </div>
+      <p class="modal-hint">
+        تنظیمات این بخش در فایل <code>video.yaml</code> ذخیره می‌شوند و روی کل ویدیو اعمال می‌شوند (مگر اینکه اسلایدی مقدار اختصاصی داشته باشد).
+      </p>
+
+      <div class="style-grid">
+        <label class="field-group">
+          <span>تم بصری کل ویدیو</span>
+          <select id="projThemeSelect" class="select-ctrl"></select>
+        </label>
+
+        <label class="field-group">
+          <span>سبک پیش‌فرض انیمیشن</span>
+          <select id="projPresetSelect" class="select-ctrl"></select>
+        </label>
+
+        <label class="field-group">
+          <span>ترنزیشن پیش‌فرض بین اسلایدها</span>
+          <select id="projTransitionSelect" class="select-ctrl"></select>
+        </label>
+
+        <label class="field-group">
+          <span>حالت انیمیشن لوگو</span>
+          <select id="projLogoMotionSelect" class="select-ctrl"></select>
+        </label>
+
+        <label class="field-group">
+          <span>جایگاه لوگو در صحنه</span>
+          <select id="projLogoPosSelect" class="select-ctrl">
+            <option value="top-left">بالا چپ (پیش‌فرض)</option>
+            <option value="top-right">بالا راست</option>
+            <option value="bottom-right">پایین راست</option>
+            <option value="bottom-left">پایین چپ (در SCAM خودکار بالا می‌رود)</option>
+          </select>
+        </label>
+
+        <label class="field-group">
+          <span>بذر تصادفی پروژه (Seed)</span>
+          <input id="projSeedInput" type="number" dir="ltr" class="text-input" min="0" step="1">
+        </label>
+      </div>
+
+      <div class="logo-config-box">
+        <div class="field-label-row"><strong>لوگوی برند (تصویر و/یا متن)</strong></div>
+        <div class="style-grid">
+          <label class="field-group">
+            <span>تصویر لوگو از پوشهٔ پروژه</span>
+            <select id="projLogoImageSelect" class="select-ctrl"></select>
+          </label>
+          <label class="field-group">
+            <span>متن کوتاه کنار لوگو (اختیاری)</span>
+            <input id="projLogoTextInput" type="text" class="text-input" placeholder="مثال: خرده‌گیر">
+          </label>
+        </div>
+        <div class="upload-row">
+          <span style="font-size:12px;color:var(--muted)">آپلود لوگوی جدید:</span>
+          <input id="projLogoUpload" type="file" accept="image/*" style="font-size:12px">
+        </div>
+      </div>
+
+      <div class="modal-actions between">
+        <button id="btnStyleModalReroll" type="button" class="btn btn-amber">🎲 ترکیب تصادفی جدید با بذر تازه</button>
+        <button id="btnApplyStyleModal" type="button" class="btn btn-primary">تایید و پیش‌نمایش</button>
+      </div>
     </div>
-    <div id="status"></div>
-  </section>
-
-  <aside id="right">
-    <div id="form"></div>
-  </aside>
-</main>
-
-<div id="gallery" class="modal" hidden>
-  <div class="modal-box wide">
-    <div class="modal-head"><b>یک قالب انتخاب کن</b><button class="btn small" data-close>✕</button></div>
-    <div id="gal" class="gal"></div>
   </div>
-</div>
 
-<div id="importer" class="modal" hidden>
-  <div class="modal-box wide">
-    <div class="modal-head"><b>ساخت اسلایدها از متن اسکریپت</b><button class="btn small" data-close>✕</button></div>
-    <p class="muted">متن اسکریپت را اینجا بچسبان. هر پاراگراف (با یک خط خالی جدا) یک قدم تله‌پرامپتر می‌شود.
-      هر خطی که داخل [ ] باشد یک اسلاید جدید می‌سازد. مثال‌ها:</p>
-    <pre class="ex">[عنوان | پول می‌دی یا به *پلیس* زنگ می‌زنی؟]
-[عدد ۸۰٪ | شرکت‌هایی که باج دادند دوباره هدف حمله شدند | source=Cybereason, 2022]
-[تصویر italy.jpg | ایتالیا، ۱۹۶۹ تا ۱۹۹۱ | خانواده‌ها باج می‌دادن]
-[نمودار میله‌ای | همکاری در دور آخر | با تنبیه ۱۸، بدون تنبیه ۳]
-[نمودار خطی | سهم همکاری | با تنبیه: 13,16,18 ; بدون تنبیه: 10,7,3]
-[مقایسه | تأخیر هفتگی | ۸ قبل ; ۱۶ با جریمه ; ۱۹ بعد]
-[جمله | هر رفتاری که پاداشش بدی، | بیشتر می‌شه]
-[فهرست | سه سؤال | اول ; دوم ; سوم]
-[گفتگو | او: کار پنج دقیقه‌ست! ; من: نه ; من: باشه...]
-[کارت‌ها | مشتری ; همکار ; کارفرما]
-[بخش | عنوان بخش]
-[دوربین]</pre>
-    <textarea id="scriptIn" rows="14" placeholder="متن اسکریپت با نشانه‌ها..."></textarea>
-    <div class="row"><label class="chk"><input type="checkbox" id="impReplace" checked> جایگزین اسلایدهای فعلی شود</label>
-      <button class="btn primary" id="doImport">ساختن اسلایدها</button></div>
+  <!-- New Project Modal -->
+  <div id="newProjectModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="newProjTitle">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="newProjTitle">ساخت پروژه جدید</h3>
+        <button id="btnCloseNewModal" type="button" class="btn btn-sm btn-ghost">بستن</button>
+      </div>
+      <p class="modal-hint">نام پوشهٔ پروژه با حروف انگلیسی، عدد یا خط تیره وارد شود (مثال: <code>ai-history</code>).</p>
+      <label class="field-group">
+        <span>نام پروژه</span>
+        <input id="newProjectName" type="text" dir="ltr" class="text-input" placeholder="my-explainer">
+      </label>
+      <div id="newProjectErr" class="error-box hidden"></div>
+      <div class="modal-actions">
+        <button id="btnCreateProject" type="button" class="btn btn-primary">ساخت پروژه</button>
+      </div>
+    </div>
   </div>
-</div>
 
-<div id="help" class="modal" hidden>
-  <div class="modal-box">
-    <div class="modal-head"><b>راهنمای سریع</b><button class="btn small" data-close>✕</button></div>
-    <ol class="help">
-      <li>با «＋ اسلاید» قالب را از گالری انتخاب کن و فرم سمت چپ را پر کن. پیش‌نمایش همان لحظه عوض می‌شود.</li>
-      <li>رنگ در متن: <code>*زرد*</code> برای نکته‌ی مثبت/کلیدی، <code>~قرمز~</code> برای عدد بد، <code>_خاکستری_</code> برای توضیح.</li>
-      <li>چیدمان: <b>SLIDE</b> اسلاید تمام‌صفحه، <b>SCAM</b> اسلاید + تو (گوشه‌ی پایین-چپ خالی می‌ماند)، <b>CAM</b> فقط دوربین.</li>
-      <li>عکس‌ها: دکمه‌ی «انتخاب عکس» یا «پوشه‌ی عکس‌ها». در فایل فقط اسم عکس ذخیره می‌شود؛ عکس را در پوشه‌ی <code>img</code> کنار video.yaml بگذار.</li>
-      <li>در آخر «ذخیره‌ی video.yaml» را بزن و فایل را در پوشه‌ی ویدیو (مثلاً <code>videos/my-video/</code>) بگذار.</li>
-      <li>ساخت ویدیوها: روی <b>build.sh</b> دوبار کلیک کن (یا در ترمینال: <code>python3 -m khordegir build videos/my-video</code>).</li>
-    </ol>
-  </div>
-</div>
-
-<script src="importer.js"></script>
-<script src="editor.js"></script>
+  <script>
+    window.Stage = window.Stage || { themes: {}, defineTheme(t) { this.themes[t.name] = t; } };
+  </script>
+  <script src="../themes/_list.js"></script>
+  <script src="../templates/_index.js"></script>
+  <script src="../stage/fx.js"></script>
+  <script>
+    (window.THEME_FILES || []).forEach((f) => document.write('<script src="../themes/' + f + '"><\/script>'));
+  </script>
+  <script src="./editor.js"></script>
 </body>
 </html>
