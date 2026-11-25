@@ -1,0 +1,33 @@
+.qt-shell {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 28px;
+}
+
+.qt-card {
+  position: relative;
+  padding: 46px 56px 46px 48px;
+  border-radius: var(--radius, 22px);
+  background: var(--c-surface, #141924);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 26px 64px rgba(0, 0, 0, 0.35);
+}
+
+.qt-spine {
+  position: absolute;
+  top: 32px;
+  bottom: 32px;
+  right: 22px;
+  width: 8px;
+  border-radius: 999px;
+  background: var(--c-accent, #F5B700);
+  transform-origin: top center;
+}
+
+.qt-author-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}

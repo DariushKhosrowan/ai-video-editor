@@ -1,0 +1,22 @@
+.sb-ghost-num {
+  position: absolute;
+  font-size: 380px;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--c-accent, #F5B700);
+  opacity: 0.1;
+  pointer-events: none;
+  user-select: none;
+}
+
+.sb-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+}
+
+.sb-badge {
+  align-self: flex-start;
+  font-size: 26px;
+}

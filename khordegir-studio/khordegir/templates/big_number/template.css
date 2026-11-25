@@ -1,0 +1,23 @@
+.bn-halo {
+  position: absolute;
+  border-radius: 999px;
+  border: 2px dashed var(--c-accent, #F5B700);
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.bn-num-row {
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.bn-unit {
+  font-weight: 800;
+  color: var(--c-accent, #F5B700);
+}
+
+.bn-gauge-svg {
+  pointer-events: none;
+}

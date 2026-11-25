@@ -10,7 +10,63 @@
     {
       "key": "spec",
       "label": "مسیر فایل spec (JSON)",
-      "type": "text"
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "title",
+      "label": "عنوان",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "subtitle",
+      "label": "زیرعنوان",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["sweep-chart", "ورود پویا"],
+        ["editorial-spec", "نمودار تحریریه"],
+        ["elastic-spec", "نمودار فنری"],
+        ["spotlight-spec", "تمرکز داده‌ها"],
+        ["cascade-spec", "رسم آبشاری"],
+        ["minimal-spec", "نمودار مینیمال"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["soft-fade", "محو نرم"],
+        ["curtain-rtl", "پرده از راست به چپ"],
+        ["accent-slash", "نوار تأکید مورب"],
+        ["iris-rise", "باز شدن دایره‌ای"],
+        ["split-curtain", "پرده دوقسمتی"],
+        ["diagonal-wipe", "پاک‌شدن مورب"],
+        ["zoom-iris", "گشایش زوم"],
+        ["shutter-bars", "کرکره ستونی"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
     }
   ],
   "example": {

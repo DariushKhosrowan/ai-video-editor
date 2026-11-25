@@ -12,30 +12,63 @@
     {
       "key": "title",
       "label": "عنوان بالای گفتگو",
-      "type": "text"
+      "type": "text",
+      "editable": true
     },
     {
       "key": "messages",
       "label": "پیام‌ها",
       "type": "table",
       "columns": [
-        [
-          "from",
-          "فرستنده (او/من)"
-        ],
-        [
-          "text",
-          "متن"
-        ],
-        [
-          "tone",
-          "لحن (bad/good)"
-        ],
-        [
-          "tag",
-          "برچسب کوچک"
-        ]
-      ]
+        ["from", "فرستنده (او/من)"],
+        ["text", "متن"],
+        ["tone", "لحن (bad/good)"],
+        ["tag", "برچسب کوچک"]
+      ],
+      "editable": true
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["pop-bubbles", "پرش حباب‌ها"],
+        ["rapid-thread", "رشته گفتگوی سریع"],
+        ["editorial-dialog", "گفتگوی تحریریه"],
+        ["slide-thread", "ورود از طرفین"],
+        ["focus-alert", "تأکید پیام مهم"],
+        ["minimal-chat", "گفتگوی آرام"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["soft-fade", "محو نرم"],
+        ["curtain-rtl", "پرده از راست به چپ"],
+        ["accent-slash", "نوار تأکید مورب"],
+        ["iris-rise", "باز شدن دایره‌ای"],
+        ["split-curtain", "پرده دوقسمتی"],
+        ["diagonal-wipe", "پاک‌شدن مورب"],
+        ["zoom-iris", "گشایش زوم"],
+        ["shutter-bars", "کرکره ستونی"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
     }
   ],
   "example": {

@@ -12,18 +12,21 @@
     {
       "key": "eyebrow",
       "label": "تیتر کوچک",
-      "type": "text"
+      "type": "text",
+      "editable": true
     },
     {
       "key": "title",
       "label": "عنوان",
-      "type": "text"
+      "type": "text",
+      "editable": true
     },
     {
       "key": "items",
       "label": "موردها (هر خط یکی؛ *زرد* ~قرمز~)",
       "type": "list",
-      "required": true
+      "required": true,
+      "editable": true
     },
     {
       "key": "numbered",
@@ -39,7 +42,8 @@
           "نه"
         ]
       ],
-      "default": "true"
+      "default": "true",
+      "editable": false
     },
     {
       "key": "columns",
@@ -55,7 +59,51 @@
           "۲"
         ]
       ],
-      "default": "1"
+      "default": "1",
+      "editable": false
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["stagger-cards", "ورود پلکانی کارت‌ها"],
+        ["cascade-rows", "آبشاری از راست"],
+        ["timeline-rail", "خط راهنمای عمودی"],
+        ["pill-grid", "شبکه مدرن"],
+        ["spotlight-focus", "تأکید نوری روی مورد"],
+        ["minimal-clean", "ورود نرم و تمیز"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["soft-fade", "محو نرم"],
+        ["curtain-rtl", "پرده از راست به چپ"],
+        ["accent-slash", "نوار تأکید مورب"],
+        ["iris-rise", "باز شدن دایره‌ای"],
+        ["split-curtain", "پرده دوقسمتی"],
+        ["diagonal-wipe", "پاک‌شدن مورب"],
+        ["zoom-iris", "گشایش زوم"],
+        ["shutter-bars", "کرکره ستونی"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
     }
   ],
   "example": {

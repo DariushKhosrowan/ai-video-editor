@@ -12,35 +12,69 @@
     {
       "key": "title",
       "label": "عنوان",
-      "type": "text"
+      "type": "text",
+      "editable": true
     },
     {
       "key": "image",
       "label": "عکس مشترک بالا (اختیاری)",
-      "type": "image"
+      "type": "image",
+      "editable": true
     },
     {
       "key": "cards",
       "label": "کارت‌ها",
       "type": "table",
       "columns": [
-        [
-          "label",
-          "برچسب"
-        ],
-        [
-          "icon",
-          "نماد/ایموجی"
-        ],
-        [
-          "image",
-          "عکس کارت"
-        ],
-        [
-          "text",
-          "توضیح"
-        ]
-      ]
+        ["label", "برچسب"],
+        ["icon", "نماد/ایموجی"],
+        ["image", "عکس کارت"],
+        ["text", "توضیح"]
+      ],
+      "editable": true
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["trio-cascade", "سه‌تایی آبشاری"],
+        ["elastic-fan", "بادبزن فنری"],
+        ["spotlight-cards", "کارت‌های درخشان"],
+        ["floating-trio", "کارت‌های شناور"],
+        ["sweep-grid", "ورود شبکه‌ای"],
+        ["minimal-cards", "کارت‌های ساده"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["soft-fade", "محو نرم"],
+        ["curtain-rtl", "پرده از راست به چپ"],
+        ["accent-slash", "نوار تأکید مورب"],
+        ["iris-rise", "باز شدن دایره‌ای"],
+        ["split-curtain", "پرده دوقسمتی"],
+        ["diagonal-wipe", "پاک‌شدن مورب"],
+        ["zoom-iris", "گشایش زوم"],
+        ["shutter-bars", "کرکره ستونی"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
     }
   ],
   "example": {
