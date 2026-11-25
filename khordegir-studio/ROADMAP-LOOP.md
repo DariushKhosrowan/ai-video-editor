@@ -16,4 +16,7 @@ Revised order (beginner loop first, templates later): editor + local server → 
 - [ ] 9. Semantic theme tokens + 5 audited themes (light, editorial). Test: contrast check across gallery.
 - [ ] 10. Static-hold frame dedup + CDP screenshot fast path in render.py. Test: ≥40% faster, identical final frame.
 
+- [ ] 11. OBS Console (port of DariushKhosrowan/obs-script-teleprompter-overview-generator): /obs/ teleprompter + OBS WebSocket v5 + `khordegir obs` package export (Lua v8, installer, PNG prompter). Test: pytest on Lua/steps; console loads steps from video.yaml.
+- [ ] 12. One-app creator flow «پروژهٔ تازه»: write or paste the script inside the app (Persian editor with acts/steps, word-count timing) → auto slides (task 8) → teleprompter → OBS package → record. Optional «کمک نوشتن با هوش مصنوعی»: off by default, uses a user-supplied key or a copy-prompt for ChatGPT/AI Studio (red line: never required). Test: E2E new project → script → build → OBS folder, no terminal.
+
 Open review points to verify: GSAP standard-license clause on no-code visual builders (Gemini flagged; confirm before any public/commercial release); catalog spec drift (window.__SEEK__, SplitText, CSS vars).
