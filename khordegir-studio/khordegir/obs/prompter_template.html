@@ -2,12 +2,15 @@
 <style>
 @font-face{font-family:V;src:url("fonts/Vazirmatn-Bold.ttf")}
 html,body{margin:0;background:#000;color:#fff;font-family:V,Vazirmatn,Tahoma,sans-serif;overflow:hidden;height:100%}
-#bar{position:fixed;top:0;left:0;right:0;background:#111;color:#FFD600;font-size:22px;padding:8px 16px;display:flex;justify-content:space-between;z-index:2}
+#bar{position:fixed;top:0;left:0;right:0;background:#111;color:#FFD600;font-size:22px;padding:8px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;z-index:2}
+#bar-end{display:flex;align-items:center;gap:12px}
 #next{color:#9E9E9E}
-#wrap{position:absolute;top:50px;bottom:0;left:0;right:0;overflow:hidden}
-#txt{padding:30px 6%;font-size:var(--fs,46px);line-height:1.75;text-align:right}
+#focusBtn{background:#222;color:#FFD600;border:1px solid rgba(255,214,0,.45);border-radius:6px;padding:4px 10px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;white-space:nowrap}
+#focusBtn:hover{background:#333}
+#wrap{position:absolute;top:50px;bottom:122px;left:0;right:0;overflow:hidden;cursor:pointer}
+#txt{padding:30px 6%;font-size:var(--fs,46px);line-height:1.75;text-align:right;white-space:pre-wrap;word-break:break-word}
 #txt .cur{color:#fff}
-#guide{position:fixed;top:32%;left:0;right:0;height:3px;background:rgba(255,214,0,.35);z-index:1}
+#guide{position:fixed;top:32%;left:0;right:0;height:3px;background:rgba(255,214,0,.35);z-index:1;pointer-events:none}
 body.mirror #wrap{transform:scaleX(-1)}
 #help{position:fixed;bottom:2px;left:10px;font-size:13px;color:#555}
 #tl{position:fixed;bottom:22px;left:10px;right:10px;height:64px;display:flex;gap:6px;z-index:3;direction:rtl}
@@ -18,26 +21,62 @@ body.mirror #wrap{transform:scaleX(-1)}
 .act b{display:block;font-size:16px}
 #tot{position:fixed;bottom:92px;left:14px;font-size:16px;color:#9E9E9E;z-index:3}
 #recdot{position:fixed;top:60px;left:16px;font-size:22px;color:#E53935;z-index:3;display:none}
-#help{bottom:2px}
-#wrap{bottom:122px}
+body.focus-mode #bar,body.focus-mode #guide,body.focus-mode #help,body.focus-mode #recdot,body.focus-mode #tot,body.focus-mode #tl{display:none!important}
+body.focus-mode #wrap{position:fixed;inset:0;top:0;bottom:0;left:0;right:0;display:flex;flex-direction:column;justify-content:center;align-items:stretch;overflow:hidden;cursor:pointer}
+body.focus-mode #txt{padding:4vh 5vw;box-sizing:border-box;width:100%;font-size:var(--fs,46px);line-height:1.5;text-align:right;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere}
 </style></head><body>
-<div id="bar"><span id="where"></span><span id="next"></span></div><div id="guide"></div>
+<div id="bar"><span id="where"></span><span id="bar-end"><span id="next"></span><button id="focusBtn" type="button" aria-pressed="false" title="حالت تمرکز / حداکثر متن (F)">تمرکز (F)</button></span></div><div id="guide"></div>
 <div id="wrap"><div id="txt"></div></div>
-<div id="help">←/→ مرحله · Space اسکرول خودکار · ↑/↓ سرعت · +/- اندازه · M آینه</div>
+<div id="help">←/→ یا کلیک مرحله · Space اسکرول خودکار · ↑/↓ سرعت · +/- اندازه · M آینه · F تمرکز</div>
 <script>
 const S=__STEPS__;
-let i=0,auto=false,speed=1.2,fs=58,y=0,lastStep=-1;
+const FOCUS_KEY='khordegir_prompter_focus_v1';
+let i=0,auto=false,speed=1.2,fs=58,y=0,lastStep=-1,focus=false,fitRaf=0;
 const q=new URLSearchParams(location.search);
 if(q.get('s'))i=Math.max(0,Math.min(S.length-1,parseInt(q.get('s'))-1));
 if(q.get('fs'))fs=parseInt(q.get('fs'));
 if(q.get('mirror'))document.body.classList.add('mirror');
 if(q.get('auto'))auto=true;
+try{focus=localStorage.getItem(FOCUS_KEY)==='1'}catch{}
+if(q.has('focus')){const fv=q.get('focus');focus=(fv==='1'||fv==='true')}
 const fa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
-function show(){const s=S[i],nx=S[i+1];
+function fitFocus(){
+ const w=document.getElementById('wrap'),t=document.getElementById('txt');
+ if(!w||!t||w.clientHeight<=0||w.clientWidth<=0)return;
+ let lo=12,hi=Math.max(72,Math.min(320,Math.floor(w.clientHeight*0.75))),best=lo;
+ while(lo<=hi){
+  const mid=(lo+hi)>>1;
+  t.style.setProperty('--fs',mid+'px');
+  if(t.scrollHeight<=w.clientHeight&&t.scrollWidth<=w.clientWidth){best=mid;lo=mid+1}
+  else{hi=mid-1}
+ }
+ t.style.setProperty('--fs',best+'px');
+}
+function scheduleFit(){if(!focus)return;if(fitRaf)cancelAnimationFrame(fitRaf);fitRaf=requestAnimationFrame(()=>{fitRaf=0;if(focus)fitFocus()})}
+function setFocus(on){
+ focus=!!on;
+ document.body.classList.toggle('focus-mode',focus);
+ const fb=document.getElementById('focusBtn');
+ if(fb){fb.setAttribute('aria-pressed',focus?'true':'false');fb.textContent=focus?'خروج از تمرکز (F)':'تمرکز (F)'}
+ try{localStorage.setItem(FOCUS_KEY,focus?'1':'0')}catch{}
+ show();
+ scheduleFit();
+}
+function show(){
+ const t=document.getElementById('txt'),w=document.getElementById('wrap');
+ if(!S.length){document.getElementById('where').textContent='مرحله‌ای وجود ندارد';document.getElementById('next').textContent='';t.textContent='';return}
+ const s=S[i],nx=S[i+1];
  document.getElementById('where').textContent='پرده '+fa(s.act)+' · مرحله '+fa(s.n)+' از '+fa(S.length)+' · '+s.lay+(s.slide?' · اسلاید '+fa(s.slide):'')+(s.time?' · '+s.time:'');
  document.getElementById('next').textContent=nx?('بعدی: '+nx.lay+(nx.slide?' '+fa(nx.slide):'')+(nx.act!=s.act?' — پایان پرده، ضبط رو قطع کن':'')):'پایان';
- const t=document.getElementById('txt');t.textContent=s.text;y=0;t.style.transform='translateY(0)';let f=fs;t.style.setProperty('--fs',f+'px');const w=document.getElementById('wrap');while(f>28&&t.scrollHeight>w.clientHeight){f-=2;t.style.setProperty('--fs',f+'px')}}
+ t.textContent=s.text;y=0;t.style.transform='translateY(0)';
+ if(focus){fitFocus();return}
+ let f=fs;t.style.setProperty('--fs',f+'px');while(f>28&&t.scrollHeight>w.clientHeight){f-=2;t.style.setProperty('--fs',f+'px')}
+}
 function tick(){if(auto){y-=speed;document.getElementById('txt').style.transform='translateY('+y+'px)';}requestAnimationFrame(tick)}
+document.getElementById('focusBtn').addEventListener('click',()=>setFocus(!focus));
+document.getElementById('wrap').addEventListener('click',()=>{if(i<S.length-1){i++;show()}});
+window.addEventListener('resize',scheduleFit);
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(scheduleFit);
 document.addEventListener('keydown',e=>{
  if(e.key=='ArrowLeft'||e.key=='PageDown'){if(i<S.length-1)i++;show()}
  else if(e.key=='ArrowRight'||e.key=='PageUp'){if(i>0)i--;show()}
@@ -47,8 +86,10 @@ document.addEventListener('keydown',e=>{
  else if(e.key=='+'||e.key=='='){fs+=4;show()}
  else if(e.key=='-'){fs=Math.max(20,fs-4);show()}
  else if(e.key=='m'||e.key=='M'){document.body.classList.toggle('mirror')}
+ else if(e.key=='f'||e.key=='F'){e.preventDefault();setFocus(!focus)}
+ else if(e.key=='Escape'&&focus){e.preventDefault();setFocus(false)}
 });
-show();tick();
+setFocus(focus);tick();
 </script><div id="recdot">● REC <span id="rt"></span></div><div id="tot"></div><div id="tl"></div>
 <script>
 const ACTS={};S.forEach(x=>{ACTS[x.act]=(ACTS[x.act]||0)+1});
@@ -58,7 +99,7 @@ function render(){const st=window.HS_STATE;if(st&&st.step-1!==lastStep){lastStep
   const tk=st?st.takes.filter(t=>t.act==a):[];const last=tk[tk.length-1];let info='ضبط نشده';
   if(last){d.classList.add('done');const dur=last.stop-last.start;tot+=dur;info='برداشت '+fa(tk.length)+' · '+mmss(dur)}
   if(st&&st.recording&&st.rec_act==a){d.classList.remove('done');d.classList.add('rec');info='در حال ضبط · '+mmss(Date.now()/1000-st.rec_start)}
-  if(S[i].act==a)d.classList.add('here');
+  if(S[i]&&S[i].act==a)d.classList.add('here');
   d.innerHTML='<b>پرده '+fa(a)+'</b>'+info;tl.appendChild(d)});
  document.getElementById('tot').textContent='مجموع ضبط‌شده: '+mmss(tot)+' از حدود '+(window.TOTAL_HINT||'')+'';
  const rd=document.getElementById('recdot');if(st&&st.recording){rd.style.display='block';document.getElementById('rt').textContent=mmss(Date.now()/1000-st.rec_start)}else rd.style.display='none';}
