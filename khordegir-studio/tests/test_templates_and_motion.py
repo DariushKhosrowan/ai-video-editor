@@ -327,6 +327,7 @@ function loadScript(rel) {
 }
 
 loadScript("vendor/gsap.min.js");
+loadScript("stage/motion-tokens.js");
 loadScript("stage/core.js");
 loadScript("stage/fx.js");
 loadScript("themes/_list.js");

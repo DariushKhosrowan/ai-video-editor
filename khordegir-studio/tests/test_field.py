@@ -342,6 +342,7 @@ sandbox.window = sandbox;
 sandbox.window.addEventListener = () => {};
 
 vm.createContext(sandbox);
+vm.runInContext(fs.readFileSync(require("path").join(require("path").dirname(corePath), "motion-tokens.js"), "utf8"), sandbox);
 vm.runInContext(coreCode, sandbox);
 
 const Stage = sandbox.window.Stage;

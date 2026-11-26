@@ -6,7 +6,7 @@ Stage.template({
     const left = A.area.left, right = A.area.x;
     const panel = A.el("div", "card", A.root, { left, right, top: h.bottom + 20, bottom: A.scam ? 90 : 80, padding: "36px 40px", display: "flex", flexDirection: "column", justifyContent: "center", gap: "22px", overflow: "hidden" });
     A.field("messages", panel);
-    A.enter(panel, "card", 0, -0.1);
+    A.enter(panel, "card", 0, Stage.MOTION.ui.chatPanelExtra);
     msgs.forEach((m, i) => {
       const me = /من|me/.test(m.from || "");
       const tone = Stage.T.tone(m.tone);

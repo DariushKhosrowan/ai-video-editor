@@ -4,6 +4,7 @@
 (function () {
   "use strict";
   const S = window.Stage;
+  const MT = window.MOTION_TOKENS || S.MOTION;
   const C = S.charts = {};
 
   function niceStep(span, n = 4) {
@@ -65,7 +66,7 @@
     const py0 = valH, py1 = H - labH, px0 = axW, px1 = W;
     const Y = (v) => py0 + (vmax - v) / ((vmax - vmin) || 1) * (py1 - py0);
     const grid = A.el("div", "abs", box, { left: 0, top: 0, width: W, height: H });
-    const axM = M.axes || { delay: 0, dur: 0.3, ease: "power3" };
+    const axM = M.axes || MT.chart.axes;
     if (axis) {
       for (let v = vmin; v <= vmax + 1e-9; v += step) {
         const y = Y(v);
@@ -80,8 +81,9 @@
     A.el("div", "abs", grid, { left: px0, top: Y(0) - 1.5, width: px1 - px0, height: 3, background: S.theme.colors.axis });
     S.tl.from(grid, { opacity: 0, duration: axM.dur, ease: S.ease(axM.ease), immediateRender: true }, t0 + axM.delay);
 
-    const barM = M.bar || { delay: 0.25, dur: 0.65, stagger: 0.08, ease: "power3" };
-    const barEase = lively ? "back" : barM.ease;
+    const barM = M.bar || MT.chart.bar;
+    const barEase = barM.ease || MT.chart.bar.ease;
+    const valM = MT.chart.value;
     const bw = Math.min(spec.bar_width || 250, slot * 0.56);
     order.forEach((i, k) => {
       const d = its[i];
@@ -96,10 +98,10 @@
         transformOrigin: neg ? "50% 0%" : "50% 100%",
       });
       if (lively && d.color === "accent") {
-        bar.style.boxShadow = `0 12px 32px rgba(255, 214, 0, 0.16)`;
+        bar.style.boxShadow = "var(--shadow-accent)";
       }
       S.tl.from(bar, { scaleY: 0, duration: barM.dur, ease: S.ease(barEase), immediateRender: true }, t);
-      if (S.fx) S.fx.cue(t + barM.dur * 0.9, "bar", String(d.label));
+      if (S.fx) S.fx.cue(t + barM.dur * MT.chart.barCueFrac, "bar", String(d.label));
       const vc = d.value_color || (d.color === "#5A5A5A" ? "muted" : d.color);
       if (spec.show_values !== false) {
         const v = A.el("div", "abs t-value", box, {
@@ -114,12 +116,12 @@
         const h = v.offsetHeight;
         v.style.top = (neg ? (d.display != null ? Y(0) - h - 8 : bot + 8) : top - h - 6) + "px";
         v.style.display = "flex"; v.style.justifyContent = "center";
-        S.tl.from(v, { opacity: 0, y: 10, duration: 0.4, ease: S.ease("power4"), immediateRender: true }, t + 0.05);
+        S.tl.from(v, { opacity: 0, y: valM.y, duration: valM.dur, ease: S.ease(valM.ease), immediateRender: true }, t + valM.delay);
       }
       const l = labs[k];
       l.style.left = (cx - slot * 0.46) + "px";
       l.style.top = (H - labH + 16) + "px";
-      A.enter(l, "body", 0, 0, { at: t + 0.08, x: 0, y: 10 });
+      A.enter(l, "body", 0, 0, { at: t + valM.delay, x: 0, y: valM.y });
     });
   };
 
@@ -135,10 +137,11 @@
     const px1 = W - labW, px0 = vsize * 3.4;
     const vmax = spec.ymax != null ? S.toNum(spec.ymax) : Math.max(...its.map((d) => d.v), 1e-9);
     const row = H / n, bh = Math.min(spec.bar_width || 90, row * 0.58);
-    const axM = M.axes || { delay: 0, dur: 0.3 };
-    const barM = M.bar || { delay: 0.25, dur: 0.65, stagger: 0.08, ease: "power3" };
+    const axM = M.axes || MT.chart.axes;
+    const barM = M.bar || MT.chart.bar;
+    const valM = MT.chart.value;
     const ax = A.el("div", "abs", box, { left: px1, top: 0, width: 3, height: H, background: S.theme.colors.axis });
-    S.tl.from(ax, { opacity: 0, duration: axM.dur, immediateRender: true }, t0);
+    S.tl.from(ax, { opacity: 0, duration: axM.dur, ease: S.ease(axM.ease), immediateRender: true }, t0 + axM.delay);
     its.forEach((d, i) => {
       const cy = row * (i + 0.5), t = t0 + barM.delay + i * barM.stagger;
       const bw = Math.max(3, d.v / (vmax || 1) * (px1 - px0));
@@ -146,13 +149,13 @@
         left: px1 - bw, top: cy - bh / 2, width: bw, height: bh,
         background: S.color(d.color), borderRadius: "8px 0 0 8px", transformOrigin: "100% 50%",
       });
-      S.tl.from(bar, { scaleX: 0, duration: barM.dur, ease: S.ease(lively ? "back" : barM.ease), immediateRender: true }, t);
+      S.tl.from(bar, { scaleX: 0, duration: barM.dur, ease: S.ease(barM.ease), immediateRender: true }, t);
       const v = A.el("div", "abs t-value", box, {
         fontSize: vsize, color: S.color(d.color === "#5A5A5A" ? "muted" : d.color),
       });
       A.count(v, { to: d.v, decimals: d.dec, prefix: d.prefix ?? pre, suffix: d.suffix ?? suf, at: t, enter: false });
       v.style.right = (W - (px1 - bw) + 16) + "px"; v.style.top = (cy - v.offsetHeight / 2) + "px";
-      S.tl.from(v, { opacity: 0, duration: 0.4, immediateRender: true }, t + 0.05);
+      S.tl.from(v, { opacity: 0, duration: valM.dur, ease: S.ease(valM.ease), immediateRender: true }, t + valM.delay);
       const l = labs[i]; l.style.right = "0px"; l.style.top = (cy - l.offsetHeight / 2) + "px";
       A.enter(l, "body", 0, 0, { at: t });
     });
@@ -234,22 +237,23 @@
       const e = A.text(grid, X.title, "axis", "abs", { color: col.muted });
       e.style.left = ((px0 + px1) / 2 - (e.offsetWidth || 60) / 2) + "px"; e.style.top = (py1 + 50) + "px";
     }
-    const axM = M.axes || { delay: 0, dur: 0.3 };
-    const lineM = M.line || { delay: 0.3, dur: 1.2, stagger: 0.15, ease: "power3" };
-    S.tl.from(grid, { opacity: 0, duration: axM.dur, immediateRender: true }, t0);
+    const axM = M.axes || MT.chart.axes;
+    const lineM = M.line || MT.chart.line;
+    const vlM = MT.chart.vline;
+    S.tl.from(grid, { opacity: 0, duration: axM.dur, ease: S.ease(axM.ease), immediateRender: true }, t0 + axM.delay);
     (spec.vlines || []).forEach((vl, j) => {
-      const x = PX(S.toNum(vl.x)), t = t0 + 0.15 + j * 0.1;
+      const x = PX(S.toNum(vl.x)), t = t0 + vlM.delay + j * vlM.stagger;
       const ln = A.el("div", "abs", box, {
         left: x - 1.5, top: py0 - 4, width: 0, height: py1 - py0 + 4,
         borderLeft: `3px dashed ${S.color(vl.color || "muted")}`, transformOrigin: "50% 0%",
       });
-      S.tl.from(ln, { scaleY: 0, duration: 0.5, ease: S.ease("power3"), immediateRender: true }, t);
+      S.tl.from(ln, { scaleY: 0, duration: vlM.dur, ease: S.ease(vlM.ease), immediateRender: true }, t);
       if (vl.label) {
         const e = A.text(box, vl.label, "label", "abs", {
           color: S.color(vl.color || "muted"), whiteSpace: "nowrap", fontSize: (vl.size || 28) + "px",
         });
         e.style.left = (x - (e.offsetWidth || 60) / 2) + "px"; e.style.top = (py0 - 16 - e.offsetHeight) + "px";
-        A.enter(e, "body", 0, 0, { at: t + 0.12, x: 0, y: 8 });
+        A.enter(e, "body", 0, 0, { at: t + vlM.labelDelay, x: 0, y: MT.chart.value.y });
       }
     });
     const svgNS = "http://www.w3.org/2000/svg";
@@ -277,6 +281,7 @@
       g.appendChild(p);
       const t = t0 + lineM.delay + i * lineM.stagger;
       if (spec.markers || s.markers) {
+        const mkM = MT.chart.marker;
         xs.forEach((x, k) => {
           const c = document.createElementNS(svgNS, "circle");
           c.setAttribute("cx", x); c.setAttribute("cy", ys[k]); c.setAttribute("r", (s.width || 7) * 1.3);
@@ -284,7 +289,7 @@
           g.appendChild(c);
           if (lively) {
             const frac = xs.length > 1 ? k / (xs.length - 1) : 0;
-            S.tl.from(c, { opacity: 0, duration: 0.28, ease: S.ease("power3"), immediateRender: true }, t + frac * lineM.dur * 0.85);
+            S.tl.from(c, { opacity: 0, duration: mkM.dur, ease: S.ease(mkM.ease), immediateRender: true }, t + frac * lineM.dur * mkM.span);
           }
         });
       }
@@ -295,14 +300,14 @@
       if (e) {
         e.style.left = (xs[xs.length - 1] + 18) + "px";
         e.style.top = (ys[ys.length - 1] - e.offsetHeight / 2 + (s.label_dy || 0)) + "px";
-        A.enter(e, "body", 0, 0, { at: t + lineM.dur * 0.8 });
+        A.enter(e, "body", 0, 0, { at: t + lineM.dur * MT.chart.endLabelFrac });
       }
     });
     (spec.marks || []).forEach((mk, j) => {
       const e = A.text(box, mk.text, "value", "abs", { color: S.color(mk.color || "accent"), whiteSpace: "nowrap", fontSize: (mk.size || 44) + "px" });
       e.style.left = (PX(S.toNum(mk.x)) - (e.offsetWidth || 40) / 2 + (mk.dx || 0)) + "px";
       e.style.top = (PY(S.toNum(mk.y)) - e.offsetHeight - 14 + (mk.dy || 0)) + "px";
-      A.enter(e, "badge", 0, 0, { at: t0 + lineM.delay + lineM.dur * 0.9 + j * 0.1 });
+      A.enter(e, "badge", 0, 0, { at: t0 + lineM.delay + lineM.dur * MT.chart.markDelayFrac + j * MT.chart.markStagger });
     });
   };
 
@@ -316,14 +321,14 @@
       color: S.color(spec.color || "accent"),
       fontSize: (spec.size || S.theme.type.number.size) + "px",
     });
-    A.count(n, { to: spec.value ?? spec.to, from: spec.from, prefix: spec.prefix, suffix: spec.suffix, decimals: spec.decimals, at: t0 + S.theme.motion.number.delay });
-    if (spec.caption) A.enter(A.text(col, spec.caption, "h1"), "title", 0, 0.25);
+    A.count(n, { to: spec.value ?? spec.to, from: spec.from, prefix: spec.prefix, suffix: spec.suffix, decimals: spec.decimals, at: t0 + (S.theme.motion.number ? S.theme.motion.number.delay : MT.chart.number.delay) });
+    if (spec.caption) A.enter(A.text(col, spec.caption, "h1"), "title", 0, MT.chart.counterCaptionExtra);
   };
 
   /* ------------------------------------------------------------ compare: before -> after (RTL: first on the right, arrow points left) */
   C.compare = function (A, box, spec, t0 = 0) {
     const steps = spec.steps || [spec.before || {}, spec.after || {}];
-    const lively = isLivelyPreset();
+    const cmpM = MT.chart.compare;
     const n = steps.length || 1, W = box.clientWidth || 1200, H = box.clientHeight || 600;
     const size = spec.size || (n === 2 ? 190 : 150);
     const arrowW = Math.min(200, W * 0.13), colW = (W - arrowW * (n - 1)) / n;
@@ -332,14 +337,14 @@
       const right = i * (colW + arrowW);
       const c = A.el("div", "col", box, { right, width: colW, top: 0, height: H, alignItems: "center", textAlign: "center", gap: "6px" });
       const num = A.el("div", "t-number", c, { color: S.color(s.color || defs[i % defs.length]), fontSize: size + "px" });
-      const t = t0 + 0.2 + i * 0.55;
-      A.count(num, { to: s.value, prefix: s.prefix ?? spec.prefix, suffix: s.suffix ?? spec.suffix, decimals: s.decimals, at: t, dur: 0.9 });
-      if (s.label) A.enter(A.text(c, s.label, "label", "", { maxWidth: colW * 0.95 + "px" }), "body", 0, 0, { at: t + 0.15 });
+      const t = t0 + cmpM.delay + i * cmpM.stagger;
+      A.count(num, { to: s.value, prefix: s.prefix ?? spec.prefix, suffix: s.suffix ?? spec.suffix, decimals: s.decimals, at: t, dur: cmpM.countDur });
+      if (s.label) A.enter(A.text(c, s.label, "label", "", { maxWidth: colW * 0.95 + "px" }), "body", 0, 0, { at: t + cmpM.labelDelay });
       if (i < n - 1) {
         const ar = A.el("div", "abs", box, { right: right + colW + 14, width: arrowW - 28, top: H / 2 - 40, height: 40 });
         ar.innerHTML = `<svg viewBox="0 0 100 40" width="100%" height="40" preserveAspectRatio="none"><path d="M100 20 H12" stroke="${S.color(spec.arrow_color || "muted")}" stroke-width="7" stroke-linecap="round"/><path d="M26 4 L6 20 L26 36" fill="none" stroke="${S.color(spec.arrow_color || "muted")}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
         ar.style.transformOrigin = "100% 50%";
-        S.tl.from(ar, { scaleX: 0, opacity: 0, duration: lively ? 0.5 : 0.45, ease: S.ease(lively ? "back" : "power3"), immediateRender: true }, t + 0.45);
+        S.tl.from(ar, { scaleX: 0, opacity: 0, duration: cmpM.arrowDur, ease: S.ease(cmpM.ease), immediateRender: true }, t + cmpM.arrowDelay);
       }
     });
   };

@@ -12,6 +12,6 @@ Stage.template({
     const box = A.box(A.root, left, top, A.W - right - left, A.H - top - ((s.note || spec.note) ? 120 : (A.scam ? 420 : 90)));
     A.field("chart", box);
     if (spec.type === "line" && typeof spec.series === "string") Object.assign(spec, Stage.T.lineSpec(spec));
-    Stage.chart(A, box, spec, 0.25);
+    Stage.chart(A, box, spec, Stage.MOTION.chart.startOffset);
   }
 });

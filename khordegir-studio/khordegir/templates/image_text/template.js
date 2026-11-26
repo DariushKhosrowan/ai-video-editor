@@ -23,7 +23,10 @@ Stage.template({
       border: s.border || (lively && preset === "editorial-split" ? "accent" : undefined),
     });
     A.field("image", frame);
-    if (lively && preset === "card-float") A.drift(frame, { x: 4, y: -8, dur: 6 });
+    if (lively && preset === "card-float") {
+      const dr = Stage.MOTION.atmosphere.drift;
+      A.drift(frame, { x: dr.cardX, y: dr.cardY, dur: dr.dur });
+    }
 
     const c = A.el("div", "col", A.root, Object.assign({ gap: "18px" }, col));
     if (s.eyebrow) {
@@ -35,7 +38,7 @@ Stage.template({
       const tEl = A.text(c, s.title, "hero", "", { fontSize: (String(s.title).length > 28 ? 60 : 76) + "px" });
       A.field("title", tEl);
       if (lively && (preset === "editorial-split" || preset === "frame-mask")) {
-        A.kinetic(tEl, { at: A.at("title"), role: "title", stagger: 0.045 });
+        A.kinetic(tEl, { at: A.at("title"), role: "title" });
       } else {
         A.enter(tEl, "title");
       }
@@ -59,7 +62,7 @@ Stage.template({
         const tone = Stage.T.tone(o.tone);
         const card = A.el("div", "card" + (tone === "danger" ? " dng-b" : tone === "accent" ? " acc-b" : ""), ptsWrap, { position: "relative", padding: "18px 26px" });
         A.text(card, o.text, "label", "", { fontSize: "34px" });
-        A.enter(card, "card", i, 0.12);
+        A.enter(card, "card", i, Stage.MOTION.ui.imageTextPointExtra);
       });
     }
     A.fit(c, 0.5);

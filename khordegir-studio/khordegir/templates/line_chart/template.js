@@ -6,6 +6,6 @@ Stage.template({
     const top = h.bottom + 30, left = A.area.left + (A.scam ? 0 : 40), right = A.area.x;
     const box = A.box(A.root, left, top, A.W - right - left, A.H - top - (s.note ? 120 : (A.scam ? 420 : 90)));
     A.field("series", box);
-    Stage.chart(A, box, Stage.T.lineSpec(s), 0.25);
+    Stage.chart(A, box, Stage.T.lineSpec(s), Stage.MOTION.chart.startOffset);
   }
 });

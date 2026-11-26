@@ -6,6 +6,6 @@ Stage.template({
     const box = A.box(A.root, left, top, A.W - left - right, (A.scam ? 520 : A.H - 120) - top);
     A.field("steps", box);
     const steps = Stage.T.data(s.steps).length ? (Array.isArray(s.steps) ? s.steps : Stage.T.data(s.steps)) : [s.before || {}, s.after || {}];
-    Stage.chart(A, box, { type: "compare", steps, prefix: s.prefix, suffix: s.suffix, size: s.size }, 0.2);
+    Stage.chart(A, box, { type: "compare", steps, prefix: s.prefix, suffix: s.suffix, size: s.size }, Stage.MOTION.chart.compareStartOffset);
   }
 });

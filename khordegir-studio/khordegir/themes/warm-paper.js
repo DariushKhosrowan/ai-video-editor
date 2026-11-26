@@ -1,5 +1,6 @@
 /* Warm Paper — High-contrast editorial light theme */
 (function () {
+  const MT = Stage.MOTION || window.MOTION_TOKENS;
   const colors = {
     bg: "#F6F2E9", bg2: "#ECE5D7",
     surface: "#FFFFFF",
@@ -32,37 +33,16 @@
       label:   { size: 32,  weight: 700, lh: 1.35 },
       axis:    { size: 26,  weight: 500, lh: 1.2 }
     },
-    ease: {
-      power4: [0.16, 1, 0.3, 1],
-      power3: [0.22, 1, 0.36, 1],
-      back: "back.out(1.25)",
-      editorial: [0.22, 1, 0.36, 1],
-      snappy: [0.16, 1, 0.3, 1],
-      spring: "back.out(1.4)",
-      expo: [0.19, 1, 0.22, 1]
-    },
-    motion: {
-      eyebrow: { delay: 0.05, dur: 0.38, y: 12, ease: "power4" },
-      title:   { delay: 0.12, dur: 0.58, y: 24, ease: "power4" },
-      body:    { delay: 0.22, dur: 0.48, x: 22, stagger: 0.09, ease: "power4" },
-      card:    { delay: 0.22, dur: 0.52, y: 28, scale: 0.96, stagger: 0.10, ease: "power4" },
-      bubble:  { delay: 0.25, dur: 0.40, y: 14, scale: 0.88, stagger: 0.20, ease: "back" },
-      badge:   { delay: 0.30, dur: 0.40, scale: 0.82, ease: "back" },
-      image:   { delay: 0.05, dur: 0.65, scale: 0.97, ease: "power4" },
-      number:  { delay: 0.20, dur: 1.15, scale: 0.92, ease: "power3" },
-      note:    { delay: 0.55, dur: 0.45, y: 10, ease: "power4" },
-      axes:    { delay: 0.00, dur: 0.30, ease: "power3" },
-      bar:     { delay: 0.25, dur: 0.65, stagger: 0.08, ease: "power3" },
-      line:    { delay: 0.30, dur: 1.20, stagger: 0.15, ease: "power3" }
-    },
-    kenburns: { period: 18, scale: 0.055, x: -14 },
-    glow: { opacity: [0.05, 0.09], move: 22, period: 12, x: 0.82, y: 0.12, size: 1.15 },
+    ease: MT.themeEases(),
+    motion: MT.themeMotion(),
+    kenburns: Object.assign({}, MT.camera.kenburns.breathe),
+    glow: Object.assign({}, MT.atmosphere.glow, { opacity: [0.05, 0.09], move: 22, x: 0.82, y: 0.12, size: 1.15 }),
     fx: {
       variants: ["rise", "slide", "mask", "blur", "scale"],
       motions: { "breathe": 3, "zoom-out": 2, "pan-left": 1, "pan-right": 1, "depth": 2 },
       grain: true, dust: false, leak: false, accent: "random"
     },
-    clip: { fade: 0.3, hold: 2.5, min: 6 },
+    clip: Object.assign({}, MT.clip),
     layout: { margin: 80, top: 64, bottom: 64, radius: 18, badgeRadius: 10, cam: [24, 740, 584, 1055], scamLeft: 650 }
   });
 })();

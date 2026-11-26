@@ -14,7 +14,8 @@ Stage.template({
       const clearStop = isLight ? "rgba(247,244,238,0)" : "rgba(18,18,18,0)";
       A.el("div", "abs", wrap, { inset: 0, background: `linear-gradient(to top, ${bgStop} 0%, ${midStop} 45%, ${clearStop} 75%)` });
       A.field("image", wrap);
-      Stage.tl.from(wrap, { opacity: 0, duration: 0.8, ease: Stage.ease("power4"), immediateRender: true }, 0);
+      const imgTok = Stage.MOTION.ui.imageFull;
+      Stage.tl.from(wrap, { opacity: 0, duration: imgTok.dur, ease: Stage.ease(imgTok.ease), immediateRender: true }, imgTok.delay);
     }
 
     const center = s.align === "center" || !s.image;
@@ -45,25 +46,26 @@ Stage.template({
     if (!lively) {
       titleEnd = A.enter(t, "title");
     } else if (preset === "kinetic-hero" || preset === "curtain-editorial" || preset === "split-contrast") {
-      titleEnd = A.kinetic(t, { at: A.at("title"), role: "title", stagger: 0.055, y: 28, ease: "back" });
+      const wsHero = Stage.MOTION.wordStagger.hero;
+      titleEnd = A.kinetic(t, { at: A.at("title"), role: "title", preset: "hero", ease: preset === "kinetic-hero" ? "back" : wsHero.ease });
     } else if (preset === "glitch-pop") {
-      A.kinetic(t, { at: A.at("title"), role: "title", stagger: 0.035, x: -20, y: 12, scale: 0.9, ease: "snappy" });
-      titleEnd = A.at("title") + 0.55;
+      titleEnd = A.kinetic(t, { at: A.at("title"), role: "title", preset: "snappy", ease: "snappy" });
     } else {
-      titleEnd = A.enter(t, "title", 0, 0, { ease: preset === "spotlight" ? "spring" : "editorial", y: 28, scale: 0.96 });
+      titleEnd = A.enter(t, "title", 0, 0, { ease: preset === "spotlight" ? "spring" : Stage.MOTION.text.title.ease });
     }
 
     if (s.subtitle) {
       const subEl = A.text(col, s.subtitle, "body", "", { color: colColors.muted, maxWidth: "1300px", fontSize: "38px" });
       A.field("subtitle", subEl);
-      A.enter(subEl, "body", 0, lively ? Math.max(0, titleEnd - A.at("body") - 0.15) : 0);
+      A.enter(subEl, "body", 0, lively ? Math.max(0, titleEnd - A.at("body") - Stage.MOTION.text.subtitleOverlap) : 0);
     }
 
     if (!s.image) {
       const r = A.el("div", "rule", col);
       r.style.transformOrigin = center && !A.scam ? "50% 50%" : "100% 50%";
       if (lively) r.style.width = preset === "spotlight" ? "240px" : "180px";
-      Stage.tl.from(r, { scaleX: 0, duration: 0.6, ease: Stage.ease("power4"), immediateRender: true }, A.at("body", 1));
+      const sl = Stage.MOTION.ui.sweepLine;
+      Stage.tl.from(r, { scaleX: 0, duration: sl.dur, ease: Stage.ease(sl.ease), immediateRender: true }, A.at("body", 1));
     }
 
     A.fit(col, 0.5);

@@ -8,6 +8,6 @@ Stage.template({
     const box = A.box(A.root, left, top, A.W - right - left, A.H - top - bottom);
     A.field("data", box);
     const spec = Object.assign({}, s, { type: "bar", data: Stage.T.data(s.data), axis: String(s.axis) !== "false" });
-    Stage.chart(A, box, spec, 0.25);
+    Stage.chart(A, box, spec, Stage.MOTION.chart.startOffset);
   }
 });

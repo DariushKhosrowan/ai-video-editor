@@ -7,12 +7,13 @@ Stage.template({
 
     const col = A.el("div", "col", A.root, { left, right, top: A.area.y, bottom: A.scam ? 120 : 100, gap: "18px", alignItems: "flex-start" });
     const r = A.el("div", "rule", col, { transformOrigin: "100% 50%" });
-    Stage.tl.from(r, { scaleX: 0, duration: 0.5, ease: Stage.ease("power4"), immediateRender: true }, A.at("eyebrow"));
+    const sl = Stage.MOTION.ui.sweepLine;
+    Stage.tl.from(r, { scaleX: 0, duration: sl.dur, ease: Stage.ease(sl.ease), immediateRender: true }, A.at("eyebrow"));
 
     const textEl = A.text(col, s.text, "hero", "", { fontSize: (s.size || (Stage.plain(s.text).length > 60 ? 64 : 84)) + "px", maxWidth: "1250px" });
     A.field("text", textEl);
     if (lively && preset === "kinetic-words") {
-      A.kinetic(textEl, { at: A.at("title"), role: "title", stagger: 0.045 });
+      A.kinetic(textEl, { at: A.at("title"), role: "title" });
     } else {
       A.enter(textEl, "title");
     }
@@ -20,7 +21,7 @@ Stage.template({
     if (s.highlight) {
       const hlEl = A.text(col, s.highlight, "hero", "", { color: A.color(s.highlight_color || "accent"), fontSize: (s.highlight_size || 120) + "px" });
       A.field("highlight", hlEl);
-      A.enter(hlEl, "title", 0, 0.12);
+      A.enter(hlEl, "title", 0, Stage.MOTION.ui.quoteHighlightExtra);
     }
     if (s.caption) {
       const capEl = A.text(col, s.caption, "body", "", { color: A.th.colors.muted, maxWidth: "1150px", fontSize: "36px" });

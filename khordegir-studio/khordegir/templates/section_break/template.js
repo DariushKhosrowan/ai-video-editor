@@ -19,13 +19,14 @@ Stage.template({
     const tEl = A.text(col, s.title, "hero", "", { fontSize: "88px" });
     A.field("title", tEl);
     if (lively && preset === "split-headline") {
-      A.kinetic(tEl, { at: A.at("title"), role: "title", stagger: 0.05 });
+      A.kinetic(tEl, { at: A.at("title"), role: "title", preset: "hero" });
     } else {
       A.enter(tEl, "title");
     }
 
     const r = A.el("div", "rule", col, { width: "160px", transformOrigin: A.scam ? "100% 50%" : "50% 50%" });
-    Stage.tl.from(r, { scaleX: 0, duration: 0.55, ease: Stage.ease("power4"), immediateRender: true }, A.at("body"));
+    const sl = Stage.MOTION.ui.sweepLine;
+    Stage.tl.from(r, { scaleX: 0, duration: sl.dur, ease: Stage.ease(sl.ease), immediateRender: true }, A.at("body"));
 
     if (s.subtitle) {
       const subEl = A.text(col, s.subtitle, "body", "", { color: A.th.colors.muted });

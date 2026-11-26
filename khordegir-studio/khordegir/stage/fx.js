@@ -6,6 +6,7 @@
 (function () {
   "use strict";
   const S = window.Stage;
+  const MT = window.MOTION_TOKENS || (S && S.MOTION);
   const FX = S.fx = {};
 
   /* ---------------------------------------------------------- seeded RNG (FNV/Murmur hash + mulberry32) */
@@ -270,26 +271,27 @@
   /* ---------------------------------------------------------- entrance from-vars */
   FX.from = function (role, m) {
     const v = (FX.cur && FX.cur.variant) || "rise";
+    const V = MT.variants;
     const from = { opacity: 0 };
     const textish = ["title", "eyebrow", "body", "note"].includes(role);
     const cardish = ["card"].includes(role);
     if (["bubble", "badge", "number"].includes(role) || v === "rise") {
-      if (m.x) from.x = m.x; if (m.y) from.y = m.y; if (m.scale) from.scale = m.scale;
+      if (m.x) from.x = m.x; if (m.y) from.y = m.y; if (m.scale) from.scale = MT.clampScale(m.scale);
       return from;
     }
     if (v === "slide") {
-      if (textish) from.x = role === "title" ? 44 : 26;
-      else if (cardish) { from.x = 34; from.scale = 0.985; }
-      else if (role === "image") from.x = -36;
+      if (textish) from.x = role === "title" ? V.slideTitleX : V.slideBodyX;
+      else if (cardish) { from.x = V.slideCardX; from.scale = V.slideCardScale; }
+      else if (role === "image") from.x = V.slideImageX;
     } else if (v === "mask") {
-      if (textish) { from.clipPath = "inset(-25% -6% 100% -6%)"; from.y = 14; }
+      if (textish) { from.clipPath = "inset(-25% -6% 100% -6%)"; from.y = V.maskTextY; }
       else if (cardish) { from.clipPath = "inset(0% 0% 0% 100%)"; }
       else if (role === "image") { from.clipPath = "inset(0% 0% 0% 100% round 16px)"; }
     } else if (v === "blur") {
-      from.filter = "blur(14px)";
-      if (textish) from.y = 8; if (cardish) from.scale = 0.98; if (role === "image") from.scale = 1.03;
+      from.filter = `blur(${V.blurPx}px)`;
+      if (textish) from.y = V.blurTextY; if (cardish) from.scale = V.blurCardScale; if (role === "image") from.scale = MT.clampScale(V.blurImageScale);
     } else if (v === "scale") {
-      from.scale = textish ? 0.96 : role === "image" ? 1.04 : 0.95;
+      from.scale = MT.clampScale(textish ? V.scaleText : role === "image" ? V.scaleImage : V.scaleCard);
     }
     return from;
   };
@@ -342,6 +344,7 @@
     const th = S.theme || {}, col = th.colors || {}, c = FX.cur || {};
     const W = S.W, H = S.H, r = FX.rngFor((slide._seed || "") + ":atm");
     const isLight = col.isDark === false;
+    const ATM = MT.atmosphere;
 
     if (c.leak && !isLight) {
       const lk = document.createElement("div");
@@ -352,7 +355,10 @@
         width: "1300px", height: "900px", top: (-300 + r() * 500) + "px", left: fromLeft ? "-700px" : "1300px",
         background: `radial-gradient(ellipse at center, rgba(255,170,60,.55) 0%, rgba(255,120,40,.18) 35%, transparent 70%)`,
       });
-      S.amb.fromTo(lk, { opacity: 0.0, x: 0 }, { opacity: 0.11, x: fromLeft ? 260 : -260, duration: 9, ease: "sine.inOut", yoyo: true, repeat: 9 }, 0);
+      S.amb.fromTo(lk, { opacity: 0.0, x: 0 }, {
+        opacity: ATM.leak.maxOpacity, x: fromLeft ? 260 : -260,
+        duration: ATM.leak.dur, ease: S.ease(ATM.leak.ease), yoyo: true, repeat: ATM.leak.repeat,
+      }, 0);
     }
 
     if (c.dust) {
@@ -373,7 +379,10 @@
           filter: s > 4 ? "blur(1.5px)" : "none",
         });
         box.appendChild(d);
-        S.amb.to(d, { x: (r() - 0.5) * 160, y: -40 - r() * 140, duration: 18 + r() * 10, ease: "none" }, 0);
+        S.amb.to(d, {
+          x: (r() - 0.5) * 160, y: -40 - r() * 140,
+          duration: ATM.dust.baseDur + r() * ATM.dust.spanDur, ease: S.ease(ATM.dust.ease),
+        }, 0);
       }
     }
 
@@ -382,7 +391,10 @@
       const sw = document.createElement("div");
       sw.className = "light-sweep";
       stage.appendChild(sw);
-      S.amb.fromTo(sw, { x: 600, opacity: 0 }, { x: -1600, opacity: isLight ? 0.16 : 0.24, duration: 10, ease: "sine.inOut", yoyo: true, repeat: 4 }, 0);
+      S.amb.fromTo(sw, { x: 600, opacity: 0 }, {
+        x: -1600, opacity: isLight ? 0.16 : 0.24,
+        duration: ATM.lightSweep.dur, ease: S.ease(ATM.lightSweep.ease), yoyo: true, repeat: ATM.lightSweep.repeat,
+      }, 0);
     }
   };
 
@@ -392,12 +404,13 @@
     gr.className = "grain";
     stage.appendChild(gr);
     gr.style.backgroundImage = `url(${grainTile()})`;
+    const G = MT.atmosphere.grain;
     const proxy = { t: 0 }, r = mulberry32(99);
-    const offs = Array.from({ length: 24 }, () => [Math.floor(r() * 256), Math.floor(r() * 256)]);
+    const offs = Array.from({ length: G.steps }, () => [Math.floor(r() * 256), Math.floor(r() * 256)]);
     S.amb.to(proxy, {
-      t: 60, duration: 60, ease: "none",
+      t: G.dur, duration: G.dur, ease: S.ease(G.ease),
       onUpdate: () => {
-        const k = Math.floor(proxy.t * 24) % 24;
+        const k = Math.floor(proxy.t * G.steps) % G.steps;
         gr.style.backgroundPosition = `${offs[k][0]}px ${offs[k][1]}px`;
       },
     }, 0);
@@ -411,21 +424,26 @@
     const im = document.createElement("img"); im.src = src; d.appendChild(im);
     stage.insertBefore(d, stage.querySelector(".content"));
     S._imgs.push(im);
-    S.amb.fromTo(im, { scale: 1.12, x: -10 }, { scale: 1.16, x: 26, duration: 20, ease: "none" }, 0);
+    const D = MT.atmosphere.depth;
+    S.amb.fromTo(im,
+      { scale: MT.clampScale(D.fromScale), x: D.fromX },
+      { scale: MT.clampScale(D.toScale), x: D.toX, duration: D.dur, ease: S.ease(D.ease) },
+      0);
   };
 
   /* ---------------------------------------------------------- 8 slide transitions */
   FX.transitionIn = function (stage, slide, th) {
     const mode = (FX.cur && FX.cur.transition) || "soft-fade";
-    const clip = th.clip || { fade: 0.3 };
+    const T = MT.transitions;
+    const clip = th.clip || MT.clip;
     const col = th.colors || {};
-    const fadeDur = clip.fade > 0 ? clip.fade : 0.35;
+    const fadeDur = clip.fade > 0 ? clip.fade : T.softFade.dur;
 
     if (mode === "soft-fade") {
       const fade = document.createElement("div");
       fade.className = "fadein";
       stage.appendChild(fade);
-      if (clip.fade > 0) S.tl.fromTo(fade, { opacity: 1 }, { opacity: 0, duration: clip.fade, ease: "power1.out", immediateRender: true }, 0);
+      if (clip.fade > 0) S.tl.fromTo(fade, { opacity: 1 }, { opacity: 0, duration: clip.fade, ease: S.ease(T.softFade.ease), immediateRender: true }, 0);
       else fade.remove();
       return;
     }
@@ -438,7 +456,7 @@
         borderLeft: `10px solid ${col.accent || "#FFD600"}`, pointerEvents: "none", zIndex: 90,
       });
       stage.appendChild(panel);
-      S.tl.fromTo(panel, { x: 0, opacity: 1 }, { x: -2000, opacity: 0, duration: 0.52, ease: "power4.out", immediateRender: true }, 0);
+      S.tl.fromTo(panel, { x: 0, opacity: 1 }, { x: -2000, opacity: 0, duration: T.curtainRtl.dur, ease: S.ease(T.curtainRtl.ease), immediateRender: true }, 0);
       return;
     }
 
@@ -456,8 +474,9 @@
       });
       stage.appendChild(veil);
       stage.appendChild(slash);
-      S.tl.fromTo(veil, { opacity: 1 }, { opacity: 0, duration: 0.36, ease: "power2.out", immediateRender: true }, 0.08);
-      S.tl.fromTo(slash, { x: 200, opacity: 1 }, { x: -2350, opacity: 0.9, duration: 0.52, ease: "power3.inOut", immediateRender: true }, 0);
+      const A2 = T.accentSlash;
+      S.tl.fromTo(veil, { opacity: 1 }, { opacity: 0, duration: A2.veilDur, ease: S.ease(A2.veilEase), immediateRender: true }, A2.veilDelay);
+      S.tl.fromTo(slash, { x: 200, opacity: 1 }, { x: -2350, opacity: 0.9, duration: A2.barDur, ease: S.ease(A2.barEase), immediateRender: true }, 0);
       return;
     }
 
@@ -469,7 +488,7 @@
         clipPath: "circle(110% at 50% 50%)", pointerEvents: "none", zIndex: 90,
       });
       stage.appendChild(veil);
-      S.tl.fromTo(veil, { scale: 1, opacity: 1 }, { scale: 1.45, opacity: 0, duration: 0.48, ease: "power3.out", immediateRender: true }, 0);
+      S.tl.fromTo(veil, { scale: 1, opacity: 1 }, { scale: MT.clampScale(T.irisRise.scale), opacity: 0, duration: T.irisRise.dur, ease: S.ease(T.irisRise.ease), immediateRender: true }, 0);
       return;
     }
 
@@ -489,8 +508,9 @@
         pointerEvents: "none", zIndex: 90,
       });
       stage.appendChild(top); stage.appendChild(bot);
-      S.tl.fromTo(top, { y: 0, opacity: 1 }, { y: -560, opacity: 0, duration: 0.48, ease: "power4.out", immediateRender: true }, 0);
-      S.tl.fromTo(bot, { y: 0, opacity: 1 }, { y: 560, opacity: 0, duration: 0.48, ease: "power4.out", immediateRender: true }, 0);
+      const SC = T.splitCurtain;
+      S.tl.fromTo(top, { y: 0, opacity: 1 }, { y: -560, opacity: 0, duration: SC.dur, ease: S.ease(SC.ease), immediateRender: true }, 0);
+      S.tl.fromTo(bot, { y: 0, opacity: 1 }, { y: 560, opacity: 0, duration: SC.dur, ease: S.ease(SC.ease), immediateRender: true }, 0);
       return;
     }
 
@@ -503,7 +523,7 @@
         pointerEvents: "none", zIndex: 90,
       });
       stage.appendChild(wipe);
-      S.tl.fromTo(wipe, { x: 0, y: 0, opacity: 1 }, { x: -2400, y: 260, opacity: 0, duration: 0.5, ease: "power4.out", immediateRender: true }, 0);
+      S.tl.fromTo(wipe, { x: 0, y: 0, opacity: 1 }, { x: -2400, y: 260, opacity: 0, duration: T.diagonalWipe.dur, ease: S.ease(T.diagonalWipe.ease), immediateRender: true }, 0);
       return;
     }
 
@@ -513,12 +533,14 @@
       fade.className = "transition-overlay transition-zoom-iris";
       Object.assign(fade.style, { position: "absolute", inset: "0", background: col.bg || "#121212", pointerEvents: "none", zIndex: 90 });
       stage.appendChild(fade);
-      S.tl.fromTo(fade, { opacity: 0.92 }, { opacity: 0, duration: Math.max(0.28, fadeDur), ease: "power2.out", immediateRender: true }, 0);
-      if (content) S.tl.fromTo(content, { scale: 1.04 }, { scale: 1, duration: 0.46, ease: "power3.out", immediateRender: true }, 0);
+      const ZI = T.zoomIris;
+      S.tl.fromTo(fade, { opacity: 0.92 }, { opacity: 0, duration: Math.max(ZI.fadeDur, fadeDur), ease: S.ease(ZI.fadeEase), immediateRender: true }, 0);
+      if (content) S.tl.fromTo(content, { scale: MT.clampScale(ZI.fromScale) }, { scale: 1, duration: ZI.contentDur, ease: S.ease(ZI.contentEase), immediateRender: true }, 0);
       return;
     }
 
     if (mode === "shutter-bars") {
+      const SB = T.shutterBars;
       for (let i = 0; i < 4; i++) {
         const bar = document.createElement("div");
         bar.className = "transition-overlay transition-shutter-bar";
@@ -528,7 +550,7 @@
           transformOrigin: "50% 0%", pointerEvents: "none", zIndex: 90,
         });
         stage.appendChild(bar);
-        S.tl.fromTo(bar, { scaleY: 1, opacity: 1 }, { scaleY: 0, opacity: 0, duration: 0.42, ease: "power4.out", immediateRender: true }, i * 0.055);
+        S.tl.fromTo(bar, { scaleY: 1, opacity: 1 }, { scaleY: 0, opacity: 0, duration: SB.dur, ease: S.ease(SB.ease), immediateRender: true }, i * SB.stagger);
       }
     }
   };
@@ -553,7 +575,7 @@
       padding: "10px 18px", borderRadius: "14px", zIndex: 35, pointerEvents: "none",
       background: isLight ? "rgba(255, 255, 255, 0.88)" : "rgba(18, 18, 22, 0.72)",
       border: `1.5px solid ${isLight ? (col.cardBorder || "rgba(0,0,0,0.12)") : "rgba(255,255,255,0.14)"}`,
-      boxShadow: isLight ? "0 8px 24px rgba(0,0,0,0.08)" : "0 10px 28px rgba(0,0,0,0.45)",
+      boxShadow: "var(--shadow-logo)",
       color: col.text || "#FFFFFF",
     };
     const mx = Math.max(36, (L.margin || 80) * 0.65);
@@ -584,26 +606,33 @@
     content.appendChild(badge);
     A.field("logo", badge);
 
+    const LM = MT.logo;
     const mode = (FX.cur && FX.cur.logoMotion) || "pop-spin";
-    const t0 = 0.08;
+    const t0 = LM.t0;
     if (mode === "pop-spin") {
-      S.tl.fromTo(badge, { opacity: 0, scale: 0.45, rotation: -18 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.58, ease: "back.out(1.5)", immediateRender: true }, t0);
+      const m = LM.popSpin;
+      S.tl.fromTo(badge, { opacity: 0, scale: m.fromScale, rotation: m.fromRot }, { opacity: 1, scale: 1, rotation: 0, duration: m.dur, ease: S.ease(m.ease), immediateRender: true }, t0);
     } else if (mode === "slide-rtl") {
-      S.tl.fromTo(badge, { opacity: 0, x: 56 }, { opacity: 1, x: 0, duration: 0.52, ease: S.ease("power4"), immediateRender: true }, t0);
+      const m = LM.slideRtl;
+      S.tl.fromTo(badge, { opacity: 0, x: m.fromX }, { opacity: 1, x: 0, duration: m.dur, ease: S.ease(m.ease), immediateRender: true }, t0);
     } else if (mode === "orbit-pulse") {
-      S.tl.fromTo(badge, { opacity: 0, scale: 0.72, y: -14 }, { opacity: 1, scale: 1, y: 0, duration: 0.52, ease: S.ease("power3"), immediateRender: true }, t0);
-      S.amb.fromTo(badge, { scale: 1 }, { scale: 1.05, duration: 2.2, ease: "sine.inOut", yoyo: true, repeat: 8 }, 0.6);
+      const m = LM.orbitPulse;
+      S.tl.fromTo(badge, { opacity: 0, scale: m.fromScale, y: m.fromY }, { opacity: 1, scale: 1, y: 0, duration: m.dur, ease: S.ease(m.ease), immediateRender: true }, t0);
+      S.amb.fromTo(badge, { scale: 1 }, { scale: MT.clampScale(m.ambScale), duration: m.ambDur, ease: S.ease(MT.eases.ambient), yoyo: true, repeat: m.ambRepeat }, m.ambDelay);
     } else if (mode === "flip-reveal") {
-      S.tl.fromTo(badge, { opacity: 0, scaleX: 0.15, scaleY: 0.9 }, { opacity: 1, scaleX: 1, scaleY: 1, duration: 0.55, ease: "back.out(1.3)", immediateRender: true }, t0);
+      const m = LM.flipReveal;
+      S.tl.fromTo(badge, { opacity: 0, scaleX: m.fromScaleX, scaleY: m.fromScaleY }, { opacity: 1, scaleX: 1, scaleY: 1, duration: m.dur, ease: S.ease(m.ease), immediateRender: true }, t0);
     } else if (mode === "stamp-drop") {
-      S.tl.fromTo(badge, { opacity: 0, scale: 1.7, y: -22 }, { opacity: 1, scale: 1, y: 0, duration: 0.44, ease: "power4.out", immediateRender: true }, t0);
+      const m = LM.stampDrop;
+      S.tl.fromTo(badge, { opacity: 0, scale: MT.clampScale(m.fromScale), y: m.fromY }, { opacity: 1, scale: 1, y: 0, duration: m.dur, ease: S.ease(m.ease), immediateRender: true }, t0);
     } else if (mode === "glitch-snap") {
-      S.tl.fromTo(badge, { opacity: 0, x: -24, skewX: 16 }, { opacity: 1, x: 6, skewX: -6, duration: 0.2, ease: "power2.out", immediateRender: true }, t0);
-      S.tl.to(badge, { x: 0, skewX: 0, duration: 0.24, ease: "power3.out" }, t0 + 0.2);
+      const m = LM.glitchSnap;
+      S.tl.fromTo(badge, { opacity: 0, x: m.fromX, skewX: 16 }, { opacity: 1, x: m.midX, skewX: -6, duration: m.inDur, ease: S.ease(m.inEase), immediateRender: true }, t0);
+      S.tl.to(badge, { x: 0, skewX: 0, duration: m.settleDur, ease: S.ease(m.settleEase) }, t0 + m.inDur);
     } else {
-      // float-fade
-      S.tl.fromTo(badge, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.65, ease: S.ease("power3"), immediateRender: true }, t0);
-      S.amb.fromTo(badge, { y: 0 }, { y: -6, duration: 3.4, ease: "sine.inOut", yoyo: true, repeat: 6 }, 0.7);
+      const m = LM.floatFade;
+      S.tl.fromTo(badge, { opacity: 0, y: m.fromY }, { opacity: 1, y: 0, duration: m.dur, ease: S.ease(m.ease), immediateRender: true }, t0);
+      S.amb.fromTo(badge, { y: 0 }, { y: m.ambY, duration: m.ambDur, ease: S.ease(MT.eases.ambient), yoyo: true, repeat: m.ambRepeat }, m.ambDelay);
     }
     FX.cue(t0, "logo", mode);
     return badge;
@@ -612,25 +641,26 @@
   /* ---------------------------------------------------------- key-word effects after build */
   FX.post = function (content) {
     const c = FX.cur || {};
+    const P = MT.post;
     const timeOf = (el) => {
       let p = el;
       while (p && p !== content) {
         if (p.dataset && p.dataset.end) return +p.dataset.end;
         p = p.parentElement;
       }
-      return 0.9;
+      return P.fallbackTime;
     };
     content.querySelectorAll(".hl").forEach((el) => {
-      const t = timeOf(el) + 0.05;
-      S.tl.fromTo(el, { backgroundSize: "0% 42%" }, { backgroundSize: "100% 42%", duration: 0.55, ease: S.ease("power3"), immediateRender: true }, t);
+      const t = timeOf(el) + P.highlight.delayOffset;
+      S.tl.fromTo(el, { backgroundSize: "0% 42%" }, { backgroundSize: "100% 42%", duration: P.highlight.dur, ease: S.ease(P.highlight.ease), immediateRender: true }, t);
       FX.cue(t, "swish", el.textContent);
     });
     const uls = [...content.querySelectorAll(".ul")];
     if (c.accentFx === "underline") uls.push(...content.querySelectorAll(".t-hero .acc, .t-h1 .acc, .t-quote .acc"));
     uls.forEach((el) => {
       el.classList.add("ul-on");
-      const t = timeOf(el) + 0.08;
-      S.tl.fromTo(el, { backgroundSize: "0% 6px" }, { backgroundSize: "100% 6px", duration: 0.5, ease: S.ease("power3"), immediateRender: true }, t);
+      const t = timeOf(el) + P.underline.delayOffset;
+      S.tl.fromTo(el, { backgroundSize: "0% 6px" }, { backgroundSize: "100% 6px", duration: P.underline.dur, ease: S.ease(P.underline.ease), immediateRender: true }, t);
     });
   };
 })();

@@ -40,7 +40,7 @@ Stage.template({
       if (o.kicker) A.text(tc, o.kicker, "eyebrow", "", { fontSize: "26px", color: A.color(tone || "accent") });
       const itemTextEl = A.text(tc, o.text, "h1", "", { fontSize: (cols > 1 ? 44 : 46) + "px" });
       if (lively && preset === "cascade-rows") {
-        A.kinetic(itemTextEl, { at: A.at("card", i), role: "body", stagger: 0.035, x: 20 });
+        A.kinetic(itemTextEl, { at: A.at("card", i), role: "body", preset: "snappy", x: Stage.MOTION.text.body.x });
       }
       A.enter(card, "card", i);
     });

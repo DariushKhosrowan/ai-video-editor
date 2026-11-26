@@ -18,7 +18,7 @@ Stage.template({
       else if (c.icon) A.el("div", "", card, { fontSize: s.image ? "56px" : "110px", lineHeight: 1 }).textContent = c.icon;
       A.text(card, c.label, "h1", "", { fontSize: s.image ? "40px" : "48px" });
       if (c.text) A.text(card, c.text, "body", "", { color: A.th.colors.muted, fontSize: "30px" });
-      A.enter(card, "card", i, s.image ? 0.2 : 0);
+      A.enter(card, "card", i, s.image ? Stage.MOTION.ui.cardGridExtra : 0);
     });
     A.fit(grid, 0.5);
   }

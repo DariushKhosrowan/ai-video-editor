@@ -49,13 +49,14 @@ Stage.template({
       scale: preset === "slam-count" ? 0.72 : undefined,
     });
 
+    const extra = Stage.MOTION.ui.bigNumExtra;
     if (lively && preset === "bar-meter") {
       A.sweepLine(col, {
         width: hasImg ? 320 : 420,
         height: 8,
         origin: centered ? "50% 50%" : "100% 50%",
         style: { marginTop: "8px", marginBottom: "8px", background: A.color(s.color || "accent") },
-        at: A.at("number") + 0.25,
+        at: A.at("number") + extra,
       });
     }
 
@@ -63,15 +64,15 @@ Stage.template({
     if (capText) {
       const capEl = A.text(col, capText, "h1", "", { maxWidth: "1100px" });
       A.field("caption", capEl);
-      if (lively && preset === "kinetic-stat") A.kinetic(capEl, { at: A.at("title") + 0.25, role: "title", stagger: 0.045 });
-      else A.enter(capEl, "title", 0, 0.25);
+      if (lively && preset === "kinetic-stat") A.kinetic(capEl, { at: A.at("title") + extra, role: "title" });
+      else A.enter(capEl, "title", 0, extra);
     }
 
     const detText = s.detail ?? s.subtitle;
     if (detText) {
       const detEl = A.text(col, detText, "body", "", { color: A.th.colors.muted, maxWidth: "1000px" });
       A.field("detail", detEl);
-      A.enter(detEl, "body", 1, 0.25);
+      A.enter(detEl, "body", 1, extra);
     }
 
     A.fit(col, 0.55);
