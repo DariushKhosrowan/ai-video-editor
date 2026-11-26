@@ -12,38 +12,65 @@
     {
       "key": "title",
       "label": "عنوان",
-      "type": "text"
+      "type": "text",
+      "editable": true
     },
     {
       "key": "cards",
       "label": "کارت‌ها",
       "type": "table",
       "columns": [
-        [
-          "value",
-          "عدد"
-        ],
-        [
-          "prefix",
-          "قبل"
-        ],
-        [
-          "suffix",
-          "بعد"
-        ],
-        [
-          "label",
-          "توضیح"
-        ],
-        [
-          "sub",
-          "توضیح کوچک"
-        ],
-        [
-          "color",
-          "رنگ"
-        ]
-      ]
+        ["value", "عدد"],
+        ["prefix", "قبل"],
+        ["suffix", "بعد"],
+        ["label", "توضیح"],
+        ["sub", "توضیح کوچک"],
+        ["color", "رنگ"]
+      ],
+      "editable": true
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["stagger-counters", "شمارش پلکانی"],
+        ["pulse-tiles", "کارت‌های نبض‌دار"],
+        ["editorial-grid", "شبکه تحریریه"],
+        ["spring-cards", "کارت‌های فنری"],
+        ["sweep-row", "ردیف کشیده"],
+        ["minimal-grid", "شبکه مینیمال"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["soft-fade", "محو نرم"],
+        ["curtain-rtl", "پرده از راست به چپ"],
+        ["accent-slash", "نوار تأکید مورب"],
+        ["iris-rise", "باز شدن دایره‌ای"],
+        ["split-curtain", "پرده دوقسمتی"],
+        ["diagonal-wipe", "پاک‌شدن مورب"],
+        ["zoom-iris", "گشایش زوم"],
+        ["shutter-bars", "کرکره ستونی"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
     }
   ],
   "example": {

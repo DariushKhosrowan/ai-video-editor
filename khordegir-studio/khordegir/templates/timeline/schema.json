@@ -10,26 +10,62 @@
     {
       "key": "title",
       "label": "عنوان",
-      "type": "text"
+      "type": "text",
+      "editable": true
     },
     {
       "key": "events",
       "label": "رویدادها",
       "type": "table",
       "columns": [
-        [
-          "date",
-          "تاریخ"
-        ],
-        [
-          "text",
-          "توضیح"
-        ],
-        [
-          "tone",
-          "لحن (bad/good)"
-        ]
-      ]
+        ["date", "تاریخ"],
+        ["text", "توضیح"],
+        ["tone", "لحن (bad/good)"]
+      ],
+      "editable": true
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["track-sweep", "کشش خط زمان"],
+        ["milestone-pop", "پرش رویدادها"],
+        ["editorial-arc", "قوس تحریریه"],
+        ["elastic-nodes", "نقاط فنری"],
+        ["stagger-eras", "دوره‌های پلکانی"],
+        ["minimal-rail", "ریل مینیمال"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["soft-fade", "محو نرم"],
+        ["curtain-rtl", "پرده از راست به چپ"],
+        ["accent-slash", "نوار تأکید مورب"],
+        ["iris-rise", "باز شدن دایره‌ای"],
+        ["split-curtain", "پرده دوقسمتی"],
+        ["diagonal-wipe", "پاک‌شدن مورب"],
+        ["zoom-iris", "گشایش زوم"],
+        ["shutter-bars", "کرکره ستونی"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
     }
   ],
   "example": {
@@ -49,6 +85,7 @@
         "text": "فقط ۳۸ مورد در ۷ سال"
       }
     ],
+    "source": "Bohlen / NYT, 1998; Avraham & Porat, 2023",
     "layout": "SLIDE"
   },
   "order": 130,

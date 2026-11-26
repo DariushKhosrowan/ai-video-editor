@@ -13,12 +13,14 @@
       "key": "text",
       "label": "جمله (*زرد* ، ~قرمز~)",
       "type": "textarea",
-      "required": true
+      "required": true,
+      "editable": true
     },
     {
       "key": "highlight",
       "label": "خط دوم بزرگ‌تر (اختیاری)",
-      "type": "text"
+      "type": "text",
+      "editable": true
     },
     {
       "key": "highlight_color",
@@ -38,17 +40,63 @@
           "سفید"
         ]
       ],
-      "default": "accent"
+      "default": "accent",
+      "editable": false
     },
     {
       "key": "caption",
       "label": "توضیح کوچک",
-      "type": "textarea"
+      "type": "textarea",
+      "editable": true
     },
     {
       "key": "author",
       "label": "گوینده (اختیاری)",
-      "type": "text"
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["editorial-mark", "نشان نقل‌قول تحریریه"],
+        ["kinetic-words", "کلمه‌به‌کلمه زنده"],
+        ["accent-brace", "کروشهٔ تأکید"],
+        ["glass-panel", "پنل شیشه‌ای"],
+        ["spotlight-serif", "کلاسیک برجسته"],
+        ["bold-contrast", "کنتراست پررنگ"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["soft-fade", "محو نرم"],
+        ["curtain-rtl", "پرده از راست به چپ"],
+        ["accent-slash", "نوار تأکید مورب"],
+        ["iris-rise", "باز شدن دایره‌ای"],
+        ["split-curtain", "پرده دوقسمتی"],
+        ["diagonal-wipe", "پاک‌شدن مورب"],
+        ["zoom-iris", "گشایش زوم"],
+        ["shutter-bars", "کرکره ستونی"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
     }
   ],
   "example": {

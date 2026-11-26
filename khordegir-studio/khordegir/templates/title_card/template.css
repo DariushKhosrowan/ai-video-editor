@@ -1,0 +1,33 @@
+.tc-wrap {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 22px;
+}
+
+.tc-badge {
+  align-self: flex-start;
+  font-size: 26px;
+}
+
+.tc-orb-ring {
+  position: absolute;
+  border-radius: 999px;
+  border: 2px solid var(--c-accent, #F5B700);
+  opacity: 0.16;
+  pointer-events: none;
+}
+
+.tc-accent-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.tc-spark {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--c-accent, #F5B700);
+  box-shadow: 0 0 18px var(--c-glow, rgba(245, 183, 0, 0.45));
+}

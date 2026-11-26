@@ -11,39 +11,70 @@
     {
       "key": "title",
       "label": "عنوان",
-      "type": "text"
+      "type": "text",
+      "editable": true
     },
     {
       "key": "steps",
       "label": "مرحله‌ها",
       "type": "table",
       "columns": [
-        [
-          "value",
-          "عدد"
-        ],
-        [
-          "label",
-          "برچسب"
-        ],
-        [
-          "color",
-          "رنگ"
-        ],
-        [
-          "prefix",
-          "قبل"
-        ],
-        [
-          "suffix",
-          "بعد"
-        ]
-      ]
+        ["value", "عدد"],
+        ["label", "برچسب"],
+        ["color", "رنگ"],
+        ["prefix", "قبل"],
+        ["suffix", "بعد"]
+      ],
+      "editable": true
     },
     {
       "key": "suffix",
       "label": "واحد مشترک (مثل ٪)",
-      "type": "text"
+      "type": "text",
+      "editable": false
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["versus-clash", "مقایسه کوبنده"],
+        ["editorial-delta", "تفاوت تحریریه"],
+        ["sweep-compare", "فلش کشیده"],
+        ["pop-badges", "پرش نشان‌ها"],
+        ["mirror-flip", "چرخش متقارن"],
+        ["minimal-compare", "مقایسه تمیز"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["soft-fade", "محو نرم"],
+        ["curtain-rtl", "پرده از راست به چپ"],
+        ["accent-slash", "نوار تأکید مورب"],
+        ["iris-rise", "باز شدن دایره‌ای"],
+        ["split-curtain", "پرده دوقسمتی"],
+        ["diagonal-wipe", "پاک‌شدن مورب"],
+        ["zoom-iris", "گشایش زوم"],
+        ["shutter-bars", "کرکره ستونی"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
     }
   ],
   "example": {

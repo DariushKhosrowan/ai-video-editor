@@ -13,87 +13,115 @@
     {
       "key": "title",
       "label": "عنوان",
-      "type": "text"
+      "type": "text",
+      "editable": true
     },
     {
       "key": "subtitle",
       "label": "زیرعنوان",
-      "type": "text"
+      "type": "text",
+      "editable": true
     },
     {
       "key": "data",
       "label": "داده‌ها",
       "type": "table",
       "columns": [
-        [
-          "label",
-          "برچسب"
-        ],
-        [
-          "value",
-          "عدد"
-        ],
-        [
-          "color",
-          "رنگ (accent/danger/muted)"
-        ],
-        [
-          "display",
-          "متن به‌جای عدد"
-        ]
-      ]
+        ["label", "برچسب"],
+        ["value", "عدد"],
+        ["color", "رنگ (accent/danger/muted)"],
+        ["display", "متن به‌جای عدد"]
+      ],
+      "editable": true
     },
     {
       "key": "prefix",
       "label": "قبل از عدد (مثل +)",
-      "type": "text"
+      "type": "text",
+      "editable": false
     },
     {
       "key": "suffix",
       "label": "بعد از عدد (مثل ٪)",
-      "type": "text"
+      "type": "text",
+      "editable": false
     },
     {
       "key": "highlight",
       "label": "میله‌ی برجسته (برچسب یا شماره)",
-      "type": "text"
+      "type": "text",
+      "editable": false
     },
     {
       "key": "orientation",
       "label": "جهت",
       "type": "select",
       "options": [
-        [
-          "vertical",
-          "عمودی"
-        ],
-        [
-          "horizontal",
-          "افقی"
-        ]
+        ["vertical", "عمودی"],
+        ["horizontal", "افقی"]
       ],
-      "default": "vertical"
+      "default": "vertical",
+      "editable": false
     },
     {
       "key": "ymax",
       "label": "سقف محور (اختیاری)",
-      "type": "number"
+      "type": "number",
+      "editable": false
     },
     {
       "key": "axis",
       "label": "محور و خطوط راهنما",
       "type": "select",
       "options": [
-        [
-          "true",
-          "نمایش"
-        ],
-        [
-          "false",
-          "پنهان"
-        ]
+        ["true", "نمایش"],
+        ["false", "پنهان"]
       ],
-      "default": "true"
+      "default": "true",
+      "editable": false
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["surge-bars", "جهش میله‌ها"],
+        ["editorial-bars", "میله‌های تحریریه"],
+        ["pulse-highlight", "درخشش میلهٔ برجسته"],
+        ["elastic-rise", "رشد فنری"],
+        ["cascade-grid", "آبشاری شبکه"],
+        ["minimal-bars", "میله‌های تمیز"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["soft-fade", "محو نرم"],
+        ["curtain-rtl", "پرده از راست به چپ"],
+        ["accent-slash", "نوار تأکید مورب"],
+        ["iris-rise", "باز شدن دایره‌ای"],
+        ["split-curtain", "پرده دوقسمتی"],
+        ["diagonal-wipe", "پاک‌شدن مورب"],
+        ["zoom-iris", "گشایش زوم"],
+        ["shutter-bars", "کرکره ستونی"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
     }
   ],
   "example": {

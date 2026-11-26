@@ -1,11 +1,12 @@
 Stage.template({
   name: "timeline",   // label, fields, example: see schema.json
   build(s, A) {
-    const h = Stage.T.header(A, s);
+    const h = Stage.T.header(A, s, { fieldTitle: true });
     const ev = Array.isArray(s.events) ? s.events : Stage.T.pairs(s.events).map((p) => ({ date: p[0], text: p[1] }));
     const left = A.area.left + 40, right = A.area.x + 40, W = A.W - left - right;
-    const y = Math.max(h.bottom + 200, A.H * 0.5);
+    const y = Math.max(h.bottom + 160, A.H * (A.scam ? 0.38 : 0.5));
     const line = A.el("div", "abs", A.root, { left, width: W, top: y - 3, height: 6, borderRadius: "3px", background: A.th.colors.axis, transformOrigin: "100% 50%" });
+    A.field("events", line);
     Stage.tl.from(line, { scaleX: 0, duration: 0.9, ease: Stage.ease("power3"), immediateRender: true }, A.at("body"));
     const n = ev.length, step = W / n;
     ev.forEach((e, i) => {

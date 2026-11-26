@@ -1,0 +1,32 @@
+.bl-list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.bl-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 22px;
+  padding: 22px 26px;
+}
+
+.bl-badge {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--badge-radius, 14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--c-accent, #F5B700);
+  color: var(--c-bg, #0B0E14);
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.bl-item-text {
+  flex: 1;
+}

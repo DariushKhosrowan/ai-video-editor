@@ -8,7 +8,7 @@ except ImportError:  # pragma: no cover
     raise SystemExit("خطا: کتابخانه‌ی pyyaml نصب نیست. بزن:  pip install pyyaml")
 
 PKG = Path(__file__).resolve().parent
-IMAGE_KEYS = {"image", "src", "bg_image", "icon_image"}
+IMAGE_KEYS = {"image", "src", "bg_image", "icon_image", "logo"}
 IMG_EXT = (".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".avif")
 CHART_SLIDE = {"bar_chart", "line_chart", "compare", "counter_grid", "chart", "timeline"}
 ALIASES = {
@@ -68,7 +68,26 @@ class Project:
                                  "راهنما: هر اسلاید با «- template:» شروع می‌شود و فاصله‌های اول خط باید یکسان باشند.")
         d = self.data
         self.title = d.get("title", folder.name)
-        self.theme = d.get("theme")
+        self.seed = int(d.get("seed") or 0)
+        raw_theme = d.get("theme")
+        if str(raw_theme or "").strip().lower() in ("random", "تصادفی"):
+            avail = sorted(p.stem for p in (PKG / "themes").glob("*.js") if not p.name.startswith("_"))
+            if avail:
+                key_data = f"{folder.name}:{self.seed}:{self.title}".encode("utf-16-le")
+                h = 2166136261
+                for idx_b in range(0, len(key_data), 2):
+                    h ^= key_data[idx_b] | (key_data[idx_b + 1] << 8)
+                    h = (h * 16777619) & 0xFFFFFFFF
+                raw_theme = avail[h % len(avail)]
+            else:
+                raw_theme = None
+        self.theme = raw_theme
+        self.preset = d.get("preset")
+        self.transition = d.get("transition")
+        self.logo = d.get("logo")
+        self.logo_motion = d.get("logo_motion")
+        self.logo_position = d.get("logo_position")
+        self.logo_text = d.get("logo_text")
         self.out = (folder / d.get("out", "out")).resolve()
         dirs = [folder] + [(folder / p).resolve() for p in (d.get("images") or [])]
         anc = [folder] + list(folder.parents)[:6]
@@ -173,7 +192,12 @@ class Project:
                 n = s["_num"]
                 # render with the camera corner empty if any step shows the camera over the slide
                 s["layout"] = (s.get("render_layout") or ("SCAM" if any(x["layout"] == "SCAM" for x in steps) else "SLIDE")).upper()
-            s["_seed"] = f"{self.dir.name}:{s['_num'] or i + 1}"
+            project_seed = getattr(self, "seed", 0)
+            s["_seed"] = f"{self.dir.name}:{project_seed}:{s['_num'] or i + 1}"
+            for attr in ("preset", "transition", "logo", "logo_motion", "logo_position", "logo_text"):
+                proj_val = getattr(self, attr, None)
+                if proj_val is not None and attr not in s:
+                    s[attr] = copy.deepcopy(proj_val)
             if self.default_duration and not s.get("duration"):
                 s["duration"] = self.default_duration
             self._resolve_images(s, f"اسلاید {s.get('_num') or i + 1}", extra)

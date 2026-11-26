@@ -5,6 +5,8 @@
   python3 -m khordegir render spec.json -o out/slide-03.mp4 [--preview]
   python3 -m khordegir import script.txt -o videos/<name>/video.yaml
   python3 -m khordegir new    videos/<name>
+  python3 -m khordegir editor [--port 8765] [--no-browser] [--videos DIR]
+  python3 -m khordegir obs    videos/<name> [--os linux|windows|macos] [-o DIR]
   python3 -m khordegir gallery                   # پیش‌نمایش قالب‌ها
   python3 -m khordegir templates                 # فهرست قالب‌ها
 """
@@ -243,11 +245,36 @@ def cmd_index(a):
 
 def cmd_editor(a):
     from .index import build_index
+    from .server import serve
     build_index()
-    import webbrowser
-    url = (PKG / "editor" / "index.html").as_uri()
-    print("ویرایشگر:", url)
-    webbrowser.open(url)
+    if a.videos:
+        videos_root = Path(a.videos)
+    elif (Path.cwd() / "videos").exists() or not (PKG.parent / "videos").exists():
+        videos_root = Path.cwd() / "videos"
+    else:
+        videos_root = PKG.parent / "videos"
+    serve(videos_root, port=a.port, open_browser=not a.no_browser)
+    return 0
+
+
+def cmd_obs(a):
+    from .obs_export import export_obs_package
+    from .project import Project
+    pr = Project(a.folder)
+    render_png = False if a.no_png else (True if a.png else "auto")
+    res = export_obs_package(
+        pr,
+        out_dir=a.out_dir,
+        os_target=a.os,
+        ws_url=a.ws_url,
+        render_png=render_png,
+    )
+    print(f"✓ بستهٔ OBS برای «{pr.title}» ({fa(res['steps_count'])} مرحله، سیستم‌عامل: {a.os}) → {res['out_dir']}")
+    print("  فایل‌ها: " + "، ".join(res["files"]))
+    if res["prompter_pngs"]:
+        print(f"  تصاویر پرامپتر: {fa(len(res['prompter_pngs']))} فایل PNG در پوشه prompter/")
+    for w in res["warnings"]:
+        print("  ⚠ " + w)
     return 0
 
 
@@ -292,7 +319,19 @@ def main(argv=None):
     n.add_argument("folder"); n.set_defaults(fn=cmd_new)
     t = sub.add_parser("templates", help="فهرست قالب‌ها"); t.set_defaults(fn=cmd_templates)
     x = sub.add_parser("index", help="به‌روزرسانی فهرست قالب‌ها و تم‌ها (بعد از اضافه کردن پوشه‌ی قالب)"); x.set_defaults(fn=cmd_index)
-    e = sub.add_parser("editor", help="باز کردن ویرایشگر در مرورگر"); e.set_defaults(fn=cmd_editor)
+    e = sub.add_parser("editor", help="اجرای سرور محلی و باز کردن ویرایشگر در مرورگر")
+    e.add_argument("--port", type=int, default=8765, help="پورت سرور محلی (پیش‌فرض: 8765)")
+    e.add_argument("--no-browser", action="store_true", help="مرورگر خودکار باز نشود")
+    e.add_argument("--videos", metavar="DIR", help="پوشهٔ پروژه‌های ویدیو (پیش‌فرض: ./videos)")
+    e.set_defaults(fn=cmd_editor)
+    o = sub.add_parser("obs", help="ساخت بستهٔ کامل OBS (Lua v8، پرامپتر و اسکریپت نصب)")
+    o.add_argument("folder")
+    o.add_argument("--os", choices=["linux", "windows", "macos"], default="linux", help="سیستم‌عامل هدف")
+    o.add_argument("-o", "--out-dir", help="پوشهٔ خروجی بستهٔ OBS")
+    o.add_argument("--ws-url", default="ws://127.0.0.1:4455", help="آدرس OBS WebSocket")
+    o.add_argument("--no-png", action="store_true", help="بدون رندر تصاویر PNG پرامپتر")
+    o.add_argument("--png", action="store_true", help="اجبار رندر تصاویر PNG پرامپتر با Playwright")
+    o.set_defaults(fn=cmd_obs)
     g = sub.add_parser("gallery", help="ساخت تصویر پیش‌نمایش قالب‌ها")
     g.add_argument("--jobs", type=int, default=2); g.set_defaults(fn=cmd_gallery)
     a = ap.parse_args(argv)

@@ -13,23 +13,27 @@
       "key": "number",
       "label": "عدد",
       "type": "text",
-      "required": true
+      "required": true,
+      "editable": true
     },
     {
       "key": "prefix",
       "label": "قبل از عدد (مثل + یا حدود)",
-      "type": "text"
+      "type": "text",
+      "editable": false
     },
     {
       "key": "suffix",
       "label": "بعد از عدد (مثل ٪ یا نفر)",
-      "type": "text"
+      "type": "text",
+      "editable": false
     },
     {
       "key": "from",
       "label": "شروع شمارش از",
       "type": "number",
-      "default": 0
+      "default": 0,
+      "editable": false
     },
     {
       "key": "color",
@@ -49,27 +53,32 @@
           "سفید"
         ]
       ],
-      "default": "accent"
+      "default": "accent",
+      "editable": false
     },
     {
       "key": "eyebrow",
       "label": "تیتر کوچک بالای عدد",
-      "type": "text"
+      "type": "text",
+      "editable": true
     },
     {
       "key": "caption",
       "label": "جمله‌ی زیر عدد",
-      "type": "textarea"
+      "type": "textarea",
+      "editable": true
     },
     {
       "key": "detail",
       "label": "توضیح کوچک",
-      "type": "text"
+      "type": "text",
+      "editable": true
     },
     {
       "key": "image",
       "label": "عکس کنار (اختیاری)",
-      "type": "image"
+      "type": "image",
+      "editable": true
     },
     {
       "key": "motion",
@@ -97,7 +106,105 @@
           "ثابت"
         ]
       ],
-      "default": "breathe"
+      "default": "breathe",
+      "editable": false
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        [
+          "auto",
+          "کلاسیک / ارث‌بری از پروژه"
+        ],
+        [
+          "random",
+          "🎲 تصادفی (با بذر قطعی)"
+        ],
+        [
+          "slam-count",
+          "شمارش کوبنده"
+        ],
+        [
+          "halo-pulse",
+          "هالهٔ نور و شمارش"
+        ],
+        [
+          "bar-meter",
+          "نوار سنجش پویا"
+        ],
+        [
+          "dual-split",
+          "چیدمان دوتایی"
+        ],
+        [
+          "kinetic-stat",
+          "آمار کینتیک"
+        ],
+        [
+          "minimal-count",
+          "شمارش تمیز"
+        ]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        [
+          "auto",
+          "پیش‌فرض / ارث‌بری"
+        ],
+        [
+          "random",
+          "🎲 تصادفی"
+        ],
+        [
+          "soft-fade",
+          "محو نرم (کلاسیک)"
+        ],
+        [
+          "curtain-rtl",
+          "پرده از راست به چپ"
+        ],
+        [
+          "accent-slash",
+          "نوار تأکید مورب"
+        ],
+        [
+          "iris-rise",
+          "باز شدن دایره‌ای"
+        ],
+        [
+          "split-curtain",
+          "پرده دوقسمتی"
+        ],
+        [
+          "diagonal-wipe",
+          "پاک‌شدن مورب"
+        ],
+        [
+          "zoom-iris",
+          "گشایش زوم"
+        ],
+        [
+          "shutter-bars",
+          "کرکره ستونی"
+        ]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
     }
   ],
   "example": {

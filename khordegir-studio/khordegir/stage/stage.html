@@ -16,14 +16,16 @@
 <body>
 <div id="stage"></div>
 <script>
-  // ?demo=<template> shows a template's built-in example (used by the gallery)
   const q = new URLSearchParams(location.search);
   window.addEventListener("load", async () => {
-    if (q.get("theme")) Stage.useTheme(q.get("theme"));
+    Stage.useTheme(q.get("theme") || "khordegir-dark");
     if (q.get("demo")) {
       const t = Stage.templates[q.get("demo")];
-      if (t) { const ex = Object.assign({ template: t.name }, t.example || {}); await Stage.load(ex, { camGuide: q.has("cam") });
-               if (q.has("t")) Stage.seek(+q.get("t")); else Stage.play(0); }
+      if (t) {
+        const ex = Object.assign({ template: t.name }, t.example || {});
+        await Stage.load(ex, { camGuide: q.has("cam") });
+        if (q.has("t")) Stage.seek(+q.get("t")); else Stage.play(0);
+      }
     }
     document.title = "ready";
   });
