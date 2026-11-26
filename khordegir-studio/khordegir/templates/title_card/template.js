@@ -21,7 +21,7 @@ Stage.template({
     const center = s.align === "center" || !s.image;
     const left = A.area.left;
     const col = A.el("div", "col", A.root, {
-      right: A.area.x, left, top: center ? A.area.y : A.H * 0.42, bottom: A.scam ? 200 : A.L.bottom + 40,
+      right: A.area.x, left, top: center ? A.area.y : A.H * 0.42, bottom: A.gapB(A.scam ? 200 : A.L.bottom + 40, A.stack && !A.scam ? 40 : 0),
       justifyContent: center ? "center" : "flex-end",
       alignItems: center && !A.scam ? "center" : "flex-start",
       textAlign: center && !A.scam ? "center" : "right",

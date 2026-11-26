@@ -3,7 +3,8 @@ Stage.template({
   build(s, A) {
     const top = s.title_position === "top";
     let box;
-    if (A.scam) box = [A.area.left, A.area.y, A.W - A.L.margin - A.area.left, top ? 860 : 640];
+    if (A.scam && A.stack) { const R = A.region(A.area.y); box = [R.x, R.y, R.w, Math.round(R.h * (top ? 0.72 : 0.58))]; }
+    else if (A.scam) box = [A.area.left, A.area.y, A.W - A.L.margin - A.area.left, top ? 860 : 640];
     else box = [0, 0, A.W, A.H];
     const f = A.image(A.root, s.image, box[0], box[1], box[2], box[3], { radius: A.scam ? undefined : 0, shadow: A.scam, motion: s.motion, dim: s.dim ?? 0.25, enter: A.scam });
     A.field("image", f);
@@ -20,9 +21,10 @@ Stage.template({
     if (s.title || s.text) {
       const shade = !A.scam;
       const isLight = A.th.colors.isDark === false;
-      if (shade) A.el("div", "abs", A.root, { left: 0, right: 0, [top ? "top" : "bottom"]: 0, height: 420, background: `linear-gradient(to ${top ? "bottom" : "top"}, ${isLight ? "rgba(247,244,238,.92)" : "rgba(18,18,18,.92)"}, rgba(18,18,18,0))` });
+      if (shade) A.el("div", "abs", A.root, { left: 0, right: 0, [top ? "top" : "bottom"]: 0, height: A.landscape ? 420 : Math.round(A.H * 0.42), background: `linear-gradient(to ${top ? "bottom" : "top"}, ${isLight ? "rgba(247,244,238,.92)" : "rgba(18,18,18,.92)"}, rgba(18,18,18,0))` });
       const col = A.el("div", "col", A.root, { left: A.area.left, right: A.area.x, gap: "10px", justifyContent: top ? "flex-start" : "flex-end",
-        top: A.scam ? (top ? A.area.y + 880 : box[1] + box[3] + 30) : (top ? A.area.y : 600), bottom: A.scam ? 110 : 110 });
+        top: A.scam ? (top ? (A.stack ? box[1] + box[3] + 30 : A.area.y + 880) : box[1] + box[3] + 30) : (top ? A.area.y : (A.landscape ? 600 : Math.round(A.H * 0.58))),
+        bottom: A.gapB(110, s.note ? 60 : 0) });
       A.field("title", col);
       if (s.title) A.enter(A.text(col, s.title, "hero", "", { fontSize: "68px" }), "title", 0, UI.imageFullTextExtra);
       if (s.text) A.enter(A.text(col, s.text, "body", "", { color: isLight ? A.th.colors.text : "#d0d0d0" }), "body", 0, UI.imageFullTextExtra);

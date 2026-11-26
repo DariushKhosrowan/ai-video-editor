@@ -3,12 +3,12 @@ Stage.template({
   build(s, A) {
     const h = Stage.T.header(A, s, { titleRole: "h1", fieldTitle: true, fieldEyebrow: true });
     const items = Stage.T.list(s.items);
-    const cols = +(s.columns || 1), numbered = String(s.numbered) !== "false";
+    const cols = A.columns(+(s.columns || 1)), numbered = String(s.numbered) !== "false";
     const preset = (Stage.fx && Stage.fx.cur && Stage.fx.cur.preset) || "classic";
     const lively = preset !== "classic";
 
     const left = A.area.left, right = A.area.x;
-    const top = h.bottom + 36, bottom = A.scam ? 110 : 100;
+    const top = h.bottom + 36, bottom = A.gapB(A.scam ? 110 : 100, s.note ? 60 : 0);
     const grid = A.el("div", "abs", A.root, {
       left, right, top, bottom,
       display: "grid", gap: "22px",
@@ -16,6 +16,7 @@ Stage.template({
       alignContent: "center",
     });
     A.field("items", grid);
+    if (A.stack) grid.style.height = "100%";   // fill the frame height so rows centre vertically
 
     items.forEach((it, i) => {
       const o = typeof it === "string" ? { text: it } : it;
@@ -26,7 +27,7 @@ Stage.template({
         alignItems: "center",
         gap: "26px",
         padding: cols > 1 ? "30px 34px" : "24px 34px",
-        minHeight: cols > 1 ? "190px" : "auto",
+        minHeight: cols > 1 ? "190px" : (A.portrait ? "150px" : "auto"),
       });
       if (numbered) {
         const numEl = A.text(card, String(o.n || i + 1), "value", "", {

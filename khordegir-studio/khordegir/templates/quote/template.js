@@ -5,7 +5,7 @@ Stage.template({
     const preset = (Stage.fx && Stage.fx.cur && Stage.fx.cur.preset) || "classic";
     const lively = preset !== "classic";
 
-    const col = A.el("div", "col", A.root, { left, right, top: A.area.y, bottom: A.scam ? 120 : 100, gap: "18px", alignItems: "flex-start" });
+    const col = A.el("div", "col", A.root, { left, right, top: A.area.y, bottom: A.gapB(A.scam ? 120 : 100, s.note ? 60 : 0), gap: "18px", alignItems: "flex-start" });
     const r = A.el("div", "rule", col, { transformOrigin: "100% 50%" });
     const sl = Stage.MOTION.ui.sweepLine;
     Stage.tl.from(r, { scaleX: 0, duration: sl.dur, ease: Stage.ease(sl.ease), immediateRender: true }, A.at("eyebrow"));

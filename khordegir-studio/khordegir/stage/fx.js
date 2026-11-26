@@ -354,7 +354,7 @@
       stage.appendChild(lk);
       const fromLeft = r() < 0.5;
       Object.assign(lk.style, {
-        width: "1300px", height: "900px", top: (-300 + r() * 500) + "px", left: fromLeft ? "-700px" : "1300px",
+        width: "1300px", height: "900px", top: (-300 + r() * 500) + "px", left: fromLeft ? "-700px" : (S.W - 620) + "px",
         background: `radial-gradient(ellipse at center, rgba(255,170,60,.55) 0%, rgba(255,120,40,.18) 35%, transparent 70%)`,
       });
       S.amb.fromTo(lk, { opacity: 0.0, x: 0 }, {
@@ -504,19 +504,19 @@
       top.className = "transition-overlay transition-split-top";
       bot.className = "transition-overlay transition-split-bot";
       Object.assign(top.style, {
-        position: "absolute", left: "0", right: "0", top: "0", height: "540px",
+        position: "absolute", left: "0", right: "0", top: "0", height: (S.H / 2) + "px",
         background: col.bg2 || col.bg || "#121212", borderBottom: `4px solid ${col.accent || "#FFD600"}`,
         pointerEvents: "none", zIndex: 90,
       });
       Object.assign(bot.style, {
-        position: "absolute", left: "0", right: "0", bottom: "0", height: "540px",
+        position: "absolute", left: "0", right: "0", bottom: "0", height: (S.H / 2) + "px",
         background: col.bg2 || col.bg || "#121212", borderTop: `4px solid ${col.accent || "#FFD600"}`,
         pointerEvents: "none", zIndex: 90,
       });
       stage.appendChild(top); stage.appendChild(bot);
       const SC = T.splitCurtain;
-      S.tl.fromTo(top, { y: 0, opacity: 1 }, { y: -560, opacity: 0, duration: SC.dur, ease: S.ease(SC.ease), immediateRender: true }, 0);
-      S.tl.fromTo(bot, { y: 0, opacity: 1 }, { y: 560, opacity: 0, duration: SC.dur, ease: S.ease(SC.ease), immediateRender: true }, 0);
+      S.tl.fromTo(top, { y: 0, opacity: 1 }, { y: -(S.H / 2 + 20), opacity: 0, duration: SC.dur, ease: S.ease(SC.ease), immediateRender: true }, 0);
+      S.tl.fromTo(bot, { y: 0, opacity: 1 }, { y: S.H / 2 + 20, opacity: 0, duration: SC.dur, ease: S.ease(SC.ease), immediateRender: true }, 0);
       return;
     }
 
@@ -529,7 +529,7 @@
         pointerEvents: "none", zIndex: 90,
       });
       stage.appendChild(wipe);
-      S.tl.fromTo(wipe, { x: 0, y: 0, opacity: 1 }, { x: -2400 * dir, y: 260, opacity: 0, duration: T.diagonalWipe.dur, ease: S.ease(T.diagonalWipe.ease), immediateRender: true }, 0);
+      S.tl.fromTo(wipe, { x: 0, y: 0, opacity: 1 }, { x: -(S.W * 1.25) * dir, y: 260, opacity: 0, duration: T.diagonalWipe.dur, ease: S.ease(T.diagonalWipe.ease), immediateRender: true }, 0);
       return;
     }
 
@@ -551,7 +551,7 @@
         const bar = document.createElement("div");
         bar.className = "transition-overlay transition-shutter-bar";
         Object.assign(bar.style, {
-          position: "absolute", top: "0", bottom: "0", left: (i * 480) + "px", width: "484px",
+          position: "absolute", top: "0", bottom: "0", left: (i * S.W / 4) + "px", width: (S.W / 4 + 4) + "px",
           background: i % 2 === 0 ? (col.bg || "#121212") : (col.bg2 || col.surface || "#1a1a1f"),
           transformOrigin: "50% 0%", pointerEvents: "none", zIndex: 90,
         });
@@ -573,6 +573,7 @@
     const isLight = col.isDark === false;
     let pos = String(slide.logo_position || (rawLogo && typeof rawLogo === "object" ? rawLogo.position : "") || "top-left");
     if (A.scam && pos === "bottom-left") pos = "top-left"; // Protect SCAM webcam box [24, 740, 584, 1055]
+    else if (A.scam && A.stack && pos.includes("bottom")) pos = pos.replace("bottom", "top"); // portrait/square: camera band is at the bottom
 
     const badge = document.createElement("div");
     badge.className = "stage-logo stage-logo-" + ((FX.cur && FX.cur.logoMotion) || "pop-spin");

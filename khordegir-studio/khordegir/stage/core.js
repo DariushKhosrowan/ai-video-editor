@@ -6,7 +6,24 @@
    so frame i of the video is strictly deterministic: Stage.seek(i / fps).                        */
 (function () {
   "use strict";
-  const W = 1920, H = 1080;
+  /* Frame formats. W/H follow the current slide's format (Stage.setFormat); landscape is the default
+     and renders exactly as before. */
+  const FORMATS = {
+    landscape: { w: 1920, h: 1080, typeScale: 1 },
+    portrait: { w: 1080, h: 1920, typeScale: 1.12 },
+    square: { w: 1080, h: 1080, typeScale: 1 },
+  };
+  /* per-format safe areas & camera box (SCAM) when the theme does not give its own layout.formats[fmt] */
+  const FORMAT_LAYOUT = {
+    portrait: { margin: 72, top: 160, bottom: 280, cam: [48, 1088, 1032, 1641] },
+    square: { margin: 64, top: 64, bottom: 64, cam: [24, 786, 504, 1056] },
+  };
+  const FORMAT_ALIASES = {
+    landscape: "landscape", horizontal: "landscape", wide: "landscape", "16:9": "landscape", "16x9": "landscape", "افقی": "landscape",
+    portrait: "portrait", vertical: "portrait", tall: "portrait", "9:16": "portrait", "9x16": "portrait", "عمودی": "portrait",
+    square: "square", "1:1": "square", "1x1": "square", "مربع": "square", "مربعی": "square",
+  };
+  let W = 1920, H = 1080;
   const MT = window.MOTION_TOKENS || (window.Stage && window.Stage.MOTION);
   const S = window.Stage = Object.assign(window.Stage || {}, {
     W, H, fps: 30, themes: (window.Stage && window.Stage.themes) || {}, templates: {}, theme: null, tl: null, amb: null, slide: null,
@@ -173,6 +190,35 @@
     return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
   }
 
+  S.FORMATS = FORMATS;
+  S.format = "landscape";
+  S.normFormat = function (v) {
+    const k = String(v == null ? "" : v).trim().toLowerCase();
+    return FORMAT_ALIASES[k] || "landscape";
+  };
+  /* Resize the stage (and the page body) for a format. Returns {format, w, h}. */
+  S.setFormat = function (v) {
+    const f = S.normFormat(v), F = FORMATS[f];
+    W = F.w; H = F.h; S.W = W; S.H = H; S.format = f;
+    const root = document.documentElement;
+    if (root && root.style) { root.style.setProperty("--stage-w", W + "px"); root.style.setProperty("--stage-h", H + "px"); }
+    const st = document.getElementById("stage");
+    if (st) st.setAttribute("data-format", f);
+    return { format: f, w: W, h: H };
+  };
+  /* Theme layout for a format: landscape = the theme's own layout object untouched. Other formats take
+     FORMAT_LAYOUT, then the theme's layout.formats[fmt]; the camera sits under full-width content. */
+  S.layoutFor = function (th, fmt) {
+    const base = (th && th.layout) || { margin: 80, top: 64, bottom: 64, radius: 16, badgeRadius: 8, cam: [24, 740, 584, 1055], scamLeft: 650 };
+    const f = S.normFormat(fmt);
+    if (f === "landscape") return base;
+    const own = (base.formats && base.formats[f]) || {};
+    const L = Object.assign({}, base, FORMAT_LAYOUT[f], own);
+    delete L.formats;
+    if (own.scamLeft == null) L.scamLeft = L.margin;
+    return L;
+  };
+
   /* ---------------------------------------------------------------- themes */
   S.defineTheme = function (t) {
     S.themes[t.name] = t;
@@ -214,6 +260,11 @@
     css += `--shadow-bubble:${shadowBubble};--shadow-logo:${shadowLogo};--shadow-accent:${shadowAccent};`;
     css += `--vignette-bg:${vignetteBg};}`;
     for (const k in ty) css += `.t-${k}{font-size:${ty[k].size}px;font-weight:${ty[k].weight};line-height:${ty[k].lh};}`;
+    for (const f in FORMATS) {
+      const sc = FORMATS[f].typeScale;
+      if (sc === 1) continue;
+      for (const k in ty) css += `#stage[data-format="${f}"] .t-${k}{font-size:${Math.round(ty[k].size * sc)}px;}`;
+    }
     let st = document.getElementById("theme-vars");
     if (!st) { st = document.createElement("style"); st.id = "theme-vars"; document.head.appendChild(st); }
     st.textContent = css;
@@ -262,11 +313,38 @@
   }
 
   function makeAPI(slide, root) {
-    const th = S.theme, L = th.layout, M = th.motion || MT.themeMotion();
+    const th = S.theme, fmt = S.format, L = S.layoutFor(th, fmt), M = th.motion || MT.themeMotion();
     const scam = (slide.layout || "SLIDE").toUpperCase() === "SCAM";
     const base = MT.ui.baseDelay;
+    S._L = L;
     const A = {
       slide, root, th, scam, W, H, L,
+      format: fmt, landscape: fmt === "landscape", portrait: fmt === "portrait", square: fmt === "square",
+      stack: fmt !== "landscape",                 // side-by-side columns stack vertically
+      typeScale: FORMATS[fmt].typeScale,          // inline font sizes are multiplied by this (1 in landscape)
+      /* pick a value per format: A.pick(landscapeValue, portraitValue, squareValue = portraitValue) */
+      pick(land, por, sq) { return fmt === "landscape" ? land : fmt === "portrait" ? por : (sq === undefined ? por : sq); },
+      /* font size scaled for the format (number px) */
+      fs(px) { return Math.round(px * A.typeScale); },
+      /* how many grid columns n items get in this format (landscape: min(n, max)) */
+      columns(n, o = {}) {
+        n = Math.max(1, +n || 1);
+        if (fmt === "landscape") return Math.min(n, o.max || n);
+        if (fmt === "portrait") return o.portrait || (n >= 4 ? 2 : 1);
+        return o.square || (n <= 2 ? n : n === 4 ? 2 : 1);
+      },
+      /* bottom gap of a content block: landscape keeps the template's own value; other formats use
+         the safe area, plus the camera band in SCAM, plus room for a note/source line */
+      gapB(land, extra = 0) {
+        if (fmt === "landscape") return land;
+        const camGap = scam ? H - L.cam[1] + 40 : 0;
+        return Math.max(L.bottom, camGap) + extra;
+      },
+      /* rectangle of the free content area (below `top`, above gapB) */
+      region(top, extra = 0) {
+        const t = top == null ? L.top : top;
+        return { x: L.margin, y: t, w: W - 2 * L.margin, h: H - A.gapB(0, extra) - t };
+      },
       area: {
         x: L.margin, y: L.top, w: W - 2 * L.margin, h: H - L.top - L.bottom,
         right: W - L.margin, bottom: H - L.bottom,
@@ -282,7 +360,12 @@
       },
       css(e, st) {
         for (const k in st) {
-          const v = st[k];
+          let v = st[k];
+          if (v === undefined) continue;
+          if (k === "fontSize" && A.typeScale !== 1 && v != null && v !== "") {
+            const n = typeof v === "number" ? v : (/^\d+(\.\d+)?px$/.test(String(v)) ? parseFloat(v) : null);
+            if (n != null) v = Math.round(n * A.typeScale * 10) / 10 + "px";
+          }
           e.style[k] = (typeof v === "number" && !/opacity|zIndex|fontWeight|lineHeight|flex/.test(k)) ? v + "px" : v;
         }
         return e;
@@ -346,7 +429,10 @@
           }
         }
 
-        const allOv = slide && slide.overrides;
+        const ovRoot = slide && slide.overrides;
+        /* drag/resize overrides belong to a format: landscape reads the top level (as before),
+           portrait/square read overrides[format] only */
+        const allOv = (fmt === "landscape") ? ovRoot : (ovRoot && typeof ovRoot === "object" ? ovRoot[fmt] : null);
         const layoutKey = scam ? "SCAM" : "SLIDE";
         let ov = null;
         if (allOv && typeof allOv === "object") {
@@ -660,7 +746,13 @@
   S.load = async function (slide, opts = {}) {
     if (opts.theme) S.useTheme(opts.theme);
     const th = S.theme;
-    S.slide = slide = Object.assign({}, slide || {});
+    slide = Object.assign({}, slide || {});
+    const fmtInfo = S.setFormat(slide.format || opts.format || S.defaultFormat || "landscape");
+    slide.format = fmtInfo.format;
+    /* hard per-format overrides: format_overrides: {portrait: {size: 70, columns: 1, ...}} */
+    const fo = slide.format_overrides && slide.format_overrides[fmtInfo.format];
+    if (fo && typeof fo === "object") Object.assign(slide, fo);
+    S.slide = slide;
     if (S.tl) S.tl.kill(); if (S.amb) S.amb.kill();
     S.tl = gsap.timeline({ paused: true }); S.amb = gsap.timeline({ paused: true });
     S._imgs = [];
@@ -674,6 +766,7 @@
     stage.className = "layout-" + layout.toLowerCase();
     stage.setAttribute("dir", lang === "en" ? "ltr" : "rtl");
     stage.setAttribute("data-lang", lang);
+    stage.setAttribute("data-format", S.format);
     stage.setAttribute("data-theme-mode", (th.colors && th.colors.isDark === false) ? "light" : "dark");
 
     // background
@@ -724,10 +817,21 @@
       stage.appendChild(vig);
     }
     // common extras: source credit + note
-    if (slide.source) { const s = A.text(content, slide.source, "caption", "source"); A.enter(s, "note"); }
-    if (slide.note) { const n = A.text(content, slide.note, "caption", "note " + (A.scam ? "note-scam" : "")); A.enter(n, "note"); }
+    const Lf = A.L, footB = A.landscape ? null : Math.max(26, Lf.bottom - 70);
+    if (slide.source) {
+      const s = A.text(content, slide.source, "caption", "source");
+      if (!A.landscape) A.css(s, { bottom: footB, right: Lf.margin, maxWidth: W - 2 * Lf.margin });
+      A.enter(s, "note");
+    }
+    if (slide.note) {
+      const n = A.text(content, slide.note, "caption", "note " + (A.scam ? "note-scam" : ""));
+      if (!A.landscape) {
+        A.css(n, { left: Lf.margin, right: Lf.margin, maxWidth: "none", bottom: A.scam ? H - Lf.cam[1] + 8 : footB + (slide.source ? 40 : 0) });
+      }
+      A.enter(n, "note");
+    }
     if (opts.camGuide || S._camGuide) {
-      const c = th.layout.cam; const cg = document.createElement("div"); cg.className = "camguide";
+      const c = A.L.cam; const cg = document.createElement("div"); cg.className = "camguide";
       Object.assign(cg.style, {
         left: c[0] + "px", top: c[1] + "px", width: (c[2] - c[0]) + "px", height: (c[3] - c[1]) + "px",
         display: layout === "SCAM" ? "flex" : "none",
@@ -764,6 +868,9 @@
       dust: S.fx.cur.dust,
     } : {};
     return {
+      format: S.format,
+      width: W,
+      height: H,
       duration: S._dur,
       entrances: ent,
       sayDuration: sayDur,
@@ -781,7 +888,7 @@
   S.duration = () => S._dur;
   S.camOverlap = function () {
     if ((S.slide.layout || "").toUpperCase() !== "SCAM") return [];
-    const c = S.theme.layout.cam, st = document.getElementById("stage").getBoundingClientRect();
+    const c = (S._L || S.theme.layout).cam, st = document.getElementById("stage").getBoundingClientRect();
     const bad = [];
     document.querySelectorAll("#stage .content *").forEach((e) => {
       if (e.closest(".fullbleed")) return;
@@ -859,7 +966,7 @@
       S._camGuide = !!d.camGuide;
       const info = await S.load(d.slide, { theme: d.theme, camGuide: d.camGuide });
       if (d.at != null) S.seek(d.at); else S.play(0);
-      parent.postMessage({ cmd: "loaded", info, cam: S.camOverlap(), fields: S.getFieldBoxes() }, "*");
+      parent.postMessage({ cmd: "loaded", info, cam: S.camOverlap(), fields: S.getFieldBoxes(), camRect: (S._L || S.theme.layout).cam }, "*");
     } else if (d.cmd === "seek") { S.stop(); S.seek(d.t); }
     else if (d.cmd === "play") S.play(d.from || 0);
     else if (d.cmd === "getFields") {

@@ -6,7 +6,16 @@ Stage.template({
     const lively = preset !== "classic";
     let colBox;
 
-    if (hasImg) {
+    let colTop = A.area.y;
+    if (hasImg && A.stack) {
+      /* portrait / square: picture on top, number below it */
+      const R = A.region(A.area.y, s.note ? 60 : 0);
+      const ih = Math.round(R.h * A.pick(0.5, 0.46, 0.42));
+      const imgFrame = A.image(A.root, s.image, R.x, R.y, R.w, ih, { motion: s.motion });
+      A.field("image", imgFrame);
+      colBox = { left: A.area.left, right: L.margin };
+      colTop = R.y + ih + 30;
+    } else if (hasImg) {
       let imgFrame;
       if (A.scam) {
         imgFrame = A.image(A.root, s.image, 1300, 110, 540, 820, { motion: s.motion });
@@ -20,9 +29,9 @@ Stage.template({
       colBox = { left: A.area.left, right: L.margin };
     }
 
-    const centered = !hasImg;
+    const centered = !hasImg || A.stack;
     const col = A.el("div", "col", A.root, {
-      left: colBox.left, right: colBox.right, top: A.area.y, bottom: A.scam ? 120 : 110,
+      left: colBox.left, right: colBox.right, top: colTop, bottom: A.gapB(A.scam ? 120 : 110, s.note ? 60 : 0),
       alignItems: centered ? "center" : "flex-start",
       textAlign: centered ? "center" : "right",
       gap: "6px",

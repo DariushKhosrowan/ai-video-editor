@@ -6,7 +6,7 @@ Stage.template({
     const lively = preset !== "classic";
 
     const col = A.el("div", "col", A.root, {
-      left, right, top: A.area.y, bottom: A.scam ? 380 : 100, gap: "16px",
+      left, right, top: A.area.y, bottom: A.gapB(A.scam ? 380 : 100, s.note ? 60 : 0), gap: "16px",
       alignItems: A.scam ? "flex-start" : "center", textAlign: A.scam ? "right" : "center",
     });
 

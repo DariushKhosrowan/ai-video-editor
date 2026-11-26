@@ -330,8 +330,9 @@
     const steps = spec.steps || [spec.before || {}, spec.after || {}];
     const cmpM = MT.chart.compare;
     const n = steps.length || 1, W = box.clientWidth || 1200, H = box.clientHeight || 600;
-    const size = spec.size || (n === 2 ? 190 : 150);
+    if (spec.vertical) return compareVertical(A, box, spec, steps, n, W, H, t0);
     const arrowW = Math.min(200, W * 0.13), colW = (W - arrowW * (n - 1)) / n;
+    const size = spec.size || Math.min(n === 2 ? 190 : 150, Math.round(colW * 0.55));   // narrow frames (square) shrink
     const defs = n === 3 ? ["muted", "accent", "danger"] : ["muted", "accent"];
     steps.forEach((s, i) => {
       const right = i * (colW + arrowW);
@@ -348,6 +349,30 @@
       }
     });
   };
+
+  /* portrait: the same before -> after story stacked top to bottom, arrows point down */
+  function compareVertical(A, box, spec, steps, n, W, H, t0) {
+    const cmpM = MT.chart.compare;
+    const size = spec.size || (n === 2 ? 190 : 150);
+    const arrowH = Math.min(150, H * 0.14), rowH = (H - arrowH * (n - 1)) / n;
+    const defs = n === 3 ? ["muted", "accent", "danger"] : ["muted", "accent"];
+    const col = S.color(spec.arrow_color || "muted");
+    steps.forEach((s, i) => {
+      const top = i * (rowH + arrowH);
+      const c = A.el("div", "col", box, { left: 0, width: W, top, height: rowH, alignItems: "center", textAlign: "center", gap: "6px" });
+      const num = A.el("div", "t-number", c, { color: S.color(s.color || defs[i % defs.length]), fontSize: size + "px" });
+      const t = t0 + cmpM.delay + i * cmpM.stagger;
+      A.count(num, { to: s.value, prefix: s.prefix ?? spec.prefix, suffix: s.suffix ?? spec.suffix, decimals: s.decimals, at: t, dur: cmpM.countDur });
+      if (s.label) A.enter(A.text(c, s.label, "label", "", { maxWidth: W * 0.95 + "px" }), "body", 0, 0, { at: t + cmpM.labelDelay });
+      A.fit(c, 0.55);
+      if (i < n - 1) {
+        const ar = A.el("div", "abs", box, { left: W / 2 - 20, width: 40, top: top + rowH + 14, height: arrowH - 28 });
+        ar.innerHTML = `<svg viewBox="0 0 40 100" width="40" height="100%" preserveAspectRatio="none"><path d="M20 0 V88" stroke="${col}" stroke-width="7" stroke-linecap="round"/><path d="M4 74 L20 94 L36 74" fill="none" stroke="${col}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        ar.style.transformOrigin = "50% 0%";
+        S.tl.from(ar, { scaleY: 0, opacity: 0, duration: cmpM.arrowDur, ease: S.ease(cmpM.ease), immediateRender: true }, t + cmpM.arrowDelay);
+      }
+    });
+  }
 
   S.chart = function (A, box, spec, t0 = 0) {
     const f = C[spec.type || "bar"];

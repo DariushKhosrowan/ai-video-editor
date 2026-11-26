@@ -215,6 +215,29 @@
     return s;
   }
 
+  /* ---------------------------------------------------------------- frame format (landscape / portrait / square) */
+  const FORMATS = { landscape: [1920, 1080], portrait: [1080, 1920], square: [1080, 1080] };
+  const FORMAT_LABELS = { landscape: "افقی ۱۶:۹", portrait: "عمودی ۹:۱۶", square: "مربع ۱:۱" };
+  const FORMAT_ALIASES = {
+    horizontal: "landscape", wide: "landscape", "16:9": "landscape", "افقی": "landscape",
+    vertical: "portrait", tall: "portrait", "9:16": "portrait", "عمودی": "portrait",
+    "1:1": "square", "مربع": "square", "مربعی": "square",
+  };
+  function normFormat(v) {
+    const k = String(v == null ? "" : v).trim().toLowerCase();
+    if (FORMATS[k]) return k;
+    return FORMAT_ALIASES[k] || "landscape";
+  }
+  function projectFormat() {
+    return normFormat(state.data && state.data.format);
+  }
+  function effectiveFormat(slide) {
+    return normFormat((slide && slide.format) || (state.data && state.data.format));
+  }
+  function stageDims() {
+    return FORMATS[effectiveFormat(activeSlide())];
+  }
+
   function buildStagePayload(slide, idx) {
     const copy = JSON.parse(JSON.stringify(slide || {}));
     const projSeed = (state.data && Number(state.data.seed)) || 0;
@@ -235,6 +258,7 @@
         "count_style",
         "count_from",
         "micro_fx",
+        "format",
       ].forEach((k) => {
         if (state.data[k] !== undefined && copy[k] === undefined) {
           copy[k] = JSON.parse(JSON.stringify(state.data[k]));
@@ -257,10 +281,14 @@
     const vp = els.stageViewport;
     const vw = Math.max(240, vp.clientWidth - 32);
     const vh = Math.max(160, vp.clientHeight - 32);
-    const scale = Math.min(vw / 1920, vh / 1080);
+    const [SW, SH] = stageDims();
+    const scale = Math.min(vw / SW, vh / SH);
     state.stageScale = scale;
-    const w = Math.floor(1920 * scale);
-    const h = Math.floor(1080 * scale);
+    state.stageW = SW; state.stageH = SH;
+    const w = Math.floor(SW * scale);
+    const h = Math.floor(SH * scale);
+    els.stageFrame.style.width = SW + "px";
+    els.stageFrame.style.height = SH + "px";
     els.stageFrameBox.style.width = w + "px";
     els.stageFrameBox.style.height = h + "px";
     els.stageFrame.style.transform = `scale(${scale})`;
@@ -309,9 +337,15 @@
     const layout = String(slide.layout || "SLIDE").toUpperCase();
     els.camOnlyOverlay.classList.toggle("hidden", layout !== "CAM");
 
-    document.querySelectorAll(".seg-btn").forEach((b) => {
+    document.querySelectorAll(".seg-btn[data-layout]").forEach((b) => {
       b.classList.toggle("active", b.dataset.layout === layout);
     });
+    const fmt = effectiveFormat(slide);
+    document.querySelectorAll(".seg-btn[data-format]").forEach((b) => {
+      b.classList.toggle("active", b.dataset.format === fmt);
+      b.classList.toggle("slide-own", b.dataset.format === fmt && !!slide.format && normFormat(slide.format) !== projectFormat());
+    });
+    resizeStage();
 
     const sayEst = estimateSay(slide);
     els.sayDurChip.textContent = sayEst ? `گفتار: ${fa(sayEst)} ثانیه` : "گفتار: ثبت نشده";
@@ -375,10 +409,12 @@
     if (layout === "SCAM" && els.chkCamGuide.checked) {
       const camBox = document.createElement("div");
       camBox.className = "canvas-cam-box";
-      camBox.style.left = `${(24 / 1920) * 100}%`;
-      camBox.style.top = `${(740 / 1080) * 100}%`;
-      camBox.style.width = `${(560 / 1920) * 100}%`;
-      camBox.style.height = `${(315 / 1080) * 100}%`;
+      const SW = state.stageW || 1920, SH = state.stageH || 1080;
+      const c = state.camRect || [24, 740, 584, 1055];
+      camBox.style.left = `${(c[0] / SW) * 100}%`;
+      camBox.style.top = `${(c[1] / SH) * 100}%`;
+      camBox.style.width = `${((c[2] - c[0]) / SW) * 100}%`;
+      camBox.style.height = `${((c[3] - c[1]) / SH) * 100}%`;
       camBox.textContent = "ناحیه امن دوربین (SCAM)";
       ov.appendChild(camBox);
     }
@@ -389,10 +425,11 @@
       const el = document.createElement("div");
       el.className = "canvas-field" + (state.selectedField === box.key ? " selected" : "");
       el.dataset.fieldKey = box.key;
-      el.style.left = `${(r.x / 1920) * 100}%`;
-      el.style.top = `${(r.y / 1080) * 100}%`;
-      el.style.width = `${(r.w / 1920) * 100}%`;
-      el.style.height = `${(r.h / 1080) * 100}%`;
+      const SW = state.stageW || 1920, SH = state.stageH || 1080;
+      el.style.left = `${(r.x / SW) * 100}%`;
+      el.style.top = `${(r.y / SH) * 100}%`;
+      el.style.width = `${(r.w / SW) * 100}%`;
+      el.style.height = `${(r.h / SH) * 100}%`;
 
       const lbl = document.createElement("div");
       lbl.className = "canvas-field-label";
@@ -441,8 +478,8 @@
               y: Math.max(-540, Math.min(540, Math.round(orig.y + dyStage))),
               scale: orig.scale,
             };
-            el.style.left = `${startLeftPct + ((next.x - orig.x) / 1920) * 100}%`;
-            el.style.top = `${startTopPct + ((next.y - orig.y) / 1080) * 100}%`;
+            el.style.left = `${startLeftPct + ((next.x - orig.x) / (state.stageW || 1920)) * 100}%`;
+            el.style.top = `${startTopPct + ((next.y - orig.y) / (state.stageH || 1080)) * 100}%`;
           }
 
           writeOverride(slide, box.key, next);
@@ -490,6 +527,7 @@
       state.duration = Number(d.info.duration || 6);
       state.fx = d.info.fx || {};
       state.fieldBoxes = Array.isArray(d.fields) ? d.fields : [];
+      if (Array.isArray(d.camRect)) state.camRect = d.camRect;
       updateCamStatusUI(d.cam);
       const pLbl = FX_CAT.presetLabels[state.fx.preset] || state.fx.preset || "خودکار";
       const tLbl = FX_CAT.transitionLabels[state.fx.transition] || state.fx.transition || "خودکار";
@@ -705,9 +743,24 @@
     reloadStage(true);
   }
 
+  /* drag/resize overrides: landscape uses slide.overrides (as before); portrait/square use
+     slide.overrides[format] so moving a title in one frame never shifts it in another */
+  function overrideScope(slide, create) {
+    const fmt = effectiveFormat(slide);
+    if (fmt === "landscape") {
+      if (create && (!slide.overrides || typeof slide.overrides !== "object")) slide.overrides = {};
+      return slide.overrides;
+    }
+    if (create) {
+      if (!slide.overrides || typeof slide.overrides !== "object") slide.overrides = {};
+      if (!slide.overrides[fmt] || typeof slide.overrides[fmt] !== "object") slide.overrides[fmt] = {};
+    }
+    return slide.overrides && slide.overrides[fmt];
+  }
+
   function readOverride(slide, key) {
     const layoutKey = String(slide.layout || "SLIDE").toUpperCase() === "SCAM" ? "SCAM" : "SLIDE";
-    const ovs = slide.overrides;
+    const ovs = overrideScope(slide, false);
     if (!ovs || typeof ovs !== "object") return { x: 0, y: 0, scale: 1 };
     let entry = null;
     if (ovs[layoutKey] && ovs[layoutKey][key]) entry = ovs[layoutKey][key];
@@ -720,15 +773,17 @@
   }
 
   function writeOverride(slide, key, nextVal) {
-    if (!slide.overrides || typeof slide.overrides !== "object") slide.overrides = {};
+    const fmt = effectiveFormat(slide);
+    const ovs = overrideScope(slide, true);
     const isIdentity = nextVal.x === 0 && nextVal.y === 0 && nextVal.scale === 1;
     if (isIdentity) {
-      delete slide.overrides[key];
-      if (slide.overrides.SCAM) delete slide.overrides.SCAM[key];
-      if (slide.overrides.SLIDE) delete slide.overrides.SLIDE[key];
+      delete ovs[key];
+      if (ovs.SCAM) delete ovs.SCAM[key];
+      if (ovs.SLIDE) delete ovs.SLIDE[key];
+      if (fmt !== "landscape" && !Object.keys(ovs).length) delete slide.overrides[fmt];
       if (!Object.keys(slide.overrides).length) delete slide.overrides;
     } else {
-      slide.overrides[key] = { x: nextVal.x, y: nextVal.y, scale: nextVal.scale };
+      ovs[key] = { x: nextVal.x, y: nextVal.y, scale: nextVal.scale };
     }
   }
 
@@ -1335,6 +1390,70 @@
         }
       )
     );
+
+    /* ---- frame format: per-slide override + hard per-format field overrides ---- */
+    const curFmt = effectiveFormat(slide);
+    const fmtHead = document.createElement("div");
+    fmtHead.className = "field-label-row";
+    fmtHead.innerHTML = `<strong>قاب (Format) — فقط برای این اسلاید</strong>`;
+    advBody.appendChild(fmtHead);
+    advBody.appendChild(
+      mkAdvSelect(
+        "قاب این اسلاید",
+        [
+          { value: "", label: `ارث‌بری از پروژه (${FORMAT_LABELS[projectFormat()]})` },
+          { value: "landscape", label: FORMAT_LABELS.landscape + " — 1920×1080" },
+          { value: "portrait", label: FORMAT_LABELS.portrait + " — 1080×1920" },
+          { value: "square", label: FORMAT_LABELS.square + " — 1080×1080" },
+        ],
+        slide.format ? normFormat(slide.format) : "",
+        (v) => {
+          if (!v) delete slide.format;
+          else slide.format = v;
+          resizeStage();
+          renderInspector();
+        }
+      )
+    );
+    const foGrp = document.createElement("div");
+    foGrp.className = "field-group";
+    const foLbl = document.createElement("div");
+    foLbl.className = "field-label-row";
+    foLbl.innerHTML = `<strong>مقدارهای اجباری فقط در قاب «${FORMAT_LABELS[curFmt]}»</strong>`;
+    foGrp.appendChild(foLbl);
+    const foHint = document.createElement("div");
+    foHint.style.cssText = "font-size:11px;color:var(--muted);margin-bottom:4px";
+    foHint.textContent = "هر خط: کلید: مقدار — مثلاً  size: 70  یا  columns: 1 . فقط وقتی این قاب فعال است جای مقدار اصلی می‌نشیند (format_overrides در video.yaml).";
+    foGrp.appendChild(foHint);
+    const foArea = document.createElement("textarea");
+    foArea.className = "text-input";
+    foArea.dir = "ltr";
+    foArea.rows = 4;
+    const curFo = (slide.format_overrides && slide.format_overrides[curFmt]) || {};
+    foArea.value = Object.entries(curFo).map(([k, v]) => `${k}: ${typeof v === "object" ? JSON.stringify(v) : v}`).join("\n");
+    foArea.addEventListener("change", () => {
+      const obj = {};
+      foArea.value.split("\n").forEach((line) => {
+        const i = line.indexOf(":");
+        if (i <= 0) return;
+        const k = line.slice(0, i).trim(), raw = line.slice(i + 1).trim();
+        if (!k || k === "format" || k === "format_overrides") return;
+        let v = raw;
+        if (/^-?\d+(\.\d+)?$/.test(raw)) v = Number(raw);
+        else if (raw === "true" || raw === "false") v = raw === "true";
+        else if (/^[\[{]/.test(raw)) { try { v = JSON.parse(raw); } catch (_) { v = raw; } }
+        obj[k] = v;
+      });
+      if (!slide.format_overrides || typeof slide.format_overrides !== "object") slide.format_overrides = {};
+      if (Object.keys(obj).length) slide.format_overrides[curFmt] = obj;
+      else delete slide.format_overrides[curFmt];
+      if (!Object.keys(slide.format_overrides).length) delete slide.format_overrides;
+      setDirty(true);
+      reloadStage(false);
+    });
+    foGrp.appendChild(foArea);
+    advBody.appendChild(foGrp);
+    if (slide.format || slide.format_overrides) advDetails.open = true;
 
     advDetails.appendChild(advBody);
     els.inspectorBody.appendChild(advDetails);
@@ -2155,6 +2274,21 @@
     renderSlidesList();
     renderInspector();
     reloadStage(true);
+  });
+
+  /* simple format switcher = the whole video's frame (video.yaml `format:`); live preview reflows */
+  document.querySelectorAll(".seg-btn[data-format]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (!state.data) return;
+      const f = normFormat(btn.dataset.format);
+      if (f === "landscape") delete state.data.format;   // default; keeps old video.yaml files unchanged
+      else state.data.format = f;
+      setDirty(true);
+      resizeStage();
+      renderSlidesList();
+      renderInspector();
+      reloadStage(true);
+    });
   });
 
   document.querySelectorAll(".seg-btn[data-layout]").forEach((btn) => {

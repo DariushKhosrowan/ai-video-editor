@@ -84,11 +84,13 @@ def cmd_build(a):
     from .outputs import write_steps, write_pdf
     from .index import build_index, template_hash
     build_index()
-    pr = Project(a.folder)
+    pr = Project(a.folder, force_format=getattr(a, "format", None))
+    if getattr(a, "out", None):
+        pr.out = Path(a.out).expanduser().resolve()
     out = pr.out
     sd = out / "slides"; sd.mkdir(parents=True, exist_ok=True)
     only = parse_only(a.only)
-    print(f"ساخت «{pr.title}» — {fa(len(pr.render_slides()))} اسلاید، تم: {pr.theme or 'پیش‌فرض'}")
+    print(f"ساخت «{pr.title}» — {fa(len(pr.render_slides()))} اسلاید، تم: {pr.theme or 'پیش‌فرض'}، قاب: {pr.format} {pr.size[0]}×{pr.size[1]}")
     for w in pr.warnings:
         print("  ⚠ " + w)
     cache_f = out / ".build-cache.json"
@@ -293,6 +295,9 @@ def main(argv=None):
     b.add_argument("--copy-to", help="پوشه‌ی HarkStudio برای کپی خروجی")
     b.add_argument("--copy", help="چه چیزهایی کپی شود: mp4,png,steps,prompter")
     b.add_argument("--no-copy", action="store_true")
+    b.add_argument("--format", choices=["landscape", "portrait", "square"],
+                   help="قاب همه‌ی اسلایدها را برای این ساخت عوض کن (بدون تغییر video.yaml)")
+    b.add_argument("--out", help="پوشه‌ی خروجی به جای out کنار video.yaml")
     b.add_argument("--no-video", action="store_true", help="فقط PNG و PDF (سریع)")
     b.add_argument("--force", action="store_true", help="همه را از نو بساز")
     b.add_argument("--jobs", type=int, default=max(1, min(4, (os.cpu_count() or 2))))

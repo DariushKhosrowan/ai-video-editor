@@ -6,7 +6,14 @@ Stage.template({
     const lively = preset !== "classic";
 
     let img, col;
-    if (s.shape === "landscape" || (lively && preset === "cinema-wide" && !s.shape)) {
+    if (A.stack) {
+      /* portrait / square: picture on top, text column below it */
+      const R = A.region(A.area.y, s.note ? 60 : 0);
+      const wide = s.shape === "landscape" || (lively && preset === "cinema-wide" && !s.shape);
+      const ih = Math.round(R.h * (wide ? A.pick(0.4, 0.36, 0.4) : A.pick(0.5, 0.5, 0.46)));
+      img = [R.x, R.y, R.w, ih];
+      col = { left: A.area.left, right: M, top: R.y + ih + 36, bottom: A.gapB(100, s.note ? 60 : 0) };
+    } else if (s.shape === "landscape" || (lively && preset === "cinema-wide" && !s.shape)) {
       img = A.scam ? [A.area.left, A.area.y, A.W - M - A.area.left, 500] : [M, A.area.y, A.W - 2 * M, 560];
       col = { left: A.area.left, right: M, top: img[1] + img[3] + 40, bottom: A.scam ? 110 : 100 };
     } else if (A.scam) {

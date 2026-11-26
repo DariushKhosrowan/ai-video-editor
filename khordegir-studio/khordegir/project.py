@@ -1,5 +1,5 @@
 """Video project: read video.yaml, normalise slides, resolve image paths, list OBS steps."""
-import copy, glob, json, os, re
+import copy, json, os
 from pathlib import Path
 
 try:
@@ -24,6 +24,31 @@ ALIASES = {
 }
 
 
+# Frame formats (video.yaml `format:`, per video, optional per-slide `format:`). Landscape is the
+# default and is never written into the stage payload, so existing videos render byte-identically.
+FORMATS = {"landscape": (1920, 1080), "portrait": (1080, 1920), "square": (1080, 1080)}
+DEFAULT_FORMAT = "landscape"
+FORMAT_ALIASES = {
+    "landscape": "landscape", "horizontal": "landscape", "wide": "landscape", "16:9": "landscape", "16x9": "landscape",
+    "افقی": "landscape",
+    "portrait": "portrait", "vertical": "portrait", "tall": "portrait", "9:16": "portrait", "9x16": "portrait",
+    "عمودی": "portrait",
+    "square": "square", "1:1": "square", "1x1": "square", "مربع": "square", "مربعی": "square",
+}
+
+
+def norm_format(v, default=None):
+    """'portrait' / 'عمودی' / '9:16' -> 'portrait'. Empty -> default. Unknown -> None."""
+    if v is None or str(v).strip() == "":
+        return default
+    return FORMAT_ALIASES.get(str(v).strip().lower())
+
+
+def format_size(fmt):
+    """(width, height) in pixels for a format name or alias; unknown/empty -> landscape."""
+    return FORMATS[norm_format(fmt, DEFAULT_FORMAT) or DEFAULT_FORMAT]
+
+
 def template_names():
     from .index import template_dirs
     return sorted(template_dirs())
@@ -43,7 +68,7 @@ def norm_template(t):
 
 
 class Project:
-    def __init__(self, folder):
+    def __init__(self, folder, force_format=None):
         folder = Path(folder).expanduser().resolve()
         if folder.is_file():
             self.yaml_path, folder = folder, folder.parent
@@ -68,6 +93,14 @@ class Project:
                                  "راهنما: هر اسلاید با «- template:» شروع می‌شود و فاصله‌های اول خط باید یکسان باشند.")
         d = self.data
         self.title = d.get("title", folder.name)
+        fmt = norm_format(d.get("format"), DEFAULT_FORMAT)
+        if fmt is None:
+            self.warnings.append(f"قاب «{d.get('format')}» ناشناخته است؛ یکی از landscape / portrait / square "
+                                 "(افقی / عمودی / مربع). قاب افقی استفاده شد.")
+            fmt = DEFAULT_FORMAT
+        self.force_format = norm_format(force_format) if force_format else None
+        self.format = self.force_format or fmt
+        self.size = FORMATS[self.format]
         self.seed = int(d.get("seed") or 0)
         raw_theme = d.get("theme")
         if str(raw_theme or "").strip().lower() in ("random", "تصادفی"):
@@ -198,6 +231,17 @@ class Project:
                 proj_val = getattr(self, attr, None)
                 if proj_val is not None and attr not in s:
                     s[attr] = copy.deepcopy(proj_val)
+            proj_fmt = getattr(self, "format", DEFAULT_FORMAT)
+            sf = norm_format(s.get("format"), proj_fmt)
+            if sf is None:
+                self.warnings.append(f"اسلاید {i + 1}: قاب «{s.get('format')}» ناشناخته است؛ قاب پروژه ({proj_fmt}) استفاده شد.")
+                sf = proj_fmt
+            if getattr(self, "force_format", None):
+                sf = self.force_format
+            if sf == DEFAULT_FORMAT:
+                s.pop("format", None)
+            else:
+                s["format"] = sf
             if self.default_duration and not s.get("duration"):
                 s["duration"] = self.default_duration
             self._resolve_images(s, f"اسلاید {s.get('_num') or i + 1}", extra)
@@ -215,6 +259,11 @@ class Project:
                 out.append({"n": k, "act": s["act"], "layout": st["layout"], "slide": s["_num"] if st["layout"] != "CAM" else 0,
                             "time": st.get("time") or "", "text": (st.get("say") or "").strip(), "zoom": st.get("zoom")})
         return out
+
+
+def slide_format(slide):
+    """Canonical format of a (normalised) slide or stage payload."""
+    return norm_format(slide.get("format"), DEFAULT_FORMAT) or DEFAULT_FORMAT
 
 
 def stage_payload(slide):
