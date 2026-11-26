@@ -82,6 +82,9 @@
     zoomIn: expInOut(3),
     zoomOut: expInOut(5),
     cameraPan: expInOut(3),
+    zoomPoint: expInOut(3),
+    zoomPointTravel: expInOut(4),
+    zoomPointReturn: expInOut(5),
     chartReveal: expOut(6),
     // inverse-exponential growth: fast start, speed decays exponentially as e^(-k t), lands at 1 (k = 5)
     chartGrow: function (t) {
@@ -188,6 +191,7 @@
       zoomIn:  { dur: 0.85, scale: 1.055, ease: EASES.zoomIn },
       zoomOut: { dur: 0.45, fromScale: 1.055, toScale: 1.0, ease: EASES.zoomOut },
       pan:     { dur: 0.80, ease: EASES.cameraPan },
+      zoomPoints: { cap: ZOOM_CAP, defaultDur: 0.85, defaultHold: 1.5, defaultScale: 1.055, returnDur: 0.65, ease: EASES.zoomPoint, travelEase: EASES.zoomPointTravel, returnEase: EASES.zoomPointReturn },
       kenburns: {
         breathe: { period: 20, scale: 0.055, x: -14, ease: EASES.ambient },
         zoomOut: { period: 14, fromScale: 1.058, toScale: 1.0, x: 0, ease: EASES.zoomIn },

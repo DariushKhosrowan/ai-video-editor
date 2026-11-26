@@ -207,7 +207,9 @@
     // Direct semantic token lookup
     if (s === "textin" || s === "wordstagger") return KM.expOut(5);
     if (s === "textout") return KM.expIn(5);
-    if (s === "zoomin" || s === "camerapan" || s === "ambient") return KM.expInOut(3);
+    if (s === "zoomin" || s === "camerapan" || s === "ambient" || s === "zoompoint") return KM.expInOut(3);
+    if (s === "zoompointtravel") return KM.expInOut(4);
+    if (s === "zoompointreturn") return KM.expInOut(5);
     // Explicit e^(-x) exponential curve strings e.g. "expOut(6)", "expInOut(5)"
     const expMatch = s.match(/^exp(inout|in|out)\(\s*([0-9.]+)\s*\)$/);
     if (expMatch) {
