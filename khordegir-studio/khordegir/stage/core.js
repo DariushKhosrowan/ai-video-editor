@@ -95,6 +95,7 @@
             const preForFmt = sign === "-" ? "" : pre;
             const suf = pctRaw ? (isEn ? pctRaw.replace("٪", "%") : pctRaw.replace("%", "٪")) : "";
             const isYear = !sign && !pctRaw && !hasTh && dec === 0 && val >= 1300 && val <= 2150 ? 1 : 0;
+            if (isYear) return full; // years stay still: rolling dates reads as a gimmick
             const display = (sign === "-" ? "-" : preForFmt) + S.fmt(val, dec, hasTh === 1) + suf;
             return `<span class="auto-num" data-to="${signedVal}" data-dec="${dec}" data-th="${hasTh}" data-pre="${esc(preForFmt)}" data-suf="${esc(suf)}" data-year="${isYear}"><bdi dir="ltr" class="auto-num-core">${display}</bdi></span>`;
           },
@@ -376,7 +377,8 @@
       text(parent, str, role, cls, style, richOpts) {
         const e = A.el("div", `t-${role || "body"} ${cls || ""}`, parent, style);
         const isSource = /\bsource\b/.test(cls || "");
-        e.innerHTML = S.rich(str, Object.assign(isSource ? { count: false, micro: false } : {}, richOpts || {}));
+        const noCount = isSource || role === "axis" || role === "label"; // chart ticks and category labels never count
+        e.innerHTML = S.rich(str, Object.assign(isSource ? { count: false, micro: false } : (noCount ? { count: false } : {}), richOpts || {}));
         if (!hasFa(str) && /[A-Za-z]/.test(String(str))) e.setAttribute("dir", "ltr");
         return e;
       },

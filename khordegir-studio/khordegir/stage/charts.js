@@ -111,12 +111,15 @@
           v.innerHTML = S.rich(d.display);
           v.style.fontSize = (spec.display_size || 40) + "px";
         } else {
-          A.count(v, { to: d.v, decimals: d.dec, prefix: d.prefix ?? pre, suffix: d.suffix ?? suf, at: t, enter: false });
+          A.count(v, { to: d.v, decimals: d.dec, prefix: d.prefix ?? pre, suffix: d.suffix ?? suf, at: t, enter: false, dur: barM.dur, ease: barEase });
         }
         const h = v.offsetHeight;
         v.style.top = (neg ? (d.display != null ? Y(0) - h - 8 : bot + 8) : top - h - 6) + "px";
         v.style.display = "flex"; v.style.justifyContent = "center";
-        S.tl.from(v, { opacity: 0, y: valM.y, duration: valM.dur, ease: S.ease(valM.ease), immediateRender: true }, t + valM.delay);
+        // value rides the bar top while it grows (same duration and ease), so it lands with the bar
+        const ride = (d.display != null) ? valM.y : (neg ? -(bot - top) : (bot - top));
+        S.tl.from(v, { y: ride, duration: barM.dur, ease: S.ease(barEase), immediateRender: true }, t);
+        S.tl.from(v, { opacity: 0, duration: valM.dur, ease: "power1.out", immediateRender: true }, t + valM.delay);
       }
       const l = labs[k];
       l.style.left = (cx - slot * 0.46) + "px";
@@ -153,7 +156,7 @@
       const v = A.el("div", "abs t-value", box, {
         fontSize: vsize, color: S.color(d.color === "#5A5A5A" ? "muted" : d.color),
       });
-      A.count(v, { to: d.v, decimals: d.dec, prefix: d.prefix ?? pre, suffix: d.suffix ?? suf, at: t, enter: false });
+      A.count(v, { to: d.v, decimals: d.dec, prefix: d.prefix ?? pre, suffix: d.suffix ?? suf, at: t, enter: false, dur: barM.dur, ease: barEase });
       v.style.right = (W - (px1 - bw) + 16) + "px"; v.style.top = (cy - v.offsetHeight / 2) + "px";
       S.tl.from(v, { opacity: 0, duration: valM.dur, ease: S.ease(valM.ease), immediateRender: true }, t + valM.delay);
       const l = labs[i]; l.style.right = "0px"; l.style.top = (cy - l.offsetHeight / 2) + "px";
