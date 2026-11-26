@@ -75,3 +75,49 @@ body.measuring #stage .content *{transform:none!important}
 .hl{background-image:linear-gradient(transparent,transparent);background-image:linear-gradient(rgba(255,214,0,.38),rgba(255,214,0,.38));
   background-repeat:no-repeat;background-position:100% 88%;background-size:100% 42%;padding:0 .08em;border-radius:3px}
 .ul,.ul-on{background-image:linear-gradient(var(--c-accent),var(--c-accent));background-repeat:no-repeat;background-position:100% 100%;background-size:100% 6px;padding-bottom:4px}
+
+/* Always-On Living Ambient Stage & Podcast Visual Polish */
+#stage.stage-transparent,
+body.stage-transparent,
+html.stage-transparent{background:transparent!important}
+#stage.stage-transparent .bg,
+#stage.stage-transparent .bgimg,
+#stage.stage-transparent .fadein,
+#stage.stage-transparent .transition-overlay,
+#stage.stage-transparent .living-grid,
+#stage.stage-transparent .living-aurora{display:none!important}
+#stage.stage-transparent .t-hero,
+#stage.stage-transparent .t-h1,
+#stage.stage-transparent .t-h2,
+#stage.stage-transparent .t-body,
+#stage.stage-transparent .t-quote,
+#stage.stage-transparent .t-eyebrow,
+#stage.stage-transparent .t-caption,
+#stage.stage-transparent .source{text-shadow:0 3px 18px rgba(0,0,0,.92),0 1px 4px rgba(0,0,0,.95)}
+#stage.stage-transparent .content > .col{background:rgba(11,14,20,.62);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:24px 32px;box-shadow:0 18px 48px rgba(0,0,0,.45)}
+
+.living-stage{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2}
+.living-aurora{position:absolute;inset:-18%;pointer-events:none;mix-blend-mode:screen;filter:blur(75px)}
+#stage[data-theme-mode="light"] .living-aurora{mix-blend-mode:multiply;opacity:.45}
+.living-aurora-orb{position:absolute;border-radius:50%;will-change:transform,opacity}
+.living-grid{position:absolute;inset:0;pointer-events:none;opacity:.16;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,.06) 1px, transparent 1px);
+  background-size:96px 96px;
+  mask-image:radial-gradient(ellipse 80% 75% at 50% 45%, #000 30%, transparent 95%);
+  -webkit-mask-image:radial-gradient(ellipse 80% 75% at 50% 45%, #000 30%, transparent 95%)}
+#stage[data-theme-mode="light"] .living-grid{
+  background-image:
+    linear-gradient(to right, rgba(0,0,0,.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0,0,0,.06) 1px, transparent 1px)}
+.living-wave{position:absolute;left:0;right:0;bottom:0;height:210px;pointer-events:none;z-index:3;opacity:.7}
+.living-wave svg{width:100%;height:100%;display:block}
+.podcast-card-surface{box-shadow:0 24px 64px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.08);overflow:hidden}
+.card-sheen{position:absolute;top:-30%;bottom:-30%;width:45%;right:-60%;transform:skewX(-20deg);pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.07),transparent)}
+.stage-annotations{position:absolute;inset:0;pointer-events:none;z-index:38}
+.stage-callout-box{position:absolute;display:inline-flex;align-items:center;gap:12px;padding:14px 24px;border-radius:16px;
+  font-size:28px;font-weight:800;line-height:1.3;box-shadow:0 16px 40px rgba(0,0,0,.45);backdrop-filter:blur(12px)}
+.stage-spotlight-mask{position:absolute;inset:0;pointer-events:none;z-index:34}
+

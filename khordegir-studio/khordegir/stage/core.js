@@ -94,6 +94,7 @@
       return by(t);
     };
   }
+  S.bezier = bezier;
   const DEFAULT_EASES = {
     power4: [0.16, 1, 0.3, 1],
     power3: [0.22, 1, 0.36, 1],
@@ -104,6 +105,16 @@
     spring: "back.out(1.45)",
   };
   S.ease = function (name) {
+    if (name === "none") return "none";
+    const mc = S.slide && S.slide.motionCurve;
+    if (mc && Array.isArray(mc.points) && mc.points.length === 4 && mc.type !== "none") {
+      return bezier(
+        Number(mc.points[0]) || 0,
+        Number(mc.points[1]) || 0,
+        Number(mc.points[2]) || 1,
+        Number(mc.points[3]) || 1
+      );
+    }
     const e = ((S.theme && S.theme.ease) || {})[name] ?? DEFAULT_EASES[name] ?? name;
     if (Array.isArray(e)) return bezier(...e);
     return e || "power3.out";
@@ -312,13 +323,18 @@
       },
       at(role, i = 0, extra = 0) {
         const m = M[role] || M.body || { delay: 0.2, stagger: 0.08 };
-        return base + (m.delay || 0) + i * (m.stagger || 0) + extra;
+        const mc = S.slide && S.slide.motionCurve;
+        const stScale = mc && Number.isFinite(+mc.staggerScale) ? Math.max(0.25, Math.min(2.5, +mc.staggerScale)) : 1;
+        return base + (m.delay || 0) + i * (m.stagger || 0) * stScale + extra;
       },
       /* entrance by role: eyebrow | title | body | card | bubble | badge | image | note */
       enter(e, role, i = 0, extra = 0, over) {
         if (!e) return 0;
         if (e.dataset && e.dataset.fieldWrap && e.firstElementChild) e = e.firstElementChild;
         const m = Object.assign({}, M[role] || M.body, over || {});
+        const mc = S.slide && S.slide.motionCurve;
+        const durScale = mc && Number.isFinite(+mc.durationScale) ? Math.max(0.3, Math.min(2.5, +mc.durationScale)) : 1;
+        const dur = (m.dur || 0.5) * durScale;
         const explicit = over && (over.x != null || over.y != null || over.scale != null);
         let from;
         if (explicit || !S.fx) {
@@ -332,14 +348,14 @@
         const t = (over && over.at != null) ? over.at : A.at(role, i, extra);
         const to = Object.assign({ opacity: 1, x: 0, y: 0, scale: 1 }, S.fx ? S.fx.to(from) : {});
         Object.keys(to).forEach((k) => { if (!(k in from)) delete to[k]; });
-        S.tl.fromTo(e, from, Object.assign(to, { duration: m.dur, ease: S.ease(m.ease), immediateRender: true }), t);
-        e.dataset.end = (t + m.dur).toFixed(3);
+        S.tl.fromTo(e, from, Object.assign(to, { duration: dur, ease: S.ease(m.ease), immediateRender: true }), t);
+        e.dataset.end = (t + dur).toFixed(3);
         if (S.fx) {
           if (role === "title") S.fx.cue(t, "whoosh", e.textContent.slice(0, 30));
           else if (role === "bubble" || role === "badge") S.fx.cue(t, "pop", e.textContent.slice(0, 30));
           else if (role === "card" && i === 0) S.fx.cue(t, "soft", "");
         }
-        return t + m.dur;
+        return t + dur;
       },
       /* Kinetic Persian RTL word-by-word animation (NEVER splits words into letters; preserves ZWNJ) */
       kinetic(e, opts = {}) {
@@ -505,8 +521,13 @@
 
     const stage = document.getElementById("stage");
     stage.innerHTML = "";
+    const isTrans = !!(opts.transparent || S._transparent);
+    stage.classList.toggle("stage-transparent", isTrans);
+    document.body.classList.toggle("stage-transparent", isTrans);
+    document.documentElement.classList.toggle("stage-transparent", isTrans);
+
     const layout = (slide.layout || "SLIDE").toUpperCase();
-    stage.className = "layout-" + layout.toLowerCase();
+    stage.className = "layout-" + layout.toLowerCase() + (isTrans ? " stage-transparent" : "");
     stage.setAttribute("data-theme-mode", (th.colors && th.colors.isDark === false) ? "light" : "dark");
 
     // background
@@ -534,7 +555,10 @@
       S.amb.fromTo(gl, { opacity: g.opacity[0], x: -g.move, y: -g.move * 0.6 },
         { opacity: g.opacity[1], x: g.move, y: g.move * 0.6, duration: half, ease: "sine.inOut", yoyo: true, repeat: 99 }, 0);
     }
-    if (S.fx) S.fx.atmosphere(stage, slide);
+    if (S.fx) {
+      if (S.fx.livingStage) S.fx.livingStage(stage, slide);
+      S.fx.atmosphere(stage, slide);
+    }
     const content = document.createElement("div"); content.className = "content"; stage.appendChild(content);
     const A = makeAPI(slide, content);
     const tname = (slide.template || "layers").replace(/-/g, "_");
@@ -548,7 +572,9 @@
     }
     if (S.fx) {
       if (S.fx.logo) S.fx.logo(content, slide, A);
+      if (S.fx.annotations) S.fx.annotations(content, slide, A);
       S.fx.post(content);
+      if (S.fx.applyMicroMotion) S.fx.applyMicroMotion(content, slide);
       S.fx.grain(stage);
     }
     // common extras: source credit + note
@@ -563,12 +589,14 @@
       cg.textContent = "جای دوربین"; stage.appendChild(cg);
     }
     // Transition in (default "soft-fade" matches classic .fadein)
-    if (S.fx && S.fx.transitionIn) {
-      S.fx.transitionIn(stage, slide, th);
-    } else {
-      const fade = document.createElement("div"); fade.className = "fadein"; stage.appendChild(fade);
-      if (th.clip.fade > 0) S.tl.fromTo(fade, { opacity: 1 }, { opacity: 0, duration: th.clip.fade, ease: "power1.out", immediateRender: true }, 0);
-      else fade.remove();
+    if (!isTrans) {
+      if (S.fx && S.fx.transitionIn) {
+        S.fx.transitionIn(stage, slide, th);
+      } else {
+        const fade = document.createElement("div"); fade.className = "fadein"; stage.appendChild(fade);
+        if (th.clip.fade > 0) S.tl.fromTo(fade, { opacity: 1 }, { opacity: 0, duration: th.clip.fade, ease: "power1.out", immediateRender: true }, 0);
+        else fade.remove();
+      }
     }
 
     await Promise.all(S._imgs.map((im) => im.decode().catch(() => {})));
@@ -577,6 +605,8 @@
     const sayDur = estimateSayDuration(slide);
     const baseMin = +slide.duration ? +slide.duration : Math.max(th.clip.min, sayDur || 0);
     S._dur = Math.max(baseMin, ent + th.clip.hold);
+    S._lastCueIdx = -1;
+    S._liveLoop = Boolean(opts.liveLoop || S._liveLoop);
     S.seek(0);
     S.ready = true;
     const fxi = S.fx ? {
@@ -598,9 +628,41 @@
       cues: (S.cues || []).sort((a, b) => a.t - b.t),
     };
   };
-  S.seek = function (t) {
+  S.setTransparent = function (flag) {
+    S._transparent = Boolean(flag);
+    const stage = document.getElementById("stage");
+    if (stage) stage.classList.toggle("stage-transparent", S._transparent);
+    document.body.classList.toggle("stage-transparent", S._transparent);
+    document.documentElement.classList.toggle("stage-transparent", S._transparent);
+  };
+  S.setMicLevel = function (level) {
+    const stage = document.getElementById("stage");
+    if (!stage) return;
+    const lvl = Math.max(0, Math.min(1, Number(level) || 0));
+    stage.style.setProperty("--mic-level", lvl.toFixed(3));
+    const wave = stage.querySelector(".living-wave");
+    if (wave) {
+      wave.style.transform = `scaleY(${(1 + lvl * 0.65).toFixed(3)})`;
+      wave.style.opacity = (0.55 + lvl * 0.45).toFixed(2);
+    }
+  };
+  S.seek = function (t, fireSfx = false) {
     if (S.tl) S.tl.time(Math.min(t, S.tl.duration()), false);
-    if (S.amb) S.amb.time(t, false);
+    if (S.amb) {
+      const ambDur = S.amb.duration();
+      const ambTime = S._liveLoop && ambDur > 0 ? (t % Math.max(8, ambDur)) : t;
+      S.amb.time(ambTime, false);
+    }
+    if (fireSfx && window.StageSFX && Array.isArray(S.cues) && S.cues.length) {
+      const prevT = S._t || 0;
+      if (t >= prevT) {
+        S.cues.forEach((c) => {
+          if (c.t > prevT && c.t <= t && (t - prevT) < 0.25) {
+            window.StageSFX.play(c.type, 0.55);
+          }
+        });
+      }
+    }
     S._t = t;
   };
   S.duration = () => S._dur;
@@ -609,7 +671,7 @@
     const c = S.theme.layout.cam, st = document.getElementById("stage").getBoundingClientRect();
     const bad = [];
     document.querySelectorAll("#stage .content *").forEach((e) => {
-      if (e.closest(".fullbleed")) return;
+      if (e.closest(".fullbleed") || e.closest(".stage-annotations")) return;
       if (e.children.length && !e.matches(".frame,.card,.bubble,.bar,.t-body,.t-h1,.t-hero,.t-label,.t-caption,.t-eyebrow,.t-quote,.num,.stage-logo")) return;
       const r = e.getBoundingClientRect(); if (!r.width || !r.height) return;
       const x0 = r.left - st.left, y0 = r.top - st.top, x1 = x0 + r.width, y1 = y0 + r.height;
@@ -618,16 +680,22 @@
     return bad;
   };
 
-  /* preview playback (editor): drives the same seek() from the clock */
+  /* preview playback (editor + live OBS loop): drives the same seek() from the clock */
   let raf = null;
-  S.play = function (from = 0) {
+  S.play = function (from = 0, opts = {}) {
     cancelAnimationFrame(raf);
+    const keepLiving = Boolean(opts.liveLoop || S._liveLoop);
     const t0 = performance.now() - from * 1000;
     const loop = () => {
       const t = (performance.now() - t0) / 1000;
-      S.seek(Math.min(t, S._dur));
-      if (t < S._dur) raf = requestAnimationFrame(loop);
-      else S.onEnd && S.onEnd();
+      if (keepLiving) {
+        S.seek(t, true);
+        raf = requestAnimationFrame(loop);
+      } else {
+        S.seek(Math.min(t, S._dur), true);
+        if (t < S._dur) raf = requestAnimationFrame(loop);
+        else S.onEnd && S.onEnd();
+      }
     };
     raf = requestAnimationFrame(loop);
   };
@@ -638,10 +706,25 @@
     const d = e.data || {};
     if (d.cmd === "load") {
       S._camGuide = !!d.camGuide;
-      const info = await S.load(d.slide, { theme: d.theme, camGuide: d.camGuide });
-      if (d.at != null) S.seek(d.at); else S.play(0);
+      if (d.sfxMuted !== undefined && window.StageSFX) window.StageSFX.setMuted(d.sfxMuted);
+      if (d.sfxVolume !== undefined && window.StageSFX) window.StageSFX.setVolume(d.sfxVolume);
+      const info = await S.load(d.slide, {
+        theme: d.theme,
+        camGuide: d.camGuide,
+        transparent: d.transparent,
+        liveLoop: d.liveLoop,
+      });
+      if (d.at != null) S.seek(d.at, false);
+      else S.play(0, { liveLoop: d.liveLoop });
       parent.postMessage({ cmd: "loaded", info, cam: S.camOverlap() }, "*");
-    } else if (d.cmd === "seek") { S.stop(); S.seek(d.t); }
-    else if (d.cmd === "play") S.play(d.from || 0);
+    } else if (d.cmd === "seek") {
+      S.stop();
+      S.seek(d.t, Boolean(d.fireSfx));
+    } else if (d.cmd === "play") {
+      S.play(d.from || 0, { liveLoop: d.liveLoop });
+    } else if (d.cmd === "sfxConfig" && window.StageSFX) {
+      if (d.muted !== undefined) window.StageSFX.setMuted(d.muted);
+      if (d.volume !== undefined) window.StageSFX.setVolume(d.volume);
+    }
   });
 })();

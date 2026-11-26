@@ -1,0 +1,22 @@
+{
+  "name": "khordegir-studio",
+  "version": "1.0.0",
+  "description": "Khordegir Studio — Persian RTL motion-graphics editor, deterministic stage, and OBS teleprompter console",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "test": "node --test lib/curveMath.test.js lib/liveRoom.test.js",
+    "build": "node --check server.js && node --check lib/project.js && node --check lib/obsExport.js && node --check lib/liveRoom.js && node --check lib/liveHub.js && node --check lib/curveMath.js",
+    "lint": "node --check server.js && node --check lib/project.js && node --check lib/obsExport.js && node --check lib/liveRoom.js && node --check lib/liveHub.js && node --check lib/curveMath.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "js-yaml": "^4.1.0",
+    "ws": "^8.23.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

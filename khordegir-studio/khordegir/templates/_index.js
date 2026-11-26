@@ -2987,5 +2987,130 @@ window.TEMPLATE_INDEX = [
    "order": 160,
    "version": 1
   }
+ },
+ {
+  "name": "guest_intro",
+  "js": "../templates/guest_intro/template.js",
+  "schema": {
+   "name": "guest_intro",
+   "label": "معرفی مهمان / میزبان پادکست",
+   "description": "کارت معرفی مهمان یا میزبان پادکست با تصویر قاب‌دار، سمت/نقش، توضیح کوتاه و شبکه اجتماعی.",
+   "aliases": ["guest-intro", "guest", "معرفی مهمان", "مهمان"],
+   "category": "پادکست",
+   "fields": [
+    { "key": "badge", "label": "نشان نقش (مثل: مهمان ویژه / میزبان)", "type": "text", "editable": false },
+    { "key": "title", "label": "نام و نام خانوادگی", "type": "text", "required": true, "editable": true },
+    { "key": "subtitle", "label": "عنوان شغلی یا تخصص", "type": "text", "editable": true },
+    { "key": "text", "label": "معرفی کوتاه یا نکتهٔ کلیدی", "type": "textarea", "editable": true },
+    { "key": "handle", "label": "آیدی شبکه‌ها (مثل @dariush)", "type": "text", "editable": false },
+    { "key": "image", "label": "تصویر مهمان", "type": "image", "editable": true },
+    {
+     "key": "preset",
+     "label": "سبک انیمیشن",
+     "type": "select",
+     "options": [
+      ["auto", "کلاسیک / ارث‌بری"],
+      ["random", "🎲 تصادفی"],
+      ["editorial-split", "قاب دو تکه سردبیری"],
+      ["card-float", "کارت شناور"],
+      ["spotlight", "نورپردازی متمرکز"]
+     ],
+     "default": "auto",
+     "editable": false
+    }
+   ],
+   "example": {
+    "badge": "مهمان ویژهٔ قسمت ۱۲",
+    "title": "دکتر سارا *رادمنش*",
+    "subtitle": "پژوهشگر علوم اعصاب و تصمیم‌گیری",
+    "text": "بررسی علمی این‌که چرا پاداش‌های نامطمئن مغز ما را درگیرتر نگه می‌دارند.",
+    "handle": "@sarah.radmanesh",
+    "layout": "SCAM"
+   },
+   "order": 15,
+   "version": 1
+  }
+ },
+ {
+  "name": "podcast_question",
+  "js": "../templates/podcast_question/template.js",
+  "schema": {
+   "name": "podcast_question",
+   "label": "کارت سؤال / موضوع داغ پادکست",
+   "description": "نمایش پرسش مخاطب، موضوع بحث یا چالش اصلی اپیزود با هایلایت وکتور و نکات پاسخ.",
+   "aliases": ["podcast-question", "qa", "سؤال مخاطب", "پرسش"],
+   "category": "پادکست",
+   "fields": [
+    { "key": "badge", "label": "برچسب بالا (مثل: سؤال مخاطب / موضوع داغ)", "type": "text", "editable": false },
+    { "key": "author", "label": "نام پرسش‌گر (اختیاری)", "type": "text", "editable": true },
+    { "key": "title", "label": "متن پرسش (*زرد* ، ==هایلایت==)", "type": "textarea", "required": true, "editable": true },
+    { "key": "items", "label": "نکته‌های پاسخ (هر خط یکی، اختیاری)", "type": "list", "editable": true },
+    {
+     "key": "preset",
+     "label": "سبک انیمیشن",
+     "type": "select",
+     "options": [
+      ["auto", "کلاسیک / ارث‌بری"],
+      ["random", "🎲 تصادفی"],
+      ["kinetic-words", "کلمه‌به‌کلمه زنده"],
+      ["spotlight", "نورپردازی متمرکز"],
+      ["glitch-pop", "پرش مدرن"]
+     ],
+     "default": "auto",
+     "editable": false
+    }
+   ],
+   "example": {
+    "badge": "پرسش کلیدی اپیزود",
+    "author": "ارسالی از شنوندگان پادکست",
+    "title": "چرا با وجود ==هوشمندتر شدن==، هنوز در دام باج‌گیری عاطفی می‌افتیم؟",
+    "items": [
+     "واکنش فوری مغز به تهدید کوتاه‌مدت",
+     "خطای هزینهٔ غرق‌شده در روابط کاری"
+    ],
+    "layout": "SCAM"
+   },
+   "order": 16,
+   "version": 1
+  }
+ },
+ {
+  "name": "podcast_end",
+  "js": "../templates/podcast_end/template.js",
+  "schema": {
+   "name": "podcast_end",
+   "label": "صفحهٔ پایان پادکست و سابسکرایب",
+   "description": "کارت پایانی یوتیوب با جایگاه دو ویدیوی پیشنهادی، دکمهٔ انیمیشنی سابسکرایب و آیدی کانال.",
+   "aliases": ["podcast-end", "outro", "end-screen", "پایان پادکست", "پایان"],
+   "category": "پادکست",
+   "fields": [
+    { "key": "eyebrow", "label": "تیتر کوچک بالا", "type": "text", "editable": true },
+    { "key": "title", "label": "جملهٔ خداحافظی / دعوت", "type": "text", "required": true, "editable": true },
+    { "key": "subtitle", "label": "لینک یا آیدی کانال", "type": "text", "editable": true },
+    { "key": "cta", "label": "متن دکمهٔ سابسکرایب", "type": "text", "editable": false },
+    {
+     "key": "preset",
+     "label": "سبک انیمیشن",
+     "type": "select",
+     "options": [
+      ["auto", "کلاسیک / ارث‌بری"],
+      ["random", "🎲 تصادفی"],
+      ["spotlight", "نورپردازی متمرکز"],
+      ["kinetic-hero", "تایپ کینتیک سینمایی"]
+     ],
+     "default": "auto",
+     "editable": false
+    }
+   ],
+   "example": {
+    "eyebrow": "ممنون که تا اینجا همراه بودید",
+    "title": "اگر این بحث برایتان مفید بود، *سابسکرایب* یادتان نرود",
+    "subtitle": "اپیزود بعدی هر پنج‌شنبه ساعت ۲۰ منتشر می‌شود",
+    "cta": "عضویت در کانال + زنگوله 🔔",
+    "layout": "SLIDE"
+   },
+   "order": 17,
+   "version": 1
+  }
  }
 ];

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>خرده‌گیر استودیو — خروجی زنده OBS Browser Source</title>
+  <link rel="stylesheet" href="../stage/stage.css">
+  <link rel="stylesheet" href="./obs-stage.css">
+  <script src="../vendor/gsap.min.js"></script>
+  <script src="../stage/sfx.js"></script>
+  <script src="../stage/core.js"></script>
+  <script src="../stage/charts.js"></script>
+  <script src="../stage/fx.js"></script>
+  <script src="../themes/_list.js"></script>
+  <script src="../stage/template-lib.js"></script>
+  <script src="../templates/_index.js"></script>
+  <script>Stage.writeIncludes("../stage/");</script>
+</head>
+<body>
+  <div id="obsCanvas" class="obs-canvas">
+    <div id="stageSlot" class="stage-slot">
+      <div id="stage"></div>
+    </div>
+
+    <!-- Live Broadcast Top Overlays -->
+    <div id="liveBadgePill" class="obs-live-badge hidden" aria-hidden="true">
+      <span class="obs-live-dot"></span>
+      <span>LIVE</span>
+    </div>
+
+    <div id="chapterOverlay" class="obs-chapter-pill hidden" aria-live="polite">
+      <div class="obs-chapter-meta">
+        <span id="chapterIndex" class="obs-chapter-num mono-num">فصل ۱ از ۱</span>
+        <span class="obs-chapter-sep">·</span>
+        <span id="chapterTitle" class="obs-chapter-title">موضوع برنامه</span>
+      </div>
+      <div class="obs-chapter-track">
+        <div id="chapterBarFill" class="obs-chapter-fill"></div>
+      </div>
+    </div>
+
+    <!-- Live Podcast Host / Guest Lower-Third Overlay -->
+    <aside id="lowerThird" class="obs-lower-third style-glass-amber side-right hidden" aria-live="polite">
+      <div class="lt-accent-bar"></div>
+      <div class="lt-body">
+        <div class="lt-top-row">
+          <span id="ltRole" class="lt-role">میزبان</span>
+          <span id="ltBadge" class="lt-badge">LIVE</span>
+        </div>
+        <div id="ltTitle" class="lt-title">نام سخنران</div>
+        <div id="ltSubtitle" class="lt-subtitle">توضیح کوتاه یا عنوان برنامه</div>
+      </div>
+      <div class="lt-sheen" aria-hidden="true"></div>
+    </aside>
+  </div>
+
+  <script src="./obs-stage.js"></script>
+</body>
+</html>

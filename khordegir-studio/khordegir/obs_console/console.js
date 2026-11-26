@@ -1,8 +1,11 @@
 /**
  * Main entrypoint for Khordegir Studio OBS Console (/obs/).
- * Plain ES module — zero build step, offline 127.0.0.1 only.
- * Works completely standalone (overview/teleprompter + keyboard/click advance + timers/takes)
- * with OBS WebSocket treated strictly as an optional enhancement.
+ * Plain ES module — zero build step.
+ * Combines:
+ *   1) Real-time WebSocket Controller (/ws/live?project=<name>&role=controller) driving /obs-stage/
+ *   2) RTL Teleprompter, Script Overview, Foot-Pedal/Keyboard controls & Take Log
+ *   3) Live Podcast Lower-Third Launcher, Chapter Progress Bar & Built-in SFX Soundboard
+ *   4) Optional OBS WebSocket (port 4455) hardware sync + Offline OBS Package Export
  */
 import { OBS_SCENES, ObsWebSocketClient } from './obs-ws.js';
 import {
@@ -19,6 +22,36 @@ const $ = (id) => document.getElementById(id);
 const els = {
   projectSelect: $('projectSelect'),
   projectSubtitle: $('projectSubtitle'),
+  liveHubBadge: $('liveHubBadge'),
+  obsViewerCountBadge: $('obsViewerCountBadge'),
+  liveMonitorFrame: $('liveMonitorFrame'),
+  btnObsUrlFull: $('btnObsUrlFull'),
+  btnObsUrlTransparent: $('btnObsUrlTransparent'),
+  obsSourceUrlInput: $('obsSourceUrlInput'),
+  btnCopyObsUrl: $('btnCopyObsUrl'),
+  btnOpenObsStageTab: $('btnOpenObsStageTab'),
+  liveBgStyleSelect: $('liveBgStyleSelect'),
+  liveIntensitySelect: $('liveIntensitySelect'),
+  chkShowLiveBadge: $('chkShowLiveBadge'),
+  chkMicReactive: $('chkMicReactive'),
+  ltActiveBadge: $('ltActiveBadge'),
+  ltRoleInput: $('ltRoleInput'),
+  ltStyleSelect: $('ltStyleSelect'),
+  ltTitleInput: $('ltTitleInput'),
+  ltSubtitleInput: $('ltSubtitleInput'),
+  btnToggleLowerThird: $('btnToggleLowerThird'),
+  btnUpdateLowerThird: $('btnUpdateLowerThird'),
+  chapterStatusText: $('chapterStatusText'),
+  chapterTitleInput: $('chapterTitleInput'),
+  chapterIndexInput: $('chapterIndexInput'),
+  chapterTotalInput: $('chapterTotalInput'),
+  chkAutoChapterSync: $('chkAutoChapterSync'),
+  btnToggleChapter: $('btnToggleChapter'),
+  btnNextChapter: $('btnNextChapter'),
+  btnSoundMute: $('btnSoundMute'),
+  soundboardGrid: $('soundboardGrid'),
+  sfxVolSlider: $('sfxVolSlider'),
+  linkBackEditor: $('linkBackEditor'),
   btnReloadSteps: $('btnReloadSteps'),
   btnToggleDock: $('btnToggleDock'),
   btnFocusMode: $('btnFocusMode'),
@@ -86,6 +119,7 @@ const els = {
   btnSceneSlide: $('btnSceneSlide'),
   btnSceneScam: $('btnSceneScam'),
   btnSceneCam: $('btnSceneCam'),
+  btnSceneOverlay: $('btnSceneOverlay'),
   btnZoomToggle: $('btnZoomToggle'),
   btnZoomOut: $('btnZoomOut'),
   btnMotionToggle: $('btnMotionToggle'),
@@ -103,7 +137,21 @@ const els = {
 
 let currentProjectName = '';
 let currentProjectTitle = '';
+let projectTheme = 'khordegir-dark';
+let projectSlides = [];
+let projectLivingStage = { bgStyle: 'studio-mix', intensity: 'podcast', microMotion: true };
+let projectPodcast = null;
 let fallbackBannerDismissed = false;
+
+let liveWs = null;
+let liveWsReconnectTimer = null;
+let liveWsPingTimer = null;
+let liveUrlTransparent = false;
+let liveLowerThirdVisible = false;
+let liveChapterVisible = false;
+let sfxMuted = false;
+let sfxVolume = 0.75;
+
 const obs = new ObsWebSocketClient();
 
 const prompter = new TeleprompterController({
@@ -116,6 +164,193 @@ const prompter = new TeleprompterController({
   },
 });
 
+/* ---------------------------------------------------------------- Live OBS Browser Source Hub Sync */
+function buildObsStageUrl(transparent = liveUrlTransparent, extraParams = {}) {
+  const base = `${window.location.origin}/obs-stage/`;
+  const u = new URL(base);
+  if (currentProjectName) u.searchParams.set('project', currentProjectName);
+  if (transparent) u.searchParams.set('transparent', '1');
+  Object.entries(extraParams).forEach(([k, v]) => {
+    if (v !== undefined && v !== null) u.searchParams.set(k, String(v));
+  });
+  return u.toString();
+}
+
+function refreshObsSourceUrlUi() {
+  const url = buildObsStageUrl(liveUrlTransparent);
+  els.obsSourceUrlInput.value = url;
+  els.btnOpenObsStageTab.href = url;
+  els.btnObsUrlFull.classList.toggle('btn-active', !liveUrlTransparent);
+  els.btnObsUrlTransparent.classList.toggle('btn-active', liveUrlTransparent);
+}
+
+function updateLiveMonitorFrame() {
+  if (!currentProjectName) return;
+  const monitorUrl = buildObsStageUrl(false, { muted: 1, preview: 1 });
+  if (els.liveMonitorFrame.dataset.project !== currentProjectName) {
+    els.liveMonitorFrame.dataset.project = currentProjectName;
+    els.liveMonitorFrame.src = monitorUrl;
+  }
+}
+
+function sendLiveCommand(type, payload) {
+  if (!currentProjectName) return;
+  if (liveWs && liveWs.readyState === WebSocket.OPEN) {
+    liveWs.send(JSON.stringify({ type, payload }));
+    return;
+  }
+  fetch(`/api/live/${encodeURIComponent(currentProjectName)}/command`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type, payload }),
+  }).catch(() => {});
+}
+
+function resolveActiveSlideForStep(step) {
+  if (!step || !projectSlides.length) return null;
+  let idx = Number.isFinite(+step.slideIndex) ? +step.slideIndex : (step.slide > 0 ? step.slide - 1 : -1);
+  if (idx < 0 || idx >= projectSlides.length) return null;
+  return { slide: JSON.parse(JSON.stringify(projectSlides[idx])), slideIndex: idx };
+}
+
+function pushStepToLiveObs(step, overrideLayout = null) {
+  if (!step || !currentProjectName) return;
+  const layout = String(overrideLayout || step.layoutKey || step.layout || 'SCAM').toUpperCase();
+  const resolved = resolveActiveSlideForStep(step);
+  const slidePayload = resolved ? resolved.slide : null;
+  const slideIndex = resolved ? resolved.slideIndex : 0;
+
+  if (slidePayload) {
+    slidePayload._seed = `${currentProjectName}:live:${slideIndex + 1}`;
+    slidePayload._num = slideIndex + 1;
+    slidePayload.livingStage = Object.assign({}, projectLivingStage, slidePayload.livingStage || {}, {
+      bgStyle: els.liveBgStyleSelect.value,
+      intensity: els.liveIntensitySelect.value,
+    });
+  }
+
+  sendLiveCommand('stage:sync', {
+    currentStepIndex: prompter.currentIndex,
+    currentSlideIndex: slideIndex,
+    layout,
+    theme: projectTheme,
+    activeSlide: slidePayload,
+    livingStage: {
+      bgStyle: els.liveBgStyleSelect.value,
+      intensity: els.liveIntensitySelect.value,
+      microMotion: true,
+    },
+  });
+
+  if (els.chkAutoChapterSync.checked) {
+    const acts = [...new Set((prompter.steps || []).map((s) => Number(s.act || 1)))].sort((a, b) => a - b);
+    const totalActs = Math.max(1, acts.length);
+    const curAct = Math.max(1, Number(step.act || 1));
+    const titleText = (slidePayload && (slidePayload.title || slidePayload.text)) || `پرده ${toPersianDigits(curAct)}`;
+    const cleanTitle = String(titleText).replace(/[*~=_]/g, '').slice(0, 64);
+    els.chapterIndexInput.value = String(curAct);
+    els.chapterTotalInput.value = String(totalActs);
+    els.chapterTitleInput.value = cleanTitle;
+    if (liveChapterVisible) {
+      sendLiveCommand('chapter:set', {
+        visible: true,
+        index: curAct,
+        total: totalActs,
+        title: cleanTitle,
+      });
+    }
+  }
+}
+
+function applyRoomStateToConsoleUi(room) {
+  if (!room) return;
+  const viewers = Number(room.viewerCount) || 0;
+  els.obsViewerCountBadge.textContent = `${toPersianDigits(viewers)} بیننده زنده`;
+  els.liveHubBadge.className = 'ws-badge ' + (viewers > 0 ? 'ws-on' : 'ws-wait');
+  els.liveHubBadge.textContent = viewers > 0
+    ? `OBS زنده: متصل (${toPersianDigits(viewers)})`
+    : 'OBS زنده: آمادهٔ اتصال';
+
+  if (room.lowerThird) {
+    liveLowerThirdVisible = Boolean(room.lowerThird.visible);
+    els.ltActiveBadge.textContent = liveLowerThirdVisible ? 'روی آنتن ✓' : 'مخفی';
+    els.ltActiveBadge.className = 'status-text ' + (liveLowerThirdVisible ? 'ok' : '');
+    els.btnToggleLowerThird.textContent = liveLowerThirdVisible ? 'مخفی کردن Lower-Third' : 'نمایش Lower-Third روی آنتن';
+  }
+  if (room.chapter) {
+    liveChapterVisible = Boolean(room.chapter.visible);
+    els.chapterStatusText.textContent = liveChapterVisible ? 'نمایش داده می‌شود ✓' : 'مخفی';
+    els.chapterStatusText.className = 'status-text ' + (liveChapterVisible ? 'ok' : '');
+  }
+}
+
+function connectLiveHubWs() {
+  clearTimeout(liveWsReconnectTimer);
+  clearInterval(liveWsPingTimer);
+  if (liveWs) {
+    try { liveWs.close(); } catch {}
+    liveWs = null;
+  }
+  if (!currentProjectName) return;
+
+  const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const url = `${proto}//${window.location.host}/ws/live?project=${encodeURIComponent(currentProjectName)}&role=controller`;
+  try {
+    liveWs = new WebSocket(url);
+  } catch {
+    return;
+  }
+
+  liveWs.onopen = () => {
+    liveWsPingTimer = setInterval(() => {
+      if (liveWs && liveWs.readyState === WebSocket.OPEN) {
+        liveWs.send(JSON.stringify({ type: 'ping' }));
+      }
+    }, 20000);
+    // Sync current step immediately upon connect
+    const step = prompter.currentStep();
+    if (step) pushStepToLiveObs(step);
+  };
+
+  liveWs.onmessage = (ev) => {
+    try {
+      const msg = JSON.parse(String(ev.data));
+      if (msg && msg.state) {
+        applyRoomStateToConsoleUi(msg.state);
+      }
+    } catch {}
+  };
+
+  liveWs.onclose = () => {
+    clearInterval(liveWsPingTimer);
+    liveWsReconnectTimer = setTimeout(connectLiveHubWs, 2000);
+  };
+}
+
+function buildSoundboard() {
+  const catalog = (window.StageSFX && window.StageSFX.CATALOG) || [];
+  els.soundboardGrid.innerHTML = '';
+  catalog.forEach((item) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'sfx-pad';
+    btn.innerHTML = `<span>${item.icon}</span><span>${item.label}</span>`;
+    btn.title = item.en;
+    btn.addEventListener('click', () => {
+      btn.classList.add('is-fired');
+      setTimeout(() => btn.classList.remove('is-fired'), 220);
+      if (window.StageSFX && !sfxMuted) {
+        window.StageSFX.setMuted(false);
+        window.StageSFX.setVolume(sfxVolume);
+        window.StageSFX.play(item.id, sfxVolume);
+      }
+      sendLiveCommand('sfx:trigger', { sound: item.id, volume: sfxVolume });
+    });
+    els.soundboardGrid.appendChild(btn);
+  });
+}
+
+/* ---------------------------------------------------------------- Focus fit + View modes */
 let focusFitRaf = 0;
 
 function fitFocusText() {
@@ -355,10 +590,9 @@ function renderPrompter() {
   els.btnNext.disabled = prompter.currentIndex >= total - 1;
   els.btnPrev.disabled = prompter.currentIndex <= 0;
 
-  // Highlight active scene button
   const curLayout = String(step.layoutKey || step.layout || 'SCAM').toUpperCase();
-  for (const btn of [els.btnSceneSlide, els.btnSceneScam, els.btnSceneCam]) {
-    btn.classList.toggle('active', btn.dataset.layout === curLayout);
+  for (const btn of [els.btnSceneSlide, els.btnSceneScam, els.btnSceneCam, els.btnSceneOverlay]) {
+    if (btn) btn.classList.toggle('active', btn.dataset.layout === curLayout);
   }
 
   renderOverview();
@@ -450,41 +684,30 @@ function renderObsStatus(snap) {
     connected ? 'ws-on' : connecting ? 'ws-wait' : isFallback ? 'ws-fallback' : 'ws-standalone'
   );
   els.wsBadge.textContent = connected
-    ? 'OBS متصل'
+    ? 'OBS WS متصل'
     : connecting
       ? 'در حال اتصال به OBS...'
       : isFallback
-        ? 'حالت مستقل (OBS در دسترس نیست)'
-        : 'حالت مستقل (بدون OBS)';
+        ? 'OBS WS مستقل'
+        : 'OBS WS مستقل';
 
   els.obsConnLabel.className = 'status-text ' + (connected ? 'ok' : isFallback ? 'warn' : '');
-  els.obsConnLabel.textContent = connected
-    ? 'متصل'
-    : connecting
-      ? 'در حال اتصال...'
-      : 'حالت مستقل';
+  els.obsConnLabel.textContent = connected ? 'متصل' : connecting ? 'در حال اتصال...' : 'اختیاری';
 
   els.statVersion.textContent = snap.obsVersion || '—';
   els.statScene.textContent = snap.programScene || '—';
   els.statStudio.textContent = connected ? (snap.studioMode ? 'فعال' : 'غیرفعال') : '—';
   els.statRec.textContent = connected
     ? (snap.recording ? `در حال ضبط ${snap.recordTimecode ? `(${snap.recordTimecode})` : ''}` : 'متوقف')
-    : (prompter.activeRec ? 'ضبط زمان‌بندی محلی' : 'مستقل');
+    : (prompter.activeRec ? 'ضبط محلی' : 'مستقل');
 
   els.zoomStateLabel.textContent = connected ? (snap.zoomed ? 'زوم فعال' : 'عادی') : 'اختیاری';
   els.btnConnectObs.classList.toggle('hidden', connected);
-  els.btnConnectObs.textContent = isFallback ? 'تلاش مجدد برای OBS' : 'اتصال به OBS';
   els.btnDisconnectObs.classList.toggle('hidden', !connected);
 
-  // Enable/disable OBS-only hardware controls cleanly; teleprompter & overview remain 100% active
   const obsOnlyBtns = document.querySelectorAll('.obs-only-btn');
   obsOnlyBtns.forEach((btn) => {
     btn.disabled = !connected;
-    if (!connected) {
-      btn.title = 'این دکمه در صورت اتصال اختیاری به OBS WebSocket فعال می‌شود';
-    } else {
-      btn.removeAttribute('title');
-    }
   });
 
   if (snap.noticeMessage) {
@@ -495,9 +718,7 @@ function renderObsStatus(snap) {
   }
 
   if (isFallback && !fallbackBannerDismissed) {
-    els.fallbackMessage.textContent =
-      snap.noticeMessage ||
-      'اتصال OBS WebSocket در دسترس نیست یا رد شد؛ تله‌پرامپتر و نمای کلی بدون نیاز به OBS فعال هستند.';
+    els.fallbackMessage.textContent = snap.noticeMessage || 'اتصال OBS WebSocket (پورت ۴۴۵۵) برقرار نیست؛ پخش زنده از طریق Browser Source فعال است.';
     els.fallbackBanner.classList.remove('hidden');
   } else {
     els.fallbackBanner.classList.add('hidden');
@@ -516,33 +737,26 @@ function resolveSlideFilePath(slideNum) {
 
 async function syncObsToStep(step, direction = 'jump') {
   if (!step) return;
+  pushStepToLiveObs(step);
+
   const snap = obs.getSnapshot();
   if (snap.status !== 'connected' || !prompter.prefs.syncObsOnStep) return;
 
   try {
-    if (direction === 'next') {
-      await obs.triggerHotkey('hs_next');
-    } else if (direction === 'prev') {
-      await obs.triggerHotkey('hs_prev');
-    }
+    if (direction === 'next') await obs.triggerHotkey('hs_next');
+    else if (direction === 'prev') await obs.triggerHotkey('hs_prev');
     const layoutKey = step.layoutKey || step.layout || 'SCAM';
     await obs.switchLayoutScene(layoutKey);
     if (step.slide > 0 && els.slidesDirInput.value.trim()) {
       await obs.setSlideImage(resolveSlideFilePath(step.slide));
     }
-    if (snap.studioMode) {
-      await obs.setPreviewScene(OBS_SCENES.PROMPTER);
-    }
-  } catch {
-    // Non-fatal if Lua script or scene names differ
-  }
+    if (snap.studioMode) await obs.setPreviewScene(OBS_SCENES.PROMPTER);
+  } catch {}
 }
 
 function jumpAndSyncStep(stepFn, direction = 'jump') {
   const step = stepFn();
-  if (step) {
-    void syncObsToStep(step, direction);
-  }
+  if (step) void syncObsToStep(step, direction);
 }
 
 async function toggleRecordingFlow() {
@@ -552,11 +766,7 @@ async function toggleRecordingFlow() {
   if (isRec) {
     prompter.cancelCountdown();
     if (snap.status === 'connected') {
-      try {
-        await obs.stopRecord();
-      } catch {
-        prompter.stopRecordingState();
-      }
+      try { await obs.stopRecord(); } catch { prompter.stopRecordingState(); }
     } else {
       prompter.stopRecordingState();
     }
@@ -570,18 +780,14 @@ async function toggleRecordingFlow() {
         await obs.startRecord();
         prompter.startRecordingState(act);
       } catch {
-        await obs.toggleRecord().catch(() => {
-          prompter.startRecordingState(act);
-        });
+        await obs.toggleRecord().catch(() => prompter.startRecordingState(act));
       }
     } else {
       prompter.startRecordingState(act);
     }
   };
 
-  prompter.startCountdown(prompter.prefs.countdownSec, () => {
-    void doStart();
-  });
+  prompter.startCountdown(prompter.prefs.countdownSec, () => void doStart());
 }
 
 async function loadProjectsList() {
@@ -624,17 +830,38 @@ async function loadProjectSteps(name, { preserveIndex = false, initialStep = nul
   const payload = await res.json();
   currentProjectName = payload.name || name;
   currentProjectTitle = payload.title || name;
+  projectTheme = payload.theme || 'khordegir-dark';
+  projectSlides = Array.isArray(payload.slides) ? payload.slides : [];
+  projectLivingStage = payload.livingStage || { bgStyle: 'studio-mix', intensity: 'podcast', microMotion: true };
+  projectPodcast = payload.podcast || null;
+
   els.projectSelect.value = currentProjectName;
-  els.projectSubtitle.textContent = `${currentProjectTitle} · ${toPersianDigits((payload.steps || []).length)} مرحله از video.yaml`;
+  els.projectSubtitle.textContent = `${currentProjectTitle} · ${toPersianDigits((payload.steps || []).length)} مرحله`;
+  els.linkBackEditor.href = `/editor/?project=${encodeURIComponent(currentProjectName)}`;
+
+  if (projectLivingStage.bgStyle) els.liveBgStyleSelect.value = projectLivingStage.bgStyle;
+  if (projectLivingStage.intensity) els.liveIntensitySelect.value = projectLivingStage.intensity;
+
+  if (projectPodcast && projectPodcast.host && !els.ltTitleInput.value) {
+    els.ltTitleInput.value = projectPodcast.host;
+    els.ltSubtitleInput.value = projectPodcast.showTitle || currentProjectTitle;
+  } else if (!els.ltTitleInput.value) {
+    els.ltTitleInput.value = currentProjectTitle;
+  }
 
   const url = new URL(window.location.href);
   url.searchParams.set('project', currentProjectName);
   window.history.replaceState({}, '', url);
 
+  refreshObsSourceUrlUi();
+  updateLiveMonitorFrame();
+
   prompter.setSteps(payload.steps || [], preserveIndex);
   if (initialStep !== null && initialStep >= 1 && (payload.steps || []).length > 0) {
     prompter.jumpTo(initialStep - 1);
   }
+
+  connectLiveHubWs();
 }
 
 async function runObsPackageExport() {
@@ -655,20 +882,11 @@ async function runObsPackageExport() {
       }),
     });
     const data = await res.json();
-    if (!res.ok || !data.ok) {
-      throw new Error(data.error || 'خطا در ساخت بستهٔ OBS');
-    }
-    const pngInfo = data.prompter_pngs?.length
-      ? `<br>تصاویر پرامپتر: ${toPersianDigits(data.prompter_pngs.length)} فایل PNG`
-      : '';
-    const warnInfo = data.warnings?.length
-      ? `<br>توجه: ${data.warnings.join(' · ')}`
-      : '';
+    if (!res.ok || !data.ok) throw new Error(data.error || 'خطا در ساخت بستهٔ OBS');
     els.exportResult.innerHTML = `
       <strong>بستهٔ OBS با موفقیت ساخته شد</strong><br>
       مسیر: <code dir="ltr">${data.out_dir}</code><br>
       فایل‌ها: <span dir="ltr">${(data.files || []).join('، ')}</span>
-      ${pngInfo}${warnInfo}
     `;
   } catch (err) {
     els.exportResult.classList.add('error');
@@ -684,15 +902,40 @@ function connectOptionalObs() {
   obs.connect(els.wsUrlInput.value, els.wsPassInput.value);
 }
 
+function sendOverlayUpdate() {
+  sendLiveCommand('overlay:set', {
+    transparentBg: liveUrlTransparent,
+    showLiveBadge: els.chkShowLiveBadge.checked,
+    micReactive: els.chkMicReactive.checked,
+    sfxEnabled: !sfxMuted,
+    livingStage: {
+      bgStyle: els.liveBgStyleSelect.value,
+      intensity: els.liveIntensitySelect.value,
+      microMotion: true,
+      micReactive: els.chkMicReactive.checked,
+    },
+  });
+}
+
+function sendLowerThird(visible) {
+  const [style, side] = String(els.ltStyleSelect.value || 'glass-amber').split('|');
+  sendLiveCommand('lower_third:set', {
+    visible,
+    role: els.ltRoleInput.value,
+    title: els.ltTitleInput.value.trim() || currentProjectTitle || 'میزبان پادکست',
+    subtitle: els.ltSubtitleInput.value.trim(),
+    badge: 'LIVE',
+    style: style || 'glass-amber',
+    side: side || 'right',
+  });
+}
+
 function wireEvents() {
   obs.subscribe(renderObsStatus);
   obs.onEvent((eventType, eventData) => {
     if (eventType === 'RecordStateChanged') {
-      if (eventData.outputActive) {
-        prompter.startRecordingState(prompter.currentStep()?.act ?? 1);
-      } else {
-        prompter.stopRecordingState(eventData.outputPath || '');
-      }
+      if (eventData.outputActive) prompter.startRecordingState(prompter.currentStep()?.act ?? 1);
+      else prompter.stopRecordingState(eventData.outputPath || '');
     }
   });
 
@@ -703,26 +946,79 @@ function wireEvents() {
   };
 
   els.btnReloadSteps.onclick = () => {
-    if (currentProjectName) {
-      void loadProjectSteps(currentProjectName, { preserveIndex: true });
+    if (currentProjectName) void loadProjectSteps(currentProjectName, { preserveIndex: true });
+  };
+
+  // Browser source URL mode + copy
+  els.btnObsUrlFull.onclick = () => {
+    liveUrlTransparent = false;
+    refreshObsSourceUrlUi();
+    sendOverlayUpdate();
+  };
+  els.btnObsUrlTransparent.onclick = () => {
+    liveUrlTransparent = true;
+    refreshObsSourceUrlUi();
+    sendOverlayUpdate();
+  };
+  els.btnCopyObsUrl.onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(els.obsSourceUrlInput.value);
+      els.btnCopyObsUrl.textContent = 'کپی شد ✓';
+      setTimeout(() => { els.btnCopyObsUrl.textContent = 'کپی لینک'; }, 1800);
+    } catch {
+      els.obsSourceUrlInput.select();
     }
+  };
+
+  els.liveBgStyleSelect.onchange = sendOverlayUpdate;
+  els.liveIntensitySelect.onchange = sendOverlayUpdate;
+  els.chkShowLiveBadge.onchange = sendOverlayUpdate;
+  els.chkMicReactive.onchange = sendOverlayUpdate;
+
+  // Lower-third & Chapter live controls
+  els.btnToggleLowerThird.onclick = () => sendLowerThird(!liveLowerThirdVisible);
+  els.btnUpdateLowerThird.onclick = () => sendLowerThird(true);
+
+  els.btnToggleChapter.onclick = () => {
+    sendLiveCommand('chapter:set', {
+      visible: !liveChapterVisible,
+      index: Number(els.chapterIndexInput.value) || 1,
+      total: Number(els.chapterTotalInput.value) || 1,
+      title: els.chapterTitleInput.value.trim() || currentProjectTitle || 'موضوع برنامه',
+    });
+  };
+  els.btnNextChapter.onclick = () => {
+    const nextIdx = Math.min(Number(els.chapterTotalInput.value) || 99, (Number(els.chapterIndexInput.value) || 1) + 1);
+    els.chapterIndexInput.value = String(nextIdx);
+    sendLiveCommand('chapter:set', {
+      visible: true,
+      index: nextIdx,
+      total: Number(els.chapterTotalInput.value) || nextIdx,
+      title: els.chapterTitleInput.value.trim() || `فصل ${toPersianDigits(nextIdx)}`,
+    });
+  };
+
+  // Soundboard mute & volume
+  els.btnSoundMute.onclick = () => {
+    sfxMuted = !sfxMuted;
+    els.btnSoundMute.textContent = sfxMuted ? '🔇 بی‌صدا' : '🔊 فعال';
+    if (window.StageSFX) window.StageSFX.setMuted(sfxMuted);
+    sendOverlayUpdate();
+  };
+  els.sfxVolSlider.oninput = () => {
+    sfxVolume = parseFloat(els.sfxVolSlider.value) || 0.75;
+    if (window.StageSFX) window.StageSFX.setVolume(sfxVolume);
   };
 
   els.btnToggleDock.onclick = () => {
     const active = document.body.classList.toggle('dock-mode');
-    els.btnToggleDock.textContent = active ? 'خروج از نمای تمام‌عرض' : 'نمای تمام‌عرض پرامپتر';
+    els.btnToggleDock.textContent = active ? 'خروج از نمای تمام‌عرض' : 'نمای تمام‌عرض';
   };
-
-  els.btnFocusMode.onclick = () => {
-    prompter.toggleFocusMode();
-  };
-
-  // View mode tabs
+  els.btnFocusMode.onclick = () => prompter.toggleFocusMode();
   for (const btn of [els.btnModePrompter, els.btnModeOverview, els.btnModeSplit]) {
     btn.onclick = () => prompter.updatePrefs({ viewMode: btn.dataset.view });
   }
 
-  // Fallback banner controls
   els.btnBannerFocus.onclick = () => {
     document.body.classList.add('dock-mode');
     els.btnToggleDock.textContent = 'خروج از نمای تمام‌عرض';
@@ -733,14 +1029,11 @@ function wireEvents() {
     els.fallbackBanner.classList.add('hidden');
   };
 
-  // Teleprompter controls
   els.btnNext.onclick = () => jumpAndSyncStep(() => prompter.next(), 'next');
   els.btnPrev.onclick = () => jumpAndSyncStep(() => prompter.prev(), 'prev');
   els.btnActStart.onclick = () => {
     jumpAndSyncStep(() => prompter.jumpToActStart());
-    if (obs.getSnapshot().status === 'connected') {
-      void obs.triggerHotkey('hs_rec').catch(() => {});
-    }
+    if (obs.getSnapshot().status === 'connected') void obs.triggerHotkey('hs_rec').catch(() => {});
   };
   els.btnRecord.onclick = () => void toggleRecordingFlow();
   els.btnCancelCountdown.onclick = () => prompter.cancelCountdown();
@@ -751,32 +1044,15 @@ function wireEvents() {
     }
   };
 
-  els.btnAutoScroll.onclick = () => {
-    prompter.updatePrefs({ autoScroll: !prompter.prefs.autoScroll });
-  };
-  els.btnSpeedDown.onclick = () => {
-    prompter.updatePrefs({ scrollSpeed: Math.max(0.2, Number((prompter.prefs.scrollSpeed - 0.2).toFixed(1))) });
-  };
-  els.btnSpeedUp.onclick = () => {
-    prompter.updatePrefs({ scrollSpeed: Math.min(4.0, Number((prompter.prefs.scrollSpeed + 0.2).toFixed(1))) });
-  };
-  els.btnFontDown.onclick = () => {
-    prompter.updatePrefs({ fontSizePx: Math.max(20, prompter.prefs.fontSizePx - 4) });
-  };
-  els.btnFontUp.onclick = () => {
-    prompter.updatePrefs({ fontSizePx: Math.min(84, prompter.prefs.fontSizePx + 4) });
-  };
-  els.btnMirror.onclick = () => {
-    prompter.updatePrefs({ mirror: !prompter.prefs.mirror });
-  };
-  els.chkClickAdvance.onchange = (e) => {
-    prompter.updatePrefs({ clickTextToAdvance: e.target.checked });
-  };
-  els.countdownSelect.onchange = (e) => {
-    prompter.updatePrefs({ countdownSec: Number(e.target.value) });
-  };
+  els.btnAutoScroll.onclick = () => prompter.updatePrefs({ autoScroll: !prompter.prefs.autoScroll });
+  els.btnSpeedDown.onclick = () => prompter.updatePrefs({ scrollSpeed: Math.max(0.2, Number((prompter.prefs.scrollSpeed - 0.2).toFixed(1))) });
+  els.btnSpeedUp.onclick = () => prompter.updatePrefs({ scrollSpeed: Math.min(4.0, Number((prompter.prefs.scrollSpeed + 0.2).toFixed(1))) });
+  els.btnFontDown.onclick = () => prompter.updatePrefs({ fontSizePx: Math.max(20, prompter.prefs.fontSizePx - 4) });
+  els.btnFontUp.onclick = () => prompter.updatePrefs({ fontSizePx: Math.min(84, prompter.prefs.fontSizePx + 4) });
+  els.btnMirror.onclick = () => prompter.updatePrefs({ mirror: !prompter.prefs.mirror });
+  els.chkClickAdvance.onchange = (e) => prompter.updatePrefs({ clickTextToAdvance: e.target.checked });
+  els.countdownSelect.onchange = (e) => prompter.updatePrefs({ countdownSec: Number(e.target.value) });
 
-  // Optional OBS controls
   els.wsUrlInput.value = prompter.prefs.wsUrl;
   els.wsPassInput.value = prompter.prefs.wsPassword;
   els.slidesDirInput.value = prompter.prefs.slidesDir;
@@ -796,54 +1072,56 @@ function wireEvents() {
 
   els.btnConnectObs.onclick = () => connectOptionalObs();
   els.btnDisconnectObs.onclick = () => obs.disconnect();
-
   els.btnStudioSync.onclick = async () => {
     if (obs.getSnapshot().status !== 'connected') return;
     try {
       await obs.setStudioMode(true);
       await obs.setPreviewScene(OBS_SCENES.PROMPTER);
-    } catch {
-      // handled gracefully
-    }
+    } catch {}
   };
 
-  for (const btn of [els.btnSceneSlide, els.btnSceneScam, els.btnSceneCam]) {
+  // Layout buttons ALWAYS switch live /obs-stage/ AND optional OBS WebSocket
+  for (const btn of [els.btnSceneSlide, els.btnSceneScam, els.btnSceneCam, els.btnSceneOverlay]) {
     btn.onclick = () => {
-      if (obs.getSnapshot().status !== 'connected') return;
-      void obs.switchLayoutScene(btn.dataset.layout).catch(() => {});
+      const lay = btn.dataset.layout;
+      if (lay === 'OVERLAY') {
+        liveUrlTransparent = true;
+        refreshObsSourceUrlUi();
+        sendLiveCommand('overlay:set', { transparentBg: true });
+        sendLiveCommand('layout:set', { layout: 'SCAM' });
+      } else {
+        if (liveUrlTransparent && lay !== 'CAM') {
+          liveUrlTransparent = false;
+          refreshObsSourceUrlUi();
+          sendLiveCommand('overlay:set', { transparentBg: false });
+        }
+        sendLiveCommand('layout:set', { layout: lay });
+        if (obs.getSnapshot().status === 'connected') {
+          void obs.switchLayoutScene(lay).catch(() => {});
+        }
+      }
+      for (const b of [els.btnSceneSlide, els.btnSceneScam, els.btnSceneCam, els.btnSceneOverlay]) {
+        b.classList.toggle('active', b === btn);
+      }
     };
   }
-  els.btnZoomToggle.onclick = () => {
-    if (obs.getSnapshot().status !== 'connected') return;
-    void obs.toggleZoom().catch(() => {});
-  };
-  els.btnZoomOut.onclick = () => {
-    if (obs.getSnapshot().status !== 'connected') return;
-    void obs.zoomOut().catch(() => {});
-  };
-  els.btnMotionToggle.onclick = () => {
-    if (obs.getSnapshot().status !== 'connected') return;
-    void obs.toggleMotion().catch(() => {});
-  };
+
+  els.btnZoomToggle.onclick = () => obs.getSnapshot().status === 'connected' && void obs.toggleZoom().catch(() => {});
+  els.btnZoomOut.onclick = () => obs.getSnapshot().status === 'connected' && void obs.zoomOut().catch(() => {});
+  els.btnMotionToggle.onclick = () => obs.getSnapshot().status === 'connected' && void obs.toggleMotion().catch(() => {});
   els.btnPushSlide.onclick = () => {
     if (obs.getSnapshot().status !== 'connected') return;
     const step = prompter.currentStep();
-    if (step && step.slide > 0) {
-      void obs.setSlideImage(resolveSlideFilePath(step.slide)).catch(() => {});
-    }
+    if (step && step.slide > 0) void obs.setSlideImage(resolveSlideFilePath(step.slide)).catch(() => {});
   };
 
   els.btnClearTakes.onclick = () => prompter.clearTakes();
 
-  // Export modal
   els.btnOpenExport.onclick = () => els.exportModal.classList.remove('hidden');
   els.btnCloseExport.onclick = () => els.exportModal.classList.add('hidden');
-  els.exportModal.onclick = (e) => {
-    if (e.target === els.exportModal) els.exportModal.classList.add('hidden');
-  };
+  els.exportModal.onclick = (e) => { if (e.target === els.exportModal) els.exportModal.classList.add('hidden'); };
   els.btnRunExport.onclick = () => void runObsPackageExport();
 
-  // Keyboard + Foot Pedal (PageUp / PageDown) shortcuts
   document.addEventListener('keydown', (e) => {
     const tag = (e.target && e.target.tagName) || '';
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
@@ -879,9 +1157,8 @@ function wireEvents() {
       e.preventDefault();
       jumpAndSyncStep(() => prompter.jumpToActStart());
     } else if (e.key === 'Escape') {
-      if (prompter.countdownRemaining > 0) {
-        prompter.cancelCountdown();
-      } else if (prompter.prefs.focusMode) {
+      if (prompter.countdownRemaining > 0) prompter.cancelCountdown();
+      else if (prompter.prefs.focusMode) {
         e.preventDefault();
         prompter.updatePrefs({ focusMode: false });
       }
@@ -890,14 +1167,12 @@ function wireEvents() {
 
   window.addEventListener('resize', scheduleFitFocusText);
   if (typeof ResizeObserver === 'function' && els.prompterWrap) {
-    const ro = new ResizeObserver(() => scheduleFitFocusText());
-    ro.observe(els.prompterWrap);
+    new ResizeObserver(() => scheduleFitFocusText()).observe(els.prompterWrap);
   }
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(() => scheduleFitFocusText());
   }
 
-  // Live 1s timer tick for act elapsed & active recording timer
   setInterval(renderTimers, 1000);
 }
 
@@ -908,26 +1183,16 @@ async function init() {
     els.btnToggleDock.textContent = 'خروج از نمای تمام‌عرض';
   }
   const focusParam = q.get('focus');
-  if (focusParam === '1' || focusParam === 'true') {
-    prompter.updatePrefs({ focusMode: true });
-  } else if (focusParam === '0' || focusParam === 'false') {
-    prompter.updatePrefs({ focusMode: false });
-  }
+  if (focusParam === '1' || focusParam === 'true') prompter.updatePrefs({ focusMode: true });
+  else if (focusParam === '0' || focusParam === 'false') prompter.updatePrefs({ focusMode: false });
   const viewParam = q.get('view');
-  if (viewParam && VALID_VIEW_MODES.includes(viewParam)) {
-    prompter.prefs.viewMode = viewParam;
-  }
+  if (viewParam && VALID_VIEW_MODES.includes(viewParam)) prompter.prefs.viewMode = viewParam;
   const fsParam = Number(q.get('fs'));
-  if (fsParam >= 20 && fsParam <= 84) {
-    prompter.prefs.fontSizePx = fsParam;
-  }
-  if (q.get('mirror') === '1') {
-    prompter.prefs.mirror = true;
-  }
-  if (q.get('auto') === '1') {
-    prompter.updatePrefs({ autoScroll: true });
-  }
+  if (fsParam >= 20 && fsParam <= 84) prompter.prefs.fontSizePx = fsParam;
+  if (q.get('mirror') === '1') prompter.prefs.mirror = true;
+  if (q.get('auto') === '1') prompter.updatePrefs({ autoScroll: true });
 
+  buildSoundboard();
   wireEvents();
 
   const initialStep = q.get('s') ? Number(q.get('s')) : null;
@@ -945,7 +1210,6 @@ async function init() {
     renderPrompter();
   }
 
-  // WebSocket is strictly optional; if autoconnect=1 is requested, attempt and degrade gracefully on refusal.
   if (q.get('autoconnect') === '1' || q.get('ws') === '1') {
     connectOptionalObs();
   }

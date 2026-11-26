@@ -31,14 +31,20 @@
           <select id="themeSelect" class="select-ctrl" aria-label="انتخاب تم"></select>
         </label>
 
-        <button id="btnProjectStyle" type="button" class="btn btn-ghost">🎨 سبک و لوگو</button>
-        <button id="btnRandomAll" type="button" class="btn btn-amber" title="انتخاب تصادفی قطعی برای تم، سبک حرکت، ترنزیشن و لوگو با تغییر بذر">🎲 ترکیب تصادفی</button>
+        <button id="btnProjectStyle" type="button" class="btn btn-ghost">🎨 سبک، لوگو و پادکست</button>
+        <button id="btnOpenImporter" type="button" class="btn btn-ghost">📄 متن به اسلاید</button>
+        <button id="btnRandomAll" type="button" class="btn btn-amber" title="انتخاب تصادفی قطعی برای تم، سبک حرکت، ترنزیشن و لوگو">🎲 تصادفی</button>
       </div>
 
       <div class="topbar-actions">
+        <div class="undo-group" role="group" aria-label="تاریخچه ویرایش">
+          <button id="btnUndo" type="button" class="btn btn-sm btn-ghost" title="برگشت (Ctrl+Z)" disabled>↶</button>
+          <button id="btnRedo" type="button" class="btn btn-sm btn-ghost" title="بازگشت به جلو (Ctrl+Shift+Z)" disabled>↷</button>
+        </div>
         <span id="dirtyBadge" class="dirty-badge hidden">تغییرات ذخیره نشده</span>
         <button id="btnSave" type="button" class="btn btn-primary" disabled>ذخیره video.yaml</button>
-        <a id="linkObs" href="/obs/" class="btn btn-amber-outline">کنسول OBS و تله‌پرامپتر</a>
+        <button id="btnSendLive" type="button" class="btn btn-live" title="پخش فوری این اسلاید روی OBS Browser Source">📡 ارسال زنده OBS</button>
+        <a id="linkObs" href="/obs/" class="btn btn-amber-outline">کنسول OBS و پرامپتر</a>
       </div>
     </header>
 
@@ -48,10 +54,11 @@
       <aside class="pane pane-slides" aria-label="فهرست اسلایدها">
         <div class="pane-head">
           <h2>اسلایدها <span id="slidesCount" class="count-chip">۰</span></h2>
-          <div class="add-slide-wrap">
-            <select id="addTemplateSelect" class="select-ctrl compact" aria-label="نوع اسلاید جدید"></select>
-            <button id="btnAddSlide" type="button" class="btn btn-sm btn-primary">+ افزودن</button>
-          </div>
+          <button id="btnOpenGallery" type="button" class="btn btn-sm btn-amber">+ گالری قالب‌ها</button>
+        </div>
+        <div class="quick-add-bar">
+          <select id="addTemplateSelect" class="select-ctrl compact" aria-label="نوع اسلاید جدید"></select>
+          <button id="btnAddSlide" type="button" class="btn btn-sm btn-primary">+ افزودن</button>
         </div>
         <div id="slidesList" class="slides-list"></div>
       </aside>
@@ -66,18 +73,25 @@
           </div>
 
           <div class="stage-tools-right">
+            <label class="toggle-chip" title="پخش مداوم پس‌زمینه و حرکت زنده مثل خروجی OBS">
+              <input id="chkLivingLoop" type="checkbox" checked>
+              <span>حالت زنده (Living)</span>
+            </label>
             <label class="toggle-chip">
               <input id="chkCamGuide" type="checkbox" checked>
-              <span>نمایش قاب دوربین</span>
+              <span>قاب دوربین</span>
             </label>
             <span id="camStatusChip" class="status-chip ok">ناحیه دوربین آزاد</span>
-            <button id="btnReroll" type="button" class="btn btn-amber">🎲 انیمیشن دیگر</button>
+            <button id="btnReroll" type="button" class="btn btn-amber btn-sm">🎲 انیمیشن دیگر</button>
           </div>
         </div>
 
         <div id="stageViewport" class="stage-viewport">
           <div id="stageFrameBox" class="stage-frame-box">
             <iframe id="stageFrame" src="../stage/stage.html" title="پیش‌نمایش صحنه"></iframe>
+            <div id="stageCanvasPicker" class="stage-canvas-picker hidden">
+              <div class="picker-banner">روی نقطهٔ دلخواه بوم کلیک کنید تا مختصات ثبت شود (Esc برای لغو)</div>
+            </div>
             <div id="camOnlyOverlay" class="cam-only-overlay hidden">
               <div class="cam-only-card">
                 <strong>حالت «فقط دوربین» (CAM)</strong>
@@ -99,19 +113,26 @@
           </div>
 
           <div class="transport-right">
+            <button id="btnSfxMute" type="button" class="btn btn-sm btn-ghost" title="صدای افکت‌های انیمیشن (SFX)">🔊 صدا</button>
             <span id="presetChip" class="meta-chip" title="سبک فعال حرکت">سبک: —</span>
             <span id="transitionChip" class="meta-chip" title="ترنزیشن فعال">ترنزیشن: —</span>
-            <span id="logoChip" class="meta-chip" title="حرکت لوگو">لوگو: —</span>
-            <span id="sayDurChip" class="meta-chip" title="زمان تخمینی گفتار از روی متن say">گفتار: —</span>
+            <span id="sayDurChip" class="meta-chip" title="زمان تخمینی گفتار">گفتار: —</span>
           </div>
         </div>
       </section>
 
-      <!-- Left Column: Schema-Driven Inspector & Editable Field Overrides -->
+      <!-- Left Column: Tabbed Studio Inspector -->
       <aside class="pane pane-inspector" aria-label="ویرایشگر ویژگی‌ها">
         <div class="pane-head">
           <h2>تنظیمات اسلاید</h2>
           <span id="activeSlideBadge" class="count-chip">—</span>
+        </div>
+
+        <div class="inspector-tabs" role="tablist" aria-label="بخش‌های تنظیمات">
+          <button type="button" class="insp-tab active" data-tab="content">محتوا</button>
+          <button type="button" class="insp-tab" data-tab="curves">منحنی و حرکت</button>
+          <button type="button" class="insp-tab" data-tab="callouts">فلش و نکته</button>
+          <button type="button" class="insp-tab" data-tab="living">زنده و صدا</button>
         </div>
 
         <div id="inspectorBody" class="inspector-body">
@@ -121,15 +142,51 @@
     </main>
   </div>
 
-  <!-- Project Style & Logo Modal -->
+  <!-- Visual Template Gallery Modal -->
+  <div id="galleryModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="galleryTitle">
+    <div class="modal-card modal-xl">
+      <div class="modal-head">
+        <h3 id="galleryTitle">گالری بصری قالب‌ها (Template Gallery)</h3>
+        <button id="btnCloseGallery" type="button" class="btn btn-sm btn-ghost">بستن</button>
+      </div>
+      <div class="gallery-toolbar">
+        <input id="gallerySearch" type="text" class="text-input" placeholder="جستجو در نام یا کاربرد قالب...">
+        <div id="galleryCats" class="gallery-cats"></div>
+      </div>
+      <div id="galleryGrid" class="gallery-grid"></div>
+    </div>
+  </div>
+
+  <!-- Script-to-Slides Importer Modal -->
+  <div id="importerModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="importerTitle">
+    <div class="modal-card modal-wide">
+      <div class="modal-head">
+        <h3 id="importerTitle">تبدیل متن اسکریپت به اسلایدهای آماده (Script Importer)</h3>
+        <button id="btnCloseImporter" type="button" class="btn btn-sm btn-ghost">بستن</button>
+      </div>
+      <p class="modal-hint">
+        متن پادکست خود را با تگ‌های <code>[عنوان | ...]</code>، <code>[عدد ...]</code>، <code>[نمودار خطی | ...]</code>، <code>[جمله | ...]</code> و <code>[دوربین]</code> وارد کنید یا از دکمهٔ «ساخت اپیزود نمونهٔ پادکست» استفاده کنید.
+      </p>
+      <textarea id="importerText" class="textarea-input" dir="rtl" style="min-height:220px" placeholder="[عنوان | راز رشد پادکست‌های وایرال | قسمت جدید]&#10;سلام به همه! امروز دربارهٔ ساخت اسلایدهای زنده حرف می‌زنیم.&#10;&#10;[عدد +۳۲۰٪ | رشد مخاطب در ۹۰ روز]&#10;طبق آمار، ویدیوهایی که گرافیک پویا دارند سه برابر بیشتر دیده می‌شوند."></textarea>
+      <div class="modal-actions between">
+        <button id="btnStarterPodcastDeck" type="button" class="btn btn-amber">🎙️ ساخت بستهٔ نمونهٔ پادکست یوتیوب</button>
+        <div style="display:flex;gap:8px">
+          <button id="btnAppendImported" type="button" class="btn btn-ghost">افزودن به انتهای پروژه</button>
+          <button id="btnReplaceImported" type="button" class="btn btn-primary">جایگزینی اسلایدها</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Project Style, Living Stage & Podcast Metadata Modal -->
   <div id="styleModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="styleModalTitle">
     <div class="modal-card modal-wide">
       <div class="modal-head">
-        <h3 id="styleModalTitle">انتخابگر سبک کل ویدیو و لوگوی متحرک</h3>
+        <h3 id="styleModalTitle">سبک کل ویدیو، لوگوی متحرک و تنظیمات پادکست</h3>
         <button id="btnCloseStyleModal" type="button" class="btn btn-sm btn-ghost">بستن</button>
       </div>
       <p class="modal-hint">
-        تنظیمات این بخش در فایل <code>video.yaml</code> ذخیره می‌شوند و روی کل ویدیو اعمال می‌شوند (مگر اینکه اسلایدی مقدار اختصاصی داشته باشد).
+        تنظیمات این بخش در فایل <code>video.yaml</code> ذخیره می‌شوند و روی تمام اسلایدها و خروجی زندهٔ OBS اعمال می‌شوند.
       </p>
 
       <div class="style-grid">
@@ -167,6 +224,37 @@
           <span>بذر تصادفی پروژه (Seed)</span>
           <input id="projSeedInput" type="number" dir="ltr" class="text-input" min="0" step="1">
         </label>
+
+        <label class="field-group">
+          <span>پس‌زمینه زندهٔ پیش‌فرض (Living Stage)</span>
+          <select id="projLivingBgSelect" class="select-ctrl">
+            <option value="studio-mix">ترکیبی استودیو (Aurora + Particles + Wave)</option>
+            <option value="aurora">شفق نوری ملایم (Aurora)</option>
+            <option value="particles">ذرات نوری شناور (Particles)</option>
+            <option value="grid">شبکه تحلیلی متحرک (Grid)</option>
+            <option value="wave">موج صوتی پادکست (Wave)</option>
+          </select>
+        </label>
+
+        <label class="field-group">
+          <span>شدت حرکت زندهٔ پس‌زمینه</span>
+          <select id="projLivingIntensitySelect" class="select-ctrl">
+            <option value="podcast">استاندارد پادکست (متعادل و زنده)</option>
+            <option value="subtle">ملایم (Subtle)</option>
+            <option value="dynamic">پرانرژی (Dynamic)</option>
+            <option value="off">خاموش (ثابت)</option>
+          </select>
+        </label>
+
+        <label class="field-group">
+          <span>نام میزبان پادکست (برای Lower-Third)</span>
+          <input id="projPodcastHost" type="text" class="text-input" placeholder="مثال: داریوش خسروان">
+        </label>
+
+        <label class="field-group">
+          <span>نام کانال / پادکست</span>
+          <input id="projPodcastShow" type="text" class="text-input" placeholder="مثال: پادکست خرده‌گیر">
+        </label>
       </div>
 
       <div class="logo-config-box">
@@ -188,7 +276,7 @@
       </div>
 
       <div class="modal-actions between">
-        <button id="btnStyleModalReroll" type="button" class="btn btn-amber">🎲 ترکیب تصادفی جدید با بذر تازه</button>
+        <button id="btnStyleModalReroll" type="button" class="btn btn-amber">🎲 ترکیب تصادفی جدید</button>
         <button id="btnApplyStyleModal" type="button" class="btn btn-primary">تایید و پیش‌نمایش</button>
       </div>
     </div>
@@ -219,9 +307,11 @@
   <script src="../themes/_list.js"></script>
   <script src="../templates/_index.js"></script>
   <script src="../stage/fx.js"></script>
+  <script src="../stage/sfx.js"></script>
+  <script src="./importer.js"></script>
   <script>
     (window.THEME_FILES || []).forEach((f) => document.write('<script src="../themes/' + f + '"><\/script>'));
   </script>
-  <script src="./editor.js"></script>
+  <script type="module" src="./editor.js"></script>
 </body>
 </html>

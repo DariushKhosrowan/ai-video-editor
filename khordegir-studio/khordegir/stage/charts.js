@@ -180,6 +180,37 @@
     return out;
   }
 
+  function catmullRom(pts, tension = 0.5, samples = 20) {
+    const n = pts.length;
+    if (n < 3) return pts.slice();
+    const tc = Math.max(0, Math.min(1, Number(tension) || 0.5));
+    const out = [];
+    for (let i = 0; i < n - 1; i += 1) {
+      const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(n - 1, i + 2)];
+      for (let k = 0; k < samples; k += 1) {
+        const s = k / samples, s2 = s * s, s3 = s2 * s;
+        const m1x = tc * (p2[0] - p0[0]), m1y = tc * (p2[1] - p0[1]);
+        const m2x = tc * (p3[0] - p1[0]), m2y = tc * (p3[1] - p1[1]);
+        out.push([
+          (2 * s3 - 3 * s2 + 1) * p1[0] + (s3 - 2 * s2 + s) * m1x + (-2 * s3 + 3 * s2) * p2[0] + (s3 - s2) * m2x,
+          (2 * s3 - 3 * s2 + 1) * p1[1] + (s3 - 2 * s2 + s) * m1y + (-2 * s3 + 3 * s2) * p2[1] + (s3 - s2) * m2y,
+        ]);
+      }
+    }
+    out.push([...pts[n - 1]]);
+    return out;
+  }
+
+  function stepCurve(pts) {
+    if (pts.length < 2) return pts.slice();
+    const out = [pts[0]];
+    for (let i = 1; i < pts.length; i += 1) {
+      out.push([pts[i][0], pts[i - 1][1]]);
+      out.push(pts[i]);
+    }
+    return out;
+  }
+
   C.line = function (A, box, spec, t0 = 0) {
     const M = S.theme.motion, col = S.theme.colors;
     const lively = isLivelyPreset();
@@ -261,7 +292,14 @@
     ser.forEach((s, i) => {
       if (!s.pts.length) return;
       const xs = s.pts.map((p) => PX(p[0])), ys = s.pts.map((p) => PY(p[1]));
-      const path = (spec.smooth !== false && s.smooth !== false) ? monotone(xs, ys) : xs.map((x, k) => [x, ys[k]]);
+      const pxPts = xs.map((x, k) => [x, ys[k]]);
+      const cMode = s.curveMode || spec.curveMode || ((spec.smooth === false || s.smooth === false) ? "linear" : "monotone");
+      const tension = s.tension ?? spec.tension ?? 0.5;
+      let path;
+      if (cMode === "linear") path = pxPts;
+      else if (cMode === "step") path = stepCurve(pxPts);
+      else if (cMode === "smooth") path = catmullRom(pxPts, tension, 20);
+      else path = monotone(xs, ys);
       S._clipSeq = (S._clipSeq || 0) + 1;
       const id = "clip" + i + "_" + S._clipSeq;
       const cp = document.createElementNS(svgNS, "clipPath"); cp.id = id;
@@ -288,6 +326,15 @@
           }
         });
       }
+      // Subtle living pulse halo at the last data point
+      const lastX = xs[xs.length - 1], lastY = ys[ys.length - 1];
+      const halo = document.createElementNS(svgNS, "circle");
+      halo.setAttribute("cx", lastX); halo.setAttribute("cy", lastY); halo.setAttribute("r", 12);
+      halo.setAttribute("fill", S.color(s.color)); halo.setAttribute("opacity", "0.35");
+      svg.appendChild(halo);
+      S.tl.from(halo, { opacity: 0, duration: 0.3, immediateRender: true }, t + lineM.dur * 0.85);
+      S.amb.fromTo(halo, { attr: { r: 8 }, opacity: 0.45 }, { attr: { r: 22 }, opacity: 0.08, duration: 2.2, ease: "sine.inOut", yoyo: true, repeat: 99 }, t + lineM.dur);
+
       const full = Math.max(...xs) - Math.min(...xs) + 40;
       S.tl.fromTo(r, { attr: { width: 0 } }, { attr: { width: full }, duration: lineM.dur, ease: S.ease(lineM.ease), immediateRender: true }, t);
       if (S.fx) S.fx.cue(t, "draw", s.name || "");

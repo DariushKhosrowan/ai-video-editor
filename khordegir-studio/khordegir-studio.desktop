@@ -1,8 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Khordegir Studio — ساخت اسلایدها
-Comment=ساخت ویدیوی اسلایدها از video.yaml
-Exec=bash -c 'cd "$(dirname "%k")" && x-terminal-emulator -e ./build.sh'
-Terminal=false
-Icon=video-x-generic
-Categories=AudioVideo;

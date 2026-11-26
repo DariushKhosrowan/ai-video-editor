@@ -63,6 +63,9 @@
     timeline: ["track-sweep", "milestone-pop", "editorial-arc", "elastic-nodes", "stagger-eras", "minimal-rail"],
     layers: ["layered-depth", "kinetic-stage", "sweep-compose", "elastic-nodes", "cinematic-pass", "minimal-layers"],
     cam: ["cam-clean", "cam-soft", "cam-pulse", "cam-editorial", "cam-focus", "cam-minimal"],
+    guest_intro: ["editorial-split", "card-float", "spotlight", "minimal-clean"],
+    podcast_question: ["kinetic-words", "spotlight", "glitch-pop", "editorial-mark"],
+    podcast_end: ["spotlight", "kinetic-hero", "curtain-editorial", "minimal-type"],
   };
 
   const PRESET_LABELS = {
@@ -631,6 +634,306 @@
       el.classList.add("ul-on");
       const t = timeOf(el) + 0.08;
       S.tl.fromTo(el, { backgroundSize: "0% 6px" }, { backgroundSize: "100% 6px", duration: 0.5, ease: S.ease("power3"), immediateRender: true }, t);
+    });
+  };
+
+  /* ---------------------------------------------------------- Always-On Living Background Engine */
+  FX.livingStage = function (stage, slide) {
+    const ls = Object.assign(
+      { bgStyle: "studio-mix", intensity: "podcast", microMotion: true },
+      (slide && slide.livingStage) || {}
+    );
+    if (ls.intensity === "off") return;
+
+    const th = S.theme || {}, col = th.colors || {};
+    const isLight = col.isDark === false;
+    const accent = col.accent || "#F5B700";
+    const danger = col.danger || "#EF4444";
+    const style = ls.bgStyle || "studio-mix";
+    const mult = ls.intensity === "dynamic" ? 1.45 : ls.intensity === "subtle" ? 0.65 : 1.0;
+
+    const layer = document.createElement("div");
+    layer.className = "living-stage";
+    stage.appendChild(layer);
+
+    // 1. Aurora / Studio-Mix drifting luminous orbs
+    if (style === "aurora" || style === "studio-mix") {
+      const aurora = document.createElement("div");
+      aurora.className = "living-aurora";
+      layer.appendChild(aurora);
+
+      const orb1 = document.createElement("div");
+      orb1.className = "living-aurora-orb";
+      Object.assign(orb1.style, {
+        width: "920px", height: "920px", left: "62%", top: "-16%",
+        background: `radial-gradient(circle, ${accent} 0%, transparent 66%)`,
+        opacity: (isLight ? 0.14 : 0.16 * mult).toFixed(2),
+      });
+      const orb2 = document.createElement("div");
+      orb2.className = "living-aurora-orb";
+      Object.assign(orb2.style, {
+        width: "760px", height: "760px", left: "-10%", top: "48%",
+        background: `radial-gradient(circle, ${danger} 0%, transparent 70%)`,
+        opacity: (isLight ? 0.09 : 0.11 * mult).toFixed(2),
+      });
+      aurora.append(orb1, orb2);
+
+      S.amb.fromTo(orb1, { x: -45 * mult, y: -25 * mult, scale: 0.94 }, {
+        x: 55 * mult, y: 38 * mult, scale: 1.08, duration: 7.5, ease: "sine.inOut", yoyo: true, repeat: 99,
+      }, 0);
+      S.amb.fromTo(orb2, { x: 40 * mult, y: 30 * mult, scale: 1.04 }, {
+        x: -50 * mult, y: -35 * mult, scale: 0.92, duration: 9.2, ease: "sine.inOut", yoyo: true, repeat: 99,
+      }, 0);
+    }
+
+    // 2. Subtle Perspective Grid + Sweep
+    if (style === "grid") {
+      const grid = document.createElement("div");
+      grid.className = "living-grid";
+      layer.appendChild(grid);
+      S.amb.fromTo(grid, { backgroundPosition: "0px 0px" }, {
+        backgroundPosition: "96px 48px", duration: 14, ease: "none", repeat: 99,
+      }, 0);
+    }
+
+    // 3. Ambient Floating Dust / Bokeh Particles (always active in particles & studio-mix)
+    if (style === "particles" || style === "studio-mix") {
+      const dustBox = document.createElement("div");
+      dustBox.className = "dust";
+      layer.appendChild(dustBox);
+      const r = FX.rngFor((slide._seed || "live") + ":living-dust");
+      const count = Math.round(24 * mult);
+      for (let i = 0; i < count; i += 1) {
+        const dot = document.createElement("i");
+        const sz = 2 + r() * 4.5;
+        Object.assign(dot.style, {
+          left: (r() * S.W).toFixed(1) + "px",
+          top: (r() * S.H).toFixed(1) + "px",
+          width: sz.toFixed(1) + "px",
+          height: sz.toFixed(1) + "px",
+          background: i % 5 === 0 ? accent : (isLight ? (col.muted || "#666") : "#fff8dc"),
+          opacity: ((isLight ? 0.07 : 0.14) * mult * (0.5 + r() * 0.8)).toFixed(2),
+          filter: sz > 4.2 ? "blur(1.5px)" : "none",
+        });
+        dustBox.appendChild(dot);
+        S.amb.fromTo(dot, { x: 0, y: 0 }, {
+          x: (r() - 0.5) * 140 * mult,
+          y: (-50 - r() * 120) * mult,
+          duration: 10 + r() * 8,
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: 99,
+        }, 0);
+      }
+    }
+
+    // 4. Podcast Ambient Audio Wave Horizon (wave or studio-mix)
+    if (style === "wave" || style === "studio-mix") {
+      const waveWrap = document.createElement("div");
+      waveWrap.className = "living-wave";
+      const svgNS = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(svgNS, "svg");
+      svg.setAttribute("viewBox", "0 0 1920 210");
+      svg.setAttribute("preserveAspectRatio", "none");
+
+      const makeWavePath = (amp, phase, stroke, opacity, sw) => {
+        const path = document.createElementNS(svgNS, "path");
+        let d = "";
+        for (let x = 0; x <= 1920; x += 48) {
+          const y = 138 + Math.sin((x / 1920) * Math.PI * 4 + phase) * amp;
+          d += `${x === 0 ? "M" : " L"}${x},${y.toFixed(1)}`;
+        }
+        path.setAttribute("d", d);
+        path.setAttribute("fill", "none");
+        path.setAttribute("stroke", stroke);
+        path.setAttribute("stroke-opacity", String(opacity));
+        path.setAttribute("stroke-width", String(sw));
+        svg.appendChild(path);
+        return path;
+      };
+
+      const p1 = makeWavePath(18 * mult, 0, accent, 0.24, 3);
+      const p2 = makeWavePath(12 * mult, 1.8, col.muted || "#94a3b8", 0.16, 2);
+      waveWrap.appendChild(svg);
+      layer.appendChild(waveWrap);
+
+      S.amb.fromTo(p1, { y: -8 * mult }, { y: 10 * mult, duration: 3.4, ease: "sine.inOut", yoyo: true, repeat: 99 }, 0);
+      S.amb.fromTo(p2, { y: 9 * mult }, { y: -9 * mult, duration: 4.3, ease: "sine.inOut", yoyo: true, repeat: 99 }, 0);
+    }
+  };
+
+  /* ---------------------------------------------------------- Continuous Foreground Micro-Motion */
+  FX.applyMicroMotion = function (content, slide) {
+    const ls = Object.assign({ intensity: "podcast", microMotion: true }, (slide && slide.livingStage) || {});
+    if (ls.intensity === "off" || ls.microMotion === false) return;
+    const mult = ls.intensity === "dynamic" ? 1.45 : ls.intensity === "subtle" ? 0.65 : 1.0;
+
+    // Gentle floating breath + sheen on cards & bubbles
+    content.querySelectorAll(".card, .bubble").forEach((card, idx) => {
+      const dy = (idx % 2 === 0 ? -4.5 : 4.5) * mult;
+      S.amb.fromTo(card, { y: 0 }, {
+        y: dy,
+        duration: 4.4 + (idx % 3) * 0.9,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: 99,
+      }, 0.2 + idx * 0.15);
+
+      if (card.classList.contains("card")) {
+        const sheen = document.createElement("div");
+        sheen.className = "card-sheen";
+        card.appendChild(sheen);
+        S.amb.fromTo(sheen, { x: 200, opacity: 0 }, {
+          x: -2200,
+          opacity: 0.9,
+          duration: 5.5,
+          ease: "sine.inOut",
+          repeat: 99,
+          repeatDelay: 3.5,
+        }, 1.0 + idx * 0.6);
+      }
+    });
+
+    // Subtle breathing glow on highlight badges & hero accents
+    content.querySelectorAll(".badge.acc, .num").forEach((el, idx) => {
+      S.amb.fromTo(el, { scale: 1 }, {
+        scale: 1 + 0.014 * mult,
+        duration: 3.2 + (idx % 2) * 0.8,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: 99,
+      }, 0.4 + idx * 0.2);
+    });
+
+    // Soft floating motion on image frames (keeps interior Ken Burns + frame micro-drift)
+    content.querySelectorAll(".frame").forEach((fr, idx) => {
+      if (fr.closest(".fullbleed")) return;
+      S.amb.fromTo(fr, { y: 0 }, {
+        y: -5 * mult,
+        duration: 5.2 + idx * 0.7,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: 99,
+      }, 0.3);
+    });
+  };
+
+  /* ---------------------------------------------------------- Viral YouTuber Annotations & Callouts */
+  FX.annotations = function (content, slide, A) {
+    const list = Array.isArray(slide && slide.annotations) ? slide.annotations : [];
+    if (!list.length) return;
+
+    const layer = document.createElement("div");
+    layer.className = "stage-annotations";
+    content.appendChild(layer);
+
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = A.svg(layer, 0, 0, A.W, A.H, `0 0 ${A.W} ${A.H}`);
+    const defs = document.createElementNS(svgNS, "defs");
+    svg.appendChild(defs);
+
+    list.forEach((ann, idx) => {
+      if (!ann || typeof ann !== "object") return;
+      const type = ann.type || "arrow-curved";
+      const color = S.color(ann.color || "accent");
+      const at = Number.isFinite(+ann.at) ? +ann.at : 0.75 + idx * 0.25;
+      const x1 = Number(ann.x1 ?? 1200);
+      const y1 = Number(ann.y1 ?? 420);
+      const x2 = Number(ann.x2 ?? 820);
+      const y2 = Number(ann.y2 ?? 280);
+      const sw = Number(ann.strokeWidth || 7);
+
+      if (type === "spotlight") {
+        const sp = document.createElement("div");
+        sp.className = "stage-spotlight-mask";
+        const r = Number(ann.radius || 260);
+        sp.style.background = `radial-gradient(circle ${r}px at ${x1}px ${y1}px, transparent 0%, transparent 72%, rgba(0,0,0,0.62) 100%)`;
+        layer.appendChild(sp);
+        S.tl.fromTo(sp, { opacity: 0 }, { opacity: 1, duration: 0.6, ease: S.ease("power3"), immediateRender: true }, at);
+        return;
+      }
+
+      if (type === "callout-box") {
+        const box = document.createElement("div");
+        box.className = "stage-callout-box";
+        Object.assign(box.style, {
+          left: x1 + "px",
+          top: y1 + "px",
+          background: "rgba(16, 21, 33, 0.88)",
+          border: `2.5px solid ${color}`,
+          color: "#FFFFFF",
+          transform: "translate(-50%, -50%)",
+        });
+        box.innerHTML = `<span style="color:${color}">✦</span><span>${S.rich(ann.label || "نکتهٔ مهم")}</span>`;
+        layer.appendChild(box);
+        S.tl.fromTo(box, { opacity: 0, scale: 0.75, y: 16 }, { opacity: 1, scale: 1, y: 0, duration: 0.48, ease: S.ease("back"), immediateRender: true }, at);
+        S.amb.fromTo(box, { y: 0 }, { y: -6, duration: 2.8, ease: "sine.inOut", yoyo: true, repeat: 99 }, at + 0.5);
+        FX.cue(at, "pop", ann.label || "");
+        return;
+      }
+
+      if (type === "highlight-ring") {
+        const rx = Number(ann.rx || 140);
+        const ry = Number(ann.ry || 72);
+        const el = A.svgEl(svg, "ellipse", {
+          cx: x1, cy: y1, rx, ry,
+          fill: "none", stroke: color, "stroke-width": sw, "stroke-linecap": "round",
+        });
+        A.draw(el, at, 0.75, "power3");
+        S.amb.fromTo(el, { scale: 1, transformOrigin: "50% 50%" }, { scale: 1.03, duration: 2.4, ease: "sine.inOut", yoyo: true, repeat: 99 }, at + 0.8);
+        FX.cue(at, "swish", ann.label || "");
+        return;
+      }
+
+      // arrow-curved | arrow-straight
+      const markerId = `ann-arr-${idx}-${Date.now()}`;
+      const marker = document.createElementNS(svgNS, "marker");
+      marker.setAttribute("id", markerId);
+      marker.setAttribute("markerWidth", "8");
+      marker.setAttribute("markerHeight", "8");
+      marker.setAttribute("refX", "6");
+      marker.setAttribute("refY", "4");
+      marker.setAttribute("orient", "auto");
+      const poly = document.createElementNS(svgNS, "path");
+      poly.setAttribute("d", "M 0 0.8 L 7 4 L 0 7.2 z");
+      poly.setAttribute("fill", color);
+      marker.appendChild(poly);
+      defs.appendChild(marker);
+
+      const cx = ann.cx != null ? Number(ann.cx) : (x1 + x2) / 2;
+      const cy = ann.cy != null ? Number(ann.cy) : Math.min(y1, y2) - 110;
+      const d = type === "arrow-straight"
+        ? `M ${x1} ${y1} L ${x2} ${y2}`
+        : `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
+
+      const path = A.svgEl(svg, "path", {
+        d,
+        fill: "none",
+        stroke: color,
+        "stroke-width": sw,
+        "stroke-linecap": "round",
+        "marker-end": `url(#${markerId})`,
+      });
+      A.draw(path, at, 0.7, "power3");
+      FX.cue(at, "swish", ann.label || "");
+
+      if (ann.label) {
+        const lbl = document.createElement("div");
+        lbl.className = "stage-callout-box";
+        Object.assign(lbl.style, {
+          left: (cx || (x1 + x2) / 2) + "px",
+          top: ((cy || (y1 + y2) / 2) - 34) + "px",
+          background: "rgba(16, 21, 33, 0.85)",
+          border: `2px solid ${color}`,
+          padding: "8px 18px",
+          fontSize: "24px",
+          color: "#fff",
+          transform: "translate(-50%, -50%)",
+        });
+        lbl.innerHTML = S.rich(ann.label);
+        layer.appendChild(lbl);
+        S.tl.fromTo(lbl, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.4, ease: S.ease("back"), immediateRender: true }, at + 0.2);
+      }
     });
   };
 })();
