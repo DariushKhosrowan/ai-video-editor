@@ -125,6 +125,20 @@
     "sine.inOut": expInOut(3),
     "back.out(1.2)": expOut(5),
     "back.out(1.4)": expOut(5),
+
+    // Explicit e^(-x) exponential curve keys for video.yaml transition_ease & advanced controls
+    "expOut(3)": expOut(3),
+    "expOut(4)": expOut(4),
+    "expOut(5)": expOut(5),
+    "expOut(6)": expOut(6),
+    "expIn(3)": expIn(3),
+    "expIn(4)": expIn(4),
+    "expIn(5)": expIn(5),
+    "expIn(6)": expIn(6),
+    "expInOut(3)": expInOut(3),
+    "expInOut(4)": expInOut(4),
+    "expInOut(5)": expInOut(5),
+    "expInOut(6)": expInOut(6),
   });
 
   const MOTION_TOKENS = {
@@ -258,7 +272,7 @@
       scaleImage: 1.04,
     },
 
-    // 8 slide entrance transitions
+    // 14 slide entrance transitions (8 classic + 6 viral; default softFade keeps existing output unchanged)
     transitions: {
       softFade:      { dur: 0.32, ease: EASES.transitionSoft },
       curtainRtl:    { dur: 0.52, ease: EASES.transition },
@@ -268,6 +282,15 @@
       diagonalWipe:  { dur: 0.50, ease: EASES.transition },
       zoomIris:      { fadeDur: 0.32, fadeEase: EASES.transitionSoft, contentDur: 0.48, contentEase: EASES.textIn, fromScale: 1.04 },
       shutterBars:   { dur: 0.42, stagger: 0.055, ease: EASES.transition },
+
+      // Viral high-craft transitions (all e^(-x) curves, <= 1.06 stage zoom cap, format-proportional)
+      whipPan:       { dur: 0.44, veilDur: 0.22, travelFrac: 0.46, blurPx: 18, skewDeg: 4.5, streakCount: 3, ease: expOut(6), veilEase: expOut(5) },
+      zoomPunch:     { dur: 0.44, punchDur: 0.16, settleDur: 0.28, startScale: 0.88, peakScale: 1.06, blurPx: 8, flashDur: 0.26, ease: expOut(6), settleEase: expOut(5) },
+      glitchSlice:   { dur: 0.38, snapDur: 0.10, settleDur: 0.28, bandCount: 5, offsetPx: 26, bandTravelPx: 150, skewDeg: 3, ease: expOut(6), veilEase: expOut(5) },
+      push:          { dur: 0.48, fromScale: 0.97, seamPx: 8, ease: expOut(5) },
+      maskWipe:      { dur: 0.50, veilDur: 0.28, bladeWidth: 8, ease: expOut(5), veilEase: expOut(3) },
+      lightLeakFade: { dur: 0.58, veilDur: 0.42, contentDur: 0.36, startScale: 1.02, leakScale: 1.04, maxOpacity: 0.78, ease: expOut(4), veilEase: expOut(3) },
+      bounds:        { minDur: 0.15, maxDur: 1.5, minIntensity: 0.4, maxIntensity: 1.5 },
     },
 
     // 7 animated logo modes

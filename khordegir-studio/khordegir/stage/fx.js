@@ -1,7 +1,7 @@
 /* Variants, presets, transitions, animated logo & atmosphere for every template (zero-config, 100% deterministic).
    - Seeded randomness: mulberry32 PRNG keyed on video + project seed + slide number + slide.seed -> reproducible rebuilds.
    - Backwards-compatible defaults: omitting `preset` keeps "classic" behavior; omitting `transition` keeps "soft-fade" (.fadein).
-   - Setting "random" / "تصادفی" deterministically picks from rich motion presets, 8 transitions, and 7 animated logo modes.
+   - Setting "random" / "تصادفی" deterministically picks from rich motion presets, 14 transitions (8 classic + 6 viral), and 7 animated logo modes.
    - All motion strictly driven via real GSAP 3 paused timelines (`Stage.tl` / `Stage.amb`) — no unseeded Math.random(). */
 (function () {
   "use strict";
@@ -62,12 +62,6 @@
     image_full: ["cinema-zoom", "curtain-reveal", "radar-dots", "parallax-caption", "noir-vignette", "minimal-frame"],
     three_cards: ["trio-cascade", "elastic-fan", "spotlight-cards", "floating-trio", "sweep-grid", "minimal-cards"],
     timeline: ["track-sweep", "milestone-pop", "editorial-arc", "elastic-nodes", "stagger-eras", "minimal-rail"],
-    "minimal-map": "نقشهٔ مینیمال",
-    "route-tracer": "رسم پیوسته مسیر",
-    "radar-pulse": "پین راداری",
-    "editorial-focus": "زوم تمرکز خبری",
-    "air-corridor": "مسیر هوایی سینمایی",
-    "vox-atlas": "اطلس تحریریه (Vox)",
     map_talk: ["vox-atlas", "air-corridor", "editorial-focus", "radar-pulse", "route-tracer", "minimal-map"],
     layers: ["layered-depth", "kinetic-stage", "sweep-compose", "elastic-nodes", "cinematic-pass", "minimal-layers"],
     cam: ["cam-clean", "cam-soft", "cam-pulse", "cam-editorial", "cam-focus", "cam-minimal"],
@@ -176,28 +170,77 @@
     "cam-editorial": "دوربین تحریریه",
     "cam-focus": "تمرکز دوربین",
     "cam-minimal": "دوربین ساده",
+    "vox-atlas": "اطلس تحریریه (Vox)",
+    "air-corridor": "مسیر هوایی سینمایی",
+    "editorial-focus": "زوم تمرکز خبری",
+    "radar-pulse": "پین راداری",
+    "route-tracer": "رسم پیوسته مسیر",
+    "minimal-map": "نقشهٔ مینیمال",
   };
 
   const TRANSITIONS = [
+    "soft-fade",
     "curtain-rtl",
     "accent-slash",
     "iris-rise",
-    "soft-fade",
     "split-curtain",
     "diagonal-wipe",
     "zoom-iris",
     "shutter-bars",
+    "whip-pan",
+    "zoom-punch",
+    "glitch-slice",
+    "push",
+    "mask-wipe",
+    "light-leak-fade",
   ];
   const TRANSITION_LABELS = {
+    "soft-fade": "محو نرم از سیاهی (کلاسیک)",
     "curtain-rtl": "پرده از راست به چپ",
     "accent-slash": "نوار تأکید مورب",
     "iris-rise": "باز شدن دایره‌ای (Iris)",
-    "soft-fade": "محو نرم از سیاهی (کلاسیک)",
     "split-curtain": "پردهٔ دوقسمتی بالا و پایین",
     "diagonal-wipe": "پاک‌شدن مورب سینمایی",
     "zoom-iris": "گشایش زوم سریع",
     "shutter-bars": "کرکرهٔ ستونی",
+    "whip-pan": "شلاق دوربین (Whip Pan)",
+    "zoom-punch": "ضربهٔ زوم (Zoom Punch)",
+    "glitch-slice": "برش گلیچ دیجیتال (Glitch Slice)",
+    push: "هل دادن صفحه (Push)",
+    "mask-wipe": "پردهٔ برش ماسکی (Mask Wipe)",
+    "light-leak-fade": "محو نوری گرم (Light Leak)",
   };
+  const TRANSITION_ALIASES = {
+    fade: "soft-fade",
+    "simple-fade": "soft-fade",
+    simple_fade: "soft-fade",
+    soft_fade: "soft-fade",
+    whip: "whip-pan",
+    whippan: "whip-pan",
+    whip_pan: "whip-pan",
+    zoom: "zoom-punch",
+    zoom_punch: "zoom-punch",
+    glitch: "glitch-slice",
+    glitch_slice: "glitch-slice",
+    "push-rtl": "push",
+    push_rtl: "push",
+    wipe: "mask-wipe",
+    mask_wipe: "mask-wipe",
+    "light-leak": "light-leak-fade",
+    lightleak: "light-leak-fade",
+    light_leak: "light-leak-fade",
+    light_leak_fade: "light-leak-fade",
+  };
+  const TRANSITION_PRESETS = [
+    { id: "soft-fade", label: "محو ساده" },
+    { id: "whip-pan", label: "شلاق دوربین" },
+    { id: "zoom-punch", label: "ضربهٔ زوم" },
+    { id: "glitch-slice", label: "گلیچ" },
+    { id: "push", label: "هل دادن" },
+    { id: "mask-wipe", label: "پرده ماسکی" },
+    { id: "light-leak-fade", label: "نور گرم" },
+    { id: "random", label: "🎲 تصادفی" },
+  ];
 
   const LOGO_MOTIONS = [
     "pop-spin",
@@ -223,6 +266,8 @@
     presetLabels: PRESET_LABELS,
     transitions: TRANSITIONS,
     transitionLabels: TRANSITION_LABELS,
+    transitionAliases: TRANSITION_ALIASES,
+    transitionPresets: TRANSITION_PRESETS,
     logoMotions: LOGO_MOTIONS,
     logoMotionLabels: LOGO_MOTION_LABELS,
     logoPositions: ["top-left", "top-right", "bottom-right", "bottom-left"],
@@ -231,6 +276,11 @@
 
   const isRand = (v) => v === "random" || v === "تصادفی";
   const isUnset = (v) => v == null || v === "" || v === "auto";
+  const normTransition = (v) => {
+    const raw = String(v || "").trim().toLowerCase();
+    const mapped = TRANSITION_ALIASES[raw] || raw;
+    return TRANSITIONS.includes(mapped) ? mapped : "soft-fade";
+  };
 
   /* ---------------------------------------------------------- per-slide seeded setup */
   FX.setup = function (slide) {
@@ -251,7 +301,26 @@
     let transition;
     if (isRand(slide.transition)) transition = pick(r, TRANSITIONS);
     else if (isUnset(slide.transition)) transition = "soft-fade";
-    else transition = slide.transition;
+    else transition = normTransition(slide.transition);
+
+    const B = (MT && MT.transitions && MT.transitions.bounds) || { minDur: 0.15, maxDur: 1.5, minIntensity: 0.4, maxIntensity: 1.5 };
+    const rawDir = String(slide.transition_dir || "auto").trim().toLowerCase();
+    const validDir = ["auto", "left", "right", "up", "down", "in", "out"].includes(rawDir) ? rawDir : "auto";
+    const numDur = slide.transition_dur != null && slide.transition_dur !== "" ? Number(slide.transition_dur) : NaN;
+    const validDur = Number.isFinite(numDur) && numDur > 0 ? Math.min(B.maxDur, Math.max(B.minDur, numDur)) : null;
+    const rawEase = String(slide.transition_ease || "").trim();
+    const validEase = rawEase && rawEase !== "auto" ? rawEase : null;
+    const numInt = slide.transition_intensity != null && slide.transition_intensity !== "" ? Number(slide.transition_intensity) : NaN;
+    const validInt = Number.isFinite(numInt) && numInt > 0 ? Math.min(B.maxIntensity, Math.max(B.minIntensity, numInt)) : 1;
+    const rawColor = String(slide.transition_color || "").trim();
+    const validColor = rawColor && rawColor !== "auto" ? rawColor : null;
+    const transitionOpts = {
+      dir: validDir,
+      dur: validDur,
+      ease: validEase,
+      intensity: validInt,
+      color: validColor,
+    };
 
     let logoMotion;
     if (isRand(slide.logo_motion)) logoMotion = pick(r, LOGO_MOTIONS);
@@ -262,6 +331,7 @@
       variant: want(slide.variant) ? pick(r, dflt.variants || FX.VARIANTS) : slide.variant,
       preset,
       transition,
+      transitionOpts,
       logoMotion,
       motion: want(slide.motion) ? wpick(r, dflt.motions || FX.MOTIONS) : slide.motion,
       glowPos: pick(r, [[0.86, 0.06], [0.14, 0.08], [0.78, 0.92], [0.5, -0.05]]),
@@ -272,6 +342,7 @@
       r,
     };
     S.cues = [];
+    if (transition !== "soft-fade") FX.cue(0, "transition", transition);
     return c;
   };
 
@@ -440,132 +511,19 @@
       0);
   };
 
-  /* ---------------------------------------------------------- 8 slide transitions */
+  /* ---------------------------------------------------------- 14 slide transitions (8 classic + 6 viral) */
   FX.transitionIn = function (stage, slide, th) {
-    const mode = (FX.cur && FX.cur.transition) || "soft-fade";
+    if (S.transitions && typeof S.transitions.apply === "function") {
+      return S.transitions.apply(stage, slide, th, FX.cur);
+    }
     const T = MT.transitions;
-    const clip = th.clip || MT.clip;
-    const col = th.colors || {};
-    const fadeDur = clip.fade > 0 ? clip.fade : T.softFade.dur;
-
-    if (mode === "soft-fade") {
-      const fade = document.createElement("div");
-      fade.className = "fadein";
-      stage.appendChild(fade);
-      if (clip.fade > 0) S.tl.fromTo(fade, { opacity: 1 }, { opacity: 0, duration: clip.fade, ease: S.ease(T.softFade.ease), immediateRender: true }, 0);
-      else fade.remove();
-      return;
-    }
-
-    const isEn = S._lang === "en";
-    const dir = isEn ? -1 : 1;
-
-    if (mode === "curtain-rtl") {
-      const panel = document.createElement("div");
-      panel.className = "transition-overlay transition-curtain-rtl";
-      const borderProp = isEn ? "borderRight" : "borderLeft";
-      Object.assign(panel.style, {
-        position: "absolute", inset: "0", background: col.bg2 || col.surface || "#16161a",
-        [borderProp]: `10px solid ${col.accent || "#FFD600"}`, pointerEvents: "none", zIndex: 90,
-      });
-      stage.appendChild(panel);
-      S.tl.fromTo(panel, { x: 0, opacity: 1 }, { x: -2000 * dir, opacity: 0, duration: T.curtainRtl.dur, ease: S.ease(T.curtainRtl.ease), immediateRender: true }, 0);
-      return;
-    }
-
-    if (mode === "accent-slash") {
-      const veil = document.createElement("div");
-      veil.className = "transition-overlay transition-accent-slash";
-      Object.assign(veil.style, {
-        position: "absolute", inset: "0", background: col.bg || "#121212", pointerEvents: "none", zIndex: 89,
-      });
-      const slash = document.createElement("div");
-      slash.className = "transition-overlay transition-slash-bar";
-      Object.assign(slash.style, {
-        position: "absolute", top: "-15%", bottom: "-15%", [isEn ? "left" : "right"]: "-20%", width: "260px",
-        background: col.accent || "#FFD600", transform: `skewX(${isEn ? "14deg" : "-14deg"})`, pointerEvents: "none", zIndex: 91,
-      });
-      stage.appendChild(veil);
-      stage.appendChild(slash);
-      const A2 = T.accentSlash;
-      S.tl.fromTo(veil, { opacity: 1 }, { opacity: 0, duration: A2.veilDur, ease: S.ease(A2.veilEase), immediateRender: true }, A2.veilDelay);
-      S.tl.fromTo(slash, { x: 200 * dir, opacity: 1 }, { x: -2350 * dir, opacity: 0.9, duration: A2.barDur, ease: S.ease(A2.barEase), immediateRender: true }, 0);
-      return;
-    }
-
-    if (mode === "iris-rise") {
-      const veil = document.createElement("div");
-      veil.className = "transition-overlay transition-iris-rise";
-      Object.assign(veil.style, {
-        position: "absolute", inset: "0", background: col.bg || "#121212",
-        clipPath: "circle(110% at 50% 50%)", pointerEvents: "none", zIndex: 90,
-      });
-      stage.appendChild(veil);
-      S.tl.fromTo(veil, { scale: 1, opacity: 1 }, { scale: MT.clampScale(T.irisRise.scale), opacity: 0, duration: T.irisRise.dur, ease: S.ease(T.irisRise.ease), immediateRender: true }, 0);
-      return;
-    }
-
-    if (mode === "split-curtain") {
-      const top = document.createElement("div");
-      const bot = document.createElement("div");
-      top.className = "transition-overlay transition-split-top";
-      bot.className = "transition-overlay transition-split-bot";
-      Object.assign(top.style, {
-        position: "absolute", left: "0", right: "0", top: "0", height: (S.H / 2) + "px",
-        background: col.bg2 || col.bg || "#121212", borderBottom: `4px solid ${col.accent || "#FFD600"}`,
-        pointerEvents: "none", zIndex: 90,
-      });
-      Object.assign(bot.style, {
-        position: "absolute", left: "0", right: "0", bottom: "0", height: (S.H / 2) + "px",
-        background: col.bg2 || col.bg || "#121212", borderTop: `4px solid ${col.accent || "#FFD600"}`,
-        pointerEvents: "none", zIndex: 90,
-      });
-      stage.appendChild(top); stage.appendChild(bot);
-      const SC = T.splitCurtain;
-      S.tl.fromTo(top, { y: 0, opacity: 1 }, { y: -(S.H / 2 + 20), opacity: 0, duration: SC.dur, ease: S.ease(SC.ease), immediateRender: true }, 0);
-      S.tl.fromTo(bot, { y: 0, opacity: 1 }, { y: S.H / 2 + 20, opacity: 0, duration: SC.dur, ease: S.ease(SC.ease), immediateRender: true }, 0);
-      return;
-    }
-
-    if (mode === "diagonal-wipe") {
-      const wipe = document.createElement("div");
-      wipe.className = "transition-overlay transition-diagonal-wipe";
-      Object.assign(wipe.style, {
-        position: "absolute", top: "-20%", bottom: "-20%", left: "-25%", right: "-25%",
-        background: `linear-gradient(120deg, ${col.bg2 || col.bg || "#121212"} 70%, ${col.accent || "#FFD600"} 100%)`,
-        pointerEvents: "none", zIndex: 90,
-      });
-      stage.appendChild(wipe);
-      S.tl.fromTo(wipe, { x: 0, y: 0, opacity: 1 }, { x: -(S.W * 1.25) * dir, y: 260, opacity: 0, duration: T.diagonalWipe.dur, ease: S.ease(T.diagonalWipe.ease), immediateRender: true }, 0);
-      return;
-    }
-
-    if (mode === "zoom-iris") {
-      const content = stage.querySelector(".content");
-      const fade = document.createElement("div");
-      fade.className = "transition-overlay transition-zoom-iris";
-      Object.assign(fade.style, { position: "absolute", inset: "0", background: col.bg || "#121212", pointerEvents: "none", zIndex: 90 });
-      stage.appendChild(fade);
-      const ZI = T.zoomIris;
-      S.tl.fromTo(fade, { opacity: 0.92 }, { opacity: 0, duration: Math.max(ZI.fadeDur, fadeDur), ease: S.ease(ZI.fadeEase), immediateRender: true }, 0);
-      if (content) S.tl.fromTo(content, { scale: MT.clampScale(ZI.fromScale) }, { scale: 1, duration: ZI.contentDur, ease: S.ease(ZI.contentEase), immediateRender: true }, 0);
-      return;
-    }
-
-    if (mode === "shutter-bars") {
-      const SB = T.shutterBars;
-      for (let i = 0; i < 4; i++) {
-        const bar = document.createElement("div");
-        bar.className = "transition-overlay transition-shutter-bar";
-        Object.assign(bar.style, {
-          position: "absolute", top: "0", bottom: "0", left: (i * S.W / 4) + "px", width: (S.W / 4 + 4) + "px",
-          background: i % 2 === 0 ? (col.bg || "#121212") : (col.bg2 || col.surface || "#1a1a1f"),
-          transformOrigin: "50% 0%", pointerEvents: "none", zIndex: 90,
-        });
-        stage.appendChild(bar);
-        S.tl.fromTo(bar, { scaleY: 1, opacity: 1 }, { scaleY: 0, opacity: 0, duration: SB.dur, ease: S.ease(SB.ease), immediateRender: true }, i * SB.stagger);
-      }
-    }
+    const clip = (th && th.clip) || MT.clip;
+    const fade = document.createElement("div");
+    fade.className = "fadein";
+    stage.appendChild(fade);
+    if (clip.fade > 0) S.tl.fromTo(fade, { opacity: 1 }, { opacity: 0, duration: clip.fade, ease: S.ease(T.softFade.ease), immediateRender: true }, 0);
+    else fade.remove();
+    return "soft-fade";
   };
 
   /* ---------------------------------------------------------- 7 animated logo modes (SCAM-safe + A.field) */
@@ -580,7 +538,6 @@
     const isLight = col.isDark === false;
     let pos = String(slide.logo_position || (rawLogo && typeof rawLogo === "object" ? rawLogo.position : "") || "top-left");
     if (A.scam && pos === "bottom-left") pos = "top-left"; // Protect SCAM webcam box [24, 740, 584, 1055]
-    else if (A.scam && A.stack && pos.includes("bottom")) pos = pos.replace("bottom", "top"); // portrait/square: camera band is at the bottom
 
     const badge = document.createElement("div");
     badge.className = "stage-logo stage-logo-" + ((FX.cur && FX.cur.logoMotion) || "pop-spin");

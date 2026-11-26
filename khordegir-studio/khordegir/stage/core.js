@@ -208,6 +208,14 @@
     if (s === "textin" || s === "wordstagger") return KM.expOut(5);
     if (s === "textout") return KM.expIn(5);
     if (s === "zoomin" || s === "camerapan" || s === "ambient") return KM.expInOut(3);
+    // Explicit e^(-x) exponential curve strings e.g. "expOut(6)", "expInOut(5)"
+    const expMatch = s.match(/^exp(inout|in|out)\(\s*([0-9.]+)\s*\)$/);
+    if (expMatch) {
+      const kVal = Math.max(0.5, Math.min(12, parseFloat(expMatch[2]) || 5));
+      if (expMatch[1] === "inout") return KM.expInOut(kVal);
+      if (expMatch[1] === "in") return KM.expIn(kVal);
+      return KM.expOut(kVal);
+    }
     if (s === "zoomout" || s === "transitionslash") return KM.expInOut(5);
     if (s === "chartreveal" || s === "transition" || s === "snappy") return KM.expOut(6);
     if (s === "transitionsoft") return KM.expOut(3);
@@ -937,6 +945,7 @@
       preset: S.fx.cur.preset,
       motion: S.fx.cur.motion,
       transition: S.fx.cur.transition,
+      transitionOpts: S.fx.cur.transitionOpts,
       logoMotion: S.fx.cur.logoMotion,
       leak: S.fx.cur.leak,
       dust: S.fx.cur.dust,

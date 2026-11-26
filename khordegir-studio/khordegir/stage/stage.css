@@ -24,8 +24,15 @@ body{width:var(--stage-w,1920px);height:var(--stage-h,1080px)}
 #stage[data-theme-mode="light"] .glow{mix-blend-mode:multiply}
 .light-sweep{position:absolute;top:-20%;bottom:-20%;right:20%;width:520px;transform:skewX(-18deg);pointer-events:none;
   background:linear-gradient(90deg,transparent,rgba(255,255,255,.07),transparent);filter:blur(26px)}
-.content{position:absolute;inset:0}
+.content{position:absolute;inset:0;transform-origin:50% 50%}
 .fadein{position:absolute;inset:0;background:#000;pointer-events:none;z-index:90}
+.transition-overlay{position:absolute;pointer-events:none;will-change:transform,opacity,clip-path}
+.transition-streak{filter:blur(10px);mix-blend-mode:screen;z-index:91}
+#stage[data-theme-mode="light"] .transition-streak{mix-blend-mode:multiply}
+.transition-leak-wash{filter:blur(42px);mix-blend-mode:screen;z-index:91}
+#stage[data-theme-mode="light"] .transition-leak-wash{mix-blend-mode:soft-light}
+.transition-glitch-band{z-index:91;will-change:transform,opacity}
+.transition-mask-blade{z-index:92;will-change:transform,opacity}
 .abs{position:absolute}
 .acc{color:var(--c-accent)} .dng{color:var(--c-dangerText);font-weight:700} .mut{color:var(--c-muted)}
 .lat{unicode-bidi:isolate;font-family:"Vazirmatn",sans-serif}
