@@ -1,6 +1,7 @@
 /* Khordegir Studio — Shared GSAP 3 Motion Tokens (single source of truth).
    Offline, deterministic, RTL-safe, stage zoom cap <= 1.06.
-   Loaded before core.js, fx.js, charts.js, themes, and templates. */
+   Loaded before core.js, fx.js, charts.js, themes, and templates.
+   All motion is mathematically based on the true exponential easing family: e^(-x). */
 (function () {
   "use strict";
 
@@ -11,35 +12,119 @@
     return Math.min(ZOOM_CAP, Math.max(0.1, n));
   };
 
+  /* True exponential easing family:
+     - expOut(k)(t) = (1 - e^(-k t)) / (1 - e^(-k))  (entrances: fast start, speed decays exponentially)
+     - expIn(k)(t) = (e^(k t) - 1) / (e^k - 1)        (exits: mirror of expOut)
+     - expInOut(k)(t) = t<0.5 ? expIn(k)(2t)/2 : 0.5 + expOut(k)(2t-1)/2
+     Deterministic, monotonic, returning exactly 0 at t=0 and 1 at t=1. */
+
+  function expOut(k) {
+    const K = k == null ? 5 : Number(k);
+    if (Math.abs(K) < 1e-6) {
+      const fn = function (t) { return t <= 0 ? 0 : t >= 1 ? 1 : t; };
+      if (arguments.length > 1) return fn(arguments[1]);
+      return fn;
+    }
+    const denom = 1 - Math.exp(-K);
+    const fn = function (t) {
+      if (t <= 0) return 0;
+      if (t >= 1) return 1;
+      return (1 - Math.exp(-K * t)) / denom;
+    };
+    if (arguments.length > 1) return fn(arguments[1]);
+    return fn;
+  }
+
+  function expIn(k) {
+    const K = k == null ? 5 : Number(k);
+    if (Math.abs(K) < 1e-6) {
+      const fn = function (t) { return t <= 0 ? 0 : t >= 1 ? 1 : t; };
+      if (arguments.length > 1) return fn(arguments[1]);
+      return fn;
+    }
+    const denom = Math.exp(K) - 1;
+    const fn = function (t) {
+      if (t <= 0) return 0;
+      if (t >= 1) return 1;
+      return (Math.exp(K * t) - 1) / denom;
+    };
+    if (arguments.length > 1) return fn(arguments[1]);
+    return fn;
+  }
+
+  function expInOut(k) {
+    const K = k == null ? 5 : Number(k);
+    const fIn = expIn(K);
+    const fOut = expOut(K);
+    const fn = function (t) {
+      if (t <= 0) return 0;
+      if (t >= 1) return 1;
+      return t < 0.5 ? fIn(2 * t) / 2 : 0.5 + fOut(2 * t - 1) / 2;
+    };
+    if (arguments.length > 1) return fn(arguments[1]);
+    return fn;
+  }
+
+  function linear(t) {
+    if (t <= 0) return 0;
+    if (t >= 1) return 1;
+    return t;
+  }
+
   const EASES = Object.freeze({
-    // Semantic motion grammar eases (GSAP 3 ease strings)
-    textIn: "power3.out",
-    textOut: "power2.in",
-    wordStagger: "power3.out",
-    zoomIn: "power2.out",
-    zoomOut: "power3.inOut",
-    cameraPan: "power2.inOut",
-    chartReveal: "power4.out",
+    // Semantic motion grammar eases (Exponential easing family)
+    // out for in/entrance tokens, in for exit tokens, inOut for camera/zoom/ambient
+    // choosing k by role: subtle 3, normal 5, strong 6
+    textIn: expOut(5),
+    textOut: expIn(5),
+    wordStagger: expOut(5),
+    zoomIn: expInOut(3),
+    zoomOut: expInOut(5),
+    cameraPan: expInOut(3),
+    chartReveal: expOut(6),
     // inverse-exponential growth: speed decays as e^(-k t), normalised to land exactly at 1 (k = 5)
     chartGrow: function (t) { const k = 5; return t >= 1 ? 1 : (1 - Math.exp(-k * t)) / (1 - Math.exp(-k)); },
-    transition: "power4.out",
-    transitionSoft: "power2.out",
-    transitionSlash: "power3.inOut",
-    ambient: "sine.inOut",
-    linear: "none",
+    transition: expOut(6),
+    transitionSoft: expOut(3),
+    transitionSlash: expInOut(5),
+    ambient: expInOut(3),
+    linear: linear,
+    none: linear,
 
     // Named aliases used by themes, templates, and Stage.ease()
-    power4: "power4.out",
-    power3: "power3.out",
-    power2: "power2.out",
-    power2In: "power2.in",
-    power2InOut: "power2.inOut",
-    power3InOut: "power3.inOut",
-    editorial: "power3.out",
-    snappy: "power4.out",
-    expo: "expo.out",
-    back: "back.out(1.2)",
-    spring: "back.out(1.4)",
+    power4: expOut(6),
+    power3: expOut(5),
+    power2: expOut(4),
+    power2In: expIn(4),
+    power2InOut: expInOut(4),
+    power3InOut: expInOut(5),
+    editorial: expOut(5),
+    snappy: expOut(6),
+    expo: expOut(6),
+    back: expOut(5),
+    spring: expOut(5),
+
+    // String compatibility aliases for themes, templates, and GSAP ease names
+    "power4.out": expOut(6),
+    "power3.out": expOut(5),
+    "power2.out": expOut(4),
+    "power2.in": expIn(4),
+    "power2.inout": expInOut(4),
+    "power2.inOut": expInOut(4),
+    "power3.inout": expInOut(5),
+    "power3.inOut": expInOut(5),
+    "power1.out": expOut(3),
+    "power1.in": expIn(3),
+    "power1.inout": expInOut(3),
+    "power1.inOut": expInOut(3),
+    "expo.out": expOut(6),
+    "expo.in": expIn(6),
+    "expo.inout": expInOut(6),
+    "expo.inOut": expInOut(6),
+    "sine.inout": expInOut(3),
+    "sine.inOut": expInOut(3),
+    "back.out(1.2)": expOut(5),
+    "back.out(1.4)": expOut(5),
   });
 
   const MOTION_TOKENS = {
@@ -47,6 +132,10 @@
     ZOOM_CAP,
     clampScale,
     eases: EASES,
+    expOut,
+    expIn,
+    expInOut,
+    linear,
 
     // Asymmetric text choreography: smooth decelerating entrance, snappy accelerating exit
     text: {
@@ -85,7 +174,7 @@
       },
     },
 
-    // Data & chart reveals (power4.out)
+    // Data & chart reveals (expOut(6))
     chart: {
       reveal: { dur: 0.72, stagger: 0.08, delay: 0.25, ease: EASES.chartReveal },
       axes:   { delay: 0.00, dur: 0.35, ease: EASES.textIn },
@@ -239,10 +328,21 @@
     },
   };
 
-  window.MOTION_TOKENS = MOTION_TOKENS;
-  if (!window.Stage) {
-    window.Stage = { themes: {}, defineTheme(t) { this.themes[t.name] = t; } };
+  const root = typeof window !== "undefined" ? window : typeof globalThis !== "undefined" ? globalThis : {};
+  root.KhordegirMotion = Object.assign(root.KhordegirMotion || {}, {
+    expOut,
+    expIn,
+    expInOut,
+    linear,
+  });
+  root.MOTION_TOKENS = MOTION_TOKENS;
+  if (!root.Stage) {
+    root.Stage = { themes: {}, defineTheme(t) { this.themes[t.name] = t; } };
   }
-  window.Stage.MOTION = MOTION_TOKENS;
-  window.Stage.motionTokens = MOTION_TOKENS;
+  root.Stage.KhordegirMotion = root.KhordegirMotion;
+  root.Stage.expOut = expOut;
+  root.Stage.expIn = expIn;
+  root.Stage.expInOut = expInOut;
+  root.Stage.MOTION = MOTION_TOKENS;
+  root.Stage.motionTokens = MOTION_TOKENS;
 })();

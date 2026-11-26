@@ -160,26 +160,98 @@
     return +(Math.max(4.5, Math.min(26, words / 2.25 + 1.15 + pauses))).toFixed(2);
   };
 
-  /* cubic-bezier ease function compatible with real GSAP 3 ease callbacks */
-  function bezier(x1, y1, x2, y2) {
-    const bx = (t) => 3 * x1 * t * (1 - t) ** 2 + 3 * x2 * t * t * (1 - t) + t ** 3;
-    const by = (t) => 3 * y1 * t * (1 - t) ** 2 + 3 * y2 * t * t * (1 - t) + t ** 3;
-    return (x) => {
-      if (x <= 0) return 0; if (x >= 1) return 1;
-      let lo = 0, hi = 1, t = x;
-      for (let i = 0; i < 30; i++) {
-        const v = bx(t);
-        if (Math.abs(v - x) < 1e-5) break;
-        if (v < x) lo = t; else hi = t;
-        t = (lo + hi) / 2;
-      }
-      return by(t);
+  /* True exponential easing resolution helpers for S.ease */
+  function getExpHelpers() {
+    const root = typeof window !== "undefined" ? window : typeof globalThis !== "undefined" ? globalThis : {};
+    const KM = root.KhordegirMotion || (root.Stage && root.Stage.KhordegirMotion) || (MT && MT.expOut && MT) || null;
+    if (KM && typeof KM.expOut === "function" && typeof KM.expIn === "function" && typeof KM.expInOut === "function") {
+      return KM;
+    }
+    const expOut = (k = 5) => {
+      const K = Number(k) || 5;
+      const d = 1 - Math.exp(-K);
+      return (t) => (t <= 0 ? 0 : t >= 1 ? 1 : (1 - Math.exp(-K * t)) / d);
     };
+    const expIn = (k = 5) => {
+      const K = Number(k) || 5;
+      const d = Math.exp(K) - 1;
+      return (t) => (t <= 0 ? 0 : t >= 1 ? 1 : (Math.exp(K * t) - 1) / d);
+    };
+    const expInOut = (k = 5) => {
+      const fi = expIn(k), fo = expOut(k);
+      return (t) => (t <= 0 ? 0 : t >= 1 ? 1 : (t < 0.5 ? fi(2 * t) / 2 : 0.5 + fo(2 * t - 1) / 2));
+    };
+    const linear = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t);
+    return { expOut, expIn, expInOut, linear };
   }
+
+  function mapBezierToExp(arr, KM) {
+    const [x1 = 0, y1 = 0, x2 = 1, y2 = 1] = Array.isArray(arr) ? arr : [];
+    const s0 = y1 / (x1 || 1e-4);
+    const s1 = (1 - y2) / ((1 - x2) || 1e-4);
+    if (s0 > 1.2 && s1 < 0.8) return KM.expOut(5);
+    if (s0 < 0.8 && s1 > 1.2) return KM.expIn(5);
+    if (s0 < 1 && s1 < 1) return KM.expInOut(5);
+    return KM.expOut(5);
+  }
+
+  function mapEaseStringToExp(str, KM) {
+    const s = String(str || "").trim().toLowerCase();
+    if (!s || s === "none" || s === "linear") {
+      return KM.linear || ((t) => (t <= 0 ? 0 : t >= 1 ? 1 : t));
+    }
+    if (s === "chartgrow" && MT && MT.eases && typeof MT.eases.chartGrow === "function") {
+      return MT.eases.chartGrow;
+    }
+
+    // Direct semantic token lookup
+    if (s === "textin" || s === "wordstagger") return KM.expOut(5);
+    if (s === "textout") return KM.expIn(5);
+    if (s === "zoomin" || s === "camerapan" || s === "ambient") return KM.expInOut(3);
+    if (s === "zoomout" || s === "transitionslash") return KM.expInOut(5);
+    if (s === "chartreveal" || s === "transition" || s === "snappy") return KM.expOut(6);
+    if (s === "transitionsoft") return KM.expOut(3);
+
+    // Strength mapping: power1/sine->3, power2->4, power3/back->5, power4/expo->6
+    let k = 5;
+    if (s.includes("power1") || s.includes("sine")) {
+      k = 3;
+    } else if (s.includes("power2") || s.includes("quad")) {
+      k = 4;
+    } else if (s.includes("power3") || s.includes("back") || s.includes("cubic") || s.includes("spring") || s.includes("editorial")) {
+      k = 5;
+    } else if (s.includes("power4") || s.includes("expo") || s.includes("quart") || s.includes("quint")) {
+      k = 6;
+    }
+
+    // Direction mapping: .out->expOut, .in->expIn, .inOut->expInOut
+    const isInOut = s.includes("inout") || s.includes("in-out");
+    if (isInOut) {
+      return KM.expInOut(k);
+    }
+    const isIn = s.includes(".in") || (s.endsWith("in") && !s.includes("inout"));
+    if (isIn) {
+      return KM.expIn(k);
+    }
+    return KM.expOut(k);
+  }
+
+  /* cubic-bezier ease function mapped to true exponential family so nothing bypasses e^(-x) */
+  function bezier(x1, y1, x2, y2) {
+    const KM = getExpHelpers();
+    return mapBezierToExp([x1, y1, x2, y2], KM);
+  }
+
   S.ease = function (name) {
-    const e = ((S.theme && S.theme.ease) || {})[name] ?? (MT && MT.eases && MT.eases[name]) ?? name;
-    if (Array.isArray(e)) return bezier(...e);
-    return e || (MT && MT.eases && MT.eases.textIn);
+    const KM = getExpHelpers();
+    if (name == null || name === "") {
+      return (MT && MT.eases && MT.eases.textIn) || KM.expOut(5);
+    }
+    const resolved = ((S.theme && S.theme.ease) || {})[name] ?? (MT && MT.eases && MT.eases[name]) ?? name;
+    if (typeof resolved === "function") return resolved;
+    if (Array.isArray(resolved)) return mapBezierToExp(resolved, KM);
+    if (typeof resolved === "string") return mapEaseStringToExp(resolved, KM);
+    return (MT && MT.eases && MT.eases.textIn) || KM.expOut(5);
   };
 
   function hexToRgb(hex, fallback) {
@@ -756,7 +828,7 @@
     if (fo && typeof fo === "object") Object.assign(slide, fo);
     S.slide = slide;
     if (S.tl) S.tl.kill(); if (S.amb) S.amb.kill();
-    S.tl = gsap.timeline({ paused: true }); S.amb = gsap.timeline({ paused: true });
+    S.tl = gsap.timeline({ paused: true, defaults: { ease: S.ease("textIn") } }); S.amb = gsap.timeline({ paused: true, defaults: { ease: S.ease("ambient") } });
     S._imgs = [];
     S._clipSeq = 0;
 

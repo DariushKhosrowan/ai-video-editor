@@ -119,7 +119,7 @@
         // value rides the bar top while it grows (same duration and ease), so it lands with the bar
         const ride = (d.display != null) ? valM.y : (neg ? -(bot - top) : (bot - top));
         S.tl.from(v, { y: ride, duration: barM.dur, ease: S.ease(barEase), immediateRender: true }, t);
-        S.tl.from(v, { opacity: 0, duration: valM.dur, ease: "power1.out", immediateRender: true }, t + valM.delay);
+        S.tl.from(v, { opacity: 0, duration: valM.dur, ease: S.ease("power1.out"), immediateRender: true }, t + valM.delay);
       }
       const l = labs[k];
       l.style.left = (cx - slot * 0.46) + "px";
