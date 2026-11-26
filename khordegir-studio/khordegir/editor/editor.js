@@ -39,6 +39,16 @@
     playStartedAt: 0,
     playFrom: 0,
     loadDebounce: null,
+    stageScale: 1,
+    fieldBoxes: [],
+    selectedField: null,
+    dragSlideIndex: null,
+    scriptMode: "new",
+    scriptResult: null,
+    presetCategory: "all",
+    aiMode: "new",
+    aiValidation: null,
+    aiValidateTimer: null,
   };
 
   const els = {
@@ -46,6 +56,9 @@
     projectSelect: document.getElementById("projectSelect"),
     themeSelect: document.getElementById("themeSelect"),
     btnNewProject: document.getElementById("btnNewProject"),
+    btnPresets: document.getElementById("btnPresets"),
+    btnImportScript: document.getElementById("btnImportScript"),
+    btnAiWriter: document.getElementById("btnAiWriter"),
     btnProjectStyle: document.getElementById("btnProjectStyle"),
     btnRandomAll: document.getElementById("btnRandomAll"),
     btnSave: document.getElementById("btnSave"),
@@ -58,7 +71,9 @@
     stageViewport: document.getElementById("stageViewport"),
     stageFrameBox: document.getElementById("stageFrameBox"),
     stageFrame: document.getElementById("stageFrame"),
+    canvasOverlay: document.getElementById("canvasOverlay"),
     camOnlyOverlay: document.getElementById("camOnlyOverlay"),
+    chkCanvasEdit: document.getElementById("chkCanvasEdit"),
     chkCamGuide: document.getElementById("chkCamGuide"),
     camStatusChip: document.getElementById("camStatusChip"),
     btnReroll: document.getElementById("btnReroll"),
@@ -85,11 +100,54 @@
     projLogoMotionSelect: document.getElementById("projLogoMotionSelect"),
     projLogoPosSelect: document.getElementById("projLogoPosSelect"),
     projSeedInput: document.getElementById("projSeedInput"),
+    projLangSelect: document.getElementById("projLangSelect"),
     projLogoImageSelect: document.getElementById("projLogoImageSelect"),
     projLogoTextInput: document.getElementById("projLogoTextInput"),
     projLogoUpload: document.getElementById("projLogoUpload"),
+    projCountSelect: document.getElementById("projCountSelect"),
+    projCountStyleSelect: document.getElementById("projCountStyleSelect"),
+    projCountFromSelect: document.getElementById("projCountFromSelect"),
+    projMicroFxSelect: document.getElementById("projMicroFxSelect"),
     btnStyleModalReroll: document.getElementById("btnStyleModalReroll"),
     btnApplyStyleModal: document.getElementById("btnApplyStyleModal"),
+    scriptModal: document.getElementById("scriptModal"),
+    btnCloseScriptModal: document.getElementById("btnCloseScriptModal"),
+    scriptProjectRow: document.getElementById("scriptProjectRow"),
+    scriptProjectName: document.getElementById("scriptProjectName"),
+    scriptTitleInput: document.getElementById("scriptTitleInput"),
+    scriptInput: document.getElementById("scriptInput"),
+    btnScriptSample: document.getElementById("btnScriptSample"),
+    btnAnalyzeScript: document.getElementById("btnAnalyzeScript"),
+    scriptPreviewWrap: document.getElementById("scriptPreviewWrap"),
+    scriptStatsBar: document.getElementById("scriptStatsBar"),
+    scriptPreviewList: document.getElementById("scriptPreviewList"),
+    scriptImportErr: document.getElementById("scriptImportErr"),
+    btnApplyScript: document.getElementById("btnApplyScript"),
+    presetsModal: document.getElementById("presetsModal"),
+    btnClosePresetsModal: document.getElementById("btnClosePresetsModal"),
+    presetCustomTitle: document.getElementById("presetCustomTitle"),
+    presetProjectName: document.getElementById("presetProjectName"),
+    presetsGrid: document.getElementById("presetsGrid"),
+    presetsErr: document.getElementById("presetsErr"),
+    aiWriterModal: document.getElementById("aiWriterModal"),
+    btnCloseAiModal: document.getElementById("btnCloseAiModal"),
+    aiRegistryStats: document.getElementById("aiRegistryStats"),
+    aiTopicInput: document.getElementById("aiTopicInput"),
+    btnCopyAiGuide: document.getElementById("btnCopyAiGuide"),
+    aiCopyStatus: document.getElementById("aiCopyStatus"),
+    aiGuideDetails: document.getElementById("aiGuideDetails"),
+    aiGuidePreview: document.getElementById("aiGuidePreview"),
+    aiProjectRow: document.getElementById("aiProjectRow"),
+    aiProjectName: document.getElementById("aiProjectName"),
+    aiYamlInput: document.getElementById("aiYamlInput"),
+    aiDiagnosticsWrap: document.getElementById("aiDiagnosticsWrap"),
+    aiAutoFixBox: document.getElementById("aiAutoFixBox"),
+    aiErrorsBox: document.getElementById("aiErrorsBox"),
+    aiWarningsBox: document.getElementById("aiWarningsBox"),
+    aiPreviewStats: document.getElementById("aiPreviewStats"),
+    aiPreviewList: document.getElementById("aiPreviewList"),
+    btnValidateAiYaml: document.getElementById("btnValidateAiYaml"),
+    btnApplyAiYaml: document.getElementById("btnApplyAiYaml"),
   };
 
   /* ---------------------------------------------------------------- helpers */
@@ -165,7 +223,19 @@
 
     // Inherit project-level defaults unless slide overrides them
     if (state.data) {
-      ["preset", "transition", "logo", "logo_motion", "logo_position", "logo_text"].forEach((k) => {
+      [
+        "preset",
+        "transition",
+        "logo",
+        "logo_motion",
+        "logo_position",
+        "logo_text",
+        "lang",
+        "count",
+        "count_style",
+        "count_from",
+        "micro_fx",
+      ].forEach((k) => {
         if (state.data[k] !== undefined && copy[k] === undefined) {
           copy[k] = JSON.parse(JSON.stringify(state.data[k]));
         }
@@ -188,6 +258,7 @@
     const vw = Math.max(240, vp.clientWidth - 32);
     const vh = Math.max(160, vp.clientHeight - 32);
     const scale = Math.min(vw / 1920, vh / 1080);
+    state.stageScale = scale;
     const w = Math.floor(1920 * scale);
     const h = Math.floor(1080 * scale);
     els.stageFrameBox.style.width = w + "px";
@@ -263,12 +334,163 @@
     }, 110);
   }
 
+  function updateCamStatusUI(camList) {
+    state.camOverlap = Array.isArray(camList) ? camList : [];
+    if (state.camOverlap.length) {
+      els.camStatusChip.textContent = `هشدار تداخل دوربین (${fa(state.camOverlap.length)})`;
+      els.camStatusChip.className = "status-chip warn";
+    } else {
+      els.camStatusChip.textContent = "ناحیه دوربین آزاد";
+      els.camStatusChip.className = "status-chip ok";
+    }
+  }
+
+  function fieldLabelForKey(key) {
+    const slide = activeSlide();
+    if (!slide) return key;
+    if (key === "logo") return "لوگو";
+    const tpl = String(slide.template || "quote").replace(/-/g, "_");
+    const schema = schemas[tpl];
+    const f = schema && Array.isArray(schema.fields) && schema.fields.find((x) => x.key === key);
+    return (f && f.label) || key;
+  }
+
+  function syncOverrideInputs(key, val) {
+    document.querySelectorAll(`[data-ov-key="${key}"]`).forEach((inp) => {
+      const prop = inp.dataset.ovProp;
+      if (prop && val[prop] !== undefined) inp.value = String(val[prop]);
+    });
+  }
+
+  function renderCanvasOverlay() {
+    const ov = els.canvasOverlay;
+    if (!ov) return;
+    const slide = activeSlide();
+    const layout = slide ? String(slide.layout || "SLIDE").toUpperCase() : "SLIDE";
+    const enabled = Boolean(els.chkCanvasEdit && els.chkCanvasEdit.checked && slide && layout !== "CAM");
+    ov.classList.toggle("active", enabled);
+    ov.innerHTML = "";
+    if (!enabled) return;
+
+    if (layout === "SCAM" && els.chkCamGuide.checked) {
+      const camBox = document.createElement("div");
+      camBox.className = "canvas-cam-box";
+      camBox.style.left = `${(24 / 1920) * 100}%`;
+      camBox.style.top = `${(740 / 1080) * 100}%`;
+      camBox.style.width = `${(560 / 1920) * 100}%`;
+      camBox.style.height = `${(315 / 1080) * 100}%`;
+      camBox.textContent = "ناحیه امن دوربین (SCAM)";
+      ov.appendChild(camBox);
+    }
+
+    (state.fieldBoxes || []).forEach((box) => {
+      const r = box.rect;
+      if (!r || r.w <= 0 || r.h <= 0) return;
+      const el = document.createElement("div");
+      el.className = "canvas-field" + (state.selectedField === box.key ? " selected" : "");
+      el.dataset.fieldKey = box.key;
+      el.style.left = `${(r.x / 1920) * 100}%`;
+      el.style.top = `${(r.y / 1080) * 100}%`;
+      el.style.width = `${(r.w / 1920) * 100}%`;
+      el.style.height = `${(r.h / 1080) * 100}%`;
+
+      const lbl = document.createElement("div");
+      lbl.className = "canvas-field-label";
+      const cur = readOverride(slide, box.key);
+      lbl.textContent = `${fieldLabelForKey(box.key)} (${fa(cur.x)}, ${fa(cur.y)} · ×${cur.scale})`;
+      el.appendChild(lbl);
+
+      const handle = document.createElement("div");
+      handle.className = "canvas-resize-handle";
+      handle.title = "کشیدن برای تغییر اندازه (Scale)";
+      el.appendChild(handle);
+
+      const startPointer = (e, mode) => {
+        e.preventDefault();
+        e.stopPropagation();
+        state.selectedField = box.key;
+        document.querySelectorAll(".canvas-field").forEach((n) => n.classList.toggle("selected", n === el));
+        document.querySelectorAll(".override-card").forEach((c) => c.classList.toggle("selected", c.dataset.ovCard === box.key));
+
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const orig = readOverride(slide, box.key);
+        const startLeftPct = parseFloat(el.style.left);
+        const startTopPct = parseFloat(el.style.top);
+        const startWPct = parseFloat(el.style.width);
+        const startHPct = parseFloat(el.style.height);
+        let moved = false;
+
+        const onMove = (mv) => {
+          const sc = state.stageScale || 0.5;
+          const dxStage = (mv.clientX - startX) / sc;
+          const dyStage = (mv.clientY - startY) / sc;
+          if (Math.abs(dxStage) > 2 || Math.abs(dyStage) > 2) moved = true;
+
+          let next;
+          if (mode === "resize") {
+            const delta = (-dxStage + dyStage) / 360;
+            const nextScale = Math.max(0.4, Math.min(2.2, +(orig.scale + delta).toFixed(2)));
+            next = { x: orig.x, y: orig.y, scale: nextScale };
+            const ratio = nextScale / (orig.scale || 1);
+            el.style.width = `${startWPct * ratio}%`;
+            el.style.height = `${startHPct * ratio}%`;
+          } else {
+            next = {
+              x: Math.max(-900, Math.min(900, Math.round(orig.x + dxStage))),
+              y: Math.max(-540, Math.min(540, Math.round(orig.y + dyStage))),
+              scale: orig.scale,
+            };
+            el.style.left = `${startLeftPct + ((next.x - orig.x) / 1920) * 100}%`;
+            el.style.top = `${startTopPct + ((next.y - orig.y) / 1080) * 100}%`;
+          }
+
+          writeOverride(slide, box.key, next);
+          lbl.textContent = `${fieldLabelForKey(box.key)} (${fa(next.x)}, ${fa(next.y)} · ×${next.scale})`;
+          syncOverrideInputs(box.key, next);
+          if (els.stageFrame.contentWindow) {
+            els.stageFrame.contentWindow.postMessage({
+              cmd: "setOverride",
+              key: box.key,
+              x: next.x,
+              y: next.y,
+              scale: next.scale,
+            }, "*");
+          }
+        };
+
+        const onUp = () => {
+          window.removeEventListener("pointermove", onMove);
+          window.removeEventListener("pointerup", onUp);
+          if (moved) {
+            setDirty(true);
+            if (els.stageFrame.contentWindow) {
+              els.stageFrame.contentWindow.postMessage({ cmd: "getFields" }, "*");
+            }
+          }
+        };
+
+        window.addEventListener("pointermove", onMove);
+        window.addEventListener("pointerup", onUp);
+      };
+
+      handle.addEventListener("pointerdown", (e) => startPointer(e, "resize"));
+      el.addEventListener("pointerdown", (e) => {
+        if (e.target === handle) return;
+        startPointer(e, "move");
+      });
+
+      ov.appendChild(el);
+    });
+  }
+
   window.addEventListener("message", (ev) => {
     const d = ev.data || {};
     if (d.cmd === "loaded" && d.info) {
       state.duration = Number(d.info.duration || 6);
       state.fx = d.info.fx || {};
-      state.camOverlap = Array.isArray(d.cam) ? d.cam : [];
+      state.fieldBoxes = Array.isArray(d.fields) ? d.fields : [];
+      updateCamStatusUI(d.cam);
       const pLbl = FX_CAT.presetLabels[state.fx.preset] || state.fx.preset || "خودکار";
       const tLbl = FX_CAT.transitionLabels[state.fx.transition] || state.fx.transition || "خودکار";
       const lLbl = FX_CAT.logoMotionLabels[state.fx.logoMotion] || state.fx.logoMotion || "خودکار";
@@ -279,13 +501,7 @@
         (state.data && (state.data.logo || state.data.logo_text));
       els.logoChip.textContent = hasLogo && (!activeSlide() || activeSlide().logo !== false) ? `لوگو: ${lLbl}` : "لوگو: خاموش";
 
-      if (state.camOverlap.length) {
-        els.camStatusChip.textContent = `هشدار تداخل دوربین (${fa(state.camOverlap.length)})`;
-        els.camStatusChip.className = "status-chip warn";
-      } else {
-        els.camStatusChip.textContent = "ناحیه دوربین آزاد";
-        els.camStatusChip.className = "status-chip ok";
-      }
+      renderCanvasOverlay();
 
       if (!state.playing) {
         state.currentTime = Math.min(state.currentTime, state.duration);
@@ -293,6 +509,9 @@
       } else {
         startClock(0);
       }
+    } else if (d.cmd === "fields") {
+      if (Array.isArray(d.fields)) state.fieldBoxes = d.fields;
+      if (d.cam !== undefined) updateCamStatusUI(d.cam);
     }
   });
 
@@ -379,6 +598,8 @@
       const schema = schemas[tpl] || {};
       const card = document.createElement("div");
       card.className = "slide-card" + (idx === state.activeIndex ? " active" : "");
+      card.draggable = true;
+      card.dataset.index = String(idx);
 
       const titleStr = s.title || s.text || s.label || s.number || s.say || "اسلاید بدون عنوان";
       const cleanTitle = String(titleStr).replace(/[*~=_]/g, "").slice(0, 48);
@@ -400,6 +621,46 @@
         </div>
       `;
 
+      card.addEventListener("dragstart", (e) => {
+        state.dragSlideIndex = idx;
+        card.classList.add("dragging");
+        if (e.dataTransfer) {
+          e.dataTransfer.effectAllowed = "move";
+          e.dataTransfer.setData("text/plain", String(idx));
+        }
+      });
+
+      card.addEventListener("dragover", (e) => {
+        if (state.dragSlideIndex === null || state.dragSlideIndex === idx) return;
+        e.preventDefault();
+        card.classList.add("drag-over");
+      });
+
+      card.addEventListener("dragleave", () => {
+        card.classList.remove("drag-over");
+      });
+
+      card.addEventListener("drop", (e) => {
+        e.preventDefault();
+        card.classList.remove("drag-over");
+        const from = state.dragSlideIndex;
+        state.dragSlideIndex = null;
+        if (from === null || from === idx || !state.data || !Array.isArray(state.data.slides)) return;
+        const activeObj = state.data.slides[state.activeIndex];
+        const [moved] = state.data.slides.splice(from, 1);
+        state.data.slides.splice(idx, 0, moved);
+        state.activeIndex = Math.max(0, state.data.slides.indexOf(activeObj));
+        setDirty(true);
+        renderSlidesList();
+        renderInspector();
+        reloadStage(true);
+      });
+
+      card.addEventListener("dragend", () => {
+        state.dragSlideIndex = null;
+        document.querySelectorAll(".slide-card").forEach((n) => n.classList.remove("dragging", "drag-over"));
+      });
+
       card.addEventListener("click", (e) => {
         const actBtn = e.target.closest("[data-act]");
         if (actBtn) {
@@ -409,6 +670,7 @@
         }
         state.activeIndex = idx;
         state.currentTime = 0;
+        state.selectedField = null;
         renderSlidesList();
         renderInspector();
         reloadStage(true);
@@ -483,7 +745,7 @@
     els.activeSlideBadge.textContent = `اسلاید ${fa(state.activeIndex + 1)}`;
     els.inspectorBody.innerHTML = "";
 
-    // 1. Template switch
+    // 1. Template & language switch
     const secMeta = document.createElement("div");
     secMeta.className = "inspector-section";
     secMeta.innerHTML = `<div class="section-title"><span>ساختار اسلاید</span></div>`;
@@ -509,7 +771,64 @@
     });
     tplGroup.appendChild(tplSel);
     secMeta.appendChild(tplGroup);
+
+    const langGroup = document.createElement("label");
+    langGroup.className = "field-group";
+    langGroup.innerHTML = `<div class="field-label-row"><strong>جهت و زبان اسلاید</strong></div>`;
+    const langSel = document.createElement("select");
+    langSel.className = "select-ctrl";
+    [
+      { value: "", label: "ارث‌بری از پروژه" },
+      { value: "fa", label: "فارسی — راست‌به‌چپ (RTL)" },
+      { value: "en", label: "English — Left-to-Right (LTR)" },
+    ].forEach((opt) => {
+      const o = document.createElement("option");
+      o.value = opt.value;
+      o.textContent = opt.label;
+      langSel.appendChild(o);
+    });
+    langSel.value = slide.lang || "";
+    langSel.addEventListener("change", () => {
+      if (!langSel.value) delete slide.lang;
+      else slide.lang = langSel.value;
+      setDirty(true);
+      reloadStage(true);
+    });
+    langGroup.appendChild(langSel);
+    secMeta.appendChild(langGroup);
     els.inspectorBody.appendChild(secMeta);
+
+    const attachRichToolbar = (groupEl, inputEl, onApply) => {
+      const bar = document.createElement("div");
+      bar.className = "rich-toolbar";
+      [
+        { open: "*", close: "*", label: "*زرد*", cls: "acc", title: "رنگ تاکیدی (*...*)" },
+        { open: "~", close: "~", label: "~قرمز~", cls: "dng", title: "رنگ هشدار (~...~)" },
+        { open: "_", close: "_", label: "_کمرنگ_", cls: "", title: "متن کمرنگ (_..._)" },
+        { open: "==", close: "==", label: "==هایلایت==", cls: "hl", title: "هایلایت (==...==)" },
+        { open: "__", close: "__", label: "__زیرخط__", cls: "ul", title: "زیرخط (__...__)" },
+      ].forEach((fmt) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "rich-btn " + fmt.cls;
+        b.textContent = fmt.label;
+        b.title = fmt.title;
+        b.addEventListener("click", () => {
+          const val = inputEl.value || "";
+          const start = inputEl.selectionStart ?? val.length;
+          const end = inputEl.selectionEnd ?? val.length;
+          const selected = val.slice(start, end) || "متن";
+          const wrapped = `${fmt.open}${selected}${fmt.close}`;
+          inputEl.value = val.slice(0, start) + wrapped + val.slice(end);
+          inputEl.focus();
+          const curStart = start + fmt.open.length;
+          inputEl.setSelectionRange(curStart, curStart + selected.length);
+          onApply(inputEl.value);
+        });
+        bar.appendChild(b);
+      });
+      groupEl.appendChild(bar);
+    };
 
     // 2. Schema-driven fields
     const secFields = document.createElement("div");
@@ -532,13 +851,15 @@
         const ta = document.createElement("textarea");
         ta.className = "textarea-input";
         ta.value = slide[f.key] ?? "";
-        ta.addEventListener("input", () => {
-          slide[f.key] = ta.value;
+        const updateTa = (nextVal) => {
+          slide[f.key] = nextVal;
           setDirty(true);
           renderSlidesList();
           scheduleReload(false);
-        });
+        };
+        ta.addEventListener("input", () => updateTa(ta.value));
         group.appendChild(ta);
+        attachRichToolbar(group, ta, updateTa);
       } else if (f.type === "list") {
         const ta = document.createElement("textarea");
         ta.className = "textarea-input";
@@ -730,13 +1051,15 @@
         inp.type = "text";
         inp.className = "text-input";
         inp.value = slide[f.key] ?? "";
-        inp.addEventListener("input", () => {
-          slide[f.key] = inp.value;
+        const updateInp = (nextVal) => {
+          slide[f.key] = nextVal;
           setDirty(true);
           renderSlidesList();
           scheduleReload(false);
-        });
+        };
+        inp.addEventListener("input", () => updateInp(inp.value));
         group.appendChild(inp);
+        attachRichToolbar(group, inp, updateInp);
       }
 
       secFields.appendChild(group);
@@ -835,7 +1158,8 @@
       ovFields.forEach((f) => {
         const cur = readOverride(slide, f.key);
         const card = document.createElement("div");
-        card.className = "override-card";
+        card.className = "override-card" + (state.selectedField === f.key ? " selected" : "");
+        card.dataset.ovCard = f.key;
 
         const head = document.createElement("div");
         head.className = "override-head";
@@ -866,19 +1190,31 @@
           inp.min = String(min);
           inp.max = String(max);
           inp.value = String(cur[prop]);
+          inp.dataset.ovKey = f.key;
+          inp.dataset.ovProp = prop;
           inp.addEventListener("input", () => {
             const next = readOverride(slide, f.key);
             next[prop] = Number(inp.value) || (prop === "scale" ? 1 : 0);
             writeOverride(slide, f.key, next);
             setDirty(true);
-            scheduleReload(false);
+            if (els.stageFrame.contentWindow) {
+              els.stageFrame.contentWindow.postMessage({
+                cmd: "setOverride",
+                key: f.key,
+                x: next.x,
+                y: next.y,
+                scale: next.scale,
+              }, "*");
+            } else {
+              scheduleReload(false);
+            }
           });
           wrap.appendChild(inp);
           return wrap;
         };
 
-        grid.appendChild(mkNum("افقی (X)", "x", 10, -800, 800));
-        grid.appendChild(mkNum("عمودی (Y)", "y", 10, -500, 500));
+        grid.appendChild(mkNum("افقی (X)", "x", 10, -900, 900));
+        grid.appendChild(mkNum("عمودی (Y)", "y", 10, -540, 540));
         grid.appendChild(mkNum("مقیاس", "scale", 0.05, 0.4, 2.2));
         card.appendChild(grid);
         secOv.appendChild(card);
@@ -886,6 +1222,122 @@
 
       els.inspectorBody.appendChild(secOv);
     }
+
+    // 5. Collapsible Advanced Counter & Micro-Details Controls
+    const advDetails = document.createElement("details");
+    advDetails.className = "advanced-details";
+    if (
+      slide.count !== undefined ||
+      slide.count_style !== undefined ||
+      slide.count_from !== undefined ||
+      slide.micro_fx !== undefined
+    ) {
+      advDetails.open = true;
+    }
+
+    const advSummary = document.createElement("summary");
+    advSummary.innerHTML = `<span>تنظیمات پیشرفتهٔ شمارنده و جزئیات حرکت (Advanced)</span><span style="font-size:11px;color:var(--muted)">▾</span>`;
+    advDetails.appendChild(advSummary);
+
+    const advBody = document.createElement("div");
+    advBody.className = "advanced-details-body";
+
+    const mkAdvSelect = (labelText, options, currentValue, onChange) => {
+      const grp = document.createElement("div");
+      grp.className = "field-group";
+      const lbl = document.createElement("div");
+      lbl.className = "field-label-row";
+      lbl.innerHTML = `<strong>${labelText}</strong>`;
+      grp.appendChild(lbl);
+      const sel = document.createElement("select");
+      sel.className = "select-ctrl";
+      options.forEach((opt) => {
+        const o = document.createElement("option");
+        o.value = opt.value;
+        o.textContent = opt.label;
+        sel.appendChild(o);
+      });
+      sel.value = currentValue;
+      sel.addEventListener("change", () => {
+        onChange(sel.value);
+        setDirty(true);
+        reloadStage(true);
+      });
+      grp.appendChild(sel);
+      return grp;
+    };
+
+    advBody.appendChild(
+      mkAdvSelect(
+        "شمارش خودکار اعداد در این اسلاید",
+        [
+          { value: "", label: "ارث‌بری از تنظیمات پروژه" },
+          { value: "true", label: "روشن (شمارش یوتیوبی)" },
+          { value: "false", label: "خاموش (count: false)" },
+        ],
+        slide.count === false ? "false" : slide.count === true ? "true" : "",
+        (v) => {
+          if (v === "false") slide.count = false;
+          else if (v === "true") slide.count = true;
+          else delete slide.count;
+        }
+      )
+    );
+
+    advBody.appendChild(
+      mkAdvSelect(
+        "سبک شمارش اعداد",
+        [
+          { value: "", label: "ارث‌بری از تنظیمات پروژه" },
+          { value: "pop", label: "پاپ یوتیوبی (پیش‌فرض)" },
+          { value: "smooth", label: "نرم و کلاسیک" },
+          { value: "slam", label: "کوبنده و پرانرژی" },
+          { value: "subtle", label: "سریع و ظریف" },
+        ],
+        slide.count_style || "",
+        (v) => {
+          if (!v) delete slide.count_style;
+          else slide.count_style = v;
+        }
+      )
+    );
+
+    advBody.appendChild(
+      mkAdvSelect(
+        "نقطهٔ شروع شمارش",
+        [
+          { value: "", label: "ارث‌بری از تنظیمات پروژه" },
+          { value: "auto", label: "هوشمند (سال‌ها از نزدیک، بقیه از صفر)" },
+          { value: "zero", label: "همیشه از صفر" },
+          { value: "near", label: "شروع از حدود ۷۰٪" },
+        ],
+        slide.count_from || "",
+        (v) => {
+          if (!v) delete slide.count_from;
+          else slide.count_from = v;
+        }
+      )
+    );
+
+    advBody.appendChild(
+      mkAdvSelect(
+        "ریزجزئیات حرکتی (تاکید، هایلایت، ایموجی)",
+        [
+          { value: "", label: "ارث‌بری از تنظیمات پروژه" },
+          { value: "true", label: "روشن" },
+          { value: "false", label: "خاموش (micro_fx: false)" },
+        ],
+        slide.micro_fx === false ? "false" : slide.micro_fx === true ? "true" : "",
+        (v) => {
+          if (v === "false") slide.micro_fx = false;
+          else if (v === "true") slide.micro_fx = true;
+          else delete slide.micro_fx;
+        }
+      )
+    );
+
+    advDetails.appendChild(advBody);
+    els.inspectorBody.appendChild(advDetails);
   }
 
   /* ---------------------------------------------------------------- Style & Logo Modal */
@@ -921,7 +1373,12 @@
     els.projLogoMotionSelect.value = state.data.logo_motion || "random";
     els.projLogoPosSelect.value = state.data.logo_position || "top-left";
     els.projSeedInput.value = String(Number(state.data.seed) || 0);
+    if (els.projLangSelect) els.projLangSelect.value = state.data.lang || "fa";
     els.projLogoTextInput.value = state.data.logo_text || "";
+    if (els.projCountSelect) els.projCountSelect.value = state.data.count === false ? "off" : "on";
+    if (els.projCountStyleSelect) els.projCountStyleSelect.value = state.data.count_style || "pop";
+    if (els.projCountFromSelect) els.projCountFromSelect.value = state.data.count_from || "auto";
+    if (els.projMicroFxSelect) els.projMicroFxSelect.value = state.data.micro_fx === false ? "off" : "on";
     els.styleModal.classList.remove("hidden");
   }
 
@@ -933,6 +1390,33 @@
     state.data.logo_motion = els.projLogoMotionSelect.value;
     state.data.logo_position = els.projLogoPosSelect.value;
     state.data.seed = Number(els.projSeedInput.value) || 0;
+    if (els.projLangSelect) {
+      if (els.projLangSelect.value === "en") state.data.lang = "en";
+      else delete state.data.lang;
+    }
+
+    if (els.projCountSelect) {
+      if (els.projCountSelect.value === "off") state.data.count = false;
+      else delete state.data.count;
+    }
+    if (els.projCountStyleSelect) {
+      if (els.projCountStyleSelect.value && els.projCountStyleSelect.value !== "pop") {
+        state.data.count_style = els.projCountStyleSelect.value;
+      } else {
+        delete state.data.count_style;
+      }
+    }
+    if (els.projCountFromSelect) {
+      if (els.projCountFromSelect.value && els.projCountFromSelect.value !== "auto") {
+        state.data.count_from = els.projCountFromSelect.value;
+      } else {
+        delete state.data.count_from;
+      }
+    }
+    if (els.projMicroFxSelect) {
+      if (els.projMicroFxSelect.value === "off") state.data.micro_fx = false;
+      else delete state.data.micro_fx;
+    }
 
     const imgVal = els.projLogoImageSelect.value;
     if (imgVal) state.data.logo = imgVal;
@@ -1077,6 +1561,543 @@
     await loadProjectsList(json.name);
   }
 
+  /* ---------------------------------------------------------------- Script Import Modal */
+  const SAMPLE_SCRIPT = `# چرا هوش مصنوعی بدون دادهٔ تمیز شکست می‌خورد؟
+
+بیشتر تیم‌ها تصور می‌کنند *مدل* همه چیز است، اما ۷۳٪ پروژه‌های هوش مصنوعی به خاطر کیفیت پایین داده‌ها متوقف می‌شوند.
+
+## سه مشکل پنهان در داده‌های خام
+- تکرار و داده‌های ناقص در جدول‌های قدیمی
+- برچسب‌گذاری سلیقه‌ای بدون دستورالعمل واحد
+- نبود نسخهٔ آزمایشی مستقل برای ارزیابی واقعی
+
+قبل از پاک‌سازی دقت ۶۲٪ بود، اما بعد از استانداردسازی به ۹۱٪ رسید.
+
+«مدل بهتر بدون دادهٔ تمیز، فقط سریع‌تر اشتباه می‌کند.»
+
+او: الان مدل آمادهٔ انتشاره؟
+من: نه هنوز، اول باید خطای داده‌ها را صفر کنیم.`;
+
+  function setScriptMode(mode) {
+    state.scriptMode = mode;
+    document.querySelectorAll(".script-mode-btn").forEach((b) => {
+      b.classList.toggle("active", b.dataset.mode === mode);
+    });
+    els.scriptProjectRow.classList.toggle("hidden", mode !== "new");
+    els.btnApplyScript.textContent =
+      mode === "new"
+        ? "ساخت و باز کردن پروژه"
+        : mode === "replace"
+          ? "جایگزینی اسلایدهای پروژه فعلی"
+          : "افزودن به انتهای پروژه فعلی";
+  }
+
+  function openScriptModal() {
+    els.scriptImportErr.classList.add("hidden");
+    if (!els.scriptProjectName.value) {
+      els.scriptProjectName.value = `script-${Math.floor(Date.now() / 1000) % 10000}`;
+    }
+    setScriptMode(state.projectName ? state.scriptMode : "new");
+    els.scriptModal.classList.remove("hidden");
+    els.scriptInput.focus();
+  }
+
+  async function analyzeScript() {
+    els.scriptImportErr.classList.add("hidden");
+    const script = els.scriptInput.value.trim();
+    if (!script) {
+      els.scriptImportErr.textContent = "لطفاً ابتدا متن اسکریپت را وارد کنید.";
+      els.scriptImportErr.classList.remove("hidden");
+      return null;
+    }
+    try {
+      const resp = await fetch("/api/import-script", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          script,
+          title: els.scriptTitleInput.value.trim(),
+          theme: (state.data && state.data.theme) || els.themeSelect.value || "khordegir-dark",
+        }),
+      });
+      const json = await resp.json();
+      if (!resp.ok) throw new Error(json.error || "خطا در تحلیل اسکریپت");
+      state.scriptResult = json;
+
+      const st = json.stats || {};
+      const mins = Math.floor((st.estSeconds || 0) / 60);
+      const secs = (st.estSeconds || 0) % 60;
+      const durText = mins > 0 ? `${fa(mins)} دقیقه و ${fa(secs)} ثانیه` : `${fa(secs)} ثانیه`;
+      els.scriptStatsBar.innerHTML =
+        `<span class="count-chip">اسلاید: ${fa(st.slides || json.slides.length)}</span>` +
+        `<span class="count-chip">کلمات گفتار: ${fa(st.words || 0)}</span>` +
+        `<span class="count-chip">زمان تخمینی: ${durText}</span>` +
+        `<span class="count-chip">حالت: ${st.mode === "markers" ? "نشانگرها" : "تشخیص خودکار"}</span>`;
+
+      els.scriptPreviewList.innerHTML = "";
+      (json.slides || []).forEach((s, i) => {
+        const tpl = String(s.template || "quote").replace(/-/g, "_");
+        const schema = schemas[tpl] || {};
+        const titleTxt = String(s.title || s.text || s.caption || s.number || s.say || "اسلاید").replace(/[*~=_]/g, "");
+        const card = document.createElement("div");
+        card.className = "script-preview-card";
+        card.innerHTML = `
+          <div class="script-preview-card-head">
+            <span>${fa(i + 1)}. ${schema.label || tpl}</span>
+            <span>${String(s.layout || "SCAM")}</span>
+          </div>
+          <div class="script-preview-card-title">${titleTxt}</div>
+          <div class="script-preview-card-say">${String(s.say || "")}</div>
+        `;
+        els.scriptPreviewList.appendChild(card);
+      });
+
+      els.scriptPreviewWrap.classList.remove("hidden");
+      els.btnApplyScript.disabled = !(json.slides && json.slides.length);
+      return json;
+    } catch (err) {
+      els.scriptImportErr.textContent = err.message;
+      els.scriptImportErr.classList.remove("hidden");
+      return null;
+    }
+  }
+
+  async function applyScript() {
+    els.scriptImportErr.classList.add("hidden");
+    const parsed = state.scriptResult || (await analyzeScript());
+    if (!parsed || !Array.isArray(parsed.slides) || !parsed.slides.length) return;
+
+    if (state.scriptMode === "new") {
+      const folderName = (els.scriptProjectName.value || "").trim() || `script-${Date.now()}`;
+      const resp = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: folderName,
+          title: els.scriptTitleInput.value.trim() || parsed.title || folderName,
+          theme: els.themeSelect.value || parsed.theme || "khordegir-dark",
+          slides: parsed.slides,
+        }),
+      });
+      const json = await resp.json();
+      if (!resp.ok) {
+        els.scriptImportErr.textContent = json.error || "خطا در ساخت پروژه از اسکریپت";
+        els.scriptImportErr.classList.remove("hidden");
+        return;
+      }
+      els.scriptModal.classList.add("hidden");
+      state.scriptResult = null;
+      await loadProjectsList(json.name);
+      setStatus(`پروژه «${json.data.title || json.name}» با ${fa(parsed.slides.length)} اسلاید ساخته شد`);
+      return;
+    }
+
+    if (!state.data) {
+      els.scriptImportErr.textContent = "ابتدا یک پروژه باز کنید یا حالت «ساخت پروژه تازه» را بزنید.";
+      els.scriptImportErr.classList.remove("hidden");
+      return;
+    }
+
+    if (state.scriptMode === "replace") {
+      state.data.slides = JSON.parse(JSON.stringify(parsed.slides));
+      state.activeIndex = 0;
+    } else {
+      state.data.slides.push(...JSON.parse(JSON.stringify(parsed.slides)));
+      state.activeIndex = Math.max(0, state.data.slides.length - parsed.slides.length);
+    }
+
+    els.scriptModal.classList.add("hidden");
+    state.scriptResult = null;
+    setDirty(true);
+    renderSlidesList();
+    renderInspector();
+    reloadStage(true);
+    setStatus(`${fa(parsed.slides.length)} اسلاید از اسکریپت اضافه شد (ذخیره فراموش نشود)`);
+  }
+
+  /* ---------------------------------------------------------------- Beginner Presets Gallery */
+  function buildSlidesFromPreset(preset) {
+    const slides = JSON.parse(JSON.stringify(preset.slides || []));
+    const customTitle = (els.presetCustomTitle && els.presetCustomTitle.value || "").trim();
+    if (customTitle && slides.length) {
+      if (typeof slides[0].title === "string") slides[0].title = customTitle;
+      else if (typeof slides[0].text === "string") slides[0].text = customTitle;
+    }
+    return {
+      slides,
+      projectTitle: customTitle || preset.title,
+    };
+  }
+
+  async function createProjectFromPreset(preset) {
+    els.presetsErr.classList.add("hidden");
+    const rawFolder = (els.presetProjectName && els.presetProjectName.value || "").trim();
+    const folderName = rawFolder || `${preset.id.replace(/_/g, "-")}-${Date.now().toString(36).slice(-4)}`;
+    const { slides, projectTitle } = buildSlidesFromPreset(preset);
+
+    try {
+      const resp = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: folderName,
+          title: projectTitle,
+          theme: preset.theme || "khordegir-dark",
+          preset: preset.preset || "random",
+          transition: preset.transition || "random",
+          count_style: preset.count_style || "pop",
+          slides,
+        }),
+      });
+      const json = await resp.json();
+      if (!resp.ok) {
+        els.presetsErr.textContent = json.error || "خطا در ساخت پروژه از الگو";
+        els.presetsErr.classList.remove("hidden");
+        return;
+      }
+      els.presetsModal.classList.add("hidden");
+      await loadProjectsList(json.name);
+      setStatus(`پروژه «${json.data.title || json.name}» از الگوی آماده ساخته شد — حالا فقط متن‌ها را ویرایش کنید`);
+    } catch (err) {
+      els.presetsErr.textContent = err.message || "خطای ارتباط با سرور";
+      els.presetsErr.classList.remove("hidden");
+    }
+  }
+
+  function applyPresetToCurrent(preset) {
+    els.presetsErr.classList.add("hidden");
+    if (!state.data) {
+      els.presetsErr.textContent = "پروژهٔ فعالی باز نیست؛ از دکمهٔ «ساخت پروژه از الگو» استفاده کنید.";
+      els.presetsErr.classList.remove("hidden");
+      return;
+    }
+    const { slides, projectTitle } = buildSlidesFromPreset(preset);
+    if ((els.presetCustomTitle && els.presetCustomTitle.value || "").trim()) {
+      state.data.title = projectTitle;
+    }
+    state.data.theme = preset.theme || state.data.theme || "khordegir-dark";
+    state.data.preset = preset.preset || "random";
+    state.data.transition = preset.transition || "random";
+    state.data.count_style = preset.count_style || "pop";
+    state.data.slides = slides;
+    state.activeIndex = 0;
+    state.selectedField = null;
+    els.themeSelect.value = state.data.theme;
+    els.presetsModal.classList.add("hidden");
+    setDirty(true);
+    renderSlidesList();
+    renderInspector();
+    reloadStage(true);
+    setStatus(`الگوی «${preset.title}» روی پروژهٔ فعلی نشست (ذخیره فراموش نشود)`);
+  }
+
+  function renderPresetsGrid(category) {
+    if (!els.presetsGrid) return;
+    const list = Array.isArray(window.BEGINNER_PRESETS) ? window.BEGINNER_PRESETS : [];
+    const cat = category || state.presetCategory || "all";
+    const filtered = cat === "all" ? list : list.filter((p) => p.category === cat);
+    els.presetsGrid.innerHTML = "";
+
+    const tplLabel = (tpl) => {
+      const s = schemas[tpl];
+      return (s && (s.title || s.name)) || tpl;
+    };
+
+    filtered.forEach((preset) => {
+      const card = document.createElement("div");
+      card.className = "preset-card";
+
+      const top = document.createElement("div");
+      const h4 = document.createElement("h4");
+      h4.className = "preset-card-title";
+      h4.textContent = preset.title;
+      top.appendChild(h4);
+
+      const meta = document.createElement("div");
+      meta.className = "preset-card-meta";
+      const themeObj = (window.Stage && window.Stage.themes && window.Stage.themes[preset.theme]) || null;
+      const themeLabel = (themeObj && (themeObj.label || themeObj.name)) || preset.theme;
+      meta.textContent = `${fa(preset.slides.length)} اسلاید · حدود ${fa(preset.estSec || 45)} ثانیه · تم ${themeLabel}`;
+      top.appendChild(meta);
+
+      const desc = document.createElement("p");
+      desc.className = "preset-card-desc";
+      desc.textContent = preset.desc;
+
+      const flow = document.createElement("div");
+      flow.className = "preset-card-flow";
+      flow.textContent = "ساختار: " + preset.slides.map((s) => tplLabel(s.template)).join(" ← ");
+
+      const actions = document.createElement("div");
+      actions.className = "preset-card-actions";
+
+      const btnNew = document.createElement("button");
+      btnNew.type = "button";
+      btnNew.className = "btn btn-sm btn-primary";
+      btnNew.textContent = "ساخت پروژهٔ جدید از این الگو";
+      btnNew.addEventListener("click", () => createProjectFromPreset(preset));
+      actions.appendChild(btnNew);
+
+      if (state.data) {
+        const btnHere = document.createElement("button");
+        btnHere.type = "button";
+        btnHere.className = "btn btn-sm btn-ghost";
+        btnHere.textContent = "اعمال روی پروژهٔ فعلی";
+        btnHere.addEventListener("click", () => applyPresetToCurrent(preset));
+        actions.appendChild(btnHere);
+      }
+
+      card.appendChild(top);
+      card.appendChild(desc);
+      card.appendChild(flow);
+      card.appendChild(actions);
+      els.presetsGrid.appendChild(card);
+    });
+  }
+
+  function openPresetsModal() {
+    if (!els.presetsModal) return;
+    els.presetsErr.classList.add("hidden");
+    state.presetCategory = "all";
+    document.querySelectorAll(".preset-cat-btn").forEach((b) => {
+      b.classList.toggle("active", b.dataset.cat === "all");
+    });
+    renderPresetsGrid("all");
+    els.presetsModal.classList.remove("hidden");
+  }
+
+  /* ---------------------------------------------------------------- Offline AI Slide Writer */
+  function setAiMode(mode) {
+    state.aiMode = mode || "new";
+    document.querySelectorAll(".ai-mode-btn").forEach((b) => {
+      b.classList.toggle("active", b.dataset.mode === state.aiMode);
+    });
+    if (els.aiProjectRow) {
+      els.aiProjectRow.classList.toggle("hidden", state.aiMode !== "new");
+    }
+    if (els.btnApplyAiYaml) {
+      if (state.aiMode === "new") els.btnApplyAiYaml.textContent = "✨ ساخت و باز کردن پروژه";
+      else if (state.aiMode === "replace") els.btnApplyAiYaml.textContent = "🔄 جایگزینی در پروژهٔ فعلی";
+      else els.btnApplyAiYaml.textContent = "➕ افزودن به انتهای پروژه";
+    }
+  }
+
+  async function fetchAiGuideText() {
+    const topic = (els.aiTopicInput && els.aiTopicInput.value || "").trim();
+    const qs = topic ? `?topic=${encodeURIComponent(topic)}` : "";
+    const resp = await fetch(`/api/ai-guide${qs}`);
+    const json = await resp.json();
+    if (!resp.ok) throw new Error(json.error || "خطا در تولید راهنمای هوش مصنوعی");
+    if (els.aiGuidePreview) els.aiGuidePreview.value = json.guide || "";
+    if (els.aiRegistryStats && json.stats) {
+      els.aiRegistryStats.textContent = `به‌روز از رجیستری زنده: ${fa(json.stats.templates)} قالب · ${fa(json.stats.themes)} تم · ${fa(json.stats.transitions)} ترنزیشن`;
+    }
+    return json.guide || "";
+  }
+
+  async function copyAiGuideToClipboard() {
+    if (els.aiCopyStatus) els.aiCopyStatus.textContent = "در حال آماده‌سازی...";
+    try {
+      const guideText = await fetchAiGuideText();
+      let copied = false;
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+        try {
+          await navigator.clipboard.writeText(guideText);
+          copied = true;
+        } catch {
+          copied = false;
+        }
+      }
+      if (!copied && els.aiGuidePreview) {
+        if (els.aiGuideDetails) els.aiGuideDetails.open = true;
+        els.aiGuidePreview.focus();
+        els.aiGuidePreview.select();
+        try {
+          copied = document.execCommand("copy");
+        } catch {
+          copied = false;
+        }
+      }
+      if (els.aiCopyStatus) {
+        els.aiCopyStatus.textContent = copied
+          ? "✓ راهنما کپی شد! در ChatGPT / Gemini / Claude بچسبانید."
+          : "متن راهنما در کادر زیر انتخاب شد — با Ctrl+C کپی کنید.";
+      }
+    } catch (err) {
+      if (els.aiCopyStatus) els.aiCopyStatus.textContent = "خطا: " + err.message;
+    }
+  }
+
+  function renderBulletBox(boxEl, heading, items) {
+    if (!boxEl) return;
+    if (!items || !items.length) {
+      boxEl.classList.add("hidden");
+      boxEl.innerHTML = "";
+      return;
+    }
+    boxEl.classList.remove("hidden");
+    boxEl.innerHTML = "";
+    const strong = document.createElement("strong");
+    strong.textContent = heading;
+    boxEl.appendChild(strong);
+    const ul = document.createElement("ul");
+    ul.className = "ai-diag-list";
+    items.forEach((msg) => {
+      const li = document.createElement("li");
+      li.textContent = msg;
+      ul.appendChild(li);
+    });
+    boxEl.appendChild(ul);
+  }
+
+  async function validateAiYamlInput() {
+    const markup = (els.aiYamlInput && els.aiYamlInput.value) || "";
+    if (!markup.trim()) {
+      state.aiValidation = null;
+      if (els.aiDiagnosticsWrap) els.aiDiagnosticsWrap.classList.add("hidden");
+      if (els.btnApplyAiYaml) els.btnApplyAiYaml.disabled = true;
+      return null;
+    }
+    try {
+      const resp = await fetch("/api/ai-import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ markup, preview: true }),
+      });
+      const json = await resp.json();
+      state.aiValidation = json;
+      if (els.aiDiagnosticsWrap) els.aiDiagnosticsWrap.classList.remove("hidden");
+
+      renderBulletBox(els.aiAutoFixBox, "اصلاحات خودکار انجام‌شده:", json.autoFixes || []);
+      renderBulletBox(els.aiErrorsBox, "خطاهای نیازمند اصلاح (با شماره خط):", json.errors || []);
+      renderBulletBox(els.aiWarningsBox, "هشدارها:", json.warnings || []);
+
+      if (els.aiPreviewStats && els.aiPreviewList) {
+        els.aiPreviewList.innerHTML = "";
+        if (json.ok && json.data && Array.isArray(json.data.slides)) {
+          const slides = json.data.slides;
+          els.aiPreviewStats.textContent = `معتبر ✓ · عنوان: ${json.data.title || "—"} · تم: ${json.data.theme || "—"} · ${fa(slides.length)} اسلاید آمادهٔ ساخت`;
+          slides.forEach((sl, idx) => {
+            const card = document.createElement("div");
+            card.className = "script-preview-card";
+            const head = document.createElement("div");
+            head.className = "script-preview-card-head";
+            const sObj = schemas[sl.template];
+            const tLabel = (sObj && (sObj.label || sObj.title || sObj.name)) || sl.template;
+            head.textContent = `${fa(idx + 1)}. ${tLabel} · ${sl.layout || "SCAM"}`;
+            const ttl = document.createElement("div");
+            ttl.className = "script-preview-card-title";
+            ttl.textContent = stripRich(sl.title || sl.text || sl.caption || (sl.number != null ? String(sl.number) : "") || "(بدون متن)");
+            const say = document.createElement("div");
+            say.className = "script-preview-card-say";
+            say.textContent = sl.say || "—";
+            card.appendChild(head);
+            card.appendChild(ttl);
+            card.appendChild(say);
+            els.aiPreviewList.appendChild(card);
+          });
+        } else {
+          els.aiPreviewStats.textContent = "";
+        }
+      }
+
+      if (els.btnApplyAiYaml) {
+        els.btnApplyAiYaml.disabled = !json.ok;
+      }
+      return json;
+    } catch (err) {
+      renderBulletBox(els.aiErrorsBox, "خطا در بررسی:", [err.message || "خطای ارتباط با سرور"]);
+      if (els.aiDiagnosticsWrap) els.aiDiagnosticsWrap.classList.remove("hidden");
+      if (els.btnApplyAiYaml) els.btnApplyAiYaml.disabled = true;
+      return null;
+    }
+  }
+
+  async function applyAiYamlImport() {
+    const validated = state.aiValidation && state.aiValidation.ok
+      ? state.aiValidation
+      : await validateAiYamlInput();
+    if (!validated || !validated.ok || !validated.data) return;
+
+    if (state.aiMode === "new") {
+      const folderName = (els.aiProjectName && els.aiProjectName.value || "").trim() || `ai-${Date.now().toString(36)}`;
+      try {
+        const resp = await fetch("/api/ai-import", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            markup: validated.yamlText || els.aiYamlInput.value,
+            mode: "new",
+            name: folderName,
+          }),
+        });
+        const json = await resp.json();
+        if (!resp.ok) {
+          renderBulletBox(els.aiErrorsBox, "خطا در ساخت پروژه:", json.errors || [json.error || "خطا"]);
+          return;
+        }
+        els.aiWriterModal.classList.add("hidden");
+        await loadProjectsList(json.name);
+        setStatus(`پروژهٔ «${json.data.title || json.name}» با ${fa(json.data.slides.length)} اسلاید از خروجی AI ساخته شد`);
+      } catch (err) {
+        renderBulletBox(els.aiErrorsBox, "خطا در ساخت پروژه:", [err.message || "خطای سرور"]);
+      }
+      return;
+    }
+
+    if (!state.data) {
+      renderBulletBox(els.aiErrorsBox, "خطا:", ["ابتدا یک پروژه باز کنید یا حالت «ساخت پروژهٔ جدید» را انتخاب کنید."]);
+      return;
+    }
+
+    const incoming = JSON.parse(JSON.stringify(validated.data));
+    if (state.aiMode === "replace") {
+      [
+        "title",
+        "theme",
+        "lang",
+        "preset",
+        "transition",
+        "variant",
+        "count",
+        "count_style",
+        "count_from",
+        "micro_fx",
+        "music",
+        "mood",
+        "sfx",
+        "duration",
+      ].forEach((k) => {
+        if (incoming[k] !== undefined) state.data[k] = incoming[k];
+      });
+      state.data.slides = incoming.slides;
+      state.activeIndex = 0;
+      if (state.data.theme && els.themeSelect) els.themeSelect.value = state.data.theme;
+    } else {
+      state.data.slides.push(...incoming.slides);
+      state.activeIndex = Math.max(0, state.data.slides.length - incoming.slides.length);
+    }
+
+    els.aiWriterModal.classList.add("hidden");
+    state.selectedField = null;
+    setDirty(true);
+    renderSlidesList();
+    renderInspector();
+    reloadStage(true);
+    setStatus(`${fa(incoming.slides.length)} اسلاید از خروجی AI وارد شد (ذخیره فراموش نشود)`);
+  }
+
+  function openAiWriterModal() {
+    if (!els.aiWriterModal) return;
+    if (els.aiCopyStatus) els.aiCopyStatus.textContent = "";
+    if (!state.data && state.aiMode !== "new") setAiMode("new");
+    else setAiMode(state.aiMode || "new");
+    els.aiWriterModal.classList.remove("hidden");
+    fetchAiGuideText().catch((err) => {
+      if (els.aiRegistryStats) els.aiRegistryStats.textContent = "خطا در بارگذاری راهنما: " + err.message;
+    });
+  }
+
   /* ---------------------------------------------------------------- event wiring */
   els.projectSelect.addEventListener("change", () => openProject(els.projectSelect.value));
   els.themeSelect.addEventListener("change", () => {
@@ -1129,13 +2150,14 @@
     const newSlide = Object.assign({ template: tpl }, example);
     state.data.slides.splice(state.activeIndex + 1, 0, newSlide);
     state.activeIndex += 1;
+    state.selectedField = null;
     setDirty(true);
     renderSlidesList();
     renderInspector();
     reloadStage(true);
   });
 
-  document.querySelectorAll(".seg-btn").forEach((btn) => {
+  document.querySelectorAll(".seg-btn[data-layout]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const slide = activeSlide();
       if (!slide) return;
@@ -1146,6 +2168,15 @@
       reloadStage(true);
     });
   });
+
+  if (els.chkCanvasEdit) {
+    els.chkCanvasEdit.addEventListener("change", () => {
+      renderCanvasOverlay();
+      if (els.chkCanvasEdit.checked && els.stageFrame.contentWindow) {
+        els.stageFrame.contentWindow.postMessage({ cmd: "getFields" }, "*");
+      }
+    });
+  }
 
   els.chkCamGuide.addEventListener("change", () => reloadStage(false, state.currentTime));
 
@@ -1185,6 +2216,65 @@
   els.newProjectName.addEventListener("keydown", (e) => {
     if (e.key === "Enter") createNewProject();
   });
+
+  els.btnImportScript.addEventListener("click", openScriptModal);
+  els.btnCloseScriptModal.addEventListener("click", () => els.scriptModal.classList.add("hidden"));
+  document.querySelectorAll(".script-mode-btn").forEach((b) => {
+    b.addEventListener("click", () => setScriptMode(b.dataset.mode));
+  });
+  els.btnScriptSample.addEventListener("click", () => {
+    els.scriptInput.value = SAMPLE_SCRIPT;
+    state.scriptResult = null;
+    analyzeScript();
+  });
+  els.scriptInput.addEventListener("input", () => {
+    state.scriptResult = null;
+    els.btnApplyScript.disabled = !els.scriptInput.value.trim();
+  });
+  els.btnAnalyzeScript.addEventListener("click", analyzeScript);
+  els.btnApplyScript.addEventListener("click", applyScript);
+
+  if (els.btnPresets) els.btnPresets.addEventListener("click", openPresetsModal);
+  if (els.btnClosePresetsModal) {
+    els.btnClosePresetsModal.addEventListener("click", () => els.presetsModal.classList.add("hidden"));
+  }
+  document.querySelectorAll(".preset-cat-btn").forEach((b) => {
+    b.addEventListener("click", () => {
+      state.presetCategory = b.dataset.cat || "all";
+      document.querySelectorAll(".preset-cat-btn").forEach((x) => {
+        x.classList.toggle("active", x === b);
+      });
+      renderPresetsGrid(state.presetCategory);
+    });
+  });
+
+  if (els.btnAiWriter) els.btnAiWriter.addEventListener("click", openAiWriterModal);
+  if (els.btnCloseAiModal) {
+    els.btnCloseAiModal.addEventListener("click", () => els.aiWriterModal.classList.add("hidden"));
+  }
+  document.querySelectorAll(".ai-mode-btn").forEach((b) => {
+    b.addEventListener("click", () => setAiMode(b.dataset.mode));
+  });
+  if (els.btnCopyAiGuide) els.btnCopyAiGuide.addEventListener("click", copyAiGuideToClipboard);
+  if (els.aiTopicInput) {
+    els.aiTopicInput.addEventListener("input", () => {
+      if (els.aiGuideDetails && els.aiGuideDetails.open) {
+        fetchAiGuideText().catch(() => {});
+      }
+    });
+  }
+  if (els.btnValidateAiYaml) els.btnValidateAiYaml.addEventListener("click", validateAiYamlInput);
+  if (els.btnApplyAiYaml) els.btnApplyAiYaml.addEventListener("click", applyAiYamlImport);
+  if (els.aiYamlInput) {
+    els.aiYamlInput.addEventListener("input", () => {
+      state.aiValidation = null;
+      if (els.btnApplyAiYaml) els.btnApplyAiYaml.disabled = true;
+      clearTimeout(state.aiValidateTimer);
+      state.aiValidateTimer = setTimeout(() => {
+        if (els.aiYamlInput.value.trim()) validateAiYamlInput();
+      }, 450);
+    });
+  }
 
   els.stageFrame.addEventListener("load", () => {
     if (activeSlide()) reloadStage(true);

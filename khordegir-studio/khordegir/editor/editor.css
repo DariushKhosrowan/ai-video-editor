@@ -1,9 +1,21 @@
 @font-face {
   font-family: "Vazirmatn";
-  src: url("../fonts/Vazirmatn-Variable.woff2") format("woff2"),
-       url("../fonts/Vazirmatn.woff2") format("woff2"),
-       url("../fonts/Vazirmatn-Bold.ttf") format("truetype");
-  font-weight: 100 900;
+  src: url("../fonts/Vazirmatn-Regular.woff2") format("woff2");
+  font-weight: 100 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("../fonts/Vazirmatn-Bold.woff2") format("woff2");
+  font-weight: 600 800;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("../fonts/Vazirmatn-Black.woff2") format("woff2");
+  font-weight: 850 1000;
   font-display: swap;
 }
 
@@ -808,6 +820,390 @@ html, body {
   gap: 10px;
 }
 
+/* Drag-and-drop Slide Cards */
+.slide-card[draggable="true"] {
+  cursor: grab;
+}
+.slide-card.dragging {
+  opacity: 0.45;
+  transform: scale(0.98);
+}
+.slide-card.drag-over {
+  border-color: var(--accent);
+  box-shadow: 0 -2px 0 0 var(--accent), 0 0 0 1px rgba(245, 183, 0, 0.35);
+}
+
+/* Inline Rich Text Toolbar */
+.rich-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.rich-btn {
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--muted);
+  border-radius: 6px;
+  padding: 2px 7px;
+  font-size: 11px;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.12s ease, color 0.12s ease, background 0.12s ease;
+}
+.rich-btn:hover {
+  color: var(--text);
+  border-color: var(--line-strong);
+  background: rgba(255, 255, 255, 0.06);
+}
+.rich-btn.acc { color: #fcd34d; }
+.rich-btn.dng { color: #fca5a5; }
+.rich-btn.hl { color: #fef08a; border-color: rgba(245, 183, 0, 0.35); }
+.rich-btn.ul { text-decoration: underline; text-decoration-color: var(--accent); }
+
+/* WYSIWYG Canvas Overlay on #stageFrameBox */
+.canvas-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  pointer-events: none;
+}
+.canvas-overlay.active {
+  pointer-events: auto;
+}
+.canvas-field {
+  position: absolute;
+  border: 1.5px dashed rgba(245, 183, 0, 0.45);
+  border-radius: 6px;
+  background: rgba(245, 183, 0, 0.02);
+  cursor: move;
+  touch-action: none;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+.canvas-field:hover {
+  border-color: rgba(245, 183, 0, 0.85);
+  background: rgba(245, 183, 0, 0.06);
+}
+.canvas-field.selected {
+  border: 2px solid var(--accent);
+  background: rgba(245, 183, 0, 0.09);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55);
+  z-index: 4;
+}
+.canvas-field-label {
+  position: absolute;
+  top: -22px;
+  right: 0;
+  background: rgba(16, 21, 33, 0.92);
+  color: #fde68a;
+  border: 1px solid rgba(245, 183, 0, 0.45);
+  border-radius: 5px;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+.canvas-field:hover .canvas-field-label,
+.canvas-field.selected .canvas-field-label {
+  opacity: 1;
+}
+.canvas-resize-handle {
+  position: absolute;
+  bottom: -6px;
+  left: -6px;
+  width: 13px;
+  height: 13px;
+  border-radius: 3px;
+  background: var(--accent);
+  border: 2px solid #0b0e14;
+  cursor: nwse-resize;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+.canvas-field.selected .canvas-resize-handle {
+  opacity: 1;
+}
+.canvas-cam-box {
+  position: absolute;
+  border: 2px dashed rgba(239, 68, 68, 0.55);
+  background: rgba(239, 68, 68, 0.06);
+  border-radius: 10px;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(252, 165, 165, 0.85);
+  font-size: 11px;
+  font-weight: 700;
+}
+.override-card.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(245, 183, 0, 0.25);
+}
+
+/* Script Import Modal */
+.script-modal-card {
+  max-width: 760px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.script-mode-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.script-textarea {
+  min-height: 168px;
+  font-size: 13px;
+  line-height: 1.75;
+}
+.script-preview-wrap {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.script-stats-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: #e2e8f0;
+}
+.script-preview-list {
+  max-height: 210px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 8px;
+}
+.script-preview-card {
+  background: var(--panel-elev);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+}
+.script-preview-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 700;
+}
+.script-preview-card-title {
+  color: var(--text);
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.script-preview-card-say {
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Beginner Presets Gallery */
+.presets-modal-card {
+  max-width: 840px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.preset-filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.presets-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.preset-card {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.preset-card:hover {
+  border-color: var(--line-strong);
+  background: #0d1320;
+}
+.preset-card-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+}
+.preset-card-meta {
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.preset-card-desc {
+  margin: 0;
+  font-size: 12.5px;
+  color: #cbd5e1;
+  line-height: 1.6;
+}
+.preset-card-flow {
+  font-size: 11px;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.preset-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Collapsible Advanced Section in Inspector */
+.advanced-details {
+  background: var(--panel-elev);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 10px 12px;
+}
+.advanced-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--accent);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.advanced-details summary::-webkit-details-marker {
+  display: none;
+}
+.advanced-details[open] summary {
+  margin-bottom: 10px;
+}
+.advanced-details-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Offline AI Slide Writer Modal */
+.ai-modal-card {
+  max-width: 880px;
+  max-height: 92vh;
+  overflow-y: auto;
+}
+.ai-step-box {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ai-step-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.ai-step-head strong {
+  font-size: 13.5px;
+  color: var(--text);
+}
+.ai-meta-text {
+  font-size: 12px;
+  color: var(--muted);
+}
+.ai-copy-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.ai-copy-status {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6ee7b7;
+}
+.ai-guide-preview {
+  min-height: 180px;
+  max-height: 260px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11.5px;
+  line-height: 1.55;
+  text-align: left;
+  color: #cbd5e1;
+}
+.ai-yaml-textarea {
+  min-height: 190px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.6;
+  text-align: left;
+}
+.ai-diag-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ai-fix-box {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #a7f3d0;
+  border-radius: 8px;
+  padding: 8px 11px;
+  font-size: 12px;
+  line-height: 1.65;
+}
+.ai-warn-box {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.38);
+  color: #fde68a;
+  border-radius: 8px;
+  padding: 8px 11px;
+  font-size: 12px;
+  line-height: 1.65;
+}
+.ai-diag-list {
+  margin: 4px 0 0;
+  padding-inline-start: 18px;
+}
+
 @media (max-width: 1220px) {
   .workspace {
     grid-template-columns: 240px minmax(0, 1fr) 310px;
@@ -822,6 +1218,9 @@ html, body {
     height: auto;
   }
   .workspace {
+    grid-template-columns: 1fr;
+  }
+  .presets-grid {
     grid-template-columns: 1fr;
   }
   .stage-viewport {

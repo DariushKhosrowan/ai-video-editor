@@ -80,3 +80,15 @@ body.measuring #stage .content *{transform:none!important}
 .hl{background-image:linear-gradient(transparent,transparent);background-image:linear-gradient(rgba(255,214,0,.38),rgba(255,214,0,.38));
   background-repeat:no-repeat;background-position:100% 88%;background-size:100% 42%;padding:0 .08em;border-radius:3px}
 .ul,.ul-on{background-image:linear-gradient(var(--c-accent),var(--c-accent));background-repeat:no-repeat;background-position:100% 100%;background-size:100% 6px;padding-bottom:4px}
+#stage[data-lang="en"]{direction:ltr}
+#stage[data-lang="en"] .num{direction:ltr}
+#stage[data-lang="en"] .num-core{text-align:left}
+#stage[data-lang="en"] .source{right:auto;left:80px;text-align:left}
+#stage[data-lang="en"] .note{left:auto;right:80px}
+#stage[data-lang="en"] .note-scam{right:auto;left:80px}
+#stage[data-lang="en"] .hl{background-position:0 88%}
+#stage[data-lang="en"] .ul,#stage[data-lang="en"] .ul-on{background-position:0 100%}
+.auto-num{display:inline-block;transform-origin:50% 60%;will-change:transform}
+.auto-num-core{display:inline-block;text-align:center;direction:ltr;unicode-bidi:isolate;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+.emo-pop{display:inline-block;transform-origin:50% 60%;will-change:transform,opacity}
+.micro-pop{display:inline-block;transform-origin:50% 60%;will-change:transform}

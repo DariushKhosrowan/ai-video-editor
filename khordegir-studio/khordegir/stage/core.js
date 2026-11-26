@@ -10,7 +10,7 @@
   const MT = window.MOTION_TOKENS || (window.Stage && window.Stage.MOTION);
   const S = window.Stage = Object.assign(window.Stage || {}, {
     W, H, fps: 30, themes: (window.Stage && window.Stage.themes) || {}, templates: {}, theme: null, tl: null, amb: null, slide: null,
-    ready: false, _dur: 6, _base: "", _clipSeq: 0, MOTION: MT, motionTokens: MT,
+    ready: false, _dur: 6, _base: "", _clipSeq: 0, _lang: "fa", MOTION: MT, motionTokens: MT,
   });
 
   /* ---------------------------------------------------------------- utils */
@@ -32,17 +32,84 @@
     const neg = v < 0; v = Math.abs(v);
     const s = v.toFixed(dec);
     let [i, f] = s.split(".");
+    if (S._lang === "en") {
+      if (thousands && i.length > 3) i = i.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      return (neg ? "-" : "") + i + (f ? "." + f : "");
+    }
     if (thousands && i.length > 3) i = i.replace(/\B(?=(\d{3})+(?!\d))/g, "٬");
     return (neg ? "-" : "") + fa(i + (f ? "٫" + f : ""));
   };
   const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const hasFa = S.hasFa = (s) => /[\u0620-\u064A\u0671-\u06D3\u06FA-\u06FF]/.test(String(s ?? ""));
+  const applyRichMarks = (h) => h
+    .replace(/==([^=]+)==/g, '<span class="hl">$1</span>')
+    .replace(/__([^_]+)__/g, '<span class="ul">$1</span>')
+    .replace(/\*([^*]+)\*/g, '<span class="acc">$1</span>')
+    .replace(/~([^~]+)~/g, '<span class="dng">$1</span>')
+    .replace(/(^|[\s(«])_([^_]+)_/g, '$1<span class="mut">$2</span>')
+    .replace(/\n/g, "<br>");
+
+  function wrapInlineDelights(html, { isEn, allowCount, allowMicro }) {
+    if (!allowCount && !allowMicro) return html;
+    const parts = String(html).split(/(<[^>]+>)/g);
+    let insideLatBdi = 0;
+    return parts.map((seg) => {
+      if (!seg) return seg;
+      if (seg.startsWith("<")) {
+        if (/^<bdi\b/i.test(seg)) insideLatBdi++;
+        else if (/^<\/bdi>/i.test(seg) && insideLatBdi > 0) insideLatBdi--;
+        return seg;
+      }
+      let out = seg;
+      if (allowCount) {
+        out = out.replace(
+          /(?<![A-Za-z0-9۰-۹_:\/\\.\-])([+\-±])?([0-9۰-۹]+(?:[٬,][0-9۰-۹]{3})*(?:[٫.][0-9۰-۹]+)?)(\s?[٪%])?(?![A-Za-z0-9۰-۹:\/\\])/g,
+          (full, sign, numRaw, pctRaw) => {
+            if (!numRaw) return full;
+            const enDigits = numRaw.replace(/[۰-۹]/g, (d) => String(FA.indexOf(d))).replace(/٬/g, ",").replace(/٫/g, ".");
+            if (/^0\d/.test(enDigits)) return full;
+            const clean = enDigits.replace(/,/g, "");
+            const val = Number(clean);
+            if (!Number.isFinite(val)) return full;
+            const dec = (clean.split(".")[1] || "").length;
+            const hasTh = /[٬,]/.test(numRaw) ? 1 : 0;
+            const pre = sign === "+" ? "+" : (sign === "-" ? "-" : (sign === "±" ? "±" : ""));
+            const signedVal = sign === "-" ? -val : val;
+            const preForFmt = sign === "-" ? "" : pre;
+            const suf = pctRaw ? (isEn ? pctRaw.replace("٪", "%") : pctRaw.replace("%", "٪")) : "";
+            const isYear = !sign && !pctRaw && !hasTh && dec === 0 && val >= 1300 && val <= 2150 ? 1 : 0;
+            const display = (sign === "-" ? "-" : preForFmt) + S.fmt(val, dec, hasTh === 1) + suf;
+            return `<span class="auto-num" data-to="${signedVal}" data-dec="${dec}" data-th="${hasTh}" data-pre="${esc(preForFmt)}" data-suf="${esc(suf)}" data-year="${isYear}"><bdi dir="ltr" class="auto-num-core">${display}</bdi></span>`;
+          },
+        );
+      }
+      if (allowMicro && !insideLatBdi) {
+        try {
+          out = out.replace(/(\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic})*)/gu, (em) => {
+            if (/^[0-9#*]+$/.test(em)) return em;
+            return `<span class="emo-pop">${em}</span>`;
+          });
+        } catch (_) { /* older regex engines */ }
+      }
+      return out;
+    }).join("");
+  }
 
   /* Rich text: *accent*  ~danger~  _muted_  ==highlight==  __underline__  newline -> <br>;
-     Latin runs isolated LTR (keep latin digits); other digits become Persian. */
-  S.rich = function (s) {
+     Includes deterministic inline auto-count numbers & emoji pops unless disabled. */
+  S.rich = function (s, opts = {}) {
     s = String(s ?? "");
-    if (!hasFa(s) && /[A-Za-z]/.test(s)) return `<bdi dir="ltr" class="lat">${esc(s)}</bdi>`;
+    const allowCount = opts.count !== false && (!S.slide || S.slide.count !== false);
+    const allowMicro = opts.micro !== false && (!S.slide || S.slide.micro_fx !== false);
+    const isEn = S._lang === "en";
+    if (isEn) {
+      const h = wrapInlineDelights(applyRichMarks(esc(s)), { isEn: true, allowCount, allowMicro });
+      return hasFa(s) ? h : `<bdi dir="ltr" class="lat">${h}</bdi>`;
+    }
+    if (!hasFa(s) && /[A-Za-z]/.test(s)) {
+      const h = wrapInlineDelights(applyRichMarks(esc(s)), { isEn: false, allowCount, allowMicro });
+      return `<bdi dir="ltr" class="lat">${h}</bdi>`;
+    }
     let h = esc(s);
     const lat = [];
     h = h.replace(/\(?[A-Za-z][A-Za-z0-9.,&;:'’\-\/() ]*[A-Za-z0-9.)]|[A-Za-z]/g, (m) => {
@@ -50,14 +117,10 @@
       return String.fromCharCode(0xE000 + lat.length - 1);
     });
     h = fa(h);
-    h = h.replace(/==([^=]+)==/g, '<span class="hl">$1</span>').replace(/__([^_]+)__/g, '<span class="ul">$1</span>')
-         .replace(/\*([^*]+)\*/g, '<span class="acc">$1</span>')
-         .replace(/~([^~]+)~/g, '<span class="dng">$1</span>')
-         .replace(/(^|[\s(«])_([^_]+)_/g, '$1<span class="mut">$2</span>')
-         .replace(/\n/g, "<br>")
-         .replace(/([≈+−±])\s?([۰-۹][۰-۹٫٬]*\s?[٪%]?)/g, '<bdi dir="ltr">$1$2</bdi>');
+    h = applyRichMarks(h)
+      .replace(/([≈+−±])\s?([۰-۹][۰-۹٫٬]*\s?[٪%]?)/g, '<bdi dir="ltr">$1$2</bdi>');
     h = h.replace(/[\uE000-\uE0FF]/g, (m) => `<bdi dir="ltr" class="lat">${lat[m.charCodeAt(0) - 0xE000]}</bdi>`);
-    return h;
+    return wrapInlineDelights(h, { isEn: false, allowCount, allowMicro });
   };
   S.plain = (s) => String(s ?? "").replace(/[*~=]/g, "");
 
@@ -227,9 +290,10 @@
       box(parent, x, y, w, h, cls) {
         return A.el("div", "abs " + (cls || ""), parent, { left: x, top: y, width: w, height: h });
       },
-      text(parent, str, role, cls, style) {
+      text(parent, str, role, cls, style, richOpts) {
         const e = A.el("div", `t-${role || "body"} ${cls || ""}`, parent, style);
-        e.innerHTML = S.rich(str);
+        const isSource = /\bsource\b/.test(cls || "");
+        e.innerHTML = S.rich(str, Object.assign(isSource ? { count: false, micro: false } : {}, richOpts || {}));
         if (!hasFa(str) && /[A-Za-z]/.test(String(str))) e.setAttribute("dir", "ltr");
         return e;
       },
@@ -344,7 +408,8 @@
         let from;
         if (explicit || !S.fx) {
           from = { opacity: 0 };
-          if (m.x) from.x = m.x;
+          const dir = S._lang === "en" ? -1 : 1;
+          if (m.x) from.x = (over && over.x != null) ? m.x : m.x * dir;
           if (m.y) from.y = m.y;
           if (m.scale) from.scale = MT.clampScale(m.scale);
         } else {
@@ -392,7 +457,7 @@
         const dur = opts.dur ?? tok.dur;
         const stagger = opts.stagger ?? tok.stagger;
         const fromY = opts.y ?? tok.y;
-        const fromX = opts.x ?? tok.x;
+        const fromX = opts.x ?? ((S._lang === "en" && tok.x) ? -tok.x : tok.x);
         const fromScale = MT.clampScale(opts.scale ?? tok.scale);
         const ease = S.ease(opts.ease || tok.ease);
 
@@ -444,7 +509,7 @@
         const r = A.el("div", cls.trim(), parent, Object.assign({
           width: (opts.width || 160) + "px",
           height: (opts.height || 6) + "px",
-          transformOrigin: opts.origin || (A.scam ? "100% 50%" : "50% 50%"),
+          transformOrigin: opts.origin || (A.scam ? (S._lang === "en" ? "0% 50%" : "100% 50%") : "50% 50%"),
         }, opts.style || {}));
         const tok = MT.ui.sweepLine;
         S.tl.fromTo(r, { scaleX: 0, opacity: 0 }, {
@@ -464,14 +529,17 @@
       stagger(list, role, extra = 0) {
         list.forEach((e, i) => A.enter(e, role, i, extra));
       },
-      /* number counting up; tabular Persian digits; scale .92 -> 1 */
+      /* number counting up; tabular Persian or English digits; scale .92 -> 1 */
       count(e, o) {
         if (e && e.dataset && e.dataset.fieldWrap && e.firstElementChild) e = e.firstElementChild;
         const m = M.number || MT.chart.number;
         const to = toNum(o.to), from = toNum(o.from ?? 0), dec = o.decimals ?? decOf(o.to), th1 = o.thousands !== false;
         const pre = o.prefix ?? "", suf = o.suffix ?? "";
+        const isEn = S._lang === "en";
+        const fmtPart = (p) => (isEn ? String(p) : fa(p));
+        const coreStr = (v) => esc(fmtPart(hasFa(pre) ? "" : pre)) + S.fmt(v, dec, th1) + esc(fmtPart(hasFa(suf) ? "" : suf));
         const html = (v) => {
-          const n = `<bdi dir="ltr" class="num-core">${esc(fa(hasFa(pre) ? "" : pre))}${S.fmt(v, dec, th1)}${esc(fa(hasFa(suf) ? "" : suf))}</bdi>`;
+          const n = `<bdi dir="ltr" class="num-core">${coreStr(v)}</bdi>`;
           return (hasFa(pre) ? `<span class="num-word">${esc(pre)}</span> ` : "") + n + (hasFa(suf) ? ` <span class="num-word">${esc(suf)}</span>` : "");
         };
         e.classList.add("num");
@@ -485,10 +553,10 @@
           v: to, duration: dur, ease: S.ease(o.ease || m.ease),
           onUpdate: () => {
             const c = e.querySelector(".num-core");
-            if (c) c.innerHTML = esc(fa(hasFa(pre) ? "" : pre)) + S.fmt(obj.v, dec, th1) + esc(fa(hasFa(suf) ? "" : suf));
+            if (c) c.innerHTML = coreStr(obj.v);
           },
         }, t);
-        if (core) core.innerHTML = esc(fa(hasFa(pre) ? "" : pre)) + S.fmt(from, dec, th1) + esc(fa(hasFa(suf) ? "" : suf));
+        if (core) core.innerHTML = coreStr(from);
         if (o.enter !== false) {
           const enterDur = Math.min(MT.chart.number.enterDur, dur);
           S.tl.from(e, {
@@ -600,8 +668,12 @@
 
     const stage = document.getElementById("stage");
     stage.innerHTML = "";
+    const lang = String(slide.lang || opts.lang || "fa").toLowerCase() === "en" ? "en" : "fa";
+    S._lang = lang;
     const layout = (slide.layout || "SLIDE").toUpperCase();
     stage.className = "layout-" + layout.toLowerCase();
+    stage.setAttribute("dir", lang === "en" ? "ltr" : "rtl");
+    stage.setAttribute("data-lang", lang);
     stage.setAttribute("data-theme-mode", (th.colors && th.colors.isDark === false) ? "light" : "dark");
 
     // background
@@ -660,7 +732,7 @@
         left: c[0] + "px", top: c[1] + "px", width: (c[2] - c[0]) + "px", height: (c[3] - c[1]) + "px",
         display: layout === "SCAM" ? "flex" : "none",
       });
-      cg.textContent = "جای دوربین"; stage.appendChild(cg);
+      cg.textContent = S._lang === "en" ? "Camera Zone" : "جای دوربین"; stage.appendChild(cg);
     }
     // Transition in (default "soft-fade" matches classic .fadein)
     if (S.fx && S.fx.transitionIn) {
@@ -721,6 +793,50 @@
     return bad;
   };
 
+  S.getFieldBoxes = function () {
+    const stage = document.getElementById("stage");
+    if (!stage) return [];
+    const st = stage.getBoundingClientRect();
+    const scaleX = st.width ? (W / st.width) : 1;
+    const scaleY = st.height ? (H / st.height) : 1;
+    const boxes = [];
+    stage.querySelectorAll("[data-field-wrap]").forEach((wrap) => {
+      const key = wrap.dataset.fieldWrap;
+      if (!key) return;
+      const r = wrap.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      boxes.push({
+        key,
+        rect: {
+          x: Math.round((r.left - st.left) * scaleX),
+          y: Math.round((r.top - st.top) * scaleY),
+          w: Math.round(r.width * scaleX),
+          h: Math.round(r.height * scaleY),
+        },
+      });
+    });
+    return boxes;
+  };
+
+  function applyLiveOverride(key, x, y, scale) {
+    const stage = document.getElementById("stage");
+    if (!stage || !key) return;
+    let wrap = null;
+    stage.querySelectorAll("[data-field-wrap]").forEach((el) => {
+      if (!wrap && el.dataset.fieldWrap === String(key)) wrap = el;
+    });
+    if (!wrap) return;
+    const nx = Number.isFinite(+x) ? +x : 0;
+    const ny = Number.isFinite(+y) ? +y : 0;
+    const nsc = Number.isFinite(+scale) ? +scale : 1;
+    wrap.style.transform = (nx === 0 && ny === 0 && nsc === 1) ? "" : `translate(${nx}px, ${ny}px) scale(${nsc})`;
+    if (S.slide) {
+      if (!S.slide.overrides || typeof S.slide.overrides !== "object") S.slide.overrides = {};
+      if (nx === 0 && ny === 0 && nsc === 1) delete S.slide.overrides[key];
+      else S.slide.overrides[key] = { x: nx, y: ny, scale: nsc };
+    }
+  }
+
   /* preview playback (editor): drives the same seek() from the clock */
   let raf = null;
   S.play = function (from = 0) {
@@ -743,8 +859,14 @@
       S._camGuide = !!d.camGuide;
       const info = await S.load(d.slide, { theme: d.theme, camGuide: d.camGuide });
       if (d.at != null) S.seek(d.at); else S.play(0);
-      parent.postMessage({ cmd: "loaded", info, cam: S.camOverlap() }, "*");
+      parent.postMessage({ cmd: "loaded", info, cam: S.camOverlap(), fields: S.getFieldBoxes() }, "*");
     } else if (d.cmd === "seek") { S.stop(); S.seek(d.t); }
     else if (d.cmd === "play") S.play(d.from || 0);
+    else if (d.cmd === "getFields") {
+      parent.postMessage({ cmd: "fields", fields: S.getFieldBoxes(), cam: S.camOverlap() }, "*");
+    } else if (d.cmd === "setOverride") {
+      applyLiveOverride(d.key, d.x, d.y, d.scale);
+      parent.postMessage({ cmd: "fields", fields: S.getFieldBoxes(), cam: S.camOverlap() }, "*");
+    }
   });
 })();

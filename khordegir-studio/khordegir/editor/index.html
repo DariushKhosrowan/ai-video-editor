@@ -25,6 +25,9 @@
         </label>
 
         <button id="btnNewProject" type="button" class="btn btn-ghost">+ پروژه جدید</button>
+        <button id="btnPresets" type="button" class="btn btn-ghost">✨ الگوهای آماده</button>
+        <button id="btnImportScript" type="button" class="btn btn-amber">📝 ورود اسکریپت</button>
+        <button id="btnAiWriter" type="button" class="btn btn-ghost">🤖 نویسندهٔ AI</button>
 
         <label class="control-pill">
           <span>تم:</span>
@@ -67,6 +70,10 @@
 
           <div class="stage-tools-right">
             <label class="toggle-chip">
+              <input id="chkCanvasEdit" type="checkbox" checked>
+              <span>ویرایش روی بوم</span>
+            </label>
+            <label class="toggle-chip">
               <input id="chkCamGuide" type="checkbox" checked>
               <span>نمایش قاب دوربین</span>
             </label>
@@ -78,6 +85,7 @@
         <div id="stageViewport" class="stage-viewport">
           <div id="stageFrameBox" class="stage-frame-box">
             <iframe id="stageFrame" src="../stage/stage.html" title="پیش‌نمایش صحنه"></iframe>
+            <div id="canvasOverlay" class="canvas-overlay" aria-label="ویرایشگر مستقیم روی بوم"></div>
             <div id="camOnlyOverlay" class="cam-only-overlay hidden">
               <div class="cam-only-card">
                 <strong>حالت «فقط دوربین» (CAM)</strong>
@@ -167,6 +175,14 @@
           <span>بذر تصادفی پروژه (Seed)</span>
           <input id="projSeedInput" type="number" dir="ltr" class="text-input" min="0" step="1">
         </label>
+
+        <label class="field-group">
+          <span>زبان و جهت صحنه (RTL / LTR)</span>
+          <select id="projLangSelect" class="select-ctrl">
+            <option value="fa">فارسی — راست‌به‌چپ (RTL)</option>
+            <option value="en">English — Left-to-Right (LTR)</option>
+          </select>
+        </label>
       </div>
 
       <div class="logo-config-box">
@@ -184,6 +200,43 @@
         <div class="upload-row">
           <span style="font-size:12px;color:var(--muted)">آپلود لوگوی جدید:</span>
           <input id="projLogoUpload" type="file" accept="image/*" style="font-size:12px">
+        </div>
+      </div>
+
+      <div class="logo-config-box">
+        <div class="field-label-row"><strong>تنظیمات پیشرفتهٔ شمارندهٔ اعداد و جزئیات حرکت (Advanced)</strong></div>
+        <div class="style-grid">
+          <label class="field-group">
+            <span>شمارش خودکار اعداد در متن</span>
+            <select id="projCountSelect" class="select-ctrl">
+              <option value="on">روشن (پیش‌فرض)</option>
+              <option value="off">خاموش</option>
+            </select>
+          </label>
+          <label class="field-group">
+            <span>سبک شمارندهٔ اعداد</span>
+            <select id="projCountStyleSelect" class="select-ctrl">
+              <option value="pop">پاپ یوتیوبی (پیش‌فرض)</option>
+              <option value="smooth">نرم و کلاسیک</option>
+              <option value="slam">کوبنده و پرانرژی</option>
+              <option value="subtle">سریع و ظریف</option>
+            </select>
+          </label>
+          <label class="field-group">
+            <span>نقطهٔ شروع شمارش</span>
+            <select id="projCountFromSelect" class="select-ctrl">
+              <option value="auto">هوشمند (سال‌ها از نزدیک، بقیه از صفر)</option>
+              <option value="zero">همیشه از صفر</option>
+              <option value="near">شروع از حدود ۷۰٪</option>
+            </select>
+          </label>
+          <label class="field-group">
+            <span>ریزجزئیات حرکتی (تاکید، هایلایت، ایموجی)</span>
+            <select id="projMicroFxSelect" class="select-ctrl">
+              <option value="on">روشن (پیش‌فرض)</option>
+              <option value="off">خاموش</option>
+            </select>
+          </label>
         </div>
       </div>
 
@@ -213,6 +266,165 @@
     </div>
   </div>
 
+  <!-- Script-to-Slides Import Modal -->
+  <div id="scriptModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="scriptModalTitle">
+    <div class="modal-card modal-wide script-modal-card">
+      <div class="modal-head">
+        <h3 id="scriptModalTitle">ورود اسکریپت و ساخت خودکار اسلایدها</h3>
+        <button id="btnCloseScriptModal" type="button" class="btn btn-sm btn-ghost">بستن</button>
+      </div>
+      <p class="modal-hint">
+        متن گفتار خود را با پاراگراف‌های ساده یا نشانگرهای اختیاری (مثل <code>[عنوان]</code>، <code>[عدد ۷۳٪]</code>، <code>[فهرست]</code>) بچسبانید. سیستم به‌صورت خودکار اسلایدها، قالب مناسب و زمان‌بندی گفتار را می‌سازد.
+      </p>
+
+      <div class="script-mode-row">
+        <div class="layout-switch" role="group" aria-label="نحوه اعمال اسکریپت">
+          <button type="button" class="seg-btn script-mode-btn active" data-mode="new">ساخت پروژه تازه</button>
+          <button type="button" class="seg-btn script-mode-btn" data-mode="replace">جایگزینی در پروژه فعلی</button>
+          <button type="button" class="seg-btn script-mode-btn" data-mode="append">افزودن به انتهای پروژه</button>
+        </div>
+        <button id="btnScriptSample" type="button" class="btn btn-sm btn-ghost">✨ درج متن نمونه</button>
+      </div>
+
+      <div id="scriptProjectRow" class="style-grid">
+        <label class="field-group">
+          <span>نام پوشه پروژه جدید (انگلیسی)</span>
+          <input id="scriptProjectName" type="text" dir="ltr" class="text-input" placeholder="my-video-script">
+        </label>
+        <label class="field-group">
+          <span>عنوان ویدیو</span>
+          <input id="scriptTitleInput" type="text" class="text-input" placeholder="عنوان خودکار از خط اول">
+        </label>
+      </div>
+
+      <label class="field-group">
+        <span>متن اسکریپت</span>
+        <textarea id="scriptInput" class="textarea-input script-textarea" placeholder="متن ویدیو را اینجا بچسبانید...&#10;&#10;تیتر با # یا پاراگراف‌های جدا شده با خط خالی، عدد/درصدها، فهرست‌ها (- یا ۱.) و نقل‌قول‌ها خودکار تشخیص داده می‌شوند."></textarea>
+      </label>
+
+      <div id="scriptPreviewWrap" class="script-preview-wrap hidden">
+        <div id="scriptStatsBar" class="script-stats-bar"></div>
+        <div id="scriptPreviewList" class="script-preview-list"></div>
+      </div>
+
+      <div id="scriptImportErr" class="error-box hidden"></div>
+
+      <div class="modal-actions between">
+        <button id="btnAnalyzeScript" type="button" class="btn btn-ghost">🔍 تحلیل و پیش‌نمایش اسلایدها</button>
+        <button id="btnApplyScript" type="button" class="btn btn-primary" disabled>ساخت و باز کردن پروژه</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Beginner Ready-Made Presets Gallery Modal -->
+  <div id="presetsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="presetsModalTitle">
+    <div class="modal-card modal-wide presets-modal-card">
+      <div class="modal-head">
+        <h3 id="presetsModalTitle">گالری الگوهای آمادهٔ یوتیوبی</h3>
+        <button id="btnClosePresetsModal" type="button" class="btn btn-sm btn-ghost">بستن</button>
+      </div>
+      <p class="modal-hint">
+        یک ساختار آماده انتخاب کنید؛ تم، ریتم اسلایدها، شمارندهٔ خودکار و متن پرامپتر از پیش چیده شده‌اند و کافی است متن خودتان را جایگزین کنید.
+      </p>
+
+      <div class="style-grid">
+        <label class="field-group">
+          <span>عنوان دلخواه ویدیوی شما (اختیاری)</span>
+          <input id="presetCustomTitle" type="text" class="text-input" placeholder="مثال: ۵ اشتباه رایج در تولید محتوا">
+        </label>
+        <label class="field-group">
+          <span>نام پوشه برای پروژهٔ جدید (انگلیسی)</span>
+          <input id="presetProjectName" type="text" dir="ltr" class="text-input" placeholder="my-youtube-video">
+        </label>
+      </div>
+
+      <div class="preset-filter-row">
+        <div class="layout-switch" role="group" aria-label="فیلتر دسته‌بندی الگوها">
+          <button type="button" class="seg-btn preset-cat-btn active" data-cat="all">همهٔ الگوها</button>
+          <button type="button" class="seg-btn preset-cat-btn" data-cat="educational">آموزشی و فکت</button>
+          <button type="button" class="seg-btn preset-cat-btn" data-cat="story">داستان و خبر</button>
+          <button type="button" class="seg-btn preset-cat-btn" data-cat="compare">لیست و مقایسه</button>
+        </div>
+      </div>
+
+      <div id="presetsGrid" class="presets-grid"></div>
+      <div id="presetsErr" class="error-box hidden"></div>
+    </div>
+  </div>
+
+  <!-- Offline AI Slide Writer Modal -->
+  <div id="aiWriterModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="aiWriterTitle">
+    <div class="modal-card modal-wide ai-modal-card">
+      <div class="modal-head">
+        <h3 id="aiWriterTitle">نویسندهٔ اسلاید با هوش مصنوعی (کاملاً آفلاین)</h3>
+        <button id="btnCloseAiModal" type="button" class="btn btn-sm btn-ghost">بستن</button>
+      </div>
+      <p class="modal-hint">
+        بدون نیاز به اینترنت یا کلید API: راهنمای زندهٔ تمام قالب‌ها، تم‌ها، ترنزیشن‌ها، شمارنده، نقاط نقشه و زوم را کپی کنید، به هر چت‌باتی (ChatGPT، Gemini، Claude) بدهید و خروجی <code>video.yaml</code> را اینجا بچسبانید.
+      </p>
+
+      <!-- Step 1: Copy live AI guide -->
+      <section class="ai-step-box">
+        <div class="ai-step-head">
+          <strong>۱. کپی راهنمای کامل برای چت‌بات</strong>
+          <span id="aiRegistryStats" class="ai-meta-text">در حال خواندن رجیستری قالب‌ها...</span>
+        </div>
+
+        <label class="field-group">
+          <span>موضوع یا متن خام ویدیوی شما (اختیاری — انتهای راهنما قرار می‌گیرد)</span>
+          <input id="aiTopicInput" type="text" class="text-input" placeholder="مثال: چرا ۵ اشتباه باعث شکست کانال‌های تازه‌کار می‌شود؟ (یا بعداً داخل چت‌بات بنویسید)">
+        </label>
+
+        <div class="ai-copy-row">
+          <button id="btnCopyAiGuide" type="button" class="btn btn-amber">📋 کپی راهنمای کامل هوش مصنوعی</button>
+          <span id="aiCopyStatus" class="ai-copy-status"></span>
+        </div>
+
+        <details id="aiGuideDetails" class="advanced-details">
+          <summary><span>مشاهده یا کپی دستی متن راهنمای تولیدشده</span><span style="font-size:11px;color:var(--muted)">▾</span></summary>
+          <div class="advanced-details-body">
+            <textarea id="aiGuidePreview" class="textarea-input ai-guide-preview" dir="ltr" readonly></textarea>
+          </div>
+        </details>
+      </section>
+
+      <!-- Step 2: Paste video.yaml & auto-fix / validate -->
+      <section class="ai-step-box">
+        <div class="ai-step-head">
+          <strong>۲. چسباندن خروجی <code>video.yaml</code> و ساخت یک‌جای اسلایدها</strong>
+          <div class="layout-switch" role="group" aria-label="نحوه اعمال خروجی AI">
+            <button type="button" class="seg-btn ai-mode-btn active" data-mode="new">ساخت پروژهٔ جدید</button>
+            <button type="button" class="seg-btn ai-mode-btn" data-mode="replace">جایگزینی در پروژهٔ فعلی</button>
+            <button type="button" class="seg-btn ai-mode-btn" data-mode="append">افزودن به انتهای پروژه</button>
+          </div>
+        </div>
+
+        <div id="aiProjectRow" class="field-group">
+          <span>نام پوشه پروژه جدید (انگلیسی)</span>
+          <input id="aiProjectName" type="text" dir="ltr" class="text-input" placeholder="ai-generated-video">
+        </div>
+
+        <label class="field-group">
+          <span>چسباندن کد YAML از چت‌بات</span>
+          <textarea id="aiYamlInput" dir="ltr" class="textarea-input ai-yaml-textarea" placeholder="```yaml&#10;title: عنوان ویدیو&#10;theme: khordegir-dark&#10;slides:&#10;  - template: title_card&#10;    title: رشد *۷۳٪* در ۱۴۰۳&#10;    say: سلام! امروز دربارهٔ یک موضوع مهم صحبت می‌کنیم.&#10;```"></textarea>
+        </label>
+
+        <div id="aiDiagnosticsWrap" class="ai-diag-wrap hidden">
+          <div id="aiAutoFixBox" class="ai-fix-box hidden"></div>
+          <div id="aiErrorsBox" class="error-box hidden"></div>
+          <div id="aiWarningsBox" class="ai-warn-box hidden"></div>
+          <div id="aiPreviewStats" class="script-stats-bar"></div>
+          <div id="aiPreviewList" class="script-preview-list"></div>
+        </div>
+
+        <div class="modal-actions between">
+          <button id="btnValidateAiYaml" type="button" class="btn btn-ghost">🔍 بررسی و اصلاح خودکار</button>
+          <button id="btnApplyAiYaml" type="button" class="btn btn-primary" disabled>✨ ساخت پروژه و پیش‌نمایش</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
   <script>
     window.Stage = window.Stage || { themes: {}, defineTheme(t) { this.themes[t.name] = t; } };
   </script>
@@ -223,6 +435,7 @@
   <script>
     (window.THEME_FILES || []).forEach((f) => document.write('<script src="../themes/' + f + '"><\/script>'));
   </script>
+  <script src="./presets.js"></script>
   <script src="./editor.js"></script>
 </body>
 </html>

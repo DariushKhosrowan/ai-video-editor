@@ -272,21 +272,23 @@
   FX.from = function (role, m) {
     const v = (FX.cur && FX.cur.variant) || "rise";
     const V = MT.variants;
+    const isEn = S._lang === "en";
+    const dir = isEn ? -1 : 1;
     const from = { opacity: 0 };
     const textish = ["title", "eyebrow", "body", "note"].includes(role);
     const cardish = ["card"].includes(role);
     if (["bubble", "badge", "number"].includes(role) || v === "rise") {
-      if (m.x) from.x = m.x; if (m.y) from.y = m.y; if (m.scale) from.scale = MT.clampScale(m.scale);
+      if (m.x) from.x = m.x * dir; if (m.y) from.y = m.y; if (m.scale) from.scale = MT.clampScale(m.scale);
       return from;
     }
     if (v === "slide") {
-      if (textish) from.x = role === "title" ? V.slideTitleX : V.slideBodyX;
-      else if (cardish) { from.x = V.slideCardX; from.scale = V.slideCardScale; }
-      else if (role === "image") from.x = V.slideImageX;
+      if (textish) from.x = (role === "title" ? V.slideTitleX : V.slideBodyX) * dir;
+      else if (cardish) { from.x = V.slideCardX * dir; from.scale = V.slideCardScale; }
+      else if (role === "image") from.x = V.slideImageX * dir;
     } else if (v === "mask") {
       if (textish) { from.clipPath = "inset(-25% -6% 100% -6%)"; from.y = V.maskTextY; }
-      else if (cardish) { from.clipPath = "inset(0% 0% 0% 100%)"; }
-      else if (role === "image") { from.clipPath = "inset(0% 0% 0% 100% round 16px)"; }
+      else if (cardish) { from.clipPath = isEn ? "inset(0% 100% 0% 0%)" : "inset(0% 0% 0% 100%)"; }
+      else if (role === "image") { from.clipPath = isEn ? "inset(0% 100% 0% 0% round 16px)" : "inset(0% 0% 0% 100% round 16px)"; }
     } else if (v === "blur") {
       from.filter = `blur(${V.blurPx}px)`;
       if (textish) from.y = V.blurTextY; if (cardish) from.scale = V.blurCardScale; if (role === "image") from.scale = MT.clampScale(V.blurImageScale);
@@ -448,15 +450,19 @@
       return;
     }
 
+    const isEn = S._lang === "en";
+    const dir = isEn ? -1 : 1;
+
     if (mode === "curtain-rtl") {
       const panel = document.createElement("div");
       panel.className = "transition-overlay transition-curtain-rtl";
+      const borderProp = isEn ? "borderRight" : "borderLeft";
       Object.assign(panel.style, {
         position: "absolute", inset: "0", background: col.bg2 || col.surface || "#16161a",
-        borderLeft: `10px solid ${col.accent || "#FFD600"}`, pointerEvents: "none", zIndex: 90,
+        [borderProp]: `10px solid ${col.accent || "#FFD600"}`, pointerEvents: "none", zIndex: 90,
       });
       stage.appendChild(panel);
-      S.tl.fromTo(panel, { x: 0, opacity: 1 }, { x: -2000, opacity: 0, duration: T.curtainRtl.dur, ease: S.ease(T.curtainRtl.ease), immediateRender: true }, 0);
+      S.tl.fromTo(panel, { x: 0, opacity: 1 }, { x: -2000 * dir, opacity: 0, duration: T.curtainRtl.dur, ease: S.ease(T.curtainRtl.ease), immediateRender: true }, 0);
       return;
     }
 
@@ -469,14 +475,14 @@
       const slash = document.createElement("div");
       slash.className = "transition-overlay transition-slash-bar";
       Object.assign(slash.style, {
-        position: "absolute", top: "-15%", bottom: "-15%", right: "-20%", width: "260px",
-        background: col.accent || "#FFD600", transform: "skewX(-14deg)", pointerEvents: "none", zIndex: 91,
+        position: "absolute", top: "-15%", bottom: "-15%", [isEn ? "left" : "right"]: "-20%", width: "260px",
+        background: col.accent || "#FFD600", transform: `skewX(${isEn ? "14deg" : "-14deg"})`, pointerEvents: "none", zIndex: 91,
       });
       stage.appendChild(veil);
       stage.appendChild(slash);
       const A2 = T.accentSlash;
       S.tl.fromTo(veil, { opacity: 1 }, { opacity: 0, duration: A2.veilDur, ease: S.ease(A2.veilEase), immediateRender: true }, A2.veilDelay);
-      S.tl.fromTo(slash, { x: 200, opacity: 1 }, { x: -2350, opacity: 0.9, duration: A2.barDur, ease: S.ease(A2.barEase), immediateRender: true }, 0);
+      S.tl.fromTo(slash, { x: 200 * dir, opacity: 1 }, { x: -2350 * dir, opacity: 0.9, duration: A2.barDur, ease: S.ease(A2.barEase), immediateRender: true }, 0);
       return;
     }
 
@@ -523,7 +529,7 @@
         pointerEvents: "none", zIndex: 90,
       });
       stage.appendChild(wipe);
-      S.tl.fromTo(wipe, { x: 0, y: 0, opacity: 1 }, { x: -2400, y: 260, opacity: 0, duration: T.diagonalWipe.dur, ease: S.ease(T.diagonalWipe.ease), immediateRender: true }, 0);
+      S.tl.fromTo(wipe, { x: 0, y: 0, opacity: 1 }, { x: -2400 * dir, y: 260, opacity: 0, duration: T.diagonalWipe.dur, ease: S.ease(T.diagonalWipe.ease), immediateRender: true }, 0);
       return;
     }
 
@@ -609,12 +615,13 @@
     const LM = MT.logo;
     const mode = (FX.cur && FX.cur.logoMotion) || "pop-spin";
     const t0 = LM.t0;
+    const logoDir = S._lang === "en" ? -1 : 1;
     if (mode === "pop-spin") {
       const m = LM.popSpin;
       S.tl.fromTo(badge, { opacity: 0, scale: m.fromScale, rotation: m.fromRot }, { opacity: 1, scale: 1, rotation: 0, duration: m.dur, ease: S.ease(m.ease), immediateRender: true }, t0);
     } else if (mode === "slide-rtl") {
       const m = LM.slideRtl;
-      S.tl.fromTo(badge, { opacity: 0, x: m.fromX }, { opacity: 1, x: 0, duration: m.dur, ease: S.ease(m.ease), immediateRender: true }, t0);
+      S.tl.fromTo(badge, { opacity: 0, x: m.fromX * logoDir }, { opacity: 1, x: 0, duration: m.dur, ease: S.ease(m.ease), immediateRender: true }, t0);
     } else if (mode === "orbit-pulse") {
       const m = LM.orbitPulse;
       S.tl.fromTo(badge, { opacity: 0, scale: m.fromScale, y: m.fromY }, { opacity: 1, scale: 1, y: 0, duration: m.dur, ease: S.ease(m.ease), immediateRender: true }, t0);
@@ -627,7 +634,7 @@
       S.tl.fromTo(badge, { opacity: 0, scale: MT.clampScale(m.fromScale), y: m.fromY }, { opacity: 1, scale: 1, y: 0, duration: m.dur, ease: S.ease(m.ease), immediateRender: true }, t0);
     } else if (mode === "glitch-snap") {
       const m = LM.glitchSnap;
-      S.tl.fromTo(badge, { opacity: 0, x: m.fromX, skewX: 16 }, { opacity: 1, x: m.midX, skewX: -6, duration: m.inDur, ease: S.ease(m.inEase), immediateRender: true }, t0);
+      S.tl.fromTo(badge, { opacity: 0, x: m.fromX * logoDir, skewX: 16 * logoDir }, { opacity: 1, x: m.midX * logoDir, skewX: -6 * logoDir, duration: m.inDur, ease: S.ease(m.inEase), immediateRender: true }, t0);
       S.tl.to(badge, { x: 0, skewX: 0, duration: m.settleDur, ease: S.ease(m.settleEase) }, t0 + m.inDur);
     } else {
       const m = LM.floatFade;
@@ -638,10 +645,11 @@
     return badge;
   };
 
-  /* ---------------------------------------------------------- key-word effects after build */
+  /* ---------------------------------------------------------- key-word effects, auto-counters & micro-delights after build */
   FX.post = function (content) {
     const c = FX.cur || {};
     const P = MT.post;
+    const slide = S.slide || {};
     const timeOf = (el) => {
       let p = el;
       while (p && p !== content) {
@@ -650,6 +658,8 @@
       }
       return P.fallbackTime;
     };
+    const isExcluded = (el) => !!(el.closest && el.closest(".source,.camguide,.stage-logo,[data-no-count]"));
+
     content.querySelectorAll(".hl").forEach((el) => {
       const t = timeOf(el) + P.highlight.delayOffset;
       S.tl.fromTo(el, { backgroundSize: "0% 42%" }, { backgroundSize: "100% 42%", duration: P.highlight.dur, ease: S.ease(P.highlight.ease), immediateRender: true }, t);
@@ -662,5 +672,98 @@
       const t = timeOf(el) + P.underline.delayOffset;
       S.tl.fromTo(el, { backgroundSize: "0% 6px" }, { backgroundSize: "100% 6px", duration: P.underline.dur, ease: S.ease(P.underline.ease), immediateRender: true }, t);
     });
+
+    // 1. Auto number count-up on inline .auto-num tokens (YouTube-style tabular counter)
+    if (slide.count !== false) {
+      const styleKey = slide.count_style || "pop";
+      const AC = (MT.autoCount && MT.autoCount[styleKey]) || MT.autoCount.pop;
+      const fromMode = slide.count_from || "auto";
+      let numIdx = 0;
+
+      content.querySelectorAll(".auto-num").forEach((el) => {
+        if (isExcluded(el)) return;
+        const core = el.querySelector(".auto-num-core");
+        if (!core) return;
+        const to = Number(el.dataset.to);
+        if (!Number.isFinite(to)) return;
+        const dec = Number(el.dataset.dec || 0);
+        const th = el.dataset.th === "1";
+        const pre = el.dataset.pre || "";
+        const suf = el.dataset.suf || "";
+        const isYear = el.dataset.year === "1";
+
+        let from = 0;
+        if (fromMode === "near") {
+          from = +(to * 0.72).toFixed(dec);
+        } else if (fromMode === "auto" && isYear) {
+          from = to - Math.min(24, Math.max(8, Math.round(to * 0.015)));
+        }
+
+        const rect = core.getBoundingClientRect ? core.getBoundingClientRect() : null;
+        if (rect && rect.width > 0) core.style.minWidth = Math.ceil(rect.width) + "px";
+
+        const renderVal = (v) => {
+          const prefix = v < 0 ? "" : pre;
+          return prefix + S.fmt(v, dec, th) + suf;
+        };
+        core.textContent = renderVal(from);
+
+        const baseT = Math.max(0.15, timeOf(el) + (AC.delayOffset ?? -0.18) + Math.min(numIdx, 4) * 0.06);
+        numIdx += 1;
+        const obj = { v: from };
+        S.tl.to(obj, {
+          v: to,
+          duration: AC.dur,
+          ease: S.ease(AC.ease),
+          onUpdate: () => { core.textContent = renderVal(obj.v); },
+        }, baseT);
+
+        if (AC.popScale && AC.popScale > 1.01) {
+          const popAt = baseT + AC.dur * 0.86;
+          S.tl.fromTo(el, { scale: 1 }, {
+            scale: AC.popScale,
+            duration: AC.popDur,
+            ease: S.ease("power2"),
+            yoyo: true,
+            repeat: 1,
+          }, popAt);
+        }
+      });
+    }
+
+    // 2. Tasteful micro-details (emoji pops, accent bounces, badge settles)
+    if (slide.micro_fx !== false && MT.micro) {
+      const MI = MT.micro;
+      content.querySelectorAll(".emo-pop").forEach((el, idx) => {
+        if (isExcluded(el)) return;
+        const t = Math.max(0.12, timeOf(el) - 0.14 + Math.min(idx, 5) * 0.04);
+        S.tl.fromTo(el,
+          { opacity: 0, scale: MI.emojiFromScale, rotation: MI.emojiRot },
+          { opacity: 1, scale: MI.emojiPopScale, rotation: 0, duration: MI.emojiDur * 0.65, ease: S.ease("back"), immediateRender: true },
+          t);
+        S.tl.to(el, { scale: 1, duration: MI.emojiDur * 0.35, ease: S.ease("power2") }, t + MI.emojiDur * 0.65);
+      });
+
+      content.querySelectorAll(".acc, .dng").forEach((el) => {
+        if (isExcluded(el)) return;
+        if (el.querySelector(".auto-num")) return; // avoid double-scaling numbers
+        const t = Math.max(0.2, timeOf(el) + 0.04);
+        const words = (el.textContent || "").trim().split(/\s+/).filter(Boolean).length;
+        if (words > 0 && words <= 3) {
+          el.classList.add("micro-pop");
+          S.tl.fromTo(el, { scale: 1, y: 0 }, {
+            scale: MI.accentScale, y: -2, duration: MI.accentDur, ease: S.ease("power2"), yoyo: true, repeat: 1,
+          }, t);
+        }
+      });
+
+      content.querySelectorAll(".badge.acc, .badge.dng").forEach((el) => {
+        if (isExcluded(el)) return;
+        const t = Math.max(0.25, timeOf(el) + 0.02);
+        S.tl.fromTo(el, { scale: 1 }, {
+          scale: MI.badgeScale, duration: MI.badgeDur, ease: S.ease("power2"), yoyo: true, repeat: 1,
+        }, t);
+      });
+    }
   };
 })();

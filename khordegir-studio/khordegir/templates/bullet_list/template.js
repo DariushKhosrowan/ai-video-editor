@@ -34,7 +34,8 @@ Stage.template({
           fontSize: "60px",
           minWidth: "56px",
           textAlign: "center",
-        });
+        }, { count: false });
+        numEl.dataset.noCount = "1";
       }
       const tc = A.el("div", "", card, { display: "flex", flexDirection: "column", gap: "4px" });
       if (o.kicker) A.text(tc, o.kicker, "eyebrow", "", { fontSize: "26px", color: A.color(tone || "accent") });

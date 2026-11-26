@@ -182,6 +182,26 @@
       underline: { delayOffset: 0.08, dur: 0.48, ease: EASES.textIn },
     },
 
+    // Inline auto number count-up presets (YouTube-style tabular counter)
+    autoCount: {
+      pop:    { dur: 0.80, ease: EASES.textIn,  popScale: 1.12, popDur: 0.14, delayOffset: -0.18 },
+      smooth: { dur: 0.90, ease: EASES.textIn,  popScale: 1.03, popDur: 0.12, delayOffset: -0.15 },
+      slam:   { dur: 0.68, ease: EASES.chartReveal, popScale: 1.18, popDur: 0.16, delayOffset: -0.12 },
+      subtle: { dur: 0.52, ease: EASES.power2,  popScale: 1.04, popDur: 0.10, delayOffset: -0.12 },
+    },
+
+    // Tasteful micro-details (accent bounce, emoji pop, badge settle)
+    micro: {
+      accentScale: 1.045,
+      accentDur: 0.14,
+      emojiFromScale: 0.58,
+      emojiPopScale: 1.12,
+      emojiDur: 0.34,
+      emojiRot: -8,
+      badgeScale: 1.04,
+      badgeDur: 0.14,
+    },
+
     // Ambient atmosphere (deterministic timelines)
     atmosphere: {
       glow:       { opacity: [0.06, 0.12], move: 24, period: 12, x: 0.86, y: 0.06, size: 1.25, ease: EASES.ambient, repeat: 99 },
