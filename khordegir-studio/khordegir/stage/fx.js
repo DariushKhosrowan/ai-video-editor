@@ -62,6 +62,13 @@
     image_full: ["cinema-zoom", "curtain-reveal", "radar-dots", "parallax-caption", "noir-vignette", "minimal-frame"],
     three_cards: ["trio-cascade", "elastic-fan", "spotlight-cards", "floating-trio", "sweep-grid", "minimal-cards"],
     timeline: ["track-sweep", "milestone-pop", "editorial-arc", "elastic-nodes", "stagger-eras", "minimal-rail"],
+    "minimal-map": "نقشهٔ مینیمال",
+    "route-tracer": "رسم پیوسته مسیر",
+    "radar-pulse": "پین راداری",
+    "editorial-focus": "زوم تمرکز خبری",
+    "air-corridor": "مسیر هوایی سینمایی",
+    "vox-atlas": "اطلس تحریریه (Vox)",
+    map_talk: ["vox-atlas", "air-corridor", "editorial-focus", "radar-pulse", "route-tracer", "minimal-map"],
     layers: ["layered-depth", "kinetic-stage", "sweep-compose", "elastic-nodes", "cinematic-pass", "minimal-layers"],
     cam: ["cam-clean", "cam-soft", "cam-pulse", "cam-editorial", "cam-focus", "cam-minimal"],
   };

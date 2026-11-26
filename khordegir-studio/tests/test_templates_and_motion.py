@@ -35,6 +35,7 @@ ALL_TEMPLATES = (
     "image_full",
     "image_text",
     "layers",
+    "map_talk",
     "line_chart",
     "quote",
     "section_break",

@@ -1,0 +1,251 @@
+/* Khordegir Studio — map_talk template styles.
+   Strict GSAP-driven deterministic timeline motion only. */
+
+.map-talk-stage {
+  position: absolute;
+  overflow: hidden;
+  border-radius: var(--radius, 16px);
+  border: 2px solid var(--c-cardBorder);
+  background: var(--c-bg2);
+  box-shadow: var(--shadow-card);
+  isolation: isolate;
+}
+
+#stage[data-theme-mode="light"] .map-talk-stage {
+  background: #DFD8CA;
+}
+
+.map-talk-stage .map-ocean-tint {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 85% 75% at 50% 45%, rgba(255, 255, 255, 0.03), transparent 72%),
+    radial-gradient(ellipse 115% 105% at 50% 50%, transparent 52%, rgba(0, 0, 0, 0.34) 100%);
+  z-index: 2;
+}
+
+#stage[data-theme-mode="light"] .map-talk-stage .map-ocean-tint {
+  background:
+    radial-gradient(ellipse 85% 75% at 50% 45%, rgba(255, 255, 255, 0.25), transparent 72%),
+    radial-gradient(ellipse 115% 105% at 50% 50%, transparent 58%, rgba(20, 24, 33, 0.12) 100%);
+}
+
+.map-talk-stage .map-world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+  z-index: 1;
+}
+
+.map-talk-stage .map-world svg {
+  display: block;
+  overflow: visible;
+}
+
+.map-talk-stage .map-hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.map-pin-anchor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.map-pin-ripple {
+  position: absolute;
+  left: -26px;
+  top: -26px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2.5px solid var(--c-accent);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.map-pin-ripple-outer {
+  position: absolute;
+  left: -38px;
+  top: -38px;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  border: 1.5px solid var(--c-accent);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.map-pin-shadow {
+  position: absolute;
+  left: -9px;
+  top: -4px;
+  width: 18px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  filter: blur(2px);
+  will-change: transform, opacity;
+}
+
+.map-pin-drop {
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform, opacity;
+}
+
+.map-pin-stem {
+  position: absolute;
+  left: -1.5px;
+  top: -22px;
+  width: 3px;
+  height: 22px;
+  border-radius: 2px;
+  background: var(--c-accent);
+}
+
+.map-pin-head {
+  position: absolute;
+  left: -13px;
+  top: -42px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--c-accent);
+  border: 3px solid var(--c-bg);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.map-pin-head::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--c-bg);
+}
+
+.map-pin-dot {
+  position: absolute;
+  left: -8px;
+  top: -8px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--c-accent);
+  border: 3px solid var(--c-bg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.map-callout {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: var(--badge-radius, 8px);
+  background: var(--c-card);
+  border: 1.5px solid var(--c-cardBorder);
+  box-shadow: var(--shadow-bubble);
+  color: var(--c-text);
+  font-weight: 700;
+  white-space: nowrap;
+  max-width: 360px;
+  will-change: transform, opacity;
+}
+
+.map-callout.is-active {
+  border-color: var(--c-accent);
+}
+
+.map-callout-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: var(--c-accentBadge);
+  color: var(--c-accent);
+  font-size: 0.78em;
+  font-weight: 900;
+  flex: 0 0 auto;
+}
+
+.map-callout-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.map-reticle {
+  position: absolute;
+  left: -34px;
+  top: -34px;
+  width: 68px;
+  height: 68px;
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.map-hud-badge {
+  position: absolute;
+  left: 18px;
+  bottom: 16px;
+  z-index: 6;
+  direction: ltr;
+  font-family: "Vazirmatn", monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: var(--badge-radius, 8px);
+  background: var(--c-card);
+  border: 1px solid var(--c-cardBorder);
+  color: var(--c-muted);
+  box-shadow: var(--shadow-bubble);
+  opacity: 0.92;
+  pointer-events: none;
+}
+
+.map-hud-badge .hud-accent {
+  color: var(--c-accent);
+}
+
+.map-step-pill {
+  position: absolute;
+  right: 18px;
+  bottom: 16px;
+  z-index: 6;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: var(--badge-radius, 8px);
+  background: var(--c-card);
+  border: 1px solid var(--c-cardBorder);
+  color: var(--c-body);
+  font-size: 17px;
+  font-weight: 700;
+  box-shadow: var(--shadow-bubble);
+  pointer-events: none;
+}
+
+.map-step-pill strong {
+  color: var(--c-accent);
+}

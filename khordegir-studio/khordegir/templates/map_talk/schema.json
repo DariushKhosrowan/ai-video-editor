@@ -1,0 +1,165 @@
+{
+  "name": "map_talk",
+  "label": "نقشه و مسیر (Map Talk)",
+  "description": "نقشهٔ برداری آفلاین که دوربین با حرکت قطعی بین نقاط مرتب‌شده پرواز می‌کند، پین‌ها با نرمی نمایی e^(-x) فرود می‌آیند، خط مسیر کشیده می‌شود و برچسب‌ها ظاهر می‌شوند.",
+  "aliases": [
+    "map-talk",
+    "map",
+    "globe",
+    "نقشه"
+  ],
+  "category": "نمودار",
+  "fields": [
+    {
+      "key": "title",
+      "label": "عنوان (*زرد* ، ~قرمز~)",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "subtitle",
+      "label": "زیرعنوان (اختیاری)",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "items",
+      "label": "نقاط مسیر (به ترتیب پرواز دوربین)",
+      "type": "table",
+      "columns": [
+        ["label", "نام نقطه"],
+        ["lat", "عرض جغرافیایی (Lat)"],
+        ["lng", "طول جغرافیایی (Lng)"],
+        ["zoom", "زوم دوربین (مثلاً ۲.۸)"]
+      ],
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "projection",
+      "label": "طرح نقشه (Projection)",
+      "type": "select",
+      "options": [
+        ["mercator", "مرکاتور (Mercator — پیش‌فرض)"],
+        ["equirectangular", "مستطیلی متساوی‌الفاصله (Equirectangular)"]
+      ],
+      "default": "mercator",
+      "editable": false,
+      "advanced": true
+    },
+    {
+      "key": "route_style",
+      "label": "سبک خط مسیر",
+      "type": "select",
+      "options": [
+        ["arc", "کمان منحنی (پیش‌فرض)"],
+        ["straight", "خط مستقیم"],
+        ["dashed", "کمان خط‌چین"],
+        ["none", "بدون خط مسیر"]
+      ],
+      "default": "arc",
+      "editable": false,
+      "advanced": true
+    },
+    {
+      "key": "show_grid",
+      "label": "خطوط طول و عرض جغرافیایی",
+      "type": "select",
+      "options": [
+        ["true", "نمایش"],
+        ["false", "پنهان"]
+      ],
+      "default": "true",
+      "editable": false,
+      "advanced": true
+    },
+    {
+      "key": "show_coords",
+      "label": "نمایش مختصات دوربین (HUD)",
+      "type": "select",
+      "options": [
+        ["false", "خاموش (ساده)"],
+        ["true", "روشن"]
+      ],
+      "default": "false",
+      "editable": false,
+      "advanced": true
+    },
+    {
+      "key": "flight_dur",
+      "label": "مدت پرواز بین هر دو نقطه (ثانیه)",
+      "type": "number",
+      "default": 1.05,
+      "editable": false,
+      "advanced": true
+    },
+    {
+      "key": "pin_delay",
+      "label": "تأخیر برچسب بعد از فرود پین (ثانیه)",
+      "type": "number",
+      "default": 0.14,
+      "editable": false,
+      "advanced": true
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["vox-atlas", "اطلس تحریریه (Vox)"],
+        ["air-corridor", "مسیر هوایی سینمایی"],
+        ["editorial-focus", "زوم تمرکز خبری"],
+        ["radar-pulse", "پین راداری"],
+        ["route-tracer", "رسم پیوسته مسیر"],
+        ["minimal-map", "نقشهٔ مینیمال"]
+      ],
+      "default": "auto",
+      "editable": false,
+      "advanced": true
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["soft-fade", "محو نرم"],
+        ["curtain-rtl", "پرده از راست به چپ"],
+        ["accent-slash", "نوار تأکید مورب"],
+        ["iris-rise", "باز شدن دایره‌ای"],
+        ["split-curtain", "پرده دوقسمتی"],
+        ["diagonal-wipe", "پاک‌شدن مورب"],
+        ["zoom-iris", "گشایش زوم"],
+        ["shutter-bars", "کرکره ستونی"]
+      ],
+      "default": "auto",
+      "editable": false,
+      "advanced": true
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false,
+      "advanced": true
+    }
+  ],
+  "example": {
+    "title": "مسیر تاریخی *جادهٔ ابریشم*",
+    "subtitle": "چهار ایستگاه کلیدی از شرق آسیا تا مدیترانه",
+    "items": [
+      { "label": "شی‌آن", "lat": 34.26, "lng": 108.94, "zoom": 2.4 },
+      { "label": "سمرقند", "lat": 39.65, "lng": 66.96, "zoom": 3.1 },
+      { "label": "تهران", "lat": 35.69, "lng": 51.39, "zoom": 3.6 },
+      { "label": "استانبول", "lat": 41.01, "lng": 28.98, "zoom": 3.4 }
+    ],
+    "source": "Natural Earth-derived offline vector basemap (CC0 / Public Domain)",
+    "layout": "SLIDE"
+  },
+  "order": 135,
+  "version": 1
+}
