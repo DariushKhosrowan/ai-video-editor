@@ -1,7 +1,8 @@
 /* Khordegir Studio — Shared GSAP 3 Motion Tokens (single source of truth).
    Offline, deterministic, RTL-safe, stage zoom cap <= 1.06.
    Loaded before core.js, fx.js, charts.js, themes, and templates.
-   All motion is mathematically based on the true exponential easing family: e^(-x). */
+   All motion is mathematically based on the true exponential easing family: e^(-x).
+   Licensed under MIT / Apache-2.0 compatible terms. */
 (function () {
   "use strict";
 
@@ -82,8 +83,15 @@
     zoomOut: expInOut(5),
     cameraPan: expInOut(3),
     chartReveal: expOut(6),
-    // inverse-exponential growth: speed decays as e^(-k t), normalised to land exactly at 1 (k = 5)
-    chartGrow: function (t) { const k = 5; return t >= 1 ? 1 : (1 - Math.exp(-k * t)) / (1 - Math.exp(-k)); },
+    // inverse-exponential growth: fast start, speed decays exponentially as e^(-k t), lands at 1 (k = 5)
+    chartGrow: function (t) {
+      if (t <= 0) return 0;
+      if (t >= 1) return 1;
+      const k = 5;
+      return (1 - Math.exp(-k * t)) / (1 - Math.exp(-k));
+    },
+    chartSnap: expOut(6),
+    chartGentle: expOut(4),
     transition: expOut(6),
     transitionSoft: expOut(3),
     transitionSlash: expInOut(5),
@@ -188,19 +196,23 @@
       },
     },
 
-    // Data & chart reveals (expOut(6))
+    // Data & chart reveals (all expOut e^(-x) curves: fast start, slow landing)
     chart: {
       reveal: { dur: 0.72, stagger: 0.08, delay: 0.25, ease: EASES.chartReveal },
       axes:   { delay: 0.00, dur: 0.35, ease: EASES.textIn },
-      bar:    { delay: 0.25, dur: 2.4, stagger: 0.18, ease: "chartGrow" },
-      line:   { delay: 0.30, dur: 2.4, stagger: 0.14, ease: "chartGrow" },
+      bar:    { delay: 0.22, dur: 1.85, stagger: 0.14, ease: "chartGrow" },
+      hbar:   { delay: 0.20, dur: 1.75, stagger: 0.14, ease: "chartGrow" },
+      line:   { delay: 0.25, dur: 2.00, stagger: 0.14, ease: "chartGrow" },
       vline:  { delay: 0.15, stagger: 0.10, dur: 0.50, ease: EASES.chartReveal, labelDelay: 0.12 },
-      marker: { dur: 0.30, ease: EASES.textIn, span: 0.85 },
-      value:  { delay: 0.05, dur: 0.45, y: 10, ease: EASES.chartReveal },
-      number: { delay: 0.20, dur: 1.10, scale: 0.92, enterDur: 0.50, ease: EASES.chartReveal },
+      marker: { dur: 0.32, ease: EASES.spring, span: 0.85 },
+      value:  { delay: 0.05, dur: 0.35, y: 10, ease: EASES.chartReveal },
+      number: { delay: 0.18, dur: 1.10, scale: 0.92, enterDur: 0.45, ease: EASES.chartReveal },
       compare: {
-        delay: 0.20, stagger: 0.55, countDur: 0.90, labelDelay: 0.15,
-        arrowDelay: 0.45, arrowDur: 0.50, ease: EASES.chartReveal,
+        delay: 0.20, stagger: 0.50, countDur: 0.85, labelDelay: 0.15,
+        arrowDelay: 0.40, arrowDur: 0.45, ease: EASES.chartReveal,
+      },
+      counterGrid: {
+        delay: 0.20, cardStagger: 0.16, countDur: 0.90, ease: EASES.chartReveal,
       },
       timeline: {
         lineDur: 0.90, ease: EASES.chartReveal,
@@ -225,11 +237,65 @@
       startOffset: 0.25,
       compareStartOffset: 0.20,
       counterCaptionExtra: 0.25,
-      markDelayFrac: 0.90,
+      markDelayFrac: 0.88,
       markStagger: 0.10,
-      endLabelFrac: 0.80,
+      endLabelFrac: 0.88,
       barCueFrac: 0.90,
       countEndCueFrac: 0.85,
+    },
+
+    // Beginner one-click animation presets for charts and counters
+    chartPresets: {
+      bar: {
+        "surge-bars":      { dur: 1.50, stagger: 0.12, ease: "expOut(6)", delay: 0.18 },
+        "editorial-bars":  { dur: 2.00, stagger: 0.16, ease: "expOut(5)", delay: 0.25 },
+        "pulse-highlight": { dur: 1.80, stagger: 0.15, ease: "expOut(5)", delay: 0.22, pulse: true },
+        "elastic-rise":    { dur: 1.75, stagger: 0.14, ease: "expOut(5)", delay: 0.20 },
+        "cascade-grid":    { dur: 1.80, stagger: 0.18, ease: "expOut(5)", delay: 0.32, axDur: 0.45 },
+        "minimal-bars":    { dur: 1.40, stagger: 0.10, ease: "expOut(5)", delay: 0.15 },
+        "classic":         { dur: 1.85, stagger: 0.14, ease: "chartGrow", delay: 0.22 },
+        "auto":            { dur: 1.85, stagger: 0.14, ease: "chartGrow", delay: 0.22 },
+      },
+      line: {
+        "sweep-trace":     { dur: 1.80, stagger: 0.14, ease: "expOut(6)", delay: 0.25 },
+        "editorial-curve": { dur: 2.20, stagger: 0.16, ease: "expOut(5)", delay: 0.28 },
+        "marker-pop":      { dur: 1.90, stagger: 0.14, ease: "expOut(5)", delay: 0.24, popMarkers: true },
+        "glow-path":       { dur: 1.90, stagger: 0.14, ease: "expOut(5)", delay: 0.25, glow: true },
+        "split-axis":      { dur: 1.80, stagger: 0.14, ease: "expOut(5)", delay: 0.35, axDur: 0.45 },
+        "minimal-trace":   { dur: 1.50, stagger: 0.12, ease: "expOut(5)", delay: 0.20 },
+        "classic":         { dur: 2.00, stagger: 0.14, ease: "chartGrow", delay: 0.25 },
+        "auto":            { dur: 2.00, stagger: 0.14, ease: "chartGrow", delay: 0.25 },
+      },
+      counter: {
+        "slam-count":      { dur: 0.85, ease: "expOut(6)", scale: 0.80 },
+        "halo-pulse":      { dur: 1.10, ease: "expOut(5)", halo: true },
+        "bar-meter":       { dur: 1.15, ease: "expOut(5)", meter: true },
+        "dual-split":      { dur: 1.10, ease: "expOut(5)" },
+        "kinetic-stat":    { dur: 1.15, ease: "expOut(5)", kinetic: true },
+        "minimal-count":   { dur: 0.85, ease: "expOut(6)" },
+        "classic":         { dur: 1.10, ease: "expOut(5)" },
+        "auto":            { dur: 1.10, ease: "expOut(5)" },
+      },
+      compare: {
+        "versus-clash":    { countDur: 0.80, stagger: 0.45, arrowDur: 0.42, arrowDelay: 0.38, ease: "expOut(6)" },
+        "editorial-delta": { countDur: 0.95, stagger: 0.55, arrowDur: 0.48, arrowDelay: 0.42, ease: "expOut(5)" },
+        "sweep-compare":   { countDur: 0.85, stagger: 0.50, arrowDur: 0.50, arrowDelay: 0.40, ease: "expOut(5)" },
+        "pop-badges":      { countDur: 0.85, stagger: 0.45, arrowDur: 0.45, arrowDelay: 0.38, ease: "expOut(5)" },
+        "mirror-flip":     { countDur: 0.90, stagger: 0.50, arrowDur: 0.45, arrowDelay: 0.40, ease: "expOut(5)" },
+        "minimal-compare": { countDur: 0.75, stagger: 0.40, arrowDur: 0.40, arrowDelay: 0.35, ease: "expOut(6)" },
+        "classic":         { countDur: 0.85, stagger: 0.50, arrowDur: 0.45, arrowDelay: 0.40, ease: "expOut(6)" },
+        "auto":            { countDur: 0.85, stagger: 0.50, arrowDur: 0.45, arrowDelay: 0.40, ease: "expOut(6)" },
+      },
+      counterGrid: {
+        "stagger-counters":{ countDur: 0.90, stagger: 0.16, ease: "expOut(6)" },
+        "pulse-tiles":     { countDur: 1.05, stagger: 0.18, ease: "expOut(5)", pulse: true },
+        "editorial-grid":  { countDur: 1.10, stagger: 0.20, ease: "expOut(5)" },
+        "spring-cards":    { countDur: 0.95, stagger: 0.16, ease: "expOut(5)" },
+        "sweep-row":       { countDur: 0.90, stagger: 0.14, ease: "expOut(5)" },
+        "minimal-grid":    { countDur: 0.80, stagger: 0.12, ease: "expOut(6)" },
+        "classic":         { countDur: 0.95, stagger: 0.16, ease: "expOut(5)" },
+        "auto":            { countDur: 0.95, stagger: 0.16, ease: "expOut(5)" },
+      },
     },
 
     // UI elements & layout helpers
