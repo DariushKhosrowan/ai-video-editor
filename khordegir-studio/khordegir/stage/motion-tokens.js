@@ -20,6 +20,8 @@
     zoomOut: "power3.inOut",
     cameraPan: "power2.inOut",
     chartReveal: "power4.out",
+    // inverse-exponential growth: speed decays as e^(-k t), normalised to land exactly at 1 (k = 5)
+    chartGrow: function (t) { const k = 5; return t >= 1 ? 1 : (1 - Math.exp(-k * t)) / (1 - Math.exp(-k)); },
     transition: "power4.out",
     transitionSoft: "power2.out",
     transitionSlash: "power3.inOut",
@@ -87,8 +89,8 @@
     chart: {
       reveal: { dur: 0.72, stagger: 0.08, delay: 0.25, ease: EASES.chartReveal },
       axes:   { delay: 0.00, dur: 0.35, ease: EASES.textIn },
-      bar:    { delay: 0.25, dur: 1.7, stagger: 0.16, ease: EASES.chartReveal },
-      line:   { delay: 0.30, dur: 1.9, stagger: 0.14, ease: EASES.chartReveal },
+      bar:    { delay: 0.25, dur: 2.4, stagger: 0.18, ease: "chartGrow" },
+      line:   { delay: 0.30, dur: 2.4, stagger: 0.14, ease: "chartGrow" },
       vline:  { delay: 0.15, stagger: 0.10, dur: 0.50, ease: EASES.chartReveal, labelDelay: 0.12 },
       marker: { dur: 0.30, ease: EASES.textIn, span: 0.85 },
       value:  { delay: 0.05, dur: 0.45, y: 10, ease: EASES.chartReveal },
