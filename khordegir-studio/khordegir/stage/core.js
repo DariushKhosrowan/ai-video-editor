@@ -352,8 +352,13 @@
         e.dataset.end = (t + dur).toFixed(3);
         if (S.fx) {
           if (role === "title") S.fx.cue(t, "whoosh", e.textContent.slice(0, 30));
-          else if (role === "bubble" || role === "badge") S.fx.cue(t, "pop", e.textContent.slice(0, 30));
-          else if (role === "card" && i === 0) S.fx.cue(t, "soft", "");
+          else if (role === "bubble") S.fx.cue(t, "bubble", e.textContent.slice(0, 30), { index: i, pitch: i });
+          else if (role === "badge") S.fx.cue(t, "ding", e.textContent.slice(0, 30), { index: i, pitch: i });
+          else if (role === "card") S.fx.cue(t, "card", e.textContent.slice(0, 30), { index: i, pitch: i });
+          else if (role === "eyebrow") S.fx.cue(t, "tick", e.textContent.slice(0, 30));
+          else if (role === "image") S.fx.cue(t, "shutter", e.textContent.slice(0, 30));
+          else if (role === "bar") S.fx.cue(t, "bar", e.textContent.slice(0, 30), { index: i, pitch: i });
+          else if (role === "note") S.fx.cue(t, "whoosh-subtle", e.textContent.slice(0, 30));
         }
         return t + dur;
       },
@@ -394,6 +399,7 @@
           transformOrigin: opts.origin || (A.scam ? "100% 50%" : "50% 50%"),
         }, opts.style || {}));
         S.tl.fromTo(r, { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: opts.dur || 0.55, ease: S.ease(opts.ease || "power4"), immediateRender: true }, opts.at ?? A.at("body", 1));
+        if (S.fx) S.fx.cue(opts.at ?? A.at("body", 1), "whoosh-subtle", "line");
         return r;
       },
       /* Gentle secondary ambient float (for glass panels/spotlights) */
@@ -490,6 +496,7 @@
         const L1 = el.getTotalLength ? el.getTotalLength() : 1000;
         el.style.strokeDasharray = L1; el.style.strokeDashoffset = L1;
         S.tl.to(el, { strokeDashoffset: 0, duration: dur, ease: S.ease(ease) }, at ?? A.at("body"));
+        if (S.fx) S.fx.cue(at ?? A.at("body"), "swish", "draw");
         return (at ?? A.at("body")) + dur;
       },
       pop(el, at, i = 0) { return A.enter(el, "badge", i, 0, at != null ? { at } : null); },
@@ -646,19 +653,53 @@
       wave.style.opacity = (0.55 + lvl * 0.45).toFixed(2);
     }
   };
+  S.updateFloat = function (t) {
+    const items = S._floats;
+    if (!Array.isArray(items) || !items.length) return;
+    const cfg = S._floatCfg || { enabled: false, baseAmp: 5, speed: 0.75 };
+    if (!cfg.enabled || cfg.baseAmp <= 0) {
+      for (let i = 0; i < items.length; i += 1) {
+        items[i].el.style.translate = "0px 0px";
+        items[i].el.style.rotate = "0deg";
+      }
+      return;
+    }
+    const speed = cfg.speed || 0.6;
+    for (let i = 0; i < items.length; i += 1) {
+      const it = items[i];
+      if (t <= it.startAt) {
+        it.el.style.translate = "0px 0px";
+        it.el.style.rotate = "0deg";
+        continue;
+      }
+      const u = Math.min(1, (t - it.startAt) / 1.5);
+      const fade = u * u * (3 - 2 * u);
+      const wt = (t - it.startAt) * speed;
+      const dx = fade * it.ampX * Math.sin(wt * it.w2 + it.p2);
+      const dy = fade * it.ampY * Math.sin(wt * it.w1 + it.p1);
+      it.el.style.translate = `${dx.toFixed(2)}px ${dy.toFixed(2)}px`;
+      if (it.ampRot) {
+        const rot = fade * it.ampRot * Math.sin(wt * it.w2 * 0.85 + it.p3);
+        it.el.style.rotate = `${rot.toFixed(3)}deg`;
+      } else {
+        it.el.style.rotate = "0deg";
+      }
+    }
+  };
   S.seek = function (t, fireSfx = false) {
     if (S.tl) S.tl.time(Math.min(t, S.tl.duration()), false);
     if (S.amb) {
       const ambDur = S.amb.duration();
-      const ambTime = S._liveLoop && ambDur > 0 ? (t % Math.max(8, ambDur)) : t;
+      const ambTime = S._liveLoop && ambDur > 0 ? (t % Math.max(20, ambDur)) : t;
       S.amb.time(ambTime, false);
     }
+    S.updateFloat(t);
     if (fireSfx && window.StageSFX && Array.isArray(S.cues) && S.cues.length) {
       const prevT = S._t || 0;
       if (t >= prevT) {
         S.cues.forEach((c) => {
           if (c.t > prevT && c.t <= t && (t - prevT) < 0.25) {
-            window.StageSFX.play(c.type, 0.55);
+            window.StageSFX.play(c.type, c.vol ?? 0.55, c.opts || {});
           }
         });
       }
@@ -714,8 +755,12 @@
         transparent: d.transparent,
         liveLoop: d.liveLoop,
       });
-      if (d.at != null) S.seek(d.at, false);
-      else S.play(0, { liveLoop: d.liveLoop });
+      if (d.at != null) {
+        const seekT = (d.at === 0) ? Math.max(1.8, (info && info.entrances) || 1.8) : d.at;
+        S.seek(seekT, false);
+      } else {
+        S.play(0, { liveLoop: d.liveLoop });
+      }
       parent.postMessage({ cmd: "loaded", info, cam: S.camOverlap() }, "*");
     } else if (d.cmd === "seek") {
       S.stop();
@@ -725,6 +770,20 @@
     } else if (d.cmd === "sfxConfig" && window.StageSFX) {
       if (d.muted !== undefined) window.StageSFX.setMuted(d.muted);
       if (d.volume !== undefined) window.StageSFX.setVolume(d.volume);
+    } else if (d.cmd === "livingConfig" && d.livingStage && S.slide) {
+      S.slide.livingStage = Object.assign({}, S.slide.livingStage || {}, d.livingStage);
+      if (Array.isArray(S._floats)) {
+        S._floats.forEach((it) => {
+          it.el.style.translate = "0px 0px";
+          it.el.style.rotate = "0deg";
+        });
+      }
+      const content = document.querySelector("#stage .content");
+      if (content && S.fx && S.fx.applyMicroMotion) {
+        content.querySelectorAll(".card-sheen").forEach((el) => el.remove());
+        S.fx.applyMicroMotion(content, S.slide);
+        S.updateFloat(S._t || 0);
+      }
     }
   });
 })();

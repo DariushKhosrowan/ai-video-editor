@@ -4,13 +4,26 @@
 یک دستور، برای هر اسلاید یک ویدیوی متحرک `slide-NN.mp4` (۱۹۲۰×۱۰۸۰، ۳۰ فریم، H.264) + تصویر `slide-NN.png` + `slides.pdf` + فایل‌های OBS
 (`steps_data.lua`، تله‌پرامپتر `prompter.html`) می‌سازد. هیچ هوش مصنوعی و هیچ کدنویسی لازم نیست.
 
-## نصب روی اوبونتو (یک بار)
+## نصب و بروزرسانی با یک دستور (یکپارچه و خودکار)
+برای نصب یا بروزرسانی استودیو، فقط کافیست دستور زیر را در ترمینال اجرا کنید:
 ```bash
-sudo apt install python3-pip ffmpeg
-cd khordegir-studio
-pip install -r requirements.txt
-python3 -m playwright install --with-deps chromium
+# نصب خودکار با یک دستور:
+bash install.sh
+# یا از طریق npm:
+npm run setup
+
+# بروزرسانی در هر زمان با یک دستور:
+bash install.sh --update
+# یا از طریق npm:
+npm run update
+
+# اجرای وب‌استودیو و کنسول OBS:
+npm start
 ```
+پس از اجرا، آدرس‌های زیر در دسترس شما خواهند بود:
+- **ویرایشگر اسلایدها و استیج کینتیک:** `http://localhost:3000/editor`
+- **کنسول پخش زنده و پرامپتر OBS:** `http://localhost:3000/obs`
+- **سورس بروزر برای ضبط در OBS:** `http://localhost:3000/obs-stage`
 
 ## ساختن یک ویدیو
 1. پوشه‌ی جدید:  `python3 -m khordegir new videos/my-video`  (یک `video.yaml` نمونه با همه‌ی قالب‌ها می‌سازد)

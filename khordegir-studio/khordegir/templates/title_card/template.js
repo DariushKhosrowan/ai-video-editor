@@ -8,20 +8,21 @@ Stage.template({
 
     if (s.image) {
       const wrap = A.el("div", "abs fullbleed", A.root, { inset: 0 });
-      A.image(wrap, s.image, 0, 0, A.W, A.H, { radius: 0, shadow: false, motion: s.motion || "breathe", dim: s.dim ?? 0.55, enter: false });
-      const bgStop = isLight ? "rgba(247,244,238,.92)" : "rgba(18,18,18,.96)";
-      const midStop = isLight ? "rgba(247,244,238,.52)" : "rgba(18,18,18,.55)";
-      const clearStop = isLight ? "rgba(247,244,238,0)" : "rgba(18,18,18,0)";
-      A.el("div", "abs", wrap, { inset: 0, background: `linear-gradient(to top, ${bgStop} 0%, ${midStop} 45%, ${clearStop} 75%)` });
+      A.image(wrap, s.image, 0, 0, A.W, A.H, { radius: 0, shadow: false, motion: s.motion || "breathe", dim: s.dim ?? 0.35, enter: false });
+      const bgStop = isLight ? "rgba(247,244,238,.88)" : "rgba(14,14,18,.82)";
+      const midStop = isLight ? "rgba(247,244,238,.42)" : "rgba(14,14,18,.45)";
+      const clearStop = isLight ? "rgba(247,244,238,0)" : "rgba(14,14,18,0)";
+      A.el("div", "abs", wrap, { inset: 0, background: `linear-gradient(to top, ${bgStop} 0%, ${midStop} 42%, ${clearStop} 78%)` });
       A.field("image", wrap);
       Stage.tl.from(wrap, { opacity: 0, duration: 0.8, ease: Stage.ease("power4"), immediateRender: true }, 0);
     }
 
     const center = s.align === "center" || !s.image;
     const left = A.area.left;
+    const topY = center ? A.area.y : (A.H * 0.28);
     const col = A.el("div", "col", A.root, {
-      right: A.area.x, left, top: center ? A.area.y : A.H * 0.42, bottom: A.scam ? 200 : A.L.bottom + 40,
-      justifyContent: center ? "center" : "flex-end",
+      right: A.area.x, left, top: topY, bottom: A.scam ? 200 : A.L.bottom + 30,
+      justifyContent: "center",
       alignItems: center && !A.scam ? "center" : "flex-start",
       textAlign: center && !A.scam ? "center" : "right",
       gap: "14px",

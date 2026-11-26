@@ -22,9 +22,21 @@ const HOST = process.env.HOST || "0.0.0.0";
 const PKG_ROOT = path.resolve(process.env.PKG_ROOT || path.join(__dirname, "khordegir-studio", "khordegir"));
 const VIDEOS_ROOT = path.resolve(process.env.VIDEOS_ROOT || path.join(__dirname, "khordegir-studio", "videos"));
 
-const STATIC_DIRS = ["editor", "stage", "templates", "themes", "vendor", "fonts"];
+const STATIC_DIRS = ["editor", "stage", "templates", "themes", "vendor", "fonts", "assets"];
 const STATIC_ALIASES = { obs: "obs_console", "obs-stage": "obs_stage" };
 const MAX_IMAGE_BYTES = 50 * 1024 * 1024;
+
+const STARTER_ASSETS_META = [
+  { filename: "world-map-dark.jpg", label: "نقشهٔ جهان (تیره و ادیتوریال)", category: "نقشه‌ها" },
+  { filename: "europe-map-topo.jpg", label: "نقشهٔ توپوگرافی اروپا و مدیترانه", category: "نقشه‌ها" },
+  { filename: "vintage-globe.jpg", label: "کرهٔ جغرافیایی کلاسیک", category: "نقشه‌ها" },
+  { filename: "archive-newspaper.jpg", label: "مقاله و روزنامهٔ آرشیوی", category: "مقاله و سند" },
+  { filename: "psychology-lab.jpg", label: "میز آزمایشگاه روانشناسی", category: "علمی و پژوهشی" },
+  { filename: "economic-lab.jpg", label: "محیط پژوهش اقتصاد رفتاری", category: "علمی و پژوهشی" },
+  { filename: "podcast-studio-mic.jpg", label: "استودیو و میکروفون پادکست (بوکه)", category: "پادکست و استودیو" },
+  { filename: "tea-ritual.jpg", label: "چای و فضای گفتگو", category: "پادکست و استودیو" },
+  { filename: "aspromonte-hills.jpg", label: "مناظر طبیعی و مستند", category: "مستند" },
+];
 
 function hasTraversalSyntax(rawPath) {
   if (!rawPath || rawPath.includes("\x00") || rawPath.includes("\\")) return true;
@@ -155,6 +167,31 @@ app.get("/", (req, res) => {
 app.get("/api/health", (req, res) => {
   res.setHeader("Cache-Control", "no-store");
   res.json({ ok: true });
+});
+
+// Curated starter media library (maps, archival articles, podcast studio backdrops)
+app.get("/api/assets", (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  const assetsDir = path.join(PKG_ROOT, "assets");
+  const list = [];
+  const metaByFile = new Map(STARTER_ASSETS_META.map((m) => [m.filename, m]));
+  if (fs.existsSync(assetsDir) && fs.statSync(assetsDir).isDirectory()) {
+    const files = fs.readdirSync(assetsDir).filter((f) => !f.startsWith(".") && IMAGE_EXTS.has(path.extname(f).toLowerCase()));
+    const ordered = [
+      ...STARTER_ASSETS_META.map((m) => m.filename).filter((f) => files.includes(f)),
+      ...files.filter((f) => !metaByFile.has(f)).sort(),
+    ];
+    for (const filename of ordered) {
+      const m = metaByFile.get(filename) || { filename, label: filename, category: "سایر" };
+      list.push({
+        filename,
+        url: `/assets/${encodeURIComponent(filename)}`,
+        label: m.label,
+        category: m.category,
+      });
+    }
+  }
+  res.json({ ok: true, assets: list });
 });
 
 // List projects

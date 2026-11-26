@@ -3112,5 +3112,82 @@ window.TEMPLATE_INDEX = [
    "order": 17,
    "version": 1
   }
+ },
+ {
+  "name": "article_zoom",
+  "js": "../templates/article_zoom/template.js",
+  "schema": {
+   "name": "article_zoom",
+   "label": "مقاله و زوم روی متن",
+   "description": "نمایش برگهٔ مقاله، پژوهش یا تصویر سند و زوم سینمایی روی جملهٔ کلیدی همراه با هایلایت ماژیکی (سبک یوتیوبرهای مستند).",
+   "aliases": ["article-zoom", "article", "مقاله", "زوم مقاله"],
+   "category": "پادکست",
+   "fields": [
+    { "key": "eyebrow", "label": "تیتر کوچک بالای صحنه (اختیاری)", "type": "text", "editable": true },
+    { "key": "title", "label": "تیتر توضیحی کنار یا بالای مقاله (اختیاری)", "type": "text", "editable": true },
+    { "key": "publication", "label": "نام نشریه یا منبع مقاله", "type": "text", "editable": false },
+    { "key": "article_title", "label": "تیتر اصلی مقاله / پژوهش", "type": "text", "editable": true },
+    { "key": "author", "label": "نویسنده و تاریخ انتشار", "type": "text", "editable": false },
+    { "key": "article_body", "label": "متن زمینهٔ مقاله (پاراگراف‌ها با Enter جدا شوند)", "type": "textarea", "editable": true },
+    { "key": "focus_text", "label": "جملهٔ کانونی برای زوم و هایلایت ماژیکی", "type": "textarea", "editable": true },
+    { "key": "image", "label": "تصویر سند یا پس‌زمینهٔ محو مقاله (اختیاری)", "type": "image", "editable": true },
+    {
+     "key": "zoom_mode",
+     "label": "حالت نمایش",
+     "type": "select",
+     "options": [
+      ["auto", "خودکار (برگهٔ مقاله + پس‌زمینه محو)"],
+      ["article", "برگهٔ مقاله و زوم روی جمله"],
+      ["image", "زوم مستقیم روی تصویر مقاله / سند"]
+     ],
+     "default": "auto",
+     "editable": false
+    },
+    {
+     "key": "paper_theme",
+     "label": "جنس و رنگ برگهٔ مقاله",
+     "type": "select",
+     "options": [
+      ["warm-paper", "کاغذ کرم پژوهشی (کلاسیک)"],
+      ["newsprint", "برش روزنامهٔ آرشیوی"],
+      ["editorial-dark", "کارت شیشه‌ای تیره (مدرن)"]
+     ],
+     "default": "warm-paper",
+     "editable": false
+    },
+    { "key": "zoom_scale", "label": "بزرگنمایی زوم (مثلاً 1.38)", "type": "number", "default": 1.38, "editable": false },
+    { "key": "zoom_x", "label": "موقعیت افقی زوم روی تصویر (۰ تا ۱۰۰٪)", "type": "number", "default": 50, "editable": false },
+    { "key": "zoom_y", "label": "موقعیت عمودی زوم روی تصویر (۰ تا ۱۰۰٪)", "type": "number", "default": 48, "editable": false },
+    {
+     "key": "preset",
+     "label": "سبک انیمیشن زوم",
+     "type": "select",
+     "options": [
+      ["auto", "ارث‌بری / خودکار"],
+      ["random", "🎲 تصادفی"],
+      ["cinematic-push", "زوم سینمایی روی جمله"],
+      ["tilt-glide", "نمای سه‌بعدی مورب و زوم"],
+      ["marker-sweep", "ماژیک هایلایت زنده + زوم نزدیک"],
+      ["split-paper", "برگهٔ مقاله + توضیح کناری"]
+     ],
+     "default": "auto",
+     "editable": false
+    }
+   ],
+   "example": {
+    "eyebrow": "بررسی پژوهش علمی",
+    "publication": "Journal of Behavioral Economics · 2024",
+    "article_title": "چرا پاداش‌های نامطمئن بیش از پاداش ثابت رفتار ما را شرطی می‌کنند؟",
+    "author": "تیم پژوهشی دانشگاه زوریخ · صفحهٔ ۱۴",
+    "article_body": "در آزمایش‌های متعدد طی دو دههٔ گذشته مشخص شد که وقتی سیستم تشویق کاملاً قابل پیش‌بینی است، مغز به سرعت به آن عادت می‌کند.\nاما به محض اینکه فاصلهٔ زمانی پاداش تغییر می‌کند، سطح دوپامین پیش‌بینی‌کننده جهش چشمگیری دارد.",
+    "focus_text": "پاداشِ گاه‌به‌گاه و غیرقابل‌پیش‌بینی تا ۳ برابر ماندگاری رفتار را افزایش می‌دهد.",
+    "image": "/assets/archive-newspaper.jpg",
+    "paper_theme": "warm-paper",
+    "zoom_scale": 1.36,
+    "layout": "SCAM"
+   },
+   "order": 25,
+   "version": 1
+  }
  }
 ];

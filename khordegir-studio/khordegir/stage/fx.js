@@ -66,6 +66,7 @@
     guest_intro: ["editorial-split", "card-float", "spotlight", "minimal-clean"],
     podcast_question: ["kinetic-words", "spotlight", "glitch-pop", "editorial-mark"],
     podcast_end: ["spotlight", "kinetic-hero", "curtain-editorial", "minimal-type"],
+    article_zoom: ["cinematic-push", "tilt-glide", "marker-sweep", "split-paper"],
   };
 
   const PRESET_LABELS = {
@@ -171,6 +172,10 @@
     "cam-editorial": "دوربین تحریریه",
     "cam-focus": "تمرکز دوربین",
     "cam-minimal": "دوربین ساده",
+    "cinematic-push": "زوم سینمایی روی جمله",
+    "tilt-glide": "نمای سه‌بعدی مورب و زوم",
+    "marker-sweep": "ماژیک هایلایت زنده + زوم نزدیک",
+    "split-paper": "برگهٔ مقاله + توضیح کناری",
   };
 
   const TRANSITIONS = [
@@ -311,8 +316,8 @@
     return "breathe";
   };
 
-  FX.cue = function (t, type, label) {
-    if (S.cues) S.cues.push({ t: +t.toFixed(3), type, label: label || "" });
+  FX.cue = function (t, type, label, opts = {}) {
+    if (S.cues) S.cues.push({ t: +t.toFixed(3), type, label: label || "", opts: opts || {} });
   };
 
   /* ---------------------------------------------------------- atmosphere (ambient, behind content) */
@@ -358,25 +363,25 @@
       S.amb.fromTo(lk, { opacity: 0.0, x: 0 }, { opacity: 0.11, x: fromLeft ? 260 : -260, duration: 9, ease: "sine.inOut", yoyo: true, repeat: 9 }, 0);
     }
 
-    if (c.dust) {
+    if (c.dust && (!slide.livingStage || slide.livingStage.intensity === "off")) {
       const box = document.createElement("div");
       box.className = "dust";
       stage.appendChild(box);
-      const n = 34;
+      const n = 14;
       for (let i = 0; i < n; i++) {
         const d = document.createElement("i");
-        const s = 1.5 + r() * 3.5;
+        const s = 3.5 + r() * 4.5;
         Object.assign(d.style, {
           left: (r() * W) + "px",
           top: (r() * H) + "px",
           width: s + "px",
           height: s + "px",
           background: isLight ? (col.muted || "#666") : "#fff8dc",
-          opacity: (isLight ? (0.04 + r() * 0.12) : (0.08 + r() * 0.22)).toFixed(2),
-          filter: s > 4 ? "blur(1.5px)" : "none",
+          opacity: (isLight ? (0.04 + r() * 0.08) : (0.06 + r() * 0.14)).toFixed(2),
+          filter: "blur(1.5px)",
         });
         box.appendChild(d);
-        S.amb.to(d, { x: (r() - 0.5) * 160, y: -40 - r() * 140, duration: 18 + r() * 10, ease: "none" }, 0);
+        S.amb.to(d, { x: (r() - 0.5) * 110, y: -30 - r() * 90, duration: 22 + r() * 10, ease: "sine.inOut", yoyo: true, repeat: 99 }, 0);
       }
     }
 
@@ -385,25 +390,18 @@
       const sw = document.createElement("div");
       sw.className = "light-sweep";
       stage.appendChild(sw);
-      S.amb.fromTo(sw, { x: 600, opacity: 0 }, { x: -1600, opacity: isLight ? 0.16 : 0.24, duration: 10, ease: "sine.inOut", yoyo: true, repeat: 4 }, 0);
+      S.amb.fromTo(sw, { x: 600, opacity: 0 }, { x: -1600, opacity: isLight ? 0.14 : 0.2, duration: 12, ease: "sine.inOut", yoyo: true, repeat: 99 }, 0);
     }
   };
 
   FX.grain = function (stage) {
-    if (!FX.cur || !FX.cur.grain) return;
+    // Keep film texture completely static and ultra-subtle (no 24fps position jumping that looks like noise on text/shapes)
+    if (!FX.cur || !FX.cur.grain || !(S.slide && S.slide.fx && S.slide.fx.grain === true)) return;
     const gr = document.createElement("div");
     gr.className = "grain";
     stage.appendChild(gr);
+    gr.style.opacity = "0.018";
     gr.style.backgroundImage = `url(${grainTile()})`;
-    const proxy = { t: 0 }, r = mulberry32(99);
-    const offs = Array.from({ length: 24 }, () => [Math.floor(r() * 256), Math.floor(r() * 256)]);
-    S.amb.to(proxy, {
-      t: 60, duration: 60, ease: "none",
-      onUpdate: () => {
-        const k = Math.floor(proxy.t * 24) % 24;
-        gr.style.backgroundPosition = `${offs[k][0]}px ${offs[k][1]}px`;
-      },
-    }, 0);
   };
 
   /* "depth" idle variant: a big blurred copy of the image behind everything drifts the other way */
@@ -595,7 +593,6 @@
       S.tl.fromTo(badge, { opacity: 0, x: 56 }, { opacity: 1, x: 0, duration: 0.52, ease: S.ease("power4"), immediateRender: true }, t0);
     } else if (mode === "orbit-pulse") {
       S.tl.fromTo(badge, { opacity: 0, scale: 0.72, y: -14 }, { opacity: 1, scale: 1, y: 0, duration: 0.52, ease: S.ease("power3"), immediateRender: true }, t0);
-      S.amb.fromTo(badge, { scale: 1 }, { scale: 1.05, duration: 2.2, ease: "sine.inOut", yoyo: true, repeat: 8 }, 0.6);
     } else if (mode === "flip-reveal") {
       S.tl.fromTo(badge, { opacity: 0, scaleX: 0.15, scaleY: 0.9 }, { opacity: 1, scaleX: 1, scaleY: 1, duration: 0.55, ease: "back.out(1.3)", immediateRender: true }, t0);
     } else if (mode === "stamp-drop") {
@@ -606,7 +603,6 @@
     } else {
       // float-fade
       S.tl.fromTo(badge, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.65, ease: S.ease("power3"), immediateRender: true }, t0);
-      S.amb.fromTo(badge, { y: 0 }, { y: -6, duration: 3.4, ease: "sine.inOut", yoyo: true, repeat: 6 }, 0.7);
     }
     FX.cue(t0, "logo", mode);
     return badge;
@@ -656,8 +652,27 @@
     layer.className = "living-stage";
     stage.appendChild(layer);
 
-    // 1. Aurora / Studio-Mix drifting luminous orbs
-    if (style === "aurora" || style === "studio-mix") {
+    // 0. Editorial Blurred Backdrop (only when explicitly requested with a dedicated background image)
+    if (style === "editorial-blur" || (style === "dreamy-bokeh" && ls.bgImage)) {
+      const blurSrc = (ls && ls.bgImage) || (slide && slide.bg_image) || (style === "editorial-blur" ? "/assets/podcast-studio-mic.jpg" : "");
+      if (blurSrc) {
+        const bWrap = document.createElement("div");
+        bWrap.className = "living-editorial-blur";
+        const bImg = document.createElement("img");
+        bImg.src = blurSrc;
+        bImg.alt = "";
+        bImg.onerror = () => bWrap.remove();
+        bWrap.appendChild(bImg);
+        layer.appendChild(bWrap);
+        S._imgs.push(bImg);
+        const scrim = document.createElement("div");
+        scrim.className = "living-velvet-scrim";
+        layer.appendChild(scrim);
+      }
+    }
+
+    // 1. Aurora / Studio-Mix / Dreamy-Bokeh drifting luminous orbs (gradient-feathered, zero heavy CSS blur filter)
+    if (style === "aurora" || style === "studio-mix" || style === "dreamy-bokeh" || style === "editorial-blur") {
       const aurora = document.createElement("div");
       aurora.className = "living-aurora";
       layer.appendChild(aurora);
@@ -665,25 +680,60 @@
       const orb1 = document.createElement("div");
       orb1.className = "living-aurora-orb";
       Object.assign(orb1.style, {
-        width: "920px", height: "920px", left: "62%", top: "-16%",
-        background: `radial-gradient(circle, ${accent} 0%, transparent 66%)`,
-        opacity: (isLight ? 0.14 : 0.16 * mult).toFixed(2),
+        width: "1120px", height: "1120px", left: "54%", top: "-22%",
+        background: `radial-gradient(circle, ${accent} 0%, transparent 64%)`,
+        opacity: (isLight ? 0.14 : (style === "dreamy-bokeh" ? 0.2 : 0.16) * mult).toFixed(2),
       });
       const orb2 = document.createElement("div");
       orb2.className = "living-aurora-orb";
       Object.assign(orb2.style, {
-        width: "760px", height: "760px", left: "-10%", top: "48%",
-        background: `radial-gradient(circle, ${danger} 0%, transparent 70%)`,
-        opacity: (isLight ? 0.09 : 0.11 * mult).toFixed(2),
+        width: "920px", height: "920px", left: "-14%", top: "42%",
+        background: `radial-gradient(circle, ${style === "dreamy-bokeh" ? "#38bdf8" : danger} 0%, transparent 66%)`,
+        opacity: (isLight ? 0.09 : (style === "dreamy-bokeh" ? 0.14 : 0.11) * mult).toFixed(2),
       });
       aurora.append(orb1, orb2);
 
       S.amb.fromTo(orb1, { x: -45 * mult, y: -25 * mult, scale: 0.94 }, {
-        x: 55 * mult, y: 38 * mult, scale: 1.08, duration: 7.5, ease: "sine.inOut", yoyo: true, repeat: 99,
+        x: 55 * mult, y: 38 * mult, scale: 1.08, duration: 8.5, ease: "sine.inOut", yoyo: true, repeat: 99, force3D: true,
       }, 0);
       S.amb.fromTo(orb2, { x: 40 * mult, y: 30 * mult, scale: 1.04 }, {
-        x: -50 * mult, y: -35 * mult, scale: 0.92, duration: 9.2, ease: "sine.inOut", yoyo: true, repeat: 99,
+        x: -50 * mult, y: -35 * mult, scale: 0.92, duration: 10.5, ease: "sine.inOut", yoyo: true, repeat: 99, force3D: true,
       }, 0);
+    }
+
+    // 1b. Creamy Out-of-Focus Bokeh Discs for YouTuber Dreamy-Bokeh mode
+    if (style === "dreamy-bokeh") {
+      const bokehWash = document.createElement("div");
+      bokehWash.className = "living-bokeh-wash";
+      layer.appendChild(bokehWash);
+      const br = FX.rngFor((slide._seed || "live") + ":dreamy-bokeh");
+      const bokehColors = [accent, "#60a5fa", "#fff4d6", danger];
+      const bCount = Math.round(9 * Math.min(1.25, mult));
+      for (let i = 0; i < bCount; i += 1) {
+        const disc = document.createElement("div");
+        disc.className = "living-bokeh-disc";
+        const sz = 110 + br() * 190;
+        const cPick = bokehColors[i % bokehColors.length];
+        Object.assign(disc.style, {
+          left: (br() * (S.W - 80)).toFixed(1) + "px",
+          top: (br() * (S.H - 80)).toFixed(1) + "px",
+          width: sz.toFixed(0) + "px",
+          height: sz.toFixed(0) + "px",
+          background: `radial-gradient(circle, ${cPick} 0%, transparent 68%)`,
+          opacity: ((isLight ? 0.05 : 0.085) * (0.6 + br() * 0.6)).toFixed(2),
+        });
+        bokehWash.appendChild(disc);
+        S.amb.fromTo(disc, { x: 0, y: 0, scale: 0.92 }, {
+          x: (br() - 0.5) * 140 * mult,
+          y: (br() - 0.5) * 90 * mult,
+          scale: 1.12,
+          duration: 16 + br() * 12,
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: 99,
+          force3D: true,
+        }, 0);
+      }
     }
 
     // 2. Subtle Perspective Grid + Sweep
@@ -696,33 +746,34 @@
       }, 0);
     }
 
-    // 3. Ambient Floating Dust / Bokeh Particles (always active in particles & studio-mix)
+    // 3. Soft Bokeh Particles (larger blurred circles, slow organic drift — no 1px pixel flicker)
     if (style === "particles" || style === "studio-mix") {
       const dustBox = document.createElement("div");
       dustBox.className = "dust";
       layer.appendChild(dustBox);
       const r = FX.rngFor((slide._seed || "live") + ":living-dust");
-      const count = Math.round(24 * mult);
+      const count = Math.round(14 * Math.min(1.3, mult));
       for (let i = 0; i < count; i += 1) {
         const dot = document.createElement("i");
-        const sz = 2 + r() * 4.5;
+        const sz = 4.5 + r() * 6.5;
         Object.assign(dot.style, {
           left: (r() * S.W).toFixed(1) + "px",
           top: (r() * S.H).toFixed(1) + "px",
           width: sz.toFixed(1) + "px",
           height: sz.toFixed(1) + "px",
-          background: i % 5 === 0 ? accent : (isLight ? (col.muted || "#666") : "#fff8dc"),
-          opacity: ((isLight ? 0.07 : 0.14) * mult * (0.5 + r() * 0.8)).toFixed(2),
-          filter: sz > 4.2 ? "blur(1.5px)" : "none",
+          background: i % 4 === 0 ? accent : (isLight ? (col.muted || "#666") : "#fff8dc"),
+          opacity: ((isLight ? 0.05 : 0.11) * Math.min(1.25, mult) * (0.5 + r() * 0.6)).toFixed(2),
+          filter: "blur(1.8px)",
         });
         dustBox.appendChild(dot);
         S.amb.fromTo(dot, { x: 0, y: 0 }, {
-          x: (r() - 0.5) * 140 * mult,
-          y: (-50 - r() * 120) * mult,
-          duration: 10 + r() * 8,
+          x: (r() - 0.5) * 90 * mult,
+          y: (-35 - r() * 75) * mult,
+          duration: 15 + r() * 11,
           ease: "sine.inOut",
           yoyo: true,
           repeat: 99,
+          force3D: true,
         }, 0);
       }
     }
@@ -752,69 +803,116 @@
         return path;
       };
 
-      const p1 = makeWavePath(18 * mult, 0, accent, 0.24, 3);
-      const p2 = makeWavePath(12 * mult, 1.8, col.muted || "#94a3b8", 0.16, 2);
+      const p1 = makeWavePath(16 * mult, 0, accent, 0.22, 3);
+      const p2 = makeWavePath(11 * mult, 1.8, col.muted || "#94a3b8", 0.14, 2);
       waveWrap.appendChild(svg);
       layer.appendChild(waveWrap);
 
-      S.amb.fromTo(p1, { y: -8 * mult }, { y: 10 * mult, duration: 3.4, ease: "sine.inOut", yoyo: true, repeat: 99 }, 0);
-      S.amb.fromTo(p2, { y: 9 * mult }, { y: -9 * mult, duration: 4.3, ease: "sine.inOut", yoyo: true, repeat: 99 }, 0);
+      S.amb.fromTo(p1, { y: -7 * mult }, { y: 8 * mult, duration: 4.8, ease: "sine.inOut", yoyo: true, repeat: 99, force3D: true }, 0);
+      S.amb.fromTo(p2, { y: 8 * mult }, { y: -8 * mult, duration: 5.9, ease: "sine.inOut", yoyo: true, repeat: 99, force3D: true }, 0);
     }
   };
 
-  /* ---------------------------------------------------------- Continuous Foreground Micro-Motion */
+  /* ---------------------------------------------------------- Gentle Water-Float Motion (Items & Images Only) */
   FX.applyMicroMotion = function (content, slide) {
-    const ls = Object.assign({ intensity: "podcast", microMotion: true }, (slide && slide.livingStage) || {});
-    if (ls.intensity === "off" || ls.microMotion === false) return;
-    const mult = ls.intensity === "dynamic" ? 1.45 : ls.intensity === "subtle" ? 0.65 : 1.0;
+    const ls = Object.assign({
+      intensity: "podcast",
+      microMotion: true,
+      floatMode: "selective",
+      floatAmplitude: 5,
+      floatSpeed: 0.75,
+      floatRatio: 0.65,
+      floatSeed: 0,
+    }, (slide && slide.livingStage) || {});
 
-    // Gentle floating breath + sheen on cards & bubbles
-    content.querySelectorAll(".card, .bubble").forEach((card, idx) => {
-      const dy = (idx % 2 === 0 ? -4.5 : 4.5) * mult;
-      S.amb.fromTo(card, { y: 0 }, {
-        y: dy,
-        duration: 4.4 + (idx % 3) * 0.9,
-        ease: "sine.inOut",
-        yoyo: true,
-        repeat: 99,
-      }, 0.2 + idx * 0.15);
+    S._floats = [];
+    const disabled = ls.intensity === "off" || ls.microMotion === false || ls.floatMode === "off" || Number(ls.floatAmplitude) === 0;
+    const intensityMult = ls.intensity === "dynamic" ? 1.3 : ls.intensity === "subtle" ? 0.65 : 1.0;
+    const baseAmp = Math.max(0, Math.min(16, Number(ls.floatAmplitude ?? 5))) * intensityMult;
+    const speed = Math.max(0.2, Math.min(2.2, Number(ls.floatSpeed ?? 0.75)));
+    const ratio = Math.max(0.15, Math.min(1, Number(ls.floatRatio ?? 0.65)));
+    const mode = ls.floatMode || "selective";
 
-      if (card.classList.contains("card")) {
-        const sheen = document.createElement("div");
-        sheen.className = "card-sheen";
-        card.appendChild(sheen);
-        S.amb.fromTo(sheen, { x: 200, opacity: 0 }, {
-          x: -2200,
-          opacity: 0.9,
-          duration: 5.5,
-          ease: "sine.inOut",
-          repeat: 99,
-          repeatDelay: 3.5,
-        }, 1.0 + idx * 0.6);
+    S._floatCfg = {
+      enabled: !disabled && baseAmp > 0,
+      mode,
+      baseAmp,
+      speed,
+      ratio,
+    };
+
+    if (disabled) return;
+
+    // Only float image frames & visual card/bubble items — NEVER plain texts, headlines, numbers, or chart axes
+    const frames = [...content.querySelectorAll(".frame")].filter((fr) => !fr.closest(".fullbleed"));
+    const items = mode === "images-only"
+      ? []
+      : [...content.querySelectorAll(".card, .bubble, .stage-callout-box")];
+
+    const r = FX.rngFor(`${slide._seed || "live"}:water-float:${ls.floatSeed || 0}`);
+    const chosen = [];
+
+    // Always gently float image frames (unless ratio is very low in selective mode with many frames)
+    frames.forEach((el, idx) => {
+      if (mode !== "selective" || frames.length <= 1 || r() < Math.max(0.75, ratio) || idx === 0) {
+        chosen.push({ el, kind: "image" });
       }
     });
 
-    // Subtle breathing glow on highlight badges & hero accents
-    content.querySelectorAll(".badge.acc, .num").forEach((el, idx) => {
-      S.amb.fromTo(el, { scale: 1 }, {
-        scale: 1 + 0.014 * mult,
-        duration: 3.2 + (idx % 2) * 0.8,
-        ease: "sine.inOut",
-        yoyo: true,
-        repeat: 99,
-      }, 0.4 + idx * 0.2);
+    // Randomly float only *some* cards/items in selective mode so the stage feels organic, calm, and alive
+    items.forEach((el) => {
+      if (mode === "all-items") {
+        chosen.push({ el, kind: "item" });
+      } else if (mode === "selective") {
+        if (items.length === 1 && !frames.length) {
+          chosen.push({ el, kind: "item" });
+        } else if (r() < ratio) {
+          chosen.push({ el, kind: "item" });
+        }
+      }
     });
 
-    // Soft floating motion on image frames (keeps interior Ken Burns + frame micro-drift)
-    content.querySelectorAll(".frame").forEach((fr, idx) => {
-      if (fr.closest(".fullbleed")) return;
-      S.amb.fromTo(fr, { y: 0 }, {
-        y: -5 * mult,
-        duration: 5.2 + idx * 0.7,
+    // Guarantee at least 1 visual item/image floats if any eligible exist and ratio > 0
+    if (!chosen.length && (frames.length || items.length)) {
+      const pool = frames.length ? frames : items;
+      chosen.push({ el: pool[Math.floor(r() * pool.length) % pool.length], kind: frames.length ? "image" : "item" });
+    }
+
+    chosen.forEach(({ el, kind }, idx) => {
+      const ir = FX.rngFor(`${slide._seed || "live"}:float-item:${ls.floatSeed || 0}:${idx}`);
+      const endAt = parseFloat(el.dataset && el.dataset.end) || 0.9;
+      el.style.willChange = "translate";
+      el.style.transformOrigin = "50% 50%";
+
+      S._floats.push({
+        el,
+        kind,
+        startAt: Math.max(0.65, endAt + 0.15),
+        ampY: (0.45 + ir() * 0.35) * Math.min(3.5, baseAmp * 0.6),
+        ampX: (0.15 + ir() * 0.2) * Math.min(1.5, baseAmp * 0.3),
+        ampRot: 0,
+        w1: 0.28 + ir() * 0.16,
+        w2: 0.18 + ir() * 0.12,
+        p1: ir() * Math.PI * 2,
+        p2: ir() * Math.PI * 2,
+        p3: ir() * Math.PI * 2,
+      });
+    });
+
+    // Very subtle slow specular light sweep on floating cards (never touches text)
+    content.querySelectorAll(".card").forEach((card, idx) => {
+      if (idx > 3) return;
+      const sheen = document.createElement("div");
+      sheen.className = "card-sheen";
+      card.appendChild(sheen);
+      S.amb.fromTo(sheen, { x: 240, opacity: 0 }, {
+        x: -2200,
+        opacity: 0.55,
+        duration: 7.5,
         ease: "sine.inOut",
-        yoyo: true,
         repeat: 99,
-      }, 0.3);
+        repeatDelay: 5.5,
+      }, 1.4 + idx * 0.9);
     });
   };
 
@@ -867,7 +965,7 @@
         box.innerHTML = `<span style="color:${color}">✦</span><span>${S.rich(ann.label || "نکتهٔ مهم")}</span>`;
         layer.appendChild(box);
         S.tl.fromTo(box, { opacity: 0, scale: 0.75, y: 16 }, { opacity: 1, scale: 1, y: 0, duration: 0.48, ease: S.ease("back"), immediateRender: true }, at);
-        S.amb.fromTo(box, { y: 0 }, { y: -6, duration: 2.8, ease: "sine.inOut", yoyo: true, repeat: 99 }, at + 0.5);
+        box.dataset.end = (at + 0.48).toFixed(3);
         FX.cue(at, "pop", ann.label || "");
         return;
       }
@@ -880,7 +978,6 @@
           fill: "none", stroke: color, "stroke-width": sw, "stroke-linecap": "round",
         });
         A.draw(el, at, 0.75, "power3");
-        S.amb.fromTo(el, { scale: 1, transformOrigin: "50% 50%" }, { scale: 1.03, duration: 2.4, ease: "sine.inOut", yoyo: true, repeat: 99 }, at + 0.8);
         FX.cue(at, "swish", ann.label || "");
         return;
       }

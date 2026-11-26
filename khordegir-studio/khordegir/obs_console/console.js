@@ -32,6 +32,7 @@ const els = {
   btnOpenObsStageTab: $('btnOpenObsStageTab'),
   liveBgStyleSelect: $('liveBgStyleSelect'),
   liveIntensitySelect: $('liveIntensitySelect'),
+  liveFloatModeSelect: $('liveFloatModeSelect'),
   chkShowLiveBadge: $('chkShowLiveBadge'),
   chkMicReactive: $('chkMicReactive'),
   ltActiveBadge: $('ltActiveBadge'),
@@ -206,6 +207,18 @@ function sendLiveCommand(type, payload) {
   }).catch(() => {});
 }
 
+function resolveLiveImageUrl(val) {
+  if (!val) return '';
+  const s = String(val).trim();
+  if (/^(https?:|file:|data:|blob:|\/projects\/|\/assets\/)/.test(s)) return s;
+  if (/^assets\//.test(s)) return '/' + s;
+  const clean = s.replace(/^img\//, '');
+  if (currentProjectName) {
+    return `/projects/${encodeURIComponent(currentProjectName)}/img/${encodeURIComponent(clean)}`;
+  }
+  return s;
+}
+
 function resolveActiveSlideForStep(step) {
   if (!step || !projectSlides.length) return null;
   let idx = Number.isFinite(+step.slideIndex) ? +step.slideIndex : (step.slide > 0 ? step.slide - 1 : -1);
@@ -220,13 +233,25 @@ function pushStepToLiveObs(step, overrideLayout = null) {
   const slidePayload = resolved ? resolved.slide : null;
   const slideIndex = resolved ? resolved.slideIndex : 0;
 
+  const mergedLiving = Object.assign({}, projectLivingStage || {}, (slidePayload && slidePayload.livingStage) || {}, {
+    bgStyle: els.liveBgStyleSelect.value,
+    intensity: els.liveIntensitySelect.value,
+    floatMode: els.liveFloatModeSelect ? els.liveFloatModeSelect.value : 'selective',
+  });
+  mergedLiving.microMotion = mergedLiving.floatMode !== 'off';
+  if (mergedLiving.bgImage) mergedLiving.bgImage = resolveLiveImageUrl(mergedLiving.bgImage);
+
   if (slidePayload) {
     slidePayload._seed = `${currentProjectName}:live:${slideIndex + 1}`;
     slidePayload._num = slideIndex + 1;
-    slidePayload.livingStage = Object.assign({}, projectLivingStage, slidePayload.livingStage || {}, {
-      bgStyle: els.liveBgStyleSelect.value,
-      intensity: els.liveIntensitySelect.value,
-    });
+    slidePayload.livingStage = mergedLiving;
+    if (slidePayload.image) slidePayload.image = resolveLiveImageUrl(slidePayload.image);
+    if (slidePayload.src) slidePayload.src = resolveLiveImageUrl(slidePayload.src);
+    if (slidePayload.bg_image) slidePayload.bg_image = resolveLiveImageUrl(slidePayload.bg_image);
+    if (typeof slidePayload.logo === 'string') slidePayload.logo = resolveLiveImageUrl(slidePayload.logo);
+    else if (slidePayload.logo && typeof slidePayload.logo === 'object' && slidePayload.logo.image) {
+      slidePayload.logo.image = resolveLiveImageUrl(slidePayload.logo.image);
+    }
   }
 
   sendLiveCommand('stage:sync', {
@@ -235,11 +260,7 @@ function pushStepToLiveObs(step, overrideLayout = null) {
     layout,
     theme: projectTheme,
     activeSlide: slidePayload,
-    livingStage: {
-      bgStyle: els.liveBgStyleSelect.value,
-      intensity: els.liveIntensitySelect.value,
-      microMotion: true,
-    },
+    livingStage: mergedLiving,
   });
 
   if (els.chkAutoChapterSync.checked) {
@@ -832,7 +853,16 @@ async function loadProjectSteps(name, { preserveIndex = false, initialStep = nul
   currentProjectTitle = payload.title || name;
   projectTheme = payload.theme || 'khordegir-dark';
   projectSlides = Array.isArray(payload.slides) ? payload.slides : [];
-  projectLivingStage = payload.livingStage || { bgStyle: 'studio-mix', intensity: 'podcast', microMotion: true };
+  projectLivingStage = payload.livingStage || {
+    bgStyle: 'dreamy-bokeh',
+    intensity: 'podcast',
+    microMotion: true,
+    floatMode: 'selective',
+    floatAmplitude: 5,
+    floatSpeed: 0.75,
+    floatRatio: 0.65,
+    floatSeed: 0,
+  };
   projectPodcast = payload.podcast || null;
 
   els.projectSelect.value = currentProjectName;
@@ -841,6 +871,9 @@ async function loadProjectSteps(name, { preserveIndex = false, initialStep = nul
 
   if (projectLivingStage.bgStyle) els.liveBgStyleSelect.value = projectLivingStage.bgStyle;
   if (projectLivingStage.intensity) els.liveIntensitySelect.value = projectLivingStage.intensity;
+  if (els.liveFloatModeSelect) {
+    els.liveFloatModeSelect.value = projectLivingStage.microMotion === false ? 'off' : (projectLivingStage.floatMode || 'selective');
+  }
 
   if (projectPodcast && projectPodcast.host && !els.ltTitleInput.value) {
     els.ltTitleInput.value = projectPodcast.host;
@@ -903,17 +936,21 @@ function connectOptionalObs() {
 }
 
 function sendOverlayUpdate() {
+  const floatMode = els.liveFloatModeSelect ? els.liveFloatModeSelect.value : 'selective';
+  const nextLiving = Object.assign({}, projectLivingStage || {}, {
+    bgStyle: els.liveBgStyleSelect.value,
+    intensity: els.liveIntensitySelect.value,
+    floatMode,
+    microMotion: floatMode !== 'off',
+    micReactive: els.chkMicReactive.checked,
+  });
+  projectLivingStage = nextLiving;
   sendLiveCommand('overlay:set', {
     transparentBg: liveUrlTransparent,
     showLiveBadge: els.chkShowLiveBadge.checked,
     micReactive: els.chkMicReactive.checked,
     sfxEnabled: !sfxMuted,
-    livingStage: {
-      bgStyle: els.liveBgStyleSelect.value,
-      intensity: els.liveIntensitySelect.value,
-      microMotion: true,
-      micReactive: els.chkMicReactive.checked,
-    },
+    livingStage: nextLiving,
   });
 }
 
@@ -972,6 +1009,7 @@ function wireEvents() {
 
   els.liveBgStyleSelect.onchange = sendOverlayUpdate;
   els.liveIntensitySelect.onchange = sendOverlayUpdate;
+  if (els.liveFloatModeSelect) els.liveFloatModeSelect.onchange = sendOverlayUpdate;
   els.chkShowLiveBadge.onchange = sendOverlayUpdate;
   els.chkMicReactive.onchange = sendOverlayUpdate;
 

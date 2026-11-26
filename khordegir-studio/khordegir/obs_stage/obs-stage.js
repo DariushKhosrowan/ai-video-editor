@@ -176,8 +176,8 @@
 
     const slide = Object.assign({}, state.activeSlide);
     slide.layout = layout;
-    if (state.livingStage && !slide.livingStage) {
-      slide.livingStage = state.livingStage;
+    if (state.livingStage) {
+      slide.livingStage = Object.assign({}, slide.livingStage || {}, state.livingStage);
     }
     if (ov.showLogo === false) {
       slide.logo = false;

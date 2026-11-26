@@ -65,10 +65,9 @@ html, body {
 /* Top Bar */
 .topbar {
   min-height: 54px;
-  padding: 5px 12px;
-  background: rgba(16, 21, 33, 0.94);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--line);
+  padding: 6px 14px;
+  background: linear-gradient(180deg, rgba(16, 22, 35, 0.98), rgba(11, 15, 25, 0.97));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -80,7 +79,7 @@ html, body {
 .brand {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   min-width: 0;
 }
 
@@ -104,13 +103,14 @@ html, body {
   font-size: 13.5px;
   font-weight: 800;
   letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 
 .brand-sub {
   display: block;
   font-size: 10.5px;
   color: var(--muted);
-  max-width: 190px;
+  max-width: 195px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -120,8 +120,8 @@ html, body {
 .topbar-actions {
   display: flex;
   align-items: center;
-  gap: 5px;
-  flex-wrap: wrap;
+  gap: 6px;
+  flex-wrap: nowrap;
 }
 
 .topbar .btn {
@@ -131,7 +131,7 @@ html, body {
 
 .topbar .select-ctrl {
   font-size: 11.5px;
-  max-width: 155px;
+  max-width: 185px;
 }
 
 .undo-group {
@@ -208,7 +208,7 @@ html, body {
   cursor: pointer;
   text-decoration: none;
   white-space: nowrap;
-  transition: transform 0.1s ease, background 0.15s ease, border-color 0.15s ease;
+  transition: transform 0.14s cubic-bezier(0.16, 1, 0.3, 1), background 0.17s ease, border-color 0.17s ease, box-shadow 0.17s ease;
 }
 
 .btn:hover:not(:disabled) {
@@ -290,26 +290,26 @@ html, body {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr) 395px;
+  grid-template-columns: 276px minmax(0, 1fr) 400px;
   gap: 12px;
   padding: 12px 14px;
 }
 
 .pane {
-  background: var(--panel);
+  background: linear-gradient(180deg, rgba(16, 21, 33, 0.97), rgba(13, 18, 28, 0.98));
   border: 1px solid var(--line);
   border-radius: 14px;
   display: flex;
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 22px 48px rgba(0, 0, 0, 0.36);
 }
 
 .pane-head {
   padding: 11px 14px;
   border-bottom: 1px solid var(--line);
-  background: var(--panel-elev);
+  background: rgba(21, 28, 43, 0.78);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -472,14 +472,14 @@ html, body {
 }
 
 .stage-toolbar {
-  padding: 9px 14px;
+  padding: 7px 12px;
   border-bottom: 1px solid var(--line);
   background: var(--panel-elev);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 6px;
 }
 
 .layout-switch {
@@ -487,8 +487,8 @@ html, body {
   background: var(--bg);
   border: 1px solid var(--line);
   border-radius: 9px;
-  padding: 3px;
-  gap: 3px;
+  padding: 2px;
+  gap: 2px;
 }
 
 .seg-btn {
@@ -496,9 +496,9 @@ html, body {
   background: transparent;
   color: var(--muted);
   font-family: inherit;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
-  padding: 5px 10px;
+  padding: 4px 8px;
   border-radius: 6px;
   cursor: pointer;
 }
@@ -515,20 +515,20 @@ html, body {
 .stage-tools-right {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 5px;
   flex-wrap: wrap;
 }
 
 .toggle-chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
+  gap: 5px;
+  font-size: 11px;
   color: #cbd5e1;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 4px 8px;
+  padding: 3px 7px;
   cursor: pointer;
 }
 
@@ -562,16 +562,18 @@ html, body {
   align-items: center;
   justify-content: center;
   padding: 16px;
-  background: radial-gradient(circle at center, #141b2b 0%, #070a10 100%);
+  background:
+    radial-gradient(ellipse 68% 60% at 50% 42%, rgba(245, 183, 0, 0.06), transparent 65%),
+    radial-gradient(circle at center, #141c2e 0%, #070a10 100%);
   overflow: hidden;
 }
 
 .stage-frame-box {
   position: relative;
-  border-radius: 12px;
+  border-radius: 13px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 32px 84px rgba(0, 0, 0, 0.72), 0 0 0 1px rgba(255, 255, 255, 0.04);
   background: #0b0e14;
 }
 
@@ -860,6 +862,103 @@ html, body {
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
+}
+
+/* Built-In Starter Image Thumbnail Picker */
+.asset-picker-box {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 4px;
+}
+
+.asset-picker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.asset-thumb-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.asset-thumb-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(8, 11, 17, 0.8);
+  border: 1.5px solid var(--line);
+  cursor: pointer;
+  text-align: right;
+  font-family: inherit;
+  transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.asset-thumb-btn:hover {
+  border-color: var(--line-strong);
+  transform: translateY(-1px);
+}
+
+.asset-thumb-btn.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(245, 183, 0, 0.25);
+}
+
+.asset-thumb-btn img {
+  width: 100%;
+  height: 54px;
+  object-fit: cover;
+  display: block;
+}
+
+.asset-thumb-btn span {
+  font-size: 10px;
+  font-weight: 700;
+  color: #e2e8f0;
+  padding: 4px 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: rgba(11, 14, 22, 0.88);
+}
+
+/* Clean Hairline Divider Group (avoids noisy card-in-card nesting) */
+.float-divider-group {
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.slides-list::-webkit-scrollbar,
+.inspector-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.slides-list::-webkit-scrollbar-track,
+.inspector-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.slides-list::-webkit-scrollbar-thumb,
+.inspector-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+}
+
+.slides-list::-webkit-scrollbar-thumb:hover,
+.inspector-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .empty-state {

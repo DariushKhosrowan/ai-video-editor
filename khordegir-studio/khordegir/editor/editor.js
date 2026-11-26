@@ -29,6 +29,7 @@ const state = {
   projectName: null,
   data: null,
   images: [],
+  starterAssets: [],
   activeIndex: 0,
   activeTab: "content",
   dirty: false,
@@ -229,8 +230,9 @@ function estimateSay(slide) {
 
 function resolveImageUrl(val) {
   if (!val) return "";
-  const s = String(val);
-  if (/^(https?:|file:|data:|blob:|\/projects\/)/.test(s)) return s;
+  const s = String(val).trim();
+  if (/^(https?:|file:|data:|blob:|\/projects\/|\/assets\/)/.test(s)) return s;
+  if (/^assets\//.test(s)) return "/" + s;
   const clean = s.replace(/^img\//, "");
   if (state.projectName) {
     return `/projects/${encodeURIComponent(state.projectName)}/img/${encodeURIComponent(clean)}`;
@@ -255,6 +257,9 @@ function buildStagePayload(slide, idx) {
   if (copy.image) copy.image = resolveImageUrl(copy.image);
   if (copy.src) copy.src = resolveImageUrl(copy.src);
   if (copy.bg_image) copy.bg_image = resolveImageUrl(copy.bg_image);
+  if (copy.livingStage && typeof copy.livingStage === "object" && copy.livingStage.bgImage) {
+    copy.livingStage.bgImage = resolveImageUrl(copy.livingStage.bgImage);
+  }
   if (typeof copy.logo === "string") copy.logo = resolveImageUrl(copy.logo);
   else if (copy.logo && typeof copy.logo === "object" && copy.logo.image) {
     copy.logo.image = resolveImageUrl(copy.logo.image);
@@ -285,7 +290,7 @@ function stopClock() {
   }
 }
 
-function startClock(fromSec) {
+function startClock(fromSec, syncFrame = true) {
   clearInterval(state.playTimer);
   state.playing = true;
   state.playFrom = fromSec ?? state.currentTime;
@@ -293,7 +298,7 @@ function startClock(fromSec) {
   state.playStartedAt = performance.now();
   els.btnPlayPause.textContent = "⏸ توقف";
 
-  if (els.stageFrame.contentWindow) {
+  if (syncFrame && els.stageFrame.contentWindow) {
     els.stageFrame.contentWindow.postMessage({ cmd: "play", from: state.playFrom, liveLoop: state.livingLoop }, "*");
   }
 
@@ -335,7 +340,11 @@ function reloadStage(autoPlay = true, atSec = null) {
   const sayEst = estimateSay(slide);
   els.sayDurChip.textContent = sayEst ? `گفتار: ${fa(sayEst)}ث` : "گفتار: —";
 
-  if (layout === "CAM" || !els.stageFrame.contentWindow) return;
+  if (layout === "CAM" || !els.stageFrame.contentWindow) {
+    state.pendingAutoPlay = false;
+    return;
+  }
+  state.pendingAutoPlay = Boolean(autoPlay);
   const payload = buildStagePayload(slide, state.activeIndex);
   els.stageFrame.contentWindow.postMessage({
     cmd: "load",
@@ -375,8 +384,9 @@ window.addEventListener("message", (ev) => {
       els.camStatusChip.className = "status-chip ok";
     }
 
-    if (state.playing) {
-      startClock(0);
+    if (state.playing || state.pendingAutoPlay) {
+      state.pendingAutoPlay = false;
+      startClock(0, false);
     } else {
       state.currentTime = Math.min(state.currentTime, state.duration);
       updateTimeUI();
@@ -631,16 +641,35 @@ function renderLivingAndAudioTab(container, slide) {
   container.innerHTML = "";
   if (!slide) return;
   const projLs = (state.data && state.data.livingStage) || {};
-  const ls = Object.assign({ bgStyle: projLs.bgStyle || "studio-mix", intensity: projLs.intensity || "podcast", microMotion: projLs.microMotion !== false }, slide.livingStage || {});
+  const ls = Object.assign({
+    bgStyle: projLs.bgStyle || "studio-mix",
+    intensity: projLs.intensity || "podcast",
+    microMotion: projLs.microMotion !== false,
+    floatMode: projLs.floatMode || "selective",
+    floatAmplitude: projLs.floatAmplitude ?? 5,
+    floatSpeed: projLs.floatSpeed ?? 0.75,
+    floatRatio: projLs.floatRatio ?? 0.65,
+    floatSeed: projLs.floatSeed ?? 0,
+  }, slide.livingStage || {});
+
+  const syncFloatLive = (patch) => {
+    Object.assign(ls, patch);
+    ls.microMotion = ls.floatMode !== "off" && Number(ls.floatAmplitude) > 0;
+    slide.livingStage = Object.assign({}, ls);
+    setDirty(true);
+    if (els.stageFrame && els.stageFrame.contentWindow) {
+      els.stageFrame.contentWindow.postMessage({ cmd: "livingConfig", livingStage: slide.livingStage }, "*");
+    }
+  };
 
   const secLive = document.createElement("div");
   secLive.className = "inspector-section";
   secLive.innerHTML = `
     <div class="section-title">
-      <span>پس‌زمینهٔ زنده و ریزحرکت مداوم (Living Stage)</span>
-      <span class="bilingual-sub">Always-On Motion</span>
+      <span>پس‌زمینهٔ زنده (Living Stage)</span>
+      <span class="bilingual-sub">Always-On Ambient</span>
     </div>
-    <p class="panel-hint">این اسلاید همیشه دارای پس‌زمینهٔ زنده و حرکت نرم کارت‌ها است تا مخاطب هیچ‌وقت تصویر ایستا و خشک نبیند.</p>
+    <p class="panel-hint">نور و موج ملایم در پس‌زمینه تا تصویر بدون لرزش متون همیشه زنده و عمیق بماند.</p>
   `;
 
   const bgGrp = document.createElement("label");
@@ -649,6 +678,8 @@ function renderLivingAndAudioTab(container, slide) {
   const bgSel = document.createElement("select");
   bgSel.className = "select-ctrl";
   [
+    ["dreamy-bokeh", "بوکهٔ محو و رویایی یوتیوبری (پیشنهادی)"],
+    ["editorial-blur", "پس‌زمینهٔ محو عمیق سافت (Editorial Blur)"],
     ["studio-mix", "ترکیبی استودیو (شفق + ذرات + موج)"],
     ["aurora", "شفق نوری ملایم (Aurora)"],
     ["particles", "ذرات نوری شناور (Particles)"],
@@ -660,22 +691,52 @@ function renderLivingAndAudioTab(container, slide) {
     o.textContent = l;
     bgSel.appendChild(o);
   });
-  bgSel.value = ls.bgStyle || "studio-mix";
+  bgSel.value = ls.bgStyle || "dreamy-bokeh";
   bgSel.addEventListener("change", () => {
-    slide.livingStage = Object.assign({}, ls, { bgStyle: bgSel.value });
+    Object.assign(ls, { bgStyle: bgSel.value });
+    slide.livingStage = Object.assign({}, ls);
     setDirty(true);
+    renderLivingAndAudioTab(container, slide);
     reloadStage(true);
   });
   bgGrp.appendChild(bgSel);
   secLive.appendChild(bgGrp);
 
+  if (ls.bgStyle === "dreamy-bokeh" || ls.bgStyle === "editorial-blur") {
+    const blurBgGrp = document.createElement("label");
+    blurBgGrp.className = "field-group";
+    blurBgGrp.innerHTML = `<span>تصویر پایه برای پس‌زمینهٔ محو (اختیاری)</span>`;
+    const blurBgSel = document.createElement("select");
+    blurBgSel.className = "select-ctrl";
+    [
+      { value: "", label: "خودکار (استفاده از عکس اسلاید یا استودیو)" },
+      ...(state.starterAssets || []).map((a) => ({ value: a.url, label: `✨ ${a.label}` })),
+      ...(state.images || []).map((im) => ({ value: im, label: `📁 ${im}` })),
+    ].forEach((optItem) => {
+      const o = document.createElement("option");
+      o.value = optItem.value;
+      o.textContent = optItem.label;
+      blurBgSel.appendChild(o);
+    });
+    blurBgSel.value = ls.bgImage || "";
+    blurBgSel.addEventListener("change", () => {
+      if (blurBgSel.value) ls.bgImage = blurBgSel.value;
+      else delete ls.bgImage;
+      slide.livingStage = Object.assign({}, ls);
+      setDirty(true);
+      reloadStage(true);
+    });
+    blurBgGrp.appendChild(blurBgSel);
+    secLive.appendChild(blurBgGrp);
+  }
+
   const intGrp = document.createElement("label");
   intGrp.className = "field-group";
-  intGrp.innerHTML = `<span>شدت حرکت و پویایی</span>`;
+  intGrp.innerHTML = `<span>شدت پس‌زمینهٔ زنده</span>`;
   const intSel = document.createElement("select");
   intSel.className = "select-ctrl";
   [
-    ["podcast", "پادکست استاندارد (متعادل و زنده)"],
+    ["podcast", "پادکست استاندارد (متعادل و آرام)"],
     ["subtle", "ملایم (Subtle)"],
     ["dynamic", "پرانرژی (Dynamic)"],
     ["off", "خاموش (فقط برای این اسلاید)"],
@@ -687,25 +748,136 @@ function renderLivingAndAudioTab(container, slide) {
   });
   intSel.value = ls.intensity || "podcast";
   intSel.addEventListener("change", () => {
-    slide.livingStage = Object.assign({}, ls, { intensity: intSel.value });
+    Object.assign(ls, { intensity: intSel.value });
+    slide.livingStage = Object.assign({}, ls);
     setDirty(true);
     reloadStage(true);
   });
   intGrp.appendChild(intSel);
   secLive.appendChild(intGrp);
 
-  const microChk = document.createElement("label");
-  microChk.className = "toggle-chip";
-  const mInp = document.createElement("input");
-  mInp.type = "checkbox";
-  mInp.checked = ls.microMotion !== false;
-  mInp.addEventListener("change", () => {
-    slide.livingStage = Object.assign({}, ls, { microMotion: mInp.checked });
-    setDirty(true);
-    reloadStage(true);
+  // Water Float subsection (for items & images only — never jittering text)
+  const floatSub = document.createElement("div");
+  floatSub.className = "float-divider-group";
+  floatSub.innerHTML = `
+    <div class="override-head">
+      <span>شناوری نرم روی آب (Water Float)</span>
+      <span class="bilingual-sub">Items &amp; Images</span>
+    </div>
+    <p class="panel-hint">حرکت خیلی آرام و سینوسی فقط برای عکس‌ها و کارت‌ها (بدون هیچ‌گونه لرزش روی متن‌ها و اعداد).</p>
+  `;
+
+  const modeGrp = document.createElement("label");
+  modeGrp.className = "field-group";
+  modeGrp.innerHTML = `<span>حالت شناوری آیتم‌ها</span>`;
+  const modeSel = document.createElement("select");
+  modeSel.className = "select-ctrl";
+  modeSel.id = "livingFloatModeSelect";
+  [
+    ["selective", "تصادفی روی بعضی آیتم‌ها و عکس‌ها (پیشنهادی)"],
+    ["images-only", "فقط عکس‌ها و قاب‌های تصویر"],
+    ["all-items", "همهٔ کارت‌ها و عکس‌ها"],
+    ["off", "خاموش (کاملاً ثابت)"],
+  ].forEach(([v, l]) => {
+    const o = document.createElement("option");
+    o.value = v;
+    o.textContent = l;
+    modeSel.appendChild(o);
   });
-  microChk.append(mInp, document.createTextNode("شناوری نرم کارت‌ها و عبور نور (Micro-Motion)"));
-  secLive.appendChild(microChk);
+  modeSel.value = ls.microMotion === false ? "off" : (ls.floatMode || "selective");
+  modeGrp.appendChild(modeSel);
+  floatSub.appendChild(modeGrp);
+
+  const ampRow = document.createElement("label");
+  ampRow.className = "slider-row";
+  const ampVal = Number(ls.floatAmplitude ?? 5);
+  ampRow.innerHTML = `<span>دامنهٔ حرکت روی آب: <strong class="mono-num">${ampVal} px</strong></span>`;
+  const ampInp = document.createElement("input");
+  ampInp.type = "range";
+  ampInp.id = "livingFloatAmpSlider";
+  ampInp.min = "0";
+  ampInp.max = "14";
+  ampInp.step = "0.5";
+  ampInp.value = String(ampVal);
+  ampRow.appendChild(ampInp);
+  floatSub.appendChild(ampRow);
+
+  const spdRow = document.createElement("label");
+  spdRow.className = "slider-row";
+  const spdVal = Number(ls.floatSpeed ?? 0.75);
+  spdRow.innerHTML = `<span>سرعت موج شناوری: <strong class="mono-num">${spdVal.toFixed(2)}x</strong></span>`;
+  const spdInp = document.createElement("input");
+  spdInp.type = "range";
+  spdInp.id = "livingFloatSpeedSlider";
+  spdInp.min = "0.3";
+  spdInp.max = "1.8";
+  spdInp.step = "0.05";
+  spdInp.value = String(spdVal);
+  spdRow.appendChild(spdInp);
+  floatSub.appendChild(spdRow);
+
+  const ratioRow = document.createElement("label");
+  ratioRow.className = "slider-row";
+  const ratioVal = Number(ls.floatRatio ?? 0.65);
+  ratioRow.innerHTML = `<span>سهم آیتم‌های شناور (تصادفی): <strong class="mono-num">${Math.round(ratioVal * 100)}%</strong></span>`;
+  const ratioInp = document.createElement("input");
+  ratioInp.type = "range";
+  ratioInp.id = "livingFloatRatioSlider";
+  ratioInp.min = "0.25";
+  ratioInp.max = "1";
+  ratioInp.step = "0.05";
+  ratioInp.value = String(ratioVal);
+  ratioRow.appendChild(ratioInp);
+  floatSub.appendChild(ratioRow);
+
+  const seedRow = document.createElement("div");
+  seedRow.className = "btn-row-wrap";
+  const rerollFloatBtn = document.createElement("button");
+  rerollFloatBtn.type = "button";
+  rerollFloatBtn.id = "btnRerollFloatSeed";
+  rerollFloatBtn.className = "btn btn-sm btn-ghost";
+  rerollFloatBtn.textContent = "🎲 الگوی تصادفی جدید برای این اسلاید";
+  seedRow.appendChild(rerollFloatBtn);
+  floatSub.appendChild(seedRow);
+
+  const updateFloatControlsState = () => {
+    const isOff = modeSel.value === "off";
+    const isSel = modeSel.value === "selective";
+    ampInp.disabled = isOff;
+    spdInp.disabled = isOff;
+    ratioInp.disabled = isOff || !isSel;
+    ratioRow.style.display = isSel ? "" : "none";
+    rerollFloatBtn.disabled = isOff || !isSel;
+    rerollFloatBtn.style.display = isSel ? "" : "none";
+  };
+  updateFloatControlsState();
+
+  modeSel.addEventListener("change", () => {
+    updateFloatControlsState();
+    syncFloatLive({ floatMode: modeSel.value });
+  });
+  ampInp.addEventListener("input", () => {
+    const v = parseFloat(ampInp.value);
+    ampRow.querySelector("strong").textContent = `${v} px`;
+    syncFloatLive({ floatAmplitude: v });
+  });
+  spdInp.addEventListener("input", () => {
+    const v = parseFloat(spdInp.value);
+    spdRow.querySelector("strong").textContent = `${v.toFixed(2)}x`;
+    syncFloatLive({ floatSpeed: v });
+  });
+  ratioInp.addEventListener("input", () => {
+    const v = parseFloat(ratioInp.value);
+    ratioRow.querySelector("strong").textContent = `${Math.round(v * 100)}%`;
+    syncFloatLive({ floatRatio: v });
+  });
+  rerollFloatBtn.addEventListener("click", () => {
+    const nextSeed = (Number(ls.floatSeed) || 0) + 1;
+    syncFloatLive({ floatSeed: nextSeed });
+    setStatus("الگوی شناوری تصادفی آیتم‌ها تغییر کرد ✓");
+  });
+
+  secLive.appendChild(floatSub);
 
   const applyAllBtn = document.createElement("button");
   applyAllBtn.type = "button";
@@ -713,11 +885,20 @@ function renderLivingAndAudioTab(container, slide) {
   applyAllBtn.textContent = "تنظیم به‌عنوان پیش‌فرض کل پروژه";
   applyAllBtn.addEventListener("click", () => {
     if (!state.data) return;
-    state.data.livingStage = { bgStyle: bgSel.value, intensity: intSel.value, microMotion: mInp.checked };
+    state.data.livingStage = {
+      bgStyle: bgSel.value,
+      intensity: intSel.value,
+      microMotion: modeSel.value !== "off" && parseFloat(ampInp.value) > 0,
+      floatMode: modeSel.value,
+      floatAmplitude: parseFloat(ampInp.value),
+      floatSpeed: parseFloat(spdInp.value),
+      floatRatio: parseFloat(ratioInp.value),
+      floatSeed: Number(ls.floatSeed) || 0,
+    };
     (state.data.slides || []).forEach((s) => { delete s.livingStage; });
     setDirty(true);
     reloadStage(true);
-    setStatus("پس‌زمینهٔ زنده روی کل پروژه اعمال شد ✓");
+    setStatus("تنظیمات پس‌زمینهٔ زنده و شناوری نرم روی کل پروژه اعمال شد ✓");
   });
   secLive.appendChild(applyAllBtn);
   container.appendChild(secLive);
@@ -956,27 +1137,103 @@ function renderContentTab(container, slide) {
       noneOpt.value = "";
       noneOpt.textContent = "— بدون تصویر —";
       imgSel.appendChild(noneOpt);
-      state.images.forEach((imgName) => {
-        const o = document.createElement("option");
-        o.value = imgName;
-        o.textContent = imgName;
-        imgSel.appendChild(o);
-      });
-      const curImg = String(slide[f.key] || "").replace(/^img\//, "");
-      if (curImg && !state.images.includes(curImg)) {
+
+      if (state.images.length) {
+        const projGrp = document.createElement("optgroup");
+        projGrp.label = "تصاویر آپلودشده در پروژه";
+        state.images.forEach((imgName) => {
+          const o = document.createElement("option");
+          o.value = imgName;
+          o.textContent = imgName;
+          projGrp.appendChild(o);
+        });
+        imgSel.appendChild(projGrp);
+      }
+
+      if (state.starterAssets.length) {
+        const libGrp = document.createElement("optgroup");
+        libGrp.label = "بانک تصاویر آماده (نقشه، مقاله، آزمایشگاه، استودیو)";
+        state.starterAssets.forEach((asset) => {
+          const o = document.createElement("option");
+          o.value = asset.url;
+          o.textContent = `${asset.category}: ${asset.label}`;
+          libGrp.appendChild(o);
+        });
+        imgSel.appendChild(libGrp);
+      }
+
+      const rawImg = String(slide[f.key] || "");
+      const curImg = rawImg.replace(/^img\//, "");
+      const inProj = state.images.includes(curImg);
+      const inStarter = state.starterAssets.some((a) => a.url === rawImg);
+      if (rawImg && !inProj && !inStarter) {
         const custom = document.createElement("option");
-        custom.value = slide[f.key];
-        custom.textContent = slide[f.key];
+        custom.value = rawImg;
+        custom.textContent = rawImg;
         imgSel.appendChild(custom);
       }
-      imgSel.value = state.images.includes(curImg) ? curImg : (slide[f.key] || "");
+      imgSel.value = inProj ? curImg : rawImg;
+
+      const thumbButtons = [];
+      const syncActiveThumb = (val) => {
+        thumbButtons.forEach(({ btn, url }) => {
+          btn.classList.toggle("active", Boolean(val) && (val === url || resolveImageUrl(val) === url));
+        });
+      };
+
       imgSel.addEventListener("change", () => {
         if (!imgSel.value) delete slide[f.key];
         else slide[f.key] = imgSel.value;
+        syncActiveThumb(slide[f.key] || "");
         setDirty(true);
         scheduleReload(false);
       });
       group.appendChild(imgSel);
+
+      if (state.starterAssets.length) {
+        const pickerBox = document.createElement("div");
+        pickerBox.className = "asset-picker-box";
+        const pickerHead = document.createElement("div");
+        pickerHead.className = "asset-picker-head";
+        pickerHead.innerHTML = `<span>انتخاب سریع از بانک تصاویر آماده:</span>`;
+        if (slide[f.key]) {
+          const clrBtn = document.createElement("button");
+          clrBtn.type = "button";
+          clrBtn.className = "icon-btn";
+          clrBtn.textContent = "حذف تصویر";
+          clrBtn.addEventListener("click", () => {
+            delete slide[f.key];
+            imgSel.value = "";
+            syncActiveThumb("");
+            setDirty(true);
+            reloadStage(false);
+          });
+          pickerHead.appendChild(clrBtn);
+        }
+        pickerBox.appendChild(pickerHead);
+
+        const grid = document.createElement("div");
+        grid.className = "asset-thumb-grid";
+        state.starterAssets.forEach((asset) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "asset-thumb-btn" + (slide[f.key] === asset.url ? " active" : "");
+          btn.title = `${asset.label} (${asset.category})`;
+          btn.innerHTML = `<img src="${asset.url}" alt="${asset.label}" decoding="async"><span>${asset.label}</span>`;
+          btn.addEventListener("click", () => {
+            slide[f.key] = asset.url;
+            imgSel.value = asset.url;
+            syncActiveThumb(asset.url);
+            setDirty(true);
+            reloadStage(false);
+            setStatus(`تصویر «${asset.label}» روی اسلاید قرار گرفت ✓`);
+          });
+          thumbButtons.push({ btn, url: asset.url });
+          grid.appendChild(btn);
+        });
+        pickerBox.appendChild(grid);
+        group.appendChild(pickerBox);
+      }
 
       const upRow = document.createElement("div");
       upRow.className = "upload-row";
@@ -1012,13 +1269,32 @@ function renderContentTab(container, slide) {
       inp.type = "number";
       inp.className = "text-input";
       inp.dir = "ltr";
-      inp.value = slide[f.key] ?? 0;
+      inp.step = f.key === "zoom_scale" ? "0.05" : "1";
+      inp.value = slide[f.key] ?? f.default ?? 0;
       inp.addEventListener("change", () => {
         slide[f.key] = Number(inp.value) || 0;
         setDirty(true);
         reloadStage(true);
       });
       group.appendChild(inp);
+
+      if (tpl === "article_zoom" && f.key === "zoom_y") {
+        const pickZoomBtn = document.createElement("button");
+        pickZoomBtn.type = "button";
+        pickZoomBtn.className = "btn btn-sm btn-amber";
+        pickZoomBtn.textContent = "🎯 انتخاب نقطهٔ زوم روی بوم (برای حالت تصویر)";
+        pickZoomBtn.addEventListener("click", () => {
+          startPickTarget((px, py) => {
+            slide.zoom_mode = "image";
+            slide.zoom_x = Math.max(8, Math.min(92, Math.round((px / 1920) * 100)));
+            slide.zoom_y = Math.max(8, Math.min(92, Math.round((py / 1080) * 100)));
+            renderInspector();
+            reloadStage(true);
+            setStatus(`نقطهٔ زوم تصویر روی (${fa(slide.zoom_x)}٪، ${fa(slide.zoom_y)}٪) تنظیم شد ✓`);
+          });
+        });
+        group.appendChild(pickZoomBtn);
+      }
     } else {
       const inp = document.createElement("input");
       inp.type = "text";
@@ -1273,25 +1549,31 @@ function buildStarterPodcastSlides() {
       eyebrow: "اپیزود ویژهٔ پادکست",
       title: "چرا بعضی گفتگوها ==میلیونی== دیده می‌شوند؟",
       subtitle: "تحلیل ساختار ریتم، تصویرسازی زنده و نگه‌داشتن توجه مخاطب",
+      image: "/assets/podcast-studio-mic.jpg",
       say: "سلام به همهٔ همراهان! در این قسمت قرار است راز ریتم زنده در پادکست‌های ویدیویی را بررسی کنیم.",
     },
     {
-      template: "guest_intro",
+      template: "article_zoom",
       layout: "SCAM",
-      badge: "مهمان ویژهٔ این قسمت",
-      title: "دکتر سارا *رادمنش*",
-      subtitle: "پژوهشگر رسانه و طراحی تجربهٔ مخاطب",
-      text: "نویسندهٔ پژوهش «تأثیر گرافیک حرکتی پیوسته بر نرخ ماندگاری مخاطبان یوتیوب».",
-      handle: "@sarah.radmanesh",
-      say: "مهمان امروز ما دکتر سارا رادمنش است که سال‌ها روی رفتار مخاطب در یوتیوب تحقیق کرده.",
+      eyebrow: "اسناد و پژوهش",
+      publication: "Journal of Behavioral Economics · 2024",
+      article_title: "چرا ==پاداش غیرقابل‌پیش‌بینی== توجه مغز را قفل می‌کند؟",
+      author: "تیم پژوهشی دانشگاه زوریخ · صفحهٔ ۱۴",
+      article_body: "بررسی ویدیوهای بلند در یوتیوب نشان می‌دهد تغییر ناگهانی صحنه بدون پیوستگی باعث خستگی چشم می‌شود.\nاما پس‌زمینهٔ محو همراه با حرکت نرم و تمرکز ناگهانی روی یک جملهٔ سندی بیشترین درگیری ذهنی را می‌سازد.",
+      focus_text: "زوم سینمایی روی جملهٔ کلیدی مقاله و هایلایت ماژیکی، نرخ ماندگاری مخاطب را تا ۲.۴ برابر بالا می‌برد.",
+      image: "/assets/archive-newspaper.jpg",
+      paper_theme: "warm-paper",
+      zoom_scale: 1.38,
+      say: "این پژوهش دانشگاه زوریخ دقیقاً روی همین نکته دست می‌گذارد: وقتی سند یا مقاله را جلوی مخاطب زوم و هایلایت می‌کنید، تمرکز او تا دو و نیم برابر بیشتر می‌شود.",
     },
     {
-      template: "podcast_question",
-      layout: "SCAM",
-      badge: "پرسش کلیدی",
-      title: "آیا تغییر تصویر هر ==۷ ثانیه== واقعاً توجه مخاطب را حفظ می‌کند؟",
-      items: ["حرکت نرم پس‌زمینه از خستگی چشم جلوگیری می‌کند", "اعداد و منحنی‌ها باید هم‌زمان با گفتار ظاهر شوند"],
-      say: "بیایید با اولین سؤال کلیدی شروع کنیم: آیا سرعت تغییر تصویر مهم‌تر است یا زنده بودن صحنه؟",
+      template: "image_full",
+      layout: "SLIDE",
+      title: "*پراکندگی جغرافیایی* الگوی تعامل مخاطبان",
+      text: "نقاط داغ در اروپا و خاورمیانه بیشترین نرخ اشتراک‌گذاری پادکست‌های تحلیلی را دارند.",
+      image: "/assets/world-map-dark.jpg",
+      dots: ["28,40", "48,32,danger", "54,36", "61,42,danger", "75,44"],
+      say: "روی نقشه می‌بینید که شهرهای اصلی مخاطبان پادکست‌های تحلیلی کجا متمرکز شده‌اند.",
     },
     {
       template: "line_chart",
@@ -1310,6 +1592,7 @@ function buildStarterPodcastSlides() {
       title: "اگر این گفتگو برایتان جذاب بود، *سابسکرایب* یادتان نرود",
       subtitle: "اپیزود بعدی هر پنج‌شنبه ساعت ۲۰",
       cta: "عضویت در کانال + زنگوله 🔔",
+      image: "/assets/podcast-studio-mic.jpg",
       say: "ممنون که تا اینجا کنار ما بودید. نظرتان را در کامنت بنویسید و تا قسمت بعدی خدانگهدار!",
     },
   ];
@@ -1349,7 +1632,7 @@ function openStyleModal() {
   els.projLogoPosSelect.value = state.data.logo_position || "top-left";
   els.projSeedInput.value = String(Number(state.data.seed) || 0);
   const ls = state.data.livingStage || {};
-  els.projLivingBgSelect.value = ls.bgStyle || "studio-mix";
+  els.projLivingBgSelect.value = ls.bgStyle || "dreamy-bokeh";
   els.projLivingIntensitySelect.value = ls.intensity || "podcast";
   const pod = state.data.podcast || {};
   els.projPodcastHost.value = pod.host || "";
@@ -1366,11 +1649,12 @@ function applyStyleModal() {
   state.data.logo_motion = els.projLogoMotionSelect.value;
   state.data.logo_position = els.projLogoPosSelect.value;
   state.data.seed = Number(els.projSeedInput.value) || 0;
-  state.data.livingStage = {
+  const prevLs = state.data.livingStage || {};
+  state.data.livingStage = Object.assign({}, prevLs, {
     bgStyle: els.projLivingBgSelect.value,
     intensity: els.projLivingIntensitySelect.value,
-    microMotion: (state.data.livingStage && state.data.livingStage.microMotion !== false),
-  };
+    microMotion: prevLs.microMotion !== false,
+  });
   const host = els.projPodcastHost.value.trim();
   const showTitle = els.projPodcastShow.value.trim();
   if (host || showTitle) {
@@ -1703,7 +1987,23 @@ if (typeof ResizeObserver === "function") {
   new ResizeObserver(resizeStage).observe(els.stageViewport);
 }
 
+async function loadStarterAssets() {
+  try {
+    const resp = await fetch("/api/assets");
+    const json = await resp.json();
+    if (json && json.ok && Array.isArray(json.assets)) {
+      state.starterAssets = json.assets;
+    }
+  } catch {
+    state.starterAssets = [];
+  }
+}
+
 initSelectors();
 resizeStage();
 const initialProject = new URLSearchParams(window.location.search).get("project");
-loadProjectsList(initialProject).catch((err) => setStatus("خطا در ارتباط با سرور محلی: " + err.message));
+Promise.all([loadStarterAssets(), loadProjectsList(initialProject)])
+  .then(() => {
+    if (activeSlide()) renderInspector();
+  })
+  .catch((err) => setStatus("خطا در ارتباط با سرور محلی: " + err.message));
