@@ -9,6 +9,8 @@
   python3 -m khordegir obs    videos/<name> [--os linux|windows|macos] [-o DIR]
   python3 -m khordegir gallery                   # پیش‌نمایش قالب‌ها
   python3 -m khordegir templates                 # فهرست قالب‌ها
+  python3 -m khordegir ai-guide [topic] [-o guide.md] # تولید راهنمای پرامپت هوش مصنوعی
+  python3 -m khordegir ai-import output.txt -o videos/<name>/video.yaml # اعتبارسنجی و تبدیل خروجی هوش مصنوعی
 """
 import argparse, hashlib, json, os, shutil, sys, time
 from concurrent.futures import ProcessPoolExecutor
@@ -286,9 +288,133 @@ def cmd_gallery(a):
     return 0
 
 
+# ------------------------------------------------------------------ AI Guide & AI Import CLI
+def cmd_ai_guide(a):
+    """Generate prompt specification guide to paste into any AI model."""
+    from .ai_guide import generate_ai_guide
+
+    topic = a.topic or a.opt_topic or ""
+    if a.script:
+        script_path = Path(a.script).expanduser().resolve()
+        if script_path.exists():
+            topic = script_path.read_text(encoding="utf-8")
+        else:
+            print(f"✗ خطا: فایل اسکریپت «{a.script}» پیدا نشد.", file=sys.stderr)
+            return 1
+    elif not topic and not sys.stdin.isatty():
+        topic = sys.stdin.read()
+
+    options = {
+        "topic": topic.strip(),
+        "title": getattr(a, "title", None),
+        "theme": getattr(a, "theme", None),
+        "lang": getattr(a, "lang", None),
+        "duration": getattr(a, "duration", None),
+        "count_style": getattr(a, "count_style", None),
+    }
+
+    guide_text = generate_ai_guide(PKG, options=options)
+
+    if a.output:
+        out_path = Path(a.output).expanduser().resolve()
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(guide_text, encoding="utf-8")
+        print(f"✓ راهنمای پرامپت هوش مصنوعی نوشته شد → {out_path}")
+    else:
+        print(guide_text)
+
+    return 0
+
+
+def cmd_ai_import(a):
+    """Validate and import AI-generated YAML/JSON into a video project."""
+    from .ai_guide import validate_and_fix_video_yaml, ai_import_to_project
+
+    # 1. Read input
+    raw_text = ""
+    if a.input and a.input != "-":
+        p = Path(a.input).expanduser().resolve()
+        if not p.exists():
+            print(f"✗ خطا: فایل ورودی «{a.input}» پیدا نشد.", file=sys.stderr)
+            return 1
+        raw_text = p.read_text(encoding="utf-8")
+    elif not sys.stdin.isatty() or a.input == "-":
+        raw_text = sys.stdin.read()
+    else:
+        print("✗ خطا: لطفاً مسیر فایل ورودی را مشخص کنید یا خروجی را پایپ کنید.\nمثال: khordegir ai-import output.txt -o videos/my-video/video.yaml", file=sys.stderr)
+        return 1
+
+    # 2. Determine target video.yaml path
+    target = None
+    if a.output:
+        target = Path(a.output).expanduser().resolve()
+    elif a.project:
+        target = (Path("videos") / a.project / "video.yaml").resolve()
+    elif Path("video.yaml").exists():
+        target = Path("video.yaml").resolve()
+    else:
+        target = Path("video.yaml").resolve()
+
+    # 3. Dry-run or JSON mode
+    if getattr(a, "json", False):
+        res = validate_and_fix_video_yaml(raw_text, pkg_root=PKG)
+        print(json.dumps(res, ensure_ascii=False, indent=2))
+        return 0 if res["ok"] else 1
+
+    if getattr(a, "dry_run", False):
+        res = validate_and_fix_video_yaml(raw_text, pkg_root=PKG)
+        if res["auto_fixes"]:
+            print(f"✓ {fa(len(res['auto_fixes']))} مورد اصلاح خودکار انجام شد:")
+            for fix in res["auto_fixes"]:
+                print(f"  • {fix}")
+        if res["warnings"]:
+            print(f"⚠ {fa(len(res['warnings']))} هشدار:")
+            for w in res["warnings"]:
+                print(f"  • {w}")
+        if not res["ok"]:
+            print(f"✗ {fa(len(res['errors']))} خطا در ساختار ورودی:")
+            for err in res["errors"]:
+                print(f"  • {err}")
+            return 1
+        slide_count = len((res.get("data") or {}).get("slides") or [])
+        print(f"✓ خروجی معتبر است ({fa(slide_count)} اسلاید). [حالت آزمایشی: تغییری در دیسک اعمال نشد]")
+        return 0
+
+    # 4. Perform actual import & write to disk
+    res = ai_import_to_project(
+        raw_text,
+        target_path=target,
+        pkg_root=PKG,
+        append=getattr(a, "append", False),
+        title=getattr(a, "title", None),
+        theme=getattr(a, "theme", None),
+    )
+
+    if res["auto_fixes"]:
+        print(f"✓ {fa(len(res['auto_fixes']))} مورد اصلاح خودکار:")
+        for fix in res["auto_fixes"]:
+            print(f"  • {fix}")
+
+    if res["warnings"]:
+        print(f"⚠ {fa(len(res['warnings']))} هشدار:")
+        for w in res["warnings"]:
+            print(f"  • {w}")
+
+    if not res["ok"]:
+        print(f"✗ {fa(len(res['errors']))} خطا در اعتبارسنجی خروجی هوش مصنوعی:", file=sys.stderr)
+        for err in res["errors"]:
+            print(f"  • {err}", file=sys.stderr)
+        return 1
+
+    print(f"✓ {fa(res['slide_count'])} اسلاید با موفقیت در «{res['target']}» ثبت شد.")
+    return 0
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="khordegir", description="Khordegir Studio — اسلاید متحرک از روی قالب‌ها")
     sub = ap.add_subparsers(dest="cmd", required=True)
+
+    # build
     b = sub.add_parser("build", help="ساخت همه‌ی اسلایدهای یک ویدیو")
     b.add_argument("folder")
     b.add_argument("--only", help="فقط این اسلایدها، مثل 3,9-12")
@@ -305,6 +431,8 @@ def main(argv=None):
     b.add_argument("--preset", default="medium")
     b.add_argument("--quality", choices=["png", "jpeg"], default="jpeg")
     b.set_defaults(fn=cmd_build)
+
+    # render
     r = sub.add_parser("render", help="ساخت از فایل spec یا لایه‌ای JSON")
     r.add_argument("paths", nargs="+")
     r.add_argument("-o", "--output")
@@ -317,18 +445,28 @@ def main(argv=None):
     r.add_argument("--preset", default="medium")
     r.add_argument("--quality", choices=["png", "jpeg"], default="jpeg")
     r.set_defaults(fn=cmd_render)
+
+    # import
     i = sub.add_parser("import", help="تبدیل متن اسکریپت با نشانه‌ها به video.yaml")
     i.add_argument("script"); i.add_argument("-o", "--output"); i.add_argument("--title")
     i.set_defaults(fn=cmd_import)
+
+    # new
     n = sub.add_parser("new", help="ساخت پوشه‌ی ویدیوی جدید از روی نمونه")
     n.add_argument("folder"); n.set_defaults(fn=cmd_new)
+
+    # templates & index
     t = sub.add_parser("templates", help="فهرست قالب‌ها"); t.set_defaults(fn=cmd_templates)
     x = sub.add_parser("index", help="به‌روزرسانی فهرست قالب‌ها و تم‌ها (بعد از اضافه کردن پوشه‌ی قالب)"); x.set_defaults(fn=cmd_index)
+
+    # editor
     e = sub.add_parser("editor", help="اجرای سرور محلی و باز کردن ویرایشگر در مرورگر")
     e.add_argument("--port", type=int, default=8765, help="پورت سرور محلی (پیش‌فرض: 8765)")
     e.add_argument("--no-browser", action="store_true", help="مرورگر خودکار باز نشود")
     e.add_argument("--videos", metavar="DIR", help="پوشهٔ پروژه‌های ویدیو (پیش‌فرض: ./videos)")
     e.set_defaults(fn=cmd_editor)
+
+    # obs
     o = sub.add_parser("obs", help="ساخت بستهٔ کامل OBS (Lua v8، پرامپتر و اسکریپت نصب)")
     o.add_argument("folder")
     o.add_argument("--os", choices=["linux", "windows", "macos"], default="linux", help="سیستم‌عامل هدف")
@@ -337,8 +475,43 @@ def main(argv=None):
     o.add_argument("--no-png", action="store_true", help="بدون رندر تصاویر PNG پرامپتر")
     o.add_argument("--png", action="store_true", help="اجبار رندر تصاویر PNG پرامپتر با Playwright")
     o.set_defaults(fn=cmd_obs)
+
+    # gallery
     g = sub.add_parser("gallery", help="ساخت تصویر پیش‌نمایش قالب‌ها")
     g.add_argument("--jobs", type=int, default=2); g.set_defaults(fn=cmd_gallery)
+
+    # ------------------ New ai-guide subcommand ------------------
+    ag = sub.add_parser("ai-guide", help="تولید راهنمای پرامپت هوش مصنوعی برای تبدیل موضوع به اسلاید")
+    # Beginner one-click default positional argument
+    ag.add_argument("topic", nargs="?", help="موضوع ویدیو یا بخشی از اسکریپت (اختیاری)")
+    ag.add_argument("-o", "--output", help="ذخیرهٔ راهنمای پرامپت در فایل متنی (مثلاً prompt.md)")
+    ag.add_argument("-s", "--script", help="خواندن متن اسکریپت از فایل متنی")
+    ag.add_argument("-t", "--topic", dest="opt_topic", help="موضوع به صورت آپشن")
+    # Hard options under Advanced
+    adv_ag = ag.add_argument_group("تنظیمات پیشرفته (Advanced)")
+    adv_ag.add_argument("--theme", help="پیش‌فرض تم برای راهنما")
+    adv_ag.add_argument("--lang", choices=["fa", "en"], default="fa", help="زبان پیش‌فرض پروژه (fa یا en)")
+    adv_ag.add_argument("--format", choices=["landscape", "portrait", "square"], help="قاب پیش‌فرض تصویر")
+    adv_ag.add_argument("--count-style", choices=["pop", "smooth", "slam", "subtle"], help="سبک شمارش اعداد")
+    adv_ag.add_argument("--duration", type=float, help="حداقل ثانیه پیش‌فرض برای هر اسلاید")
+    ag.set_defaults(fn=cmd_ai_guide)
+
+    # ------------------ New ai-import subcommand -----------------
+    ai = sub.add_parser("ai-import", help="اعتبارسنجی و تبدیل خروجی هوش مصنوعی به video.yaml پروژه")
+    # Beginner one-click default
+    ai.add_argument("input", nargs="?", help="فایل حاوی خروجی هوش مصنوعی (یا - برای خواندن از stdin)")
+    ai.add_argument("-o", "--output", help="مسیر فایل یا پوشهٔ پروژه (پیش‌فرض: video.yaml)")
+    ai.add_argument("-p", "--project", help="نام پوشه در videos/ (مثلاً my-video)")
+    ai.add_argument("--append", action="store_true", help="افزودن اسلایدها به انتهای video.yaml موجود")
+    ai.add_argument("--dry-run", action="store_true", help="بررسی اعتبار بدون نوشتن روی دیسک")
+    # Hard options under Advanced
+    adv_ai = ai.add_argument_group("تنظیمات پیشرفته (Advanced)")
+    adv_ai.add_argument("--title", help="عنوان دلخواه برای ویدیو")
+    adv_ai.add_argument("--theme", help="تغییر تم پیش‌فرض پروژه")
+    adv_ai.add_argument("--force", action="store_true", help="اجبار به نوشتن با وجود هشدارها")
+    adv_ai.add_argument("--json", action="store_true", help="نمایش نتیجه اعتبارسنجی با فرمت JSON")
+    ai.set_defaults(fn=cmd_ai_import)
+
     a = ap.parse_args(argv)
     try:
         return a.fn(a) or 0
