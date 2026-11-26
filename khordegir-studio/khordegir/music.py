@@ -861,6 +861,101 @@ def parse_music_block(
     )
 
 
+VALID_LOGO_CORNERS = ("top-left", "top-right", "bottom-left", "bottom-right")
+
+
+@dataclass(frozen=True)
+class LogoConfig:
+    file: str
+    corner: str = "top-left"
+    size: float = 8.0  # % of stage width
+    opacity: float = 0.85
+    margin: float = 40.0  # px or %
+    hide: tuple[Any, ...] = field(default_factory=tuple)
+
+
+def parse_logo_block(
+    video_source: str | pathlib.Path | dict[str, Any],
+    khordegir_root: pathlib.Path | str | None = None,
+) -> LogoConfig | None:
+    """Parse and validate top-level `logo` block from `video.yaml` (single source of truth)."""
+    data = load_video_yaml(video_source)
+    raw_logo = data.get("logo")
+    if raw_logo is None or raw_logo is False or raw_logo == "off" or raw_logo == "none":
+        return None
+
+    root = pathlib.Path(khordegir_root).resolve() if khordegir_root else KHODEGIR_ROOT
+
+    if isinstance(raw_logo, str):
+        file_str = raw_logo.strip()
+        if not file_str:
+            return None
+        cfg_dict = {"file": file_str}
+    elif isinstance(raw_logo, dict):
+        cfg_dict = dict(raw_logo)
+    else:
+        raise ValueError(f"Invalid logo configuration type: {type(raw_logo).__name__}")
+
+    allowed_keys = {"file", "corner", "size", "opacity", "margin", "hide"}
+    unknown_keys = set(cfg_dict.keys()) - allowed_keys
+    if unknown_keys:
+        raise ValueError(f"Unknown logo keys: {sorted(unknown_keys)}; allowed: {sorted(allowed_keys)}")
+
+    file_val = cfg_dict.get("file")
+    if not file_val or not isinstance(file_val, str):
+        raise ValueError("Logo block requires a valid string 'file' path")
+
+    corner = str(cfg_dict.get("corner", "top-left")).strip().lower()
+    if corner not in VALID_LOGO_CORNERS:
+        raise ValueError(f"Unknown logo corner {corner!r}; valid: {VALID_LOGO_CORNERS}")
+
+    size_raw = cfg_dict.get("size", 8.0)
+    if isinstance(size_raw, str):
+        s_clean = size_raw.strip().lower().rstrip("%").strip()
+        size_val = float(s_clean)
+    else:
+        size_val = float(size_raw)
+    if not (0.5 <= size_val <= 100.0):
+        raise ValueError(f"Logo size out of range: {size_val}; expected 0.5..100 (%)")
+
+    op_raw = cfg_dict.get("opacity", 0.85)
+    opacity_val = float(op_raw)
+    if not (0.0 <= opacity_val <= 1.0):
+        raise ValueError(f"Logo opacity out of range: {opacity_val}; expected 0.0..1.0")
+
+    margin_raw = cfg_dict.get("margin", 40.0)
+    if isinstance(margin_raw, str):
+        m_clean = margin_raw.strip().lower().rstrip("px").rstrip("%").strip()
+        margin_val = float(m_clean)
+    else:
+        margin_val = float(margin_raw)
+    if not (0.0 <= margin_val <= 500.0):
+        raise ValueError(f"Logo margin out of range: {margin_val}; expected 0..500")
+
+    file_path = pathlib.Path(file_val)
+    abs_file_path = file_path if file_path.is_absolute() else (root / file_path).resolve()
+    if not abs_file_path.is_file():
+        raise FileNotFoundError(f"Logo file missing or unreadable: {abs_file_path}")
+
+    hide_raw = cfg_dict.get("hide", ())
+    if hide_raw is None:
+        hide_tuple = ()
+    elif isinstance(hide_raw, (list, tuple)):
+        hide_tuple = tuple(hide_raw)
+    else:
+        hide_tuple = (hide_raw,)
+
+    return LogoConfig(
+        file=str(file_path),
+        corner=corner,
+        size=round(size_val, 2),
+        opacity=round(opacity_val, 3),
+        margin=round(margin_val, 2),
+        hide=hide_tuple,
+    )
+
+
+
 # ---------------------------------------------------------------------------
 # Logarithmic fade curves & equal-power crossfade mathematics
 # ---------------------------------------------------------------------------
