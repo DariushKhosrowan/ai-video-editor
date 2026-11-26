@@ -557,7 +557,7 @@ function renderEasingCurveEditor(sec, slide, projectData, onChange, onApplyProje
     const projMc = projectData && projectData.motionCurve;
     slide.motionCurve = projMc
       ? JSON.parse(JSON.stringify(projMc))
-      : { preset: "youtube-snappy", points: [...EASING_PRESETS["youtube-snappy"].points], durationScale: 0.9, staggerScale: 0.85 };
+      : { preset: "vox-editorial", points: [...EASING_PRESETS["vox-editorial"].points], durationScale: 1.0, staggerScale: 0.9 };
   }
   const mc = slide.motionCurve;
   mc.points = clampBezierPoints(mc.points);

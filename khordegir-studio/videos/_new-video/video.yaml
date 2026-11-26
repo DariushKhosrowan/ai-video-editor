@@ -14,9 +14,10 @@ livingStage:
   bgStyle: dreamy-bokeh
   intensity: podcast
   microMotion: true
-  floatMode: selective
-  floatAmplitude: 5
-  floatSpeed: 0.75
+  floatMode: images-only
+  floatStyle: silk-glide
+  floatAmplitude: 2
+  floatSpeed: 0.45
   floatRatio: 0.65
   floatSeed: 0
 

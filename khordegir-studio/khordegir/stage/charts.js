@@ -38,15 +38,19 @@
     return d;
   }
 
-  function isLivelyPreset() {
-    return !!(S.fx && S.fx.cur && S.fx.cur.preset && S.fx.cur.preset !== "classic");
+  function activePreset(spec) {
+    return (spec && spec.preset) || (S.fx && S.fx.cur && S.fx.cur.preset) || "classic";
+  }
+  function isLivelyPreset(spec) {
+    return activePreset(spec) !== "classic";
   }
 
   /* ------------------------------------------------------------ bar (vertical) */
   C.bar = function (A, box, spec, t0 = 0) {
     if ((spec.orientation || "").startsWith("h")) return C.hbar(A, box, spec, t0);
     const M = S.theme.motion, its = items(spec), n = its.length || 1;
-    const lively = isLivelyPreset();
+    const preset = activePreset(spec);
+    const lively = preset !== "classic";
     const W = box.clientWidth || 1200, H = box.clientHeight || 640;
     const pre = spec.prefix || "", suf = spec.suffix || "";
     const axis = spec.axis !== false;
@@ -65,7 +69,7 @@
     const py0 = valH, py1 = H - labH, px0 = axW, px1 = W;
     const Y = (v) => py0 + (vmax - v) / ((vmax - vmin) || 1) * (py1 - py0);
     const grid = A.el("div", "abs", box, { left: 0, top: 0, width: W, height: H });
-    const axM = M.axes || { delay: 0, dur: 0.3, ease: "power3" };
+    const axM = M.axes || { delay: 0, dur: 0.34, ease: "vox" };
     if (axis) {
       for (let v = vmin; v <= vmax + 1e-9; v += step) {
         const y = Y(v);
@@ -77,29 +81,54 @@
         });
       }
     }
-    A.el("div", "abs", grid, { left: px0, top: Y(0) - 1.5, width: px1 - px0, height: 3, background: S.theme.colors.axis });
+    const baseLine = A.el("div", "abs", grid, {
+      left: px0, top: Y(0) - 1.5, width: px1 - px0, height: 3,
+      background: S.theme.colors.axis, transformOrigin: "100% 50%",
+    });
     S.tl.from(grid, { opacity: 0, duration: axM.dur, ease: S.ease(axM.ease), immediateRender: true }, t0 + axM.delay);
+    if (lively) {
+      S.tl.from(baseLine, { scaleX: 0, duration: 0.45, ease: S.ease("vox"), immediateRender: true }, t0 + axM.delay);
+    }
 
-    const barM = M.bar || { delay: 0.25, dur: 0.65, stagger: 0.08, ease: "power3" };
-    const barEase = lively ? "back" : barM.ease;
+    const barM = M.bar || { delay: 0.25, dur: 0.68, stagger: 0.08, ease: "vox" };
+    const barEase = preset === "elastic-rise" ? "spring"
+      : preset === "surge-bars" ? "power4"
+      : preset === "editorial-bars" || preset === "cascade-grid" ? "vox"
+      : preset === "minimal-bars" ? "fluid"
+      : (lively ? "vox" : barM.ease);
+    const barStagger = preset === "cascade-grid" ? barM.stagger * 1.25 : preset === "minimal-bars" ? barM.stagger * 0.7 : barM.stagger;
+    const barDur = preset === "minimal-bars" ? barM.dur * 0.85 : barM.dur;
     const bw = Math.min(spec.bar_width || 250, slot * 0.56);
+
     order.forEach((i, k) => {
       const d = its[i];
       const cx = px0 + slot * (k + 0.5);
-      const t = t0 + barM.delay + k * barM.stagger;
+      const t = t0 + barM.delay + k * barStagger;
       const neg = d.v < 0;
       const top = Y(Math.max(d.v, 0)), bot = Y(Math.min(d.v, 0));
+      const baseCol = S.color(d.color);
+      const barBg = lively
+        ? `linear-gradient(${neg ? "0deg" : "180deg"}, ${baseCol} 0%, ${baseCol} 78%, color-mix(in srgb, ${baseCol} 76%, #000 24%) 100%)`
+        : baseCol;
       const bar = A.el("div", "abs bar", box, {
         left: cx - bw / 2, top, width: bw, height: Math.max(3, bot - top),
-        background: S.color(d.color),
-        borderRadius: neg ? "0 0 8px 8px" : "8px 8px 0 0",
+        background: barBg,
+        borderRadius: neg ? "0 0 10px 10px" : "10px 10px 0 0",
         transformOrigin: neg ? "50% 0%" : "50% 100%",
+        overflow: "hidden",
       });
-      if (lively && d.color === "accent") {
-        bar.style.boxShadow = `0 12px 32px rgba(255, 214, 0, 0.16)`;
+      if (lively) {
+        A.el("div", "abs", bar, {
+          left: 0, right: 0, [neg ? "bottom" : "top"]: 0, height: "4px",
+          background: "rgba(255,255,255,0.28)", pointerEvents: "none",
+        });
       }
-      S.tl.from(bar, { scaleY: 0, duration: barM.dur, ease: S.ease(barEase), immediateRender: true }, t);
-      if (S.fx) S.fx.cue(t + barM.dur * 0.9, "bar", String(d.label));
+      if ((preset === "pulse-highlight" || lively) && (d.color === "accent" || spec.highlight == i || String(spec.highlight) === String(d.label))) {
+        bar.style.boxShadow = `0 12px 34px rgba(255, 214, 0, ${preset === "pulse-highlight" ? "0.24" : "0.14"})`;
+      }
+      S.tl.from(bar, { scaleY: 0, duration: barDur, ease: S.ease(barEase), immediateRender: true }, t);
+      if (S.fx) S.fx.cue(t + barDur * 0.88, "bar", String(d.label));
+
       const vc = d.value_color || (d.color === "#5A5A5A" ? "muted" : d.color);
       if (spec.show_values !== false) {
         const v = A.el("div", "abs t-value", box, {
@@ -109,12 +138,12 @@
           v.innerHTML = S.rich(d.display);
           v.style.fontSize = (spec.display_size || 40) + "px";
         } else {
-          A.count(v, { to: d.v, decimals: d.dec, prefix: d.prefix ?? pre, suffix: d.suffix ?? suf, at: t, enter: false });
+          A.count(v, { to: d.v, decimals: d.dec, prefix: d.prefix ?? pre, suffix: d.suffix ?? suf, at: t, dur: Math.max(0.55, barDur * 0.95), enter: false });
         }
         const h = v.offsetHeight;
         v.style.top = (neg ? (d.display != null ? Y(0) - h - 8 : bot + 8) : top - h - 6) + "px";
         v.style.display = "flex"; v.style.justifyContent = "center";
-        S.tl.from(v, { opacity: 0, y: 10, duration: 0.4, ease: S.ease("power4"), immediateRender: true }, t + 0.05);
+        S.tl.from(v, { opacity: 0, y: neg ? -8 : 10, duration: 0.42, ease: S.ease("vox"), immediateRender: true }, t + 0.06);
       }
       const l = labs[k];
       l.style.left = (cx - slot * 0.46) + "px";
@@ -126,7 +155,8 @@
   /* ------------------------------------------------------------ bar (horizontal, RTL) */
   C.hbar = function (A, box, spec, t0 = 0) {
     const M = S.theme.motion, its = items(spec), n = its.length || 1;
-    const lively = isLivelyPreset();
+    const preset = activePreset(spec);
+    const lively = preset !== "classic";
     const W = box.clientWidth || 1200, H = box.clientHeight || 640;
     const pre = spec.prefix || "", suf = spec.suffix || "";
     const labs = its.map((d) => A.text(box, d.label, "label", "abs", { whiteSpace: "nowrap" }));
@@ -135,24 +165,29 @@
     const px1 = W - labW, px0 = vsize * 3.4;
     const vmax = spec.ymax != null ? S.toNum(spec.ymax) : Math.max(...its.map((d) => d.v), 1e-9);
     const row = H / n, bh = Math.min(spec.bar_width || 90, row * 0.58);
-    const axM = M.axes || { delay: 0, dur: 0.3 };
-    const barM = M.bar || { delay: 0.25, dur: 0.65, stagger: 0.08, ease: "power3" };
-    const ax = A.el("div", "abs", box, { left: px1, top: 0, width: 3, height: H, background: S.theme.colors.axis });
-    S.tl.from(ax, { opacity: 0, duration: axM.dur, immediateRender: true }, t0);
+    const axM = M.axes || { delay: 0, dur: 0.34 };
+    const barM = M.bar || { delay: 0.25, dur: 0.68, stagger: 0.08, ease: "vox" };
+    const barEase = preset === "elastic-rise" ? "spring" : (lively ? "vox" : barM.ease);
+    const ax = A.el("div", "abs", box, {
+      left: px1, top: 0, width: 3, height: H, background: S.theme.colors.axis, transformOrigin: "50% 0%",
+    });
+    S.tl.from(ax, { opacity: 0, scaleY: lively ? 0 : 1, duration: axM.dur + 0.1, ease: S.ease("vox"), immediateRender: true }, t0);
     its.forEach((d, i) => {
       const cy = row * (i + 0.5), t = t0 + barM.delay + i * barM.stagger;
       const bw = Math.max(3, d.v / (vmax || 1) * (px1 - px0));
+      const baseCol = S.color(d.color);
       const bar = A.el("div", "abs bar", box, {
         left: px1 - bw, top: cy - bh / 2, width: bw, height: bh,
-        background: S.color(d.color), borderRadius: "8px 0 0 8px", transformOrigin: "100% 50%",
+        background: lively ? `linear-gradient(270deg, ${baseCol} 0%, color-mix(in srgb, ${baseCol} 80%, #000 20%) 100%)` : baseCol,
+        borderRadius: "10px 0 0 10px", transformOrigin: "100% 50%",
       });
-      S.tl.from(bar, { scaleX: 0, duration: barM.dur, ease: S.ease(lively ? "back" : barM.ease), immediateRender: true }, t);
+      S.tl.from(bar, { scaleX: 0, duration: barM.dur, ease: S.ease(barEase), immediateRender: true }, t);
       const v = A.el("div", "abs t-value", box, {
         fontSize: vsize, color: S.color(d.color === "#5A5A5A" ? "muted" : d.color),
       });
-      A.count(v, { to: d.v, decimals: d.dec, prefix: d.prefix ?? pre, suffix: d.suffix ?? suf, at: t, enter: false });
+      A.count(v, { to: d.v, decimals: d.dec, prefix: d.prefix ?? pre, suffix: d.suffix ?? suf, at: t, dur: Math.max(0.55, barM.dur * 0.95), enter: false });
       v.style.right = (W - (px1 - bw) + 16) + "px"; v.style.top = (cy - v.offsetHeight / 2) + "px";
-      S.tl.from(v, { opacity: 0, duration: 0.4, immediateRender: true }, t + 0.05);
+      S.tl.from(v, { opacity: 0, x: 10, duration: 0.42, ease: S.ease("vox"), immediateRender: true }, t + 0.06);
       const l = labs[i]; l.style.right = "0px"; l.style.top = (cy - l.offsetHeight / 2) + "px";
       A.enter(l, "body", 0, 0, { at: t });
     });
@@ -213,7 +248,8 @@
 
   C.line = function (A, box, spec, t0 = 0) {
     const M = S.theme.motion, col = S.theme.colors;
-    const lively = isLivelyPreset();
+    const preset = activePreset(spec);
+    const lively = preset !== "classic";
     const W = box.clientWidth || 1200, H = box.clientHeight || 640;
     const serCols = col.series || [col.accent, col.danger, col.muted];
     const ser = (spec.series || []).map((s, i) => {
@@ -253,8 +289,8 @@
         A.el("div", "abs", grid, { left: px0, top: y, width: px1 - px0, borderTop: `2px dashed ${col.grid}` });
       }
     });
-    A.el("div", "abs", grid, { left: px0, top: py1 - 1.5, width: px1 - px0, height: 3, background: col.axis });
-    A.el("div", "abs", grid, { left: px0 - 1.5, top: py0 - 10, width: 3, height: py1 - py0 + 10, background: col.axis });
+    const xAx = A.el("div", "abs", grid, { left: px0, top: py1 - 1.5, width: px1 - px0, height: 3, background: col.axis, transformOrigin: "0% 50%" });
+    const yAx = A.el("div", "abs", grid, { left: px0 - 1.5, top: py0 - 10, width: 3, height: py1 - py0 + 10, background: col.axis, transformOrigin: "50% 100%" });
     const xt = X.ticks || [...new Set(allx)].sort((a, b) => a - b).map((v) => [v, S.fmt(v)]);
     xt.forEach((t) => {
       const [v, lab] = Array.isArray(t) ? [S.toNum(t[0]), t[1]] : [S.toNum(t), S.fmt(S.toNum(t))];
@@ -265,16 +301,22 @@
       const e = A.text(grid, X.title, "axis", "abs", { color: col.muted });
       e.style.left = ((px0 + px1) / 2 - (e.offsetWidth || 60) / 2) + "px"; e.style.top = (py1 + 50) + "px";
     }
-    const axM = M.axes || { delay: 0, dur: 0.3 };
-    const lineM = M.line || { delay: 0.3, dur: 1.2, stagger: 0.15, ease: "power3" };
-    S.tl.from(grid, { opacity: 0, duration: axM.dur, immediateRender: true }, t0);
+    const axM = M.axes || { delay: 0, dur: 0.34 };
+    const lineM = M.line || { delay: 0.3, dur: 1.25, stagger: 0.16, ease: "fluid" };
+    const lineEase = preset === "editorial-curve" ? "vox" : preset === "minimal-trace" ? "power2" : (lively ? "fluid" : lineM.ease);
+    S.tl.from(grid, { opacity: 0, duration: axM.dur, ease: S.ease("vox"), immediateRender: true }, t0);
+    if (preset === "split-axis" || lively) {
+      S.tl.from(xAx, { scaleX: 0, duration: 0.48, ease: S.ease("vox"), immediateRender: true }, t0);
+      S.tl.from(yAx, { scaleY: 0, duration: 0.48, ease: S.ease("vox"), immediateRender: true }, t0 + 0.06);
+    }
+
     (spec.vlines || []).forEach((vl, j) => {
       const x = PX(S.toNum(vl.x)), t = t0 + 0.15 + j * 0.1;
       const ln = A.el("div", "abs", box, {
         left: x - 1.5, top: py0 - 4, width: 0, height: py1 - py0 + 4,
         borderLeft: `3px dashed ${S.color(vl.color || "muted")}`, transformOrigin: "50% 0%",
       });
-      S.tl.from(ln, { scaleY: 0, duration: 0.5, ease: S.ease("power3"), immediateRender: true }, t);
+      S.tl.from(ln, { scaleY: 0, duration: 0.5, ease: S.ease("vox"), immediateRender: true }, t);
       if (vl.label) {
         const e = A.text(box, vl.label, "label", "abs", {
           color: S.color(vl.color || "muted"), whiteSpace: "nowrap", fontSize: (vl.size || 28) + "px",
@@ -289,6 +331,7 @@
     svg.style.position = "absolute"; svg.style.left = 0; svg.style.top = 0; svg.style.overflow = "visible";
     box.appendChild(svg);
     const defs = document.createElementNS(svgNS, "defs"); svg.appendChild(defs);
+
     ser.forEach((s, i) => {
       if (!s.pts.length) return;
       const xs = s.pts.map((p) => PX(p[0])), ys = s.pts.map((p) => PY(p[1]));
@@ -300,43 +343,109 @@
       else if (cMode === "step") path = stepCurve(pxPts);
       else if (cMode === "smooth") path = catmullRom(pxPts, tension, 20);
       else path = monotone(xs, ys);
+
       S._clipSeq = (S._clipSeq || 0) + 1;
       const id = "clip" + i + "_" + S._clipSeq;
+      const gradId = "grad" + i + "_" + S._clipSeq;
+      const strokeCol = S.color(s.color);
+
       const cp = document.createElementNS(svgNS, "clipPath"); cp.id = id;
       const r = document.createElementNS(svgNS, "rect");
       r.setAttribute("x", Math.min(...xs) - 20); r.setAttribute("y", -50); r.setAttribute("height", H + 100); r.setAttribute("width", Math.max(...xs) - Math.min(...xs) + 40);
       cp.appendChild(r); defs.appendChild(cp);
+
+      const lg = document.createElementNS(svgNS, "linearGradient");
+      lg.setAttribute("id", gradId); lg.setAttribute("x1", "0%"); lg.setAttribute("y1", "0%"); lg.setAttribute("x2", "0%"); lg.setAttribute("y2", "100%");
+      const st1 = document.createElementNS(svgNS, "stop");
+      st1.setAttribute("offset", "0%"); st1.setAttribute("stop-color", strokeCol); st1.setAttribute("stop-opacity", lively ? "0.24" : "0.14");
+      const st2 = document.createElementNS(svgNS, "stop");
+      st2.setAttribute("offset", "100%"); st2.setAttribute("stop-color", strokeCol); st2.setAttribute("stop-opacity", "0");
+      lg.appendChild(st1); lg.appendChild(st2); defs.appendChild(lg);
+
       const g = document.createElementNS(svgNS, "g"); g.setAttribute("clip-path", `url(#${id})`); svg.appendChild(g);
+      const dStr = "M" + path.map((q) => q[0].toFixed(1) + " " + q[1].toFixed(1)).join(" L");
+
+      // Soft gradient area fill beneath the curve (explicitly clipped along with stroke reveal)
+      if (spec.fill !== false && s.fill !== false && path.length >= 2) {
+        const area = document.createElementNS(svgNS, "path");
+        const firstX = path[0][0].toFixed(1), lastPtX = path[path.length - 1][0].toFixed(1);
+        area.setAttribute("d", `${dStr} L${lastPtX} ${py1.toFixed(1)} L${firstX} ${py1.toFixed(1)} Z`);
+        area.setAttribute("fill", `url(#${gradId})`);
+        g.appendChild(area);
+      }
+
+      if (preset === "glow-path") {
+        const glowPath = document.createElementNS(svgNS, "path");
+        glowPath.setAttribute("d", dStr);
+        glowPath.setAttribute("fill", "none");
+        glowPath.setAttribute("stroke", strokeCol);
+        glowPath.setAttribute("stroke-width", (s.width || 7) * 2.4);
+        glowPath.setAttribute("stroke-opacity", "0.2");
+        glowPath.setAttribute("stroke-linecap", "round");
+        glowPath.setAttribute("stroke-linejoin", "round");
+        g.appendChild(glowPath);
+      }
+
       const p = document.createElementNS(svgNS, "path");
-      p.setAttribute("d", "M" + path.map((q) => q[0].toFixed(1) + " " + q[1].toFixed(1)).join(" L"));
-      p.setAttribute("fill", "none"); p.setAttribute("stroke", S.color(s.color)); p.setAttribute("stroke-width", s.width || 7);
+      p.setAttribute("d", dStr);
+      p.setAttribute("fill", "none"); p.setAttribute("stroke", strokeCol); p.setAttribute("stroke-width", s.width || 7);
       p.setAttribute("stroke-linecap", "round"); p.setAttribute("stroke-linejoin", "round");
       if (s.dashed) p.setAttribute("stroke-dasharray", `${(s.width || 7) * 2.6} ${(s.width || 7) * 2.2}`);
       g.appendChild(p);
+
       const t = t0 + lineM.delay + i * lineM.stagger;
-      if (spec.markers || s.markers) {
+      if (spec.markers || s.markers || preset === "marker-pop") {
         xs.forEach((x, k) => {
           const c = document.createElementNS(svgNS, "circle");
           c.setAttribute("cx", x); c.setAttribute("cy", ys[k]); c.setAttribute("r", (s.width || 7) * 1.3);
           c.setAttribute("fill", S.color(s.marker_color || "accent")); c.setAttribute("stroke", col.bg); c.setAttribute("stroke-width", 4);
+          c.style.transformBox = "fill-box";
+          c.style.transformOrigin = "50% 50%";
           g.appendChild(c);
           if (lively) {
             const frac = xs.length > 1 ? k / (xs.length - 1) : 0;
-            S.tl.from(c, { opacity: 0, duration: 0.28, ease: S.ease("power3"), immediateRender: true }, t + frac * lineM.dur * 0.85);
+            S.tl.from(c, {
+              opacity: 0, scale: 0.25, duration: 0.34,
+              ease: preset === "marker-pop" ? "back.out(1.5)" : S.ease("vox"), immediateRender: true,
+            }, t + frac * lineM.dur * 0.85);
           }
         });
       }
-      // Subtle living pulse halo at the last data point
+
+      // Deterministic leading tracer dot scrubbed cleanly via GSAP proxy + path.getPointAtLength
+      if (lively && typeof p.getTotalLength === "function") {
+        const totalLen = p.getTotalLength();
+        if (totalLen > 1) {
+          const tracer = document.createElementNS(svgNS, "circle");
+          tracer.setAttribute("r", (s.width || 7) * 1.15);
+          tracer.setAttribute("fill", "#FFFFFF");
+          tracer.setAttribute("stroke", strokeCol);
+          tracer.setAttribute("stroke-width", 4);
+          svg.appendChild(tracer);
+          const proxy = { p: 0 };
+          const updateTracer = () => {
+            const pt = p.getPointAtLength(Math.max(0, Math.min(1, proxy.p)) * totalLen);
+            tracer.setAttribute("cx", pt.x.toFixed(1));
+            tracer.setAttribute("cy", pt.y.toFixed(1));
+          };
+          updateTracer();
+          S.tl.fromTo(tracer, { opacity: 0 }, { opacity: 1, duration: 0.14, immediateRender: true }, t);
+          S.tl.to(proxy, { p: 1, duration: lineM.dur, ease: S.ease(lineEase), onUpdate: updateTracer }, t);
+          S.tl.to(tracer, { opacity: 0, duration: 0.28, ease: "power2.out" }, t + lineM.dur);
+        }
+      }
+
+      // Calm living pulse halo at the final point
       const lastX = xs[xs.length - 1], lastY = ys[ys.length - 1];
       const halo = document.createElementNS(svgNS, "circle");
-      halo.setAttribute("cx", lastX); halo.setAttribute("cy", lastY); halo.setAttribute("r", 12);
-      halo.setAttribute("fill", S.color(s.color)); halo.setAttribute("opacity", "0.35");
+      halo.setAttribute("cx", lastX); halo.setAttribute("cy", lastY); halo.setAttribute("r", 11);
+      halo.setAttribute("fill", strokeCol); halo.setAttribute("opacity", "0.3");
       svg.appendChild(halo);
-      S.tl.from(halo, { opacity: 0, duration: 0.3, immediateRender: true }, t + lineM.dur * 0.85);
-      S.amb.fromTo(halo, { attr: { r: 8 }, opacity: 0.45 }, { attr: { r: 22 }, opacity: 0.08, duration: 2.2, ease: "sine.inOut", yoyo: true, repeat: 99 }, t + lineM.dur);
+      S.tl.from(halo, { opacity: 0, duration: 0.34, immediateRender: true }, t + lineM.dur * 0.88);
+      S.amb.fromTo(halo, { attr: { r: 8 }, opacity: 0.36 }, { attr: { r: 20 }, opacity: 0.06, duration: 3.6, ease: "sine.inOut", yoyo: true, repeat: 99 }, t + lineM.dur);
 
       const full = Math.max(...xs) - Math.min(...xs) + 40;
-      S.tl.fromTo(r, { attr: { width: 0 } }, { attr: { width: full }, duration: lineM.dur, ease: S.ease(lineM.ease), immediateRender: true }, t);
+      S.tl.fromTo(r, { attr: { width: 0 } }, { attr: { width: full }, duration: lineM.dur, ease: S.ease(lineEase), immediateRender: true }, t);
       if (S.fx) S.fx.cue(t, "draw", s.name || "");
       const e = ends[i];
       if (e) {
@@ -355,6 +464,15 @@
 
   /* ------------------------------------------------------------ counter (one big number + caption) */
   C.counter = function (A, box, spec, t0 = 0) {
+    const lively = isLivelyPreset(spec);
+    if (lively) {
+      const aura = A.el("div", "abs", box, {
+        left: "50%", top: "38%", width: "520px", height: "320px",
+        transform: "translate(-50%, -50%)", borderRadius: "999px", pointerEvents: "none",
+        background: `radial-gradient(circle, ${S.color(spec.color || "accent")}26 0%, transparent 70%)`,
+      });
+      S.tl.from(aura, { opacity: 0, scale: 0.72, duration: 0.75, ease: S.ease("fluid"), immediateRender: true }, t0 + 0.05);
+    }
     const col = A.el("div", "col", box, {
       inset: 0, alignItems: spec.align === "right" ? "flex-start" : "center",
       textAlign: spec.align === "right" ? "right" : "center", gap: "10px",
@@ -364,29 +482,55 @@
       fontSize: (spec.size || S.theme.type.number.size) + "px",
     });
     A.count(n, { to: spec.value ?? spec.to, from: spec.from, prefix: spec.prefix, suffix: spec.suffix, decimals: spec.decimals, at: t0 + S.theme.motion.number.delay });
+    if (lively) S.tl.from(n, { scale: 0.94, duration: 0.72, ease: S.ease("vox"), immediateRender: true }, t0 + S.theme.motion.number.delay);
     if (spec.caption) A.enter(A.text(col, spec.caption, "h1"), "title", 0, 0.25);
   };
 
   /* ------------------------------------------------------------ compare: before -> after (RTL: first on the right, arrow points left) */
   C.compare = function (A, box, spec, t0 = 0) {
     const steps = spec.steps || [spec.before || {}, spec.after || {}];
-    const lively = isLivelyPreset();
+    const preset = activePreset(spec);
+    const lively = preset !== "classic";
     const n = steps.length || 1, W = box.clientWidth || 1200, H = box.clientHeight || 600;
     const size = spec.size || (n === 2 ? 190 : 150);
     const arrowW = Math.min(200, W * 0.13), colW = (W - arrowW * (n - 1)) / n;
     const defs = n === 3 ? ["muted", "accent", "danger"] : ["muted", "accent"];
+    const svgNS = "http://www.w3.org/2000/svg";
+
     steps.forEach((s, i) => {
       const right = i * (colW + arrowW);
       const c = A.el("div", "col", box, { right, width: colW, top: 0, height: H, alignItems: "center", textAlign: "center", gap: "6px" });
       const num = A.el("div", "t-number", c, { color: S.color(s.color || defs[i % defs.length]), fontSize: size + "px" });
-      const t = t0 + 0.2 + i * 0.55;
-      A.count(num, { to: s.value, prefix: s.prefix ?? spec.prefix, suffix: s.suffix ?? spec.suffix, decimals: s.decimals, at: t, dur: 0.9 });
+      const t = t0 + 0.18 + i * (preset === "versus-clash" ? 0.34 : 0.5);
+      A.count(num, { to: s.value, prefix: s.prefix ?? spec.prefix, suffix: s.suffix ?? spec.suffix, decimals: s.decimals, at: t, dur: 0.88 });
+      if (lively) {
+        const fromVars = preset === "versus-clash"
+          ? { x: i === 0 ? 44 : -44, scale: 0.92, opacity: 0 }
+          : preset === "mirror-flip"
+            ? { scaleX: 0.78, opacity: 0 }
+            : { y: 18, scale: 0.95, opacity: 0 };
+        S.tl.from(num, {
+          ...fromVars,
+          duration: 0.65,
+          ease: S.ease(preset === "pop-badges" ? "spring" : "vox"),
+          immediateRender: true,
+        }, t);
+      }
       if (s.label) A.enter(A.text(c, s.label, "label", "", { maxWidth: colW * 0.95 + "px" }), "body", 0, 0, { at: t + 0.15 });
       if (i < n - 1) {
         const ar = A.el("div", "abs", box, { right: right + colW + 14, width: arrowW - 28, top: H / 2 - 40, height: 40 });
-        ar.innerHTML = `<svg viewBox="0 0 100 40" width="100%" height="40" preserveAspectRatio="none"><path d="M100 20 H12" stroke="${S.color(spec.arrow_color || "muted")}" stroke-width="7" stroke-linecap="round"/><path d="M26 4 L6 20 L26 36" fill="none" stroke="${S.color(spec.arrow_color || "muted")}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-        ar.style.transformOrigin = "100% 50%";
-        S.tl.from(ar, { scaleX: 0, opacity: 0, duration: lively ? 0.5 : 0.45, ease: S.ease(lively ? "back" : "power3"), immediateRender: true }, t + 0.45);
+        const arSvg = document.createElementNS(svgNS, "svg");
+        arSvg.setAttribute("viewBox", "0 0 100 40");
+        arSvg.setAttribute("width", "100%");
+        arSvg.setAttribute("height", "40");
+        arSvg.setAttribute("preserveAspectRatio", "none");
+        const arrColor = S.color(spec.arrow_color || (lively ? "accent" : "muted"));
+        const shaft = A.svgEl(arSvg, "path", { d: "M100 20 H12", fill: "none", stroke: arrColor, "stroke-width": 7, "stroke-linecap": "round" });
+        const head = A.svgEl(arSvg, "path", { d: "M26 4 L6 20 L26 36", fill: "none", stroke: arrColor, "stroke-width": 7, "stroke-linecap": "round", "stroke-linejoin": "round" });
+        ar.appendChild(arSvg);
+        const arrowAt = t + 0.35;
+        A.draw(shaft, arrowAt, preset === "sweep-compare" ? 0.5 : 0.42, "vox");
+        A.draw(head, arrowAt + 0.22, 0.28, "vox");
       }
     });
   };

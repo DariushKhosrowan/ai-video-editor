@@ -17,27 +17,35 @@ Stage.template({
       col = { left: M + 780 + 80, right: M, top: A.area.y, bottom: 100 };
     }
 
+    const revealMode = (lively && (preset === "frame-mask" || preset === "card-float"))
+      ? "curtain"
+      : (lively && (preset === "editorial-split" || preset === "cinema-wide" || preset === "kenburns-drift"))
+        ? "wipe"
+        : undefined;
     const frame = A.image(A.root, s.image, img[0], img[1], img[2], img[3], {
-      motion: s.motion,
+      motion: s.motion || (lively && preset === "kenburns-drift" ? "gentle-drift" : undefined),
       fit: s.fit,
+      reveal: revealMode,
       border: s.border || (lively && preset === "editorial-split" ? "accent" : undefined),
     });
     A.field("image", frame);
-    if (lively && preset === "card-float") A.drift(frame, { x: 4, y: -8, dur: 6 });
+    if (lively && preset === "card-float") frame.dataset.float = "true";
 
     const c = A.el("div", "col", A.root, Object.assign({ gap: "18px" }, col));
     if (s.eyebrow) {
       const eyEl = A.text(c, s.eyebrow, "eyebrow", "", { fontSize: "36px" });
       A.field("eyebrow", eyEl);
-      A.enter(eyEl, "eyebrow");
+      A.enter(eyEl, "eyebrow", 0, 0, lively ? { ease: "vox" } : {});
     }
     if (s.title) {
       const tEl = A.text(c, s.title, "hero", "", { fontSize: (String(s.title).length > 28 ? 60 : 76) + "px" });
       A.field("title", tEl);
-      if (lively && (preset === "editorial-split" || preset === "frame-mask")) {
-        A.kinetic(tEl, { at: A.at("title"), role: "title", stagger: 0.045 });
+      if (lively && preset === "editorial-split") {
+        A.kinetic(tEl, { at: A.at("title"), mode: "glide-rtl", role: "title", stagger: 0.045, ease: "vox" });
+      } else if (lively && (preset === "frame-mask" || preset === "cinema-wide")) {
+        A.kinetic(tEl, { at: A.at("title"), mode: "rise-mask", role: "title", stagger: 0.045, ease: "vox" });
       } else {
-        A.enter(tEl, "title");
+        A.enter(tEl, "title", 0, 0, lively ? { ease: "vox" } : {});
       }
     }
     if (lively && preset === "accent-bar") {
@@ -47,7 +55,7 @@ Stage.template({
     if (bodyText) {
       const txtEl = A.text(c, bodyText, "body", "", { fontSize: "38px" });
       A.field("text", txtEl);
-      A.enter(txtEl, "body");
+      A.enter(txtEl, "body", 0, 0, lively ? { ease: "fluid" } : {});
     }
 
     const pts = Stage.T.list(s.points);

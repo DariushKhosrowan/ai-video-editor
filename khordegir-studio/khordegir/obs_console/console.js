@@ -236,7 +236,7 @@ function pushStepToLiveObs(step, overrideLayout = null) {
   const mergedLiving = Object.assign({}, projectLivingStage || {}, (slidePayload && slidePayload.livingStage) || {}, {
     bgStyle: els.liveBgStyleSelect.value,
     intensity: els.liveIntensitySelect.value,
-    floatMode: els.liveFloatModeSelect ? els.liveFloatModeSelect.value : 'selective',
+    floatMode: els.liveFloatModeSelect ? els.liveFloatModeSelect.value : 'images-only',
   });
   mergedLiving.microMotion = mergedLiving.floatMode !== 'off';
   if (mergedLiving.bgImage) mergedLiving.bgImage = resolveLiveImageUrl(mergedLiving.bgImage);
@@ -857,10 +857,11 @@ async function loadProjectSteps(name, { preserveIndex = false, initialStep = nul
     bgStyle: 'dreamy-bokeh',
     intensity: 'podcast',
     microMotion: true,
-    floatMode: 'selective',
-    floatAmplitude: 5,
-    floatSpeed: 0.75,
-    floatRatio: 0.65,
+    floatMode: 'images-only',
+    floatStyle: 'silk-glide',
+    floatAmplitude: 2,
+    floatSpeed: 0.45,
+    floatRatio: 0.75,
     floatSeed: 0,
   };
   projectPodcast = payload.podcast || null;
@@ -872,7 +873,7 @@ async function loadProjectSteps(name, { preserveIndex = false, initialStep = nul
   if (projectLivingStage.bgStyle) els.liveBgStyleSelect.value = projectLivingStage.bgStyle;
   if (projectLivingStage.intensity) els.liveIntensitySelect.value = projectLivingStage.intensity;
   if (els.liveFloatModeSelect) {
-    els.liveFloatModeSelect.value = projectLivingStage.microMotion === false ? 'off' : (projectLivingStage.floatMode || 'selective');
+    els.liveFloatModeSelect.value = projectLivingStage.microMotion === false ? 'off' : (projectLivingStage.floatMode || 'images-only');
   }
 
   if (projectPodcast && projectPodcast.host && !els.ltTitleInput.value) {
@@ -936,7 +937,7 @@ function connectOptionalObs() {
 }
 
 function sendOverlayUpdate() {
-  const floatMode = els.liveFloatModeSelect ? els.liveFloatModeSelect.value : 'selective';
+  const floatMode = els.liveFloatModeSelect ? els.liveFloatModeSelect.value : 'images-only';
   const nextLiving = Object.assign({}, projectLivingStage || {}, {
     bgStyle: els.liveBgStyleSelect.value,
     intensity: els.liveIntensitySelect.value,

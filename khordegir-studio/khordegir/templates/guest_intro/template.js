@@ -2,6 +2,8 @@ Stage.template({
   name: "guest_intro",
   build(s, A) {
     const th = A.th, colColors = th.colors || {};
+    const preset = (Stage.fx && Stage.fx.cur && Stage.fx.cur.preset) || "classic";
+    const lively = preset !== "classic";
     const left = A.area.left;
     const right = A.area.x;
     const hasImg = Boolean(s.image);
@@ -13,7 +15,8 @@ Stage.template({
       const frame = A.image(A.root, s.image, imgX, imgY, imgSize, imgSize + 60, {
         radius: 26,
         border: "accent",
-        motion: s.motion || "breathe",
+        motion: s.motion || "gentle-drift",
+        reveal: (lively && preset === "editorial-split") ? "wipe" : undefined,
       });
       A.field("image", frame);
     }
@@ -26,18 +29,26 @@ Stage.template({
       gap: "18px",
       alignItems: "flex-start",
       backdropFilter: "blur(16px)",
+      boxShadow: (lively && preset === "spotlight") ? `0 18px 46px ${colColors.accent || "#F5B700"}22` : undefined,
     });
+    if (lively && preset === "card-float") col.dataset.float = "true";
 
     if (s.badge) {
       const bd = A.text(col, s.badge, "caption", "badge acc");
-      A.enter(bd, "badge");
+      A.enter(bd, "badge", 0, 0, lively ? { ease: "vox" } : {});
     }
 
     const titleEl = A.text(col, s.title || "مهمان ویژه", "hero", "", {
       fontSize: (s.size || 74) + "px",
     });
     A.field("title", titleEl);
-    A.kinetic(titleEl, { at: A.at("title"), role: "title", stagger: 0.05 });
+    if (lively && preset === "minimal-clean") {
+      A.kinetic(titleEl, { at: A.at("title"), mode: "editorial-blur", role: "title", stagger: 0.038, ease: "fluid" });
+    } else if (lively) {
+      A.kinetic(titleEl, { at: A.at("title"), mode: "rise-mask", role: "title", stagger: 0.045, ease: "vox" });
+    } else {
+      A.enter(titleEl, "title");
+    }
 
     if (s.subtitle) {
       const subEl = A.text(col, s.subtitle, "h1", "", {
@@ -45,7 +56,7 @@ Stage.template({
         color: colColors.accent || "#F5B700",
       });
       A.field("subtitle", subEl);
-      A.enter(subEl, "body", 0, 0.15);
+      A.enter(subEl, "body", 0, 0.15, lively ? { ease: "vox" } : {});
     }
 
     if (s.text) {
@@ -55,7 +66,7 @@ Stage.template({
         maxWidth: "960px",
       });
       A.field("text", bodyEl);
-      A.enter(bodyEl, "body", 1, 0.15);
+      A.enter(bodyEl, "body", 1, 0.15, lively ? { ease: "fluid" } : {});
     }
 
     if (s.handle) {
@@ -66,10 +77,10 @@ Stage.template({
         fontSize: "24px",
         direction: "ltr",
       });
-      A.enter(hEl, "badge", 1, 0.25);
+      A.enter(hEl, "badge", 1, 0.25, lively ? { ease: "vox" } : {});
     }
 
-    A.enter(col, "card");
+    A.enter(col, "card", 0, 0, lively ? { ease: "vox" } : {});
     A.fit(col, 0.55);
   },
 });

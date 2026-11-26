@@ -99,10 +99,13 @@
     power4: [0.16, 1, 0.3, 1],
     power3: [0.22, 1, 0.36, 1],
     editorial: [0.22, 1, 0.36, 1],
+    vox: [0.19, 1, 0.22, 1],
+    fluid: [0.25, 1, 0.35, 1],
+    silk: [0.33, 1, 0.68, 1],
     snappy: [0.16, 1, 0.3, 1],
     expo: [0.19, 1, 0.22, 1],
-    back: "back.out(1.2)",
-    spring: "back.out(1.45)",
+    back: "back.out(1.18)",
+    spring: "back.out(1.32)",
   };
   S.ease = function (name) {
     if (name === "none") return "none";
@@ -334,21 +337,38 @@
         const m = Object.assign({}, M[role] || M.body, over || {});
         const mc = S.slide && S.slide.motionCurve;
         const durScale = mc && Number.isFinite(+mc.durationScale) ? Math.max(0.3, Math.min(2.5, +mc.durationScale)) : 1;
-        const dur = (m.dur || 0.5) * durScale;
-        const explicit = over && (over.x != null || over.y != null || over.scale != null);
+        const dur = (m.dur || 0.55) * durScale;
+        const explicit = over && (over.x != null || over.y != null || over.scale != null || over.clipPath != null || over.filter != null || over.rotation != null);
         let from;
         if (explicit || !S.fx) {
           from = { opacity: 0 };
           if (m.x) from.x = m.x;
           if (m.y) from.y = m.y;
           if (m.scale) from.scale = m.scale;
+          if (m.clipPath) from.clipPath = m.clipPath;
+          if (m.filter) from.filter = m.filter;
+          if (m.rotation) from.rotation = m.rotation;
         } else {
           from = S.fx.from(role, m);
         }
         const t = (over && over.at != null) ? over.at : A.at(role, i, extra);
-        const to = Object.assign({ opacity: 1, x: 0, y: 0, scale: 1 }, S.fx ? S.fx.to(from) : {});
+        const to = Object.assign({ opacity: 1, x: 0, y: 0, scale: 1, rotation: 0 }, S.fx ? S.fx.to(from) : {});
         Object.keys(to).forEach((k) => { if (!(k in from)) delete to[k]; });
-        S.tl.fromTo(e, from, Object.assign(to, { duration: dur, ease: S.ease(m.ease), immediateRender: true }), t);
+        if (over && over.toClipPath) to.clipPath = over.toClipPath;
+
+        // Decouple opacity settle (~52% of duration) from motion settle for crisp, non-ghostly entrances
+        const motionKeys = Object.keys(from).filter((k) => k !== "opacity");
+        if ("opacity" in from && motionKeys.length > 0) {
+          const opDur = Math.max(0.18, Math.min(dur * 0.65, dur * 0.54));
+          S.tl.fromTo(e, { opacity: from.opacity }, { opacity: to.opacity ?? 1, duration: opDur, ease: "power2.out", immediateRender: true }, t);
+          const mFrom = {};
+          const mTo = {};
+          motionKeys.forEach((k) => { mFrom[k] = from[k]; mTo[k] = to[k]; });
+          S.tl.fromTo(e, mFrom, Object.assign(mTo, { duration: dur, ease: S.ease(m.ease), immediateRender: true }), t);
+        } else {
+          S.tl.fromTo(e, from, Object.assign(to, { duration: dur, ease: S.ease(m.ease), immediateRender: true }), t);
+        }
+
         e.dataset.end = (t + dur).toFixed(3);
         if (S.fx) {
           if (role === "title") S.fx.cue(t, "whoosh", e.textContent.slice(0, 30));
@@ -366,24 +386,51 @@
       kinetic(e, opts = {}) {
         if (!e) return 0;
         if (e.dataset && e.dataset.fieldWrap && e.firstElementChild) e = e.firstElementChild;
+        const mc = S.slide && S.slide.motionCurve;
+        const durScale = mc && Number.isFinite(+mc.durationScale) ? Math.max(0.35, Math.min(2.2, +mc.durationScale)) : 1;
+        const stScale = mc && Number.isFinite(+mc.staggerScale) ? Math.max(0.35, Math.min(2.2, +mc.staggerScale)) : 1;
+        const mode = opts.mode || "rise-mask";
         const at = opts.at ?? A.at(opts.role || "title", 0, opts.extra || 0);
-        const dur = opts.dur ?? 0.48;
-        const stagger = opts.stagger ?? 0.055;
-        const fromY = opts.y ?? 26;
-        const fromX = opts.x ?? 10;
-        const fromScale = opts.scale ?? 0.94;
-        const ease = S.ease(opts.ease || "back");
+        const dur = (opts.dur ?? 0.46) * durScale;
+        const stagger = (opts.stagger ?? (mode === "glide-rtl" ? 0.042 : 0.036)) * stScale;
+
+        let fromBase;
+        let easeName = opts.ease;
+        if (mode === "editorial-blur") {
+          fromBase = { y: opts.y ?? 14, x: opts.x ?? 0, scale: opts.scale ?? 0.985, filter: "blur(8px)" };
+          easeName = easeName || "expo";
+        } else if (mode === "glide-rtl") {
+          fromBase = { x: opts.x ?? 26, y: opts.y ?? 0, scale: opts.scale ?? 1 };
+          easeName = easeName || "expo";
+        } else if (mode === "pop-clean") {
+          fromBase = { y: opts.y ?? 16, x: opts.x ?? 0, scale: opts.scale ?? 0.9 };
+          easeName = easeName || "back";
+        } else if (mode === "cascade-3d") {
+          fromBase = { y: opts.y ?? 18, x: opts.x ?? 0, scale: opts.scale ?? 0.97, rotationX: -22 };
+          easeName = easeName || "power4";
+        } else {
+          // rise-mask: natural vertical glide with zero lateral wobble
+          fromBase = { y: opts.y ?? 20, x: opts.x ?? 0, scale: opts.scale ?? 0.98 };
+          easeName = easeName || "power4";
+        }
+        const ease = S.ease(easeName);
 
         e.innerHTML = wrapHtmlWords(e.innerHTML);
         const words = [...e.querySelectorAll(".k-word")];
         if (!words.length) return A.enter(e, opts.role || "title", 0, opts.extra || 0);
 
+        if (mode === "cascade-3d") {
+          e.style.perspective = "900px";
+        }
+        const opDur = Math.max(0.16, dur * 0.5);
         words.forEach((w, idx) => {
           const wt = at + idx * stagger;
-          S.tl.fromTo(w,
-            { opacity: 0, y: fromY, x: fromX, scale: fromScale },
-            { opacity: 1, y: 0, x: 0, scale: 1, duration: dur, ease, immediateRender: true },
-            wt);
+          if (mode === "cascade-3d") w.style.transformOrigin = "50% 100%";
+          S.tl.fromTo(w, { opacity: 0 }, { opacity: 1, duration: opDur, ease: "power2.out", immediateRender: true }, wt);
+          const toVars = { y: 0, x: 0, scale: 1, duration: dur, ease, immediateRender: true };
+          if ("filter" in fromBase) toVars.filter = "blur(0px)";
+          if ("rotationX" in fromBase) toVars.rotationX = 0;
+          S.tl.fromTo(w, fromBase, toVars, wt);
         });
         const end = at + Math.max(0, words.length - 1) * stagger + dur;
         e.dataset.end = end.toFixed(3);
@@ -398,15 +445,16 @@
           height: (opts.height || 6) + "px",
           transformOrigin: opts.origin || (A.scam ? "100% 50%" : "50% 50%"),
         }, opts.style || {}));
-        S.tl.fromTo(r, { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: opts.dur || 0.55, ease: S.ease(opts.ease || "power4"), immediateRender: true }, opts.at ?? A.at("body", 1));
-        if (S.fx) S.fx.cue(opts.at ?? A.at("body", 1), "whoosh-subtle", "line");
+        const at = opts.at ?? A.at("body", 1);
+        S.tl.fromTo(r, { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: opts.dur || 0.58, ease: S.ease(opts.ease || "expo"), immediateRender: true }, at);
+        if (S.fx) S.fx.cue(at, "whoosh-subtle", "line");
         return r;
       },
-      /* Gentle secondary ambient float (for glass panels/spotlights) */
+      /* Imperceptible secondary ambient optical glide (never jittery) */
       drift(el, opts = {}) {
         if (!el) return;
-        const dx = opts.x ?? 8, dy = opts.y ?? -10, dur = opts.dur ?? 6;
-        S.amb.fromTo(el, { x: -dx, y: -dy }, { x: dx, y: dy, duration: dur, ease: "sine.inOut", yoyo: true, repeat: 8 }, 0);
+        const dx = opts.x ?? 2.0, dy = opts.y ?? 1.2, dur = opts.dur ?? 18;
+        S.amb.fromTo(el, { x: -dx, y: -dy }, { x: dx, y: dy, duration: dur, ease: "sine.inOut", yoyo: true, repeat: 99, force3D: true }, 0);
       },
       stagger(list, role, extra = 0) {
         list.forEach((e, i) => A.enter(e, role, i, extra));
@@ -443,26 +491,53 @@
         if (S.fx) { S.fx.cue(t, "count-start", String(o.to)); S.fx.cue(t + dur * 0.85, "count-end", String(o.to)); }
         return t + dur;
       },
-      /* image in a rounded frame + Ken Burns inside the frame */
+      /* image in a rounded frame + counter-scale reveal + continuous silky Ken Burns inside the frame */
       image(parent, src, x, y, w, h, o = {}) {
+        const rad = o.radius ?? L.radius;
         const f = A.el("div", "frame" + (o.shadow === false ? "" : " shadow") + (o.border ? " bordered" : ""), parent,
-          { left: x, top: y, width: w, height: h, borderRadius: (o.radius ?? L.radius) + "px" });
+          { left: x, top: y, width: w, height: h, borderRadius: rad + "px" });
         if (o.border) f.style.setProperty("--frame-border", S.color(o.border));
         const inner = A.el("div", "frame-inner", f);
+        const cam = A.el("div", "frame-cam", inner);
         if (src) {
-          const im = A.el("img", "", inner);
+          const im = A.el("img", "", cam);
           im.src = src; im.alt = "";
           im.style.objectFit = o.fit || "cover";
           if (o.focus) im.style.objectPosition = o.focus;
-          im.onerror = () => { im.remove(); A.placeholder(inner, src); };
+          im.onerror = () => { im.remove(); A.placeholder(cam, src); };
           S._imgs.push(im);
           A._imgIndex = (A._imgIndex || 0) + 1;
           let mo = S.fx ? S.fx.imageMotion(o.motion, A._imgIndex) : o.motion;
           if (mo === "depth") { if (o.depth !== false && w * h > 200000 && S.fx) S.fx.depth(src); mo = "breathe"; }
           A.kenburns(im, mo);
-        } else A.placeholder(inner, o.name || "");
+        } else A.placeholder(cam, o.name || "");
         if (o.dim) A.el("div", "dim", inner, { opacity: o.dim });
-        if (o.enter !== false) A.enter(f, "image", 0, o.delay || 0);
+        if (o.enter !== false) {
+          const entAt = o.at ?? A.at("image", 0, o.delay || 0);
+          let enterOver = o.enterOver || null;
+          if (o.reveal === "wipe") {
+            enterOver = Object.assign({
+              clipPath: `inset(0% 0% 0% 100% round ${rad}px)`,
+              toClipPath: `inset(0% 0% 0% 0% round ${rad}px)`,
+              dur: 0.72,
+              ease: "expo",
+              at: entAt,
+            }, enterOver || {});
+          } else if (o.reveal === "curtain") {
+            enterOver = Object.assign({
+              clipPath: `inset(7% 7% 7% 7% round ${rad}px)`,
+              toClipPath: `inset(0% 0% 0% 0% round ${rad}px)`,
+              dur: 0.75,
+              ease: "power4",
+              at: entAt,
+            }, enterOver || {});
+          } else if (o.delay) {
+            enterOver = Object.assign({ at: entAt }, enterOver || {});
+          }
+          A.enter(f, "image", 0, o.delay || 0, enterOver);
+          // Smooth inner optical counter-scale settle (separate .frame-cam node avoids GSAP conflict with .frame & <img>)
+          S.tl.fromTo(cam, { scale: o.counterScale || 1.072 }, { scale: 1, duration: 0.92, ease: S.ease("power4"), immediateRender: true }, entAt);
+        }
         return f;
       },
       placeholder(parent, name) {
@@ -472,13 +547,16 @@
         return p;
       },
       kenburns(im, motion) {
-        const kb = th.kenburns || { period: 20, scale: 0.055, x: -14 }; motion = motion || "breathe";
+        const kb = th.kenburns || { period: 28, scale: 0.036, x: -9 }; motion = motion || "breathe";
         if (motion === "none") return;
-        let a = { scale: 1, x: 0 }, b = { scale: 1 + kb.scale, x: kb.x };
-        if (motion === "zoom-out") { a = { scale: 1 + kb.scale + 0.005, x: 0 }; b = { scale: 1, x: 0 }; }
-        if (motion === "pan-left") { a = { scale: 1.07, x: 30 }; b = { scale: 1.07, x: -30 }; }
-        if (motion === "pan-right") { a = { scale: 1.07, x: -30 }; b = { scale: 1.07, x: 30 }; }
-        S.amb.fromTo(im, a, Object.assign(b, { duration: kb.period, ease: "none" }), 0);
+        const period = Math.max(24, Number(kb.period) || 28);
+        const sc = Math.min(0.042, Number(kb.scale) || 0.034);
+        let a = { scale: 1.0, x: 0, y: 0 }, b = { scale: 1 + sc, x: -7, y: -3 };
+        if (motion === "zoom-out") { a = { scale: 1 + sc + 0.006, x: 4, y: 2 }; b = { scale: 1.004, x: -4, y: -2 }; }
+        else if (motion === "pan-left") { a = { scale: 1.04, x: 16, y: 0 }; b = { scale: 1.04, x: -16, y: -2 }; }
+        else if (motion === "pan-right") { a = { scale: 1.04, x: -16, y: 0 }; b = { scale: 1.04, x: 16, y: 2 }; }
+        else if (motion === "gentle-drift") { a = { scale: 1.016, x: -9, y: 4 }; b = { scale: 1.036, x: 9, y: -4 }; }
+        S.amb.fromTo(im, a, Object.assign(b, { duration: period, ease: "sine.inOut", yoyo: true, repeat: 99, force3D: true }), 0);
       },
       color: (c) => S.color(c),
       svg(parent, x, y, w, h, viewBox) {
@@ -547,7 +625,7 @@
       const im = document.createElement("img"); im.src = bgimg; wrap.appendChild(im); S._imgs.push(im);
       im.onerror = () => wrap.remove();
       const d = document.createElement("div"); d.className = "dim"; d.style.opacity = bgs.dim ?? slide.bg_dim ?? 0.55; wrap.appendChild(d);
-      S.amb.fromTo(im, { scale: 1 }, { scale: 1.03, duration: th.kenburns.period, ease: "none" }, 0);
+      S.amb.fromTo(im, { scale: 1 }, { scale: 1.028, duration: Math.max(24, th.kenburns.period || 26), ease: "sine.inOut", yoyo: true, repeat: 99, force3D: true }, 0);
     }
     const FXC = S.fx ? S.fx.setup(slide) : null;
     const g = th.glow ? Object.assign({}, th.glow, FXC ? { x: FXC.glowPos[0], y: FXC.glowPos[1] } : {}) : null;
@@ -656,33 +734,37 @@
   S.updateFloat = function (t) {
     const items = S._floats;
     if (!Array.isArray(items) || !items.length) return;
-    const cfg = S._floatCfg || { enabled: false, baseAmp: 5, speed: 0.75 };
+    const cfg = S._floatCfg || { enabled: false, baseAmp: 2, speed: 0.45, style: "silk-glide" };
     if (!cfg.enabled || cfg.baseAmp <= 0) {
       for (let i = 0; i < items.length; i += 1) {
-        items[i].el.style.translate = "0px 0px";
+        items[i].el.style.translate = "0px 0px 0px";
         items[i].el.style.rotate = "0deg";
+        items[i].el.style.scale = "1";
       }
       return;
     }
-    const speed = cfg.speed || 0.6;
+    const speed = cfg.speed || 0.45;
     for (let i = 0; i < items.length; i += 1) {
       const it = items[i];
       if (t <= it.startAt) {
-        it.el.style.translate = "0px 0px";
+        it.el.style.translate = "0px 0px 0px";
         it.el.style.rotate = "0deg";
+        it.el.style.scale = "1";
         continue;
       }
-      const u = Math.min(1, (t - it.startAt) / 1.5);
-      const fade = u * u * (3 - 2 * u);
+      // Quintic C2 smootherstep fade-in over 2.8s so entrance transitions imperceptibly into optical glide
+      const u = Math.min(1, (t - it.startAt) / 2.8);
+      const fade = u * u * u * (10 - u * (15 - 6 * u));
       const wt = (t - it.startAt) * speed;
       const dx = fade * it.ampX * Math.sin(wt * it.w2 + it.p2);
       const dy = fade * it.ampY * Math.sin(wt * it.w1 + it.p1);
-      it.el.style.translate = `${dx.toFixed(2)}px ${dy.toFixed(2)}px`;
-      if (it.ampRot) {
-        const rot = fade * it.ampRot * Math.sin(wt * it.w2 * 0.85 + it.p3);
-        it.el.style.rotate = `${rot.toFixed(3)}deg`;
+      it.el.style.translate = `${dx.toFixed(3)}px ${dy.toFixed(3)}px 0px`;
+      it.el.style.rotate = "0deg";
+      if (it.ampScale) {
+        const sc = 1 + fade * it.ampScale * Math.sin(wt * it.w3 + it.p3);
+        it.el.style.scale = sc.toFixed(5);
       } else {
-        it.el.style.rotate = "0deg";
+        it.el.style.scale = "1";
       }
     }
   };
@@ -774,8 +856,9 @@
       S.slide.livingStage = Object.assign({}, S.slide.livingStage || {}, d.livingStage);
       if (Array.isArray(S._floats)) {
         S._floats.forEach((it) => {
-          it.el.style.translate = "0px 0px";
+          it.el.style.translate = "0px 0px 0px";
           it.el.style.rotate = "0deg";
+          it.el.style.scale = "1";
         });
       }
       const content = document.querySelector("#stage .content");

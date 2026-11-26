@@ -11,7 +11,7 @@ const fa = (v) => String(v ?? "").replace(/[0-9]/g, (d) => FA[+d]);
 const FX_CAT = (window.Stage && window.Stage.fx && window.Stage.fx.CATALOG) || {
   presets: {},
   presetLabels: {},
-  transitions: ["curtain-rtl", "accent-slash", "iris-rise", "soft-fade", "split-curtain", "diagonal-wipe", "zoom-iris", "shutter-bars"],
+  transitions: ["curtain-rtl", "accent-slash", "iris-rise", "soft-fade", "split-curtain", "diagonal-wipe", "zoom-iris", "shutter-bars", "editorial-push", "cinema-bars"],
   transitionLabels: {},
   logoMotions: ["pop-spin", "slide-rtl", "orbit-pulse", "flip-reveal", "stamp-drop", "glitch-snap", "float-fade"],
   logoMotionLabels: {},
@@ -645,10 +645,11 @@ function renderLivingAndAudioTab(container, slide) {
     bgStyle: projLs.bgStyle || "studio-mix",
     intensity: projLs.intensity || "podcast",
     microMotion: projLs.microMotion !== false,
-    floatMode: projLs.floatMode || "selective",
-    floatAmplitude: projLs.floatAmplitude ?? 5,
-    floatSpeed: projLs.floatSpeed ?? 0.75,
-    floatRatio: projLs.floatRatio ?? 0.65,
+    floatMode: projLs.floatMode || "images-only",
+    floatStyle: projLs.floatStyle || "silk-glide",
+    floatAmplitude: projLs.floatAmplitude ?? 2,
+    floatSpeed: projLs.floatSpeed ?? 0.45,
+    floatRatio: projLs.floatRatio ?? 0.75,
     floatSeed: projLs.floatSeed ?? 0,
   }, slide.livingStage || {});
 
@@ -756,26 +757,26 @@ function renderLivingAndAudioTab(container, slide) {
   intGrp.appendChild(intSel);
   secLive.appendChild(intGrp);
 
-  // Water Float subsection (for items & images only — never jittering text)
+  // Imperceptible Silk-Glide subsection (foreground images & visual items on top of background ONLY)
   const floatSub = document.createElement("div");
   floatSub.className = "float-divider-group";
   floatSub.innerHTML = `
     <div class="override-head">
-      <span>شناوری نرم روی آب (Water Float)</span>
-      <span class="bilingual-sub">Items &amp; Images</span>
+      <span>لغزش ابریشمی اجزای روی پس‌زمینه</span>
+      <span class="bilingual-sub">Silk Glide</span>
     </div>
-    <p class="panel-hint">حرکت خیلی آرام و سینوسی فقط برای عکس‌ها و کارت‌ها (بدون هیچ‌گونه لرزش روی متن‌ها و اعداد).</p>
+    <p class="panel-hint">لغزش بسیار نرم و تقریباً ثابت (نامحسوس) فقط برای عکس‌ها و قاب‌های روی پس‌زمینه — متن‌ها، کارت‌ها و نمودارها کاملاً ثابت می‌مانند.</p>
   `;
 
   const modeGrp = document.createElement("label");
   modeGrp.className = "field-group";
-  modeGrp.innerHTML = `<span>حالت شناوری آیتم‌ها</span>`;
+  modeGrp.innerHTML = `<span>محدودهٔ لغزش نرم</span>`;
   const modeSel = document.createElement("select");
   modeSel.className = "select-ctrl";
   modeSel.id = "livingFloatModeSelect";
   [
-    ["selective", "تصادفی روی بعضی آیتم‌ها و عکس‌ها (پیشنهادی)"],
-    ["images-only", "فقط عکس‌ها و قاب‌های تصویر"],
+    ["images-only", "فقط عکس‌ها و اجزای روی پس‌زمینه (پیشنهادی · بسیار نرم)"],
+    ["selective", "بعضی کارت‌ها و عکس‌ها (انتخابی)"],
     ["all-items", "همهٔ کارت‌ها و عکس‌ها"],
     ["off", "خاموش (کاملاً ثابت)"],
   ].forEach(([v, l]) => {
@@ -784,33 +785,52 @@ function renderLivingAndAudioTab(container, slide) {
     o.textContent = l;
     modeSel.appendChild(o);
   });
-  modeSel.value = ls.microMotion === false ? "off" : (ls.floatMode || "selective");
+  modeSel.value = ls.microMotion === false ? "off" : (ls.floatMode || "images-only");
   modeGrp.appendChild(modeSel);
   floatSub.appendChild(modeGrp);
 
+  const styleGrp = document.createElement("label");
+  styleGrp.className = "field-group";
+  styleGrp.innerHTML = `<span>سبک لغزش</span>`;
+  const styleSel = document.createElement("select");
+  styleSel.className = "select-ctrl";
+  styleSel.id = "livingFloatStyleSelect";
+  [
+    ["silk-glide", "لغزش ابریشمی نامحسوس (تقریباً ثابت)"],
+    ["optical-breathe", "تنفس اپتیکی بسیار ملایم"],
+  ].forEach(([v, l]) => {
+    const o = document.createElement("option");
+    o.value = v;
+    o.textContent = l;
+    styleSel.appendChild(o);
+  });
+  styleSel.value = ls.floatStyle || "silk-glide";
+  styleGrp.appendChild(styleSel);
+  floatSub.appendChild(styleGrp);
+
   const ampRow = document.createElement("label");
   ampRow.className = "slider-row";
-  const ampVal = Number(ls.floatAmplitude ?? 5);
-  ampRow.innerHTML = `<span>دامنهٔ حرکت روی آب: <strong class="mono-num">${ampVal} px</strong></span>`;
+  const ampVal = Number(ls.floatAmplitude ?? 2);
+  ampRow.innerHTML = `<span>دامنهٔ لغزش (بسیار ظریف): <strong class="mono-num">${ampVal} px</strong></span>`;
   const ampInp = document.createElement("input");
   ampInp.type = "range";
   ampInp.id = "livingFloatAmpSlider";
   ampInp.min = "0";
-  ampInp.max = "14";
-  ampInp.step = "0.5";
+  ampInp.max = "8";
+  ampInp.step = "0.25";
   ampInp.value = String(ampVal);
   ampRow.appendChild(ampInp);
   floatSub.appendChild(ampRow);
 
   const spdRow = document.createElement("label");
   spdRow.className = "slider-row";
-  const spdVal = Number(ls.floatSpeed ?? 0.75);
-  spdRow.innerHTML = `<span>سرعت موج شناوری: <strong class="mono-num">${spdVal.toFixed(2)}x</strong></span>`;
+  const spdVal = Number(ls.floatSpeed ?? 0.45);
+  spdRow.innerHTML = `<span>نرمی و کندی حرکت: <strong class="mono-num">${spdVal.toFixed(2)}x</strong></span>`;
   const spdInp = document.createElement("input");
   spdInp.type = "range";
   spdInp.id = "livingFloatSpeedSlider";
-  spdInp.min = "0.3";
-  spdInp.max = "1.8";
+  spdInp.min = "0.2";
+  spdInp.max = "1.5";
   spdInp.step = "0.05";
   spdInp.value = String(spdVal);
   spdRow.appendChild(spdInp);
@@ -818,8 +838,8 @@ function renderLivingAndAudioTab(container, slide) {
 
   const ratioRow = document.createElement("label");
   ratioRow.className = "slider-row";
-  const ratioVal = Number(ls.floatRatio ?? 0.65);
-  ratioRow.innerHTML = `<span>سهم آیتم‌های شناور (تصادفی): <strong class="mono-num">${Math.round(ratioVal * 100)}%</strong></span>`;
+  const ratioVal = Number(ls.floatRatio ?? 0.75);
+  ratioRow.innerHTML = `<span>سهم آیتم‌های لغزان: <strong class="mono-num">${Math.round(ratioVal * 100)}%</strong></span>`;
   const ratioInp = document.createElement("input");
   ratioInp.type = "range";
   ratioInp.id = "livingFloatRatioSlider";
@@ -843,6 +863,7 @@ function renderLivingAndAudioTab(container, slide) {
   const updateFloatControlsState = () => {
     const isOff = modeSel.value === "off";
     const isSel = modeSel.value === "selective";
+    styleSel.disabled = isOff;
     ampInp.disabled = isOff;
     spdInp.disabled = isOff;
     ratioInp.disabled = isOff || !isSel;
@@ -855,6 +876,9 @@ function renderLivingAndAudioTab(container, slide) {
   modeSel.addEventListener("change", () => {
     updateFloatControlsState();
     syncFloatLive({ floatMode: modeSel.value });
+  });
+  styleSel.addEventListener("change", () => {
+    syncFloatLive({ floatStyle: styleSel.value });
   });
   ampInp.addEventListener("input", () => {
     const v = parseFloat(ampInp.value);
@@ -874,7 +898,7 @@ function renderLivingAndAudioTab(container, slide) {
   rerollFloatBtn.addEventListener("click", () => {
     const nextSeed = (Number(ls.floatSeed) || 0) + 1;
     syncFloatLive({ floatSeed: nextSeed });
-    setStatus("الگوی شناوری تصادفی آیتم‌ها تغییر کرد ✓");
+    setStatus("الگوی لغزش نرم تغییر کرد ✓");
   });
 
   secLive.appendChild(floatSub);
@@ -890,6 +914,7 @@ function renderLivingAndAudioTab(container, slide) {
       intensity: intSel.value,
       microMotion: modeSel.value !== "off" && parseFloat(ampInp.value) > 0,
       floatMode: modeSel.value,
+      floatStyle: styleSel.value,
       floatAmplitude: parseFloat(ampInp.value),
       floatSpeed: parseFloat(spdInp.value),
       floatRatio: parseFloat(ratioInp.value),
@@ -898,7 +923,7 @@ function renderLivingAndAudioTab(container, slide) {
     (state.data.slides || []).forEach((s) => { delete s.livingStage; });
     setDirty(true);
     reloadStage(true);
-    setStatus("تنظیمات پس‌زمینهٔ زنده و شناوری نرم روی کل پروژه اعمال شد ✓");
+    setStatus("تنظیمات پس‌زمینهٔ زنده و لغزش ابریشمی روی کل پروژه اعمال شد ✓");
   });
   secLive.appendChild(applyAllBtn);
   container.appendChild(secLive);

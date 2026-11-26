@@ -39,32 +39,49 @@ Stage.template({
       A.enter(eyEl, "eyebrow");
     }
 
+    if (lively && preset === "spotlight") {
+      const glow = A.el("div", "abs", A.root, {
+        left: center && !A.scam ? "50%" : "68%", top: "48%",
+        width: "860px", height: "420px", transform: "translate(-50%, -50%)",
+        borderRadius: "999px", pointerEvents: "none",
+        background: `radial-gradient(circle, ${colColors.accent || "#F5B700"}22 0%, transparent 70%)`,
+      });
+      Stage.tl.fromTo(glow, { opacity: 0, scale: 0.78 }, { opacity: 1, scale: 1, duration: 0.95, ease: Stage.ease("fluid"), immediateRender: true }, 0.1);
+    }
+
     const t = A.text(col, s.title || "", "hero", "", { fontSize: (s.size || 92) + "px", maxWidth: "1500px" });
     A.field("title", t);
 
     let titleEnd = A.at("title");
     if (!lively) {
       titleEnd = A.enter(t, "title");
-    } else if (preset === "kinetic-hero" || preset === "curtain-editorial" || preset === "split-contrast") {
-      titleEnd = A.kinetic(t, { at: A.at("title"), role: "title", stagger: 0.055, y: 28, ease: "back" });
+    } else if (preset === "curtain-editorial") {
+      titleEnd = A.kinetic(t, { at: A.at("title"), mode: "rise-mask", role: "title", stagger: 0.048, y: 24, ease: "vox" });
+      A.sweepLine(col, { width: 220, height: 6, origin: center && !A.scam ? "50% 50%" : "100% 50%", at: A.at("title") + 0.08 });
+    } else if (preset === "split-contrast") {
+      titleEnd = A.kinetic(t, { at: A.at("title"), mode: "glide-rtl", role: "title", stagger: 0.045, ease: "vox" });
+    } else if (preset === "minimal-type") {
+      titleEnd = A.kinetic(t, { at: A.at("title"), mode: "editorial-blur", role: "title", stagger: 0.038, ease: "fluid" });
     } else if (preset === "glitch-pop") {
-      A.kinetic(t, { at: A.at("title"), role: "title", stagger: 0.035, x: -20, y: 12, scale: 0.9, ease: "snappy" });
-      titleEnd = A.at("title") + 0.55;
+      titleEnd = A.kinetic(t, { at: A.at("title"), mode: "pop-clean", role: "title", stagger: 0.036, ease: "spring" });
+    } else if (preset === "spotlight") {
+      titleEnd = A.kinetic(t, { at: A.at("title"), mode: "editorial-blur", role: "title", stagger: 0.042, ease: "vox" });
     } else {
-      titleEnd = A.enter(t, "title", 0, 0, { ease: preset === "spotlight" ? "spring" : "editorial", y: 28, scale: 0.96 });
+      // kinetic-hero
+      titleEnd = A.kinetic(t, { at: A.at("title"), mode: "rise-mask", role: "title", stagger: 0.05, y: 26, ease: "vox" });
     }
 
     if (s.subtitle) {
       const subEl = A.text(col, s.subtitle, "body", "", { color: colColors.muted, maxWidth: "1300px", fontSize: "38px" });
       A.field("subtitle", subEl);
-      A.enter(subEl, "body", 0, lively ? Math.max(0, titleEnd - A.at("body") - 0.15) : 0);
+      A.enter(subEl, "body", 0, lively ? Math.max(0, titleEnd - A.at("body") - 0.16) : 0, lively ? { ease: "fluid", y: 12 } : {});
     }
 
-    if (!s.image) {
+    if (!s.image && (!lively || preset !== "curtain-editorial")) {
       const r = A.el("div", "rule", col);
       r.style.transformOrigin = center && !A.scam ? "50% 50%" : "100% 50%";
-      if (lively) r.style.width = preset === "spotlight" ? "240px" : "180px";
-      Stage.tl.from(r, { scaleX: 0, duration: 0.6, ease: Stage.ease("power4"), immediateRender: true }, A.at("body", 1));
+      if (lively) r.style.width = preset === "spotlight" ? "260px" : "190px";
+      Stage.tl.from(r, { scaleX: 0, duration: 0.62, ease: Stage.ease("vox"), immediateRender: true }, A.at("body", 1));
     }
 
     A.fit(col, 0.5);

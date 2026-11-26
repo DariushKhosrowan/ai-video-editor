@@ -34,6 +34,16 @@ Stage.template({
       A.enter(ey, "eyebrow");
     }
 
+    if (lively && preset === "halo-pulse") {
+      const aura = A.el("div", "abs", A.root, {
+        left: centered ? "50%" : (A.scam ? "38%" : "68%"), top: "42%",
+        width: "560px", height: "340px", transform: "translate(-50%, -50%)",
+        borderRadius: "999px", pointerEvents: "none",
+        background: `radial-gradient(circle, ${A.color(s.color || "accent")}24 0%, transparent 70%)`,
+      });
+      Stage.tl.fromTo(aura, { opacity: 0, scale: 0.72 }, { opacity: 1, scale: 1, duration: 0.85, ease: Stage.ease("fluid"), immediateRender: true }, 0.1);
+    }
+
     const n = A.el("div", "t-number", col, {
       color: A.color(s.color || "accent"),
       fontSize: (s.size || (hasImg ? 190 : 230)) + "px",
@@ -45,8 +55,8 @@ Stage.template({
       prefix: s.prefix,
       suffix: s.suffix ?? s.unit,
       decimals: s.decimals,
-      enterEase: preset === "slam-count" || preset === "halo-pulse" ? "spring" : undefined,
-      scale: preset === "slam-count" ? 0.72 : undefined,
+      enterEase: preset === "slam-count" ? "vox" : preset === "halo-pulse" ? "fluid" : undefined,
+      scale: preset === "slam-count" ? 0.86 : (lively ? 0.94 : undefined),
     });
 
     if (lively && preset === "bar-meter") {
@@ -63,15 +73,20 @@ Stage.template({
     if (capText) {
       const capEl = A.text(col, capText, "h1", "", { maxWidth: "1100px" });
       A.field("caption", capEl);
-      if (lively && preset === "kinetic-stat") A.kinetic(capEl, { at: A.at("title") + 0.25, role: "title", stagger: 0.045 });
-      else A.enter(capEl, "title", 0, 0.25);
+      if (lively && preset === "kinetic-stat") {
+        A.kinetic(capEl, { at: A.at("title") + 0.22, mode: "rise-mask", role: "title", stagger: 0.045, ease: "vox" });
+      } else if (lively && preset === "dual-split") {
+        A.kinetic(capEl, { at: A.at("title") + 0.22, mode: "glide-rtl", role: "title", stagger: 0.04, ease: "vox" });
+      } else {
+        A.enter(capEl, "title", 0, 0.25, lively ? { ease: "vox" } : {});
+      }
     }
 
     const detText = s.detail ?? s.subtitle;
     if (detText) {
       const detEl = A.text(col, detText, "body", "", { color: A.th.colors.muted, maxWidth: "1000px" });
       A.field("detail", detEl);
-      A.enter(detEl, "body", 1, 0.25);
+      A.enter(detEl, "body", 1, 0.25, lively ? { ease: "fluid" } : {});
     }
 
     A.fit(col, 0.55);

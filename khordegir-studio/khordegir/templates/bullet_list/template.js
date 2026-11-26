@@ -17,19 +17,30 @@ Stage.template({
     });
     A.field("items", grid);
 
+    if (lively && preset === "timeline-rail" && cols === 1) {
+      const rail = A.el("div", "abs", A.root, {
+        right: right - 18, top: top + 16, bottom: bottom + 16, width: "5px",
+        borderRadius: "4px", background: A.color("accent"), transformOrigin: "50% 0%",
+      });
+      Stage.tl.from(rail, { scaleY: 0, opacity: 0, duration: 0.72, ease: Stage.ease("vox"), immediateRender: true }, A.at("card", 0));
+    }
+
     items.forEach((it, i) => {
       const o = typeof it === "string" ? { text: it } : it;
       const tone = Stage.T.tone(o.tone);
-      const card = A.el("div", "card" + (tone === "danger" ? " dng-b" : tone === "accent" ? " acc-b" : ""), grid, {
+      const isFocus = lively && preset === "spotlight-focus" && (tone === "accent" || (i === 0 && !items.some((x) => typeof x === "object" && Stage.T.tone(x.tone) === "accent")));
+      const card = A.el("div", "card" + (tone === "danger" ? " dng-b" : (tone === "accent" || isFocus) ? " acc-b" : ""), grid, {
         position: "relative",
         display: "flex",
         alignItems: "center",
         gap: "26px",
         padding: cols > 1 ? "30px 34px" : "24px 34px",
         minHeight: cols > 1 ? "190px" : "auto",
+        borderRadius: (lively && preset === "pill-grid") ? "28px" : undefined,
+        boxShadow: isFocus ? `0 14px 36px ${A.color("accent")}22` : undefined,
       });
       if (numbered) {
-        const numEl = A.text(card, String(o.n || i + 1), "value", "", {
+        A.text(card, String(o.n || i + 1), "value", "", {
           color: A.color(tone || "accent"),
           fontSize: "60px",
           minWidth: "56px",
@@ -40,9 +51,14 @@ Stage.template({
       if (o.kicker) A.text(tc, o.kicker, "eyebrow", "", { fontSize: "26px", color: A.color(tone || "accent") });
       const itemTextEl = A.text(tc, o.text, "h1", "", { fontSize: (cols > 1 ? 44 : 46) + "px" });
       if (lively && preset === "cascade-rows") {
-        A.kinetic(itemTextEl, { at: A.at("card", i), role: "body", stagger: 0.035, x: 20 });
+        A.kinetic(itemTextEl, { at: A.at("card", i) + 0.04, mode: "glide-rtl", role: "body", stagger: 0.032, ease: "vox" });
       }
-      A.enter(card, "card", i);
+      const enterOpts = !lively ? {} : (preset === "minimal-clean"
+        ? { ease: "fluid", y: 12 }
+        : preset === "cascade-rows"
+          ? { ease: "vox", x: 30, y: 0 }
+          : { ease: "vox" });
+      A.enter(card, "card", i, 0, enterOpts);
     });
     A.fit(grid, 0.5);
   },

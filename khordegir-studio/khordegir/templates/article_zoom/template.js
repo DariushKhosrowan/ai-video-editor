@@ -96,10 +96,10 @@ Stage.template({
         pointerEvents: "none",
       });
 
-      A.enter(stageBox, "image", 0, 0);
+      A.enter(stageBox, "image", 0, 0, { ease: "vox" });
       rig.style.transformOrigin = `${zx}% ${zy}%`;
-      Stage.tl.fromTo(rig, { scale: 1 }, { scale: zScale, duration: 1.35, ease: Stage.ease("power3"), immediateRender: true }, 0.85);
-      Stage.tl.fromTo(hlBand, { opacity: 0, scaleX: 0.35 }, { opacity: 1, scaleX: 1, duration: 0.65, ease: Stage.ease("power3"), immediateRender: true }, 1.15);
+      Stage.tl.fromTo(rig, { scale: 1 }, { scale: zScale, duration: 1.45, ease: Stage.ease("fluid"), immediateRender: true }, 0.85);
+      Stage.tl.fromTo(hlBand, { opacity: 0, scaleX: 0.35 }, { opacity: 1, scaleX: 1, duration: 0.68, ease: Stage.ease("vox"), immediateRender: true }, 1.15);
       if (Stage.fx) Stage.fx.cue(1.15, "swish", "article-zoom");
       return;
     }
@@ -274,15 +274,15 @@ Stage.template({
     const oy = fwRect.height ? ((fwRect.top + fwRect.height / 2 - vpRect.top) / Math.max(1, vpRect.height)) * 100 : 55;
     rig.style.transformOrigin = `${ox.toFixed(1)}% ${Math.max(25, Math.min(78, oy)).toFixed(1)}%`;
 
-    const startRotateX = preset === "tilt-glide" ? 6 : 2;
-    const startRotateY = preset === "tilt-glide" ? -4 : 0;
+    const startRotateX = preset === "tilt-glide" ? 4.5 : 1.5;
+    const startRotateY = preset === "tilt-glide" ? -3 : 0;
 
     // Smooth documentary timeline
-    A.enter(viewport, "card", 0, 0);
+    A.enter(viewport, "card", 0, 0, { ease: "vox" });
     Stage.tl.fromTo(
       rig,
       { scale: 0.94, rotateX: startRotateX, rotateY: startRotateY },
-      { scale: 1, rotateX: 0, rotateY: 0, duration: 0.72, ease: Stage.ease("power3"), immediateRender: true },
+      { scale: 1, rotateX: 0, rotateY: 0, duration: 0.78, ease: Stage.ease("fluid"), immediateRender: true },
       0.08
     );
 
@@ -290,8 +290,8 @@ Stage.template({
       rig,
       {
         scale: targetScale,
-        duration: 1.15,
-        ease: Stage.ease("power3"),
+        duration: 1.25,
+        ease: Stage.ease("fluid"),
       },
       0.85
     );
@@ -306,7 +306,7 @@ Stage.template({
     Stage.tl.fromTo(
       markerSpan,
       { backgroundSize: "0% 88%" },
-      { backgroundSize: "100% 88%", duration: 0.88, ease: Stage.ease("power3"), immediateRender: true },
+      { backgroundSize: "100% 88%", duration: 0.92, ease: Stage.ease("vox"), immediateRender: true },
       1.32
     );
     if (Stage.fx) Stage.fx.cue(1.32, "swish", focusRaw.slice(0, 30));

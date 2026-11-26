@@ -32,7 +32,7 @@ Stage.template({
           const len = Math.hypot(w, h), ang = Math.atan2(h, w) * 180 / Math.PI;
           const ln = A.el("div", "abs", rootLayer, { left: x, top: y - (el.width || 4) / 2, width: len, height: el.width || 4, background: c, transformOrigin: "0% 50%", transform: `rotate(${ang}deg)` });
           if (kind === "arrow") { A.el("div", "abs", ln, { right: -4, top: -(el.width || 4) * 2, width: 0, height: 0, borderTop: `${(el.width || 4) * 2.5}px solid transparent`, borderBottom: `${(el.width || 4) * 2.5}px solid transparent`, borderLeft: `${(el.width || 4) * 4}px solid ${c}` }); }
-          Stage.tl.from(ln, { scaleX: 0, duration: 0.6, ease: Stage.ease("power3"), immediateRender: true }, 0.1 + (+el.delay || 0.25));
+          Stage.tl.from(ln, { scaleX: 0, duration: 0.62, ease: Stage.ease("vox"), immediateRender: true }, 0.1 + (+el.delay || 0.25));
         } else {
           const r = A.el("div", "abs", rootLayer, { left: x, top: y, width: w, height: h, borderRadius: kind === "circle" ? "50%" : (el.radius ?? 16) + "px", background: el.fill ? A.color(el.fill) : (kind === "rect" && !el.fill ? c : "transparent"), border: el.fill ? `${el.width || 3}px solid ${c}` : "none" });
           A.enter(r, "card", 0, 0, roleAt(el));

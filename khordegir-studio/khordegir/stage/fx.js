@@ -43,7 +43,7 @@
 
   /* ---------------------------------------------------------- catalog of variants, presets, transitions, logo modes */
   FX.VARIANTS = ["rise", "slide", "mask", "blur", "scale"];
-  FX.MOTIONS = { breathe: 3, "zoom-out": 2, "pan-left": 1, "pan-right": 1, depth: 2 };
+  FX.MOTIONS = { breathe: 3, "gentle-drift": 2, "zoom-out": 2, "pan-left": 1, "pan-right": 1, depth: 2 };
 
   const PRESETS = {
     title_card: ["kinetic-hero", "spotlight", "curtain-editorial", "split-contrast", "minimal-type", "glitch-pop"],
@@ -187,6 +187,8 @@
     "diagonal-wipe",
     "zoom-iris",
     "shutter-bars",
+    "editorial-push",
+    "cinema-bars",
   ];
   const TRANSITION_LABELS = {
     "curtain-rtl": "پرده از راست به چپ",
@@ -197,6 +199,8 @@
     "diagonal-wipe": "پاک‌شدن مورب سینمایی",
     "zoom-iris": "گشایش زوم سریع",
     "shutter-bars": "کرکرهٔ ستونی",
+    "editorial-push": "پوش تحریریه سینمایی",
+    "cinema-bars": "باز شدن کادر سینمایی",
   };
 
   const LOGO_MOTIONS = [
@@ -226,7 +230,8 @@
     logoMotions: LOGO_MOTIONS,
     logoMotionLabels: LOGO_MOTION_LABELS,
     logoPositions: ["top-left", "top-right", "bottom-right", "bottom-left"],
-    imageMotions: ["breathe", "zoom-out", "pan-left", "pan-right", "depth", "none"],
+    imageMotions: ["breathe", "gentle-drift", "zoom-out", "pan-left", "pan-right", "depth", "none"],
+    floatStyles: ["silk-glide", "optical-breathe"],
   };
 
   const isRand = (v) => v === "random" || v === "تصادفی";
@@ -286,18 +291,18 @@
       return from;
     }
     if (v === "slide") {
-      if (textish) from.x = role === "title" ? 44 : 26;
-      else if (cardish) { from.x = 34; from.scale = 0.985; }
-      else if (role === "image") from.x = -36;
+      if (textish) from.x = role === "title" ? 36 : 22;
+      else if (cardish) { from.x = 28; from.scale = 0.985; }
+      else if (role === "image") from.x = -32;
     } else if (v === "mask") {
-      if (textish) { from.clipPath = "inset(-25% -6% 100% -6%)"; from.y = 14; }
+      if (textish) { from.clipPath = "inset(-18% -4% 100% -4%)"; from.y = 12; }
       else if (cardish) { from.clipPath = "inset(0% 0% 0% 100%)"; }
       else if (role === "image") { from.clipPath = "inset(0% 0% 0% 100% round 16px)"; }
     } else if (v === "blur") {
-      from.filter = "blur(14px)";
-      if (textish) from.y = 8; if (cardish) from.scale = 0.98; if (role === "image") from.scale = 1.03;
+      from.filter = "blur(10px)";
+      if (textish) from.y = 8; if (cardish) from.scale = 0.982; if (role === "image") from.scale = 1.028;
     } else if (v === "scale") {
-      from.scale = textish ? 0.96 : role === "image" ? 1.04 : 0.95;
+      from.scale = textish ? 0.968 : role === "image" ? 1.032 : 0.96;
     }
     return from;
   };
@@ -404,7 +409,7 @@
     gr.style.backgroundImage = `url(${grainTile()})`;
   };
 
-  /* "depth" idle variant: a big blurred copy of the image behind everything drifts the other way */
+  /* "depth" idle variant: a big blurred copy of the image behind everything drifts smoothly in continuous yoyo */
   FX.depth = function (src) {
     const stage = document.getElementById("stage");
     if (!stage || stage.querySelector(".depth")) return;
@@ -412,15 +417,18 @@
     const im = document.createElement("img"); im.src = src; d.appendChild(im);
     stage.insertBefore(d, stage.querySelector(".content"));
     S._imgs.push(im);
-    S.amb.fromTo(im, { scale: 1.12, x: -10 }, { scale: 1.16, x: 26, duration: 20, ease: "none" }, 0);
+    S.amb.fromTo(im, { scale: 1.11, x: -8, y: 0 }, {
+      scale: 1.15, x: 18, y: -6, duration: 28, ease: "sine.inOut", yoyo: true, repeat: 99, force3D: true,
+    }, 0);
   };
 
-  /* ---------------------------------------------------------- 8 slide transitions */
+  /* ---------------------------------------------------------- 10 slide transitions */
   FX.transitionIn = function (stage, slide, th) {
     const mode = (FX.cur && FX.cur.transition) || "soft-fade";
     const clip = th.clip || { fade: 0.3 };
     const col = th.colors || {};
     const fadeDur = clip.fade > 0 ? clip.fade : 0.35;
+    const content = stage.querySelector(".content");
 
     if (mode === "soft-fade") {
       const fade = document.createElement("div");
@@ -439,7 +447,8 @@
         borderLeft: `10px solid ${col.accent || "#FFD600"}`, pointerEvents: "none", zIndex: 90,
       });
       stage.appendChild(panel);
-      S.tl.fromTo(panel, { x: 0, opacity: 1 }, { x: -2000, opacity: 0, duration: 0.52, ease: "power4.out", immediateRender: true }, 0);
+      S.tl.fromTo(panel, { x: 0, opacity: 1 }, { x: -2000, opacity: 0, duration: 0.54, ease: S.ease("vox"), immediateRender: true }, 0);
+      if (content) S.tl.fromTo(content, { x: 26, scale: 1.015 }, { x: 0, scale: 1, duration: 0.56, ease: S.ease("fluid"), immediateRender: true }, 0.04);
       return;
     }
 
@@ -459,6 +468,7 @@
       stage.appendChild(slash);
       S.tl.fromTo(veil, { opacity: 1 }, { opacity: 0, duration: 0.36, ease: "power2.out", immediateRender: true }, 0.08);
       S.tl.fromTo(slash, { x: 200, opacity: 1 }, { x: -2350, opacity: 0.9, duration: 0.52, ease: "power3.inOut", immediateRender: true }, 0);
+      if (content) S.tl.fromTo(content, { scale: 1.022 }, { scale: 1, duration: 0.52, ease: S.ease("vox"), immediateRender: true }, 0.05);
       return;
     }
 
@@ -470,7 +480,8 @@
         clipPath: "circle(110% at 50% 50%)", pointerEvents: "none", zIndex: 90,
       });
       stage.appendChild(veil);
-      S.tl.fromTo(veil, { scale: 1, opacity: 1 }, { scale: 1.45, opacity: 0, duration: 0.48, ease: "power3.out", immediateRender: true }, 0);
+      S.tl.fromTo(veil, { scale: 1, opacity: 1 }, { scale: 1.48, opacity: 0, duration: 0.5, ease: S.ease("vox"), immediateRender: true }, 0);
+      if (content) S.tl.fromTo(content, { scale: 0.98 }, { scale: 1, duration: 0.5, ease: S.ease("fluid"), immediateRender: true }, 0.02);
       return;
     }
 
@@ -490,8 +501,9 @@
         pointerEvents: "none", zIndex: 90,
       });
       stage.appendChild(top); stage.appendChild(bot);
-      S.tl.fromTo(top, { y: 0, opacity: 1 }, { y: -560, opacity: 0, duration: 0.48, ease: "power4.out", immediateRender: true }, 0);
-      S.tl.fromTo(bot, { y: 0, opacity: 1 }, { y: 560, opacity: 0, duration: 0.48, ease: "power4.out", immediateRender: true }, 0);
+      S.tl.fromTo(top, { y: 0, opacity: 1 }, { y: -560, opacity: 0, duration: 0.5, ease: S.ease("vox"), immediateRender: true }, 0);
+      S.tl.fromTo(bot, { y: 0, opacity: 1 }, { y: 560, opacity: 0, duration: 0.5, ease: S.ease("vox"), immediateRender: true }, 0);
+      if (content) S.tl.fromTo(content, { scale: 1.02 }, { scale: 1, duration: 0.5, ease: S.ease("fluid"), immediateRender: true }, 0.03);
       return;
     }
 
@@ -504,18 +516,18 @@
         pointerEvents: "none", zIndex: 90,
       });
       stage.appendChild(wipe);
-      S.tl.fromTo(wipe, { x: 0, y: 0, opacity: 1 }, { x: -2400, y: 260, opacity: 0, duration: 0.5, ease: "power4.out", immediateRender: true }, 0);
+      S.tl.fromTo(wipe, { x: 0, y: 0, opacity: 1 }, { x: -2400, y: 260, opacity: 0, duration: 0.52, ease: S.ease("vox"), immediateRender: true }, 0);
+      if (content) S.tl.fromTo(content, { x: 18, scale: 1.018 }, { x: 0, scale: 1, duration: 0.52, ease: S.ease("fluid"), immediateRender: true }, 0.04);
       return;
     }
 
     if (mode === "zoom-iris") {
-      const content = stage.querySelector(".content");
       const fade = document.createElement("div");
       fade.className = "transition-overlay transition-zoom-iris";
       Object.assign(fade.style, { position: "absolute", inset: "0", background: col.bg || "#121212", pointerEvents: "none", zIndex: 90 });
       stage.appendChild(fade);
       S.tl.fromTo(fade, { opacity: 0.92 }, { opacity: 0, duration: Math.max(0.28, fadeDur), ease: "power2.out", immediateRender: true }, 0);
-      if (content) S.tl.fromTo(content, { scale: 1.04 }, { scale: 1, duration: 0.46, ease: "power3.out", immediateRender: true }, 0);
+      if (content) S.tl.fromTo(content, { scale: 1.04 }, { scale: 1, duration: 0.5, ease: S.ease("vox"), immediateRender: true }, 0);
       return;
     }
 
@@ -529,8 +541,42 @@
           transformOrigin: "50% 0%", pointerEvents: "none", zIndex: 90,
         });
         stage.appendChild(bar);
-        S.tl.fromTo(bar, { scaleY: 1, opacity: 1 }, { scaleY: 0, opacity: 0, duration: 0.42, ease: "power4.out", immediateRender: true }, i * 0.055);
+        S.tl.fromTo(bar, { scaleY: 1, opacity: 1 }, { scaleY: 0, opacity: 0, duration: 0.44, ease: S.ease("vox"), immediateRender: true }, i * 0.05);
       }
+      return;
+    }
+
+    if (mode === "editorial-push") {
+      const veil = document.createElement("div");
+      veil.className = "transition-overlay transition-editorial-push";
+      Object.assign(veil.style, {
+        position: "absolute", inset: "0", background: col.bg || "#121212",
+        borderLeft: `6px solid ${col.accent || "#FFD600"}`, pointerEvents: "none", zIndex: 90,
+      });
+      stage.appendChild(veil);
+      S.tl.fromTo(veil, { x: 0, opacity: 1 }, { x: -1960, opacity: 0.15, duration: 0.56, ease: S.ease("vox"), immediateRender: true }, 0);
+      if (content) S.tl.fromTo(content, { x: 72, opacity: 0.35, scale: 0.985 }, { x: 0, opacity: 1, scale: 1, duration: 0.62, ease: S.ease("vox"), immediateRender: true }, 0.02);
+      return;
+    }
+
+    if (mode === "cinema-bars") {
+      const topBar = document.createElement("div");
+      const botBar = document.createElement("div");
+      topBar.className = "transition-overlay transition-cinema-top";
+      botBar.className = "transition-overlay transition-cinema-bot";
+      Object.assign(topBar.style, {
+        position: "absolute", left: "0", right: "0", top: "0", height: "540px",
+        background: col.bg || "#0e0e11", pointerEvents: "none", zIndex: 90,
+      });
+      Object.assign(botBar.style, {
+        position: "absolute", left: "0", right: "0", bottom: "0", height: "540px",
+        background: col.bg || "#0e0e11", pointerEvents: "none", zIndex: 90,
+      });
+      stage.appendChild(topBar);
+      stage.appendChild(botBar);
+      S.tl.fromTo(topBar, { y: 0 }, { y: -560, duration: 0.58, ease: S.ease("fluid"), immediateRender: true }, 0);
+      S.tl.fromTo(botBar, { y: 0 }, { y: 560, duration: 0.58, ease: S.ease("fluid"), immediateRender: true }, 0);
+      if (content) S.tl.fromTo(content, { scale: 1.03 }, { scale: 1, duration: 0.64, ease: S.ease("vox"), immediateRender: true }, 0.04);
     }
   };
 
@@ -693,11 +739,11 @@
       });
       aurora.append(orb1, orb2);
 
-      S.amb.fromTo(orb1, { x: -45 * mult, y: -25 * mult, scale: 0.94 }, {
-        x: 55 * mult, y: 38 * mult, scale: 1.08, duration: 8.5, ease: "sine.inOut", yoyo: true, repeat: 99, force3D: true,
+      S.amb.fromTo(orb1, { x: -38 * mult, y: -22 * mult, scale: 0.95 }, {
+        x: 48 * mult, y: 32 * mult, scale: 1.06, duration: 19, ease: "sine.inOut", yoyo: true, repeat: 99, force3D: true,
       }, 0);
-      S.amb.fromTo(orb2, { x: 40 * mult, y: 30 * mult, scale: 1.04 }, {
-        x: -50 * mult, y: -35 * mult, scale: 0.92, duration: 10.5, ease: "sine.inOut", yoyo: true, repeat: 99, force3D: true,
+      S.amb.fromTo(orb2, { x: 34 * mult, y: 26 * mult, scale: 1.03 }, {
+        x: -44 * mult, y: -30 * mult, scale: 0.93, duration: 23, ease: "sine.inOut", yoyo: true, repeat: 99, force3D: true,
       }, 0);
     }
 
@@ -723,11 +769,11 @@
           opacity: ((isLight ? 0.05 : 0.085) * (0.6 + br() * 0.6)).toFixed(2),
         });
         bokehWash.appendChild(disc);
-        S.amb.fromTo(disc, { x: 0, y: 0, scale: 0.92 }, {
-          x: (br() - 0.5) * 140 * mult,
-          y: (br() - 0.5) * 90 * mult,
-          scale: 1.12,
-          duration: 16 + br() * 12,
+        S.amb.fromTo(disc, { x: 0, y: 0, scale: 0.94 }, {
+          x: (br() - 0.5) * 110 * mult,
+          y: (br() - 0.5) * 75 * mult,
+          scale: 1.08,
+          duration: 23 + br() * 14,
           ease: "sine.inOut",
           yoyo: true,
           repeat: 99,
@@ -813,29 +859,32 @@
     }
   };
 
-  /* ---------------------------------------------------------- Gentle Water-Float Motion (Items & Images Only) */
+  /* ---------------------------------------------------------- Imperceptible Silk-Glide Motion (Foreground Images Only by Default) */
   FX.applyMicroMotion = function (content, slide) {
     const ls = Object.assign({
       intensity: "podcast",
       microMotion: true,
-      floatMode: "selective",
-      floatAmplitude: 5,
-      floatSpeed: 0.75,
-      floatRatio: 0.65,
+      floatMode: "images-only",
+      floatStyle: "silk-glide",
+      floatAmplitude: 2,
+      floatSpeed: 0.45,
+      floatRatio: 0.75,
       floatSeed: 0,
     }, (slide && slide.livingStage) || {});
 
     S._floats = [];
     const disabled = ls.intensity === "off" || ls.microMotion === false || ls.floatMode === "off" || Number(ls.floatAmplitude) === 0;
-    const intensityMult = ls.intensity === "dynamic" ? 1.3 : ls.intensity === "subtle" ? 0.65 : 1.0;
-    const baseAmp = Math.max(0, Math.min(16, Number(ls.floatAmplitude ?? 5))) * intensityMult;
-    const speed = Math.max(0.2, Math.min(2.2, Number(ls.floatSpeed ?? 0.75)));
-    const ratio = Math.max(0.15, Math.min(1, Number(ls.floatRatio ?? 0.65)));
-    const mode = ls.floatMode || "selective";
+    const intensityMult = ls.intensity === "dynamic" ? 1.18 : ls.intensity === "subtle" ? 0.72 : 1.0;
+    const baseAmp = Math.max(0, Math.min(8, Number(ls.floatAmplitude ?? 2))) * intensityMult;
+    const speed = Math.max(0.15, Math.min(1.6, Number(ls.floatSpeed ?? 0.45)));
+    const ratio = Math.max(0.15, Math.min(1, Number(ls.floatRatio ?? 0.75)));
+    const mode = ls.floatMode || "images-only";
+    const floatStyle = ls.floatStyle || "silk-glide";
 
     S._floatCfg = {
       enabled: !disabled && baseAmp > 0,
       mode,
+      floatStyle,
       baseAmp,
       speed,
       ratio,
@@ -843,23 +892,25 @@
 
     if (disabled) return;
 
-    // Only float image frames & visual card/bubble items — NEVER plain texts, headlines, numbers, or chart axes
-    const frames = [...content.querySelectorAll(".frame")].filter((fr) => !fr.closest(".fullbleed"));
+    // Foreground visuals on top of background ONLY (.frame, [data-float="true"]) in default images-only mode.
+    // NEVER move plain text, bullet lists, cards, chat bubbles, or chart axes unless explicitly switched to selective/all-items.
+    const frames = [
+      ...content.querySelectorAll(".frame"),
+      ...content.querySelectorAll('[data-float="true"]'),
+    ].filter((fr, idx, arr) => !fr.closest(".fullbleed") && arr.indexOf(fr) === idx);
     const items = mode === "images-only"
       ? []
       : [...content.querySelectorAll(".card, .bubble, .stage-callout-box")];
 
-    const r = FX.rngFor(`${slide._seed || "live"}:water-float:${ls.floatSeed || 0}`);
+    const r = FX.rngFor(`${slide._seed || "live"}:silk-glide:${ls.floatSeed || 0}`);
     const chosen = [];
 
-    // Always gently float image frames (unless ratio is very low in selective mode with many frames)
     frames.forEach((el, idx) => {
-      if (mode !== "selective" || frames.length <= 1 || r() < Math.max(0.75, ratio) || idx === 0) {
+      if (mode !== "selective" || frames.length <= 1 || r() < Math.max(0.8, ratio) || idx === 0) {
         chosen.push({ el, kind: "image" });
       }
     });
 
-    // Randomly float only *some* cards/items in selective mode so the stage feels organic, calm, and alive
     items.forEach((el) => {
       if (mode === "all-items") {
         chosen.push({ el, kind: "item" });
@@ -872,34 +923,41 @@
       }
     });
 
-    // Guarantee at least 1 visual item/image floats if any eligible exist and ratio > 0
     if (!chosen.length && (frames.length || items.length)) {
       const pool = frames.length ? frames : items;
       chosen.push({ el: pool[Math.floor(r() * pool.length) % pool.length], kind: frames.length ? "image" : "item" });
     }
 
     chosen.forEach(({ el, kind }, idx) => {
-      const ir = FX.rngFor(`${slide._seed || "live"}:float-item:${ls.floatSeed || 0}:${idx}`);
-      const endAt = parseFloat(el.dataset && el.dataset.end) || 0.9;
-      el.style.willChange = "translate";
+      const ir = FX.rngFor(`${slide._seed || "live"}:silk-item:${ls.floatSeed || 0}:${idx}`);
+      const endAt = parseFloat(el.dataset && el.dataset.end) || 0.95;
+      el.style.willChange = "translate, transform";
       el.style.transformOrigin = "50% 50%";
+
+      const isImage = kind === "image";
+      const capAmp = isImage ? baseAmp : Math.min(2.2, baseAmp * 0.55);
+      const ampX = (0.72 + ir() * 0.28) * capAmp;
+      const ampY = (0.45 + ir() * 0.25) * capAmp;
+      const ampScale = (floatStyle === "optical-breathe" && isImage) ? 0.0022 : 0;
 
       S._floats.push({
         el,
         kind,
-        startAt: Math.max(0.65, endAt + 0.15),
-        ampY: (0.45 + ir() * 0.35) * Math.min(3.5, baseAmp * 0.6),
-        ampX: (0.15 + ir() * 0.2) * Math.min(1.5, baseAmp * 0.3),
+        startAt: Math.max(0.85, endAt + 0.3),
+        ampX,
+        ampY,
+        ampScale,
         ampRot: 0,
-        w1: 0.28 + ir() * 0.16,
-        w2: 0.18 + ir() * 0.12,
+        w1: 0.14 + ir() * 0.07,
+        w2: 0.09 + ir() * 0.06,
+        w3: 0.11 + ir() * 0.05,
         p1: ir() * Math.PI * 2,
         p2: ir() * Math.PI * 2,
         p3: ir() * Math.PI * 2,
       });
     });
 
-    // Very subtle slow specular light sweep on floating cards (never touches text)
+    // Ultra-subtle specular light sweep on cards (never touches text)
     content.querySelectorAll(".card").forEach((card, idx) => {
       if (idx > 3) return;
       const sheen = document.createElement("div");
@@ -907,12 +965,12 @@
       card.appendChild(sheen);
       S.amb.fromTo(sheen, { x: 240, opacity: 0 }, {
         x: -2200,
-        opacity: 0.55,
-        duration: 7.5,
+        opacity: 0.25,
+        duration: 11,
         ease: "sine.inOut",
         repeat: 99,
-        repeatDelay: 5.5,
-      }, 1.4 + idx * 0.9);
+        repeatDelay: 8,
+      }, 1.8 + idx * 1.1);
     });
   };
 
@@ -983,7 +1041,8 @@
       }
 
       // arrow-curved | arrow-straight
-      const markerId = `ann-arr-${idx}-${Date.now()}`;
+      S._annSeq = (S._annSeq || 0) + 1;
+      const markerId = `ann-arr-${idx}-${S._annSeq}`;
       const marker = document.createElementNS(svgNS, "marker");
       marker.setAttribute("id", markerId);
       marker.setAttribute("markerWidth", "8");
