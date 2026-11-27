@@ -1,0 +1,104 @@
+{
+  "name": "fact_check",
+  "label": "راستی‌آزمایی (Fact Check)",
+  "description": "نمایش ادعا در برابر سند و شواهد به همراه مهر حکم متحرک (درست، نادرست، گمراه‌کننده، نیمه‌درست یا اثبات‌نشده).",
+  "aliases": [
+    "fact-check",
+    "راستی-آزمایی",
+    "سنجش-ادعا"
+  ],
+  "category": "خبر",
+  "fields": [
+    {
+      "key": "eyebrow",
+      "label": "برچسب بالا (Eyebrow)",
+      "type": "text",
+      "default": "راستی‌آزمایی",
+      "editable": true
+    },
+    {
+      "key": "claim",
+      "label": "ادعای مطرح‌شده (Claim)",
+      "type": "textarea",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "verdict",
+      "label": "حکم نهایی (Verdict)",
+      "type": "select",
+      "options": [
+        ["false", "نادرست (False)"],
+        ["true", "درست (True)"],
+        ["misleading", "گمراه‌کننده (Misleading)"],
+        ["mixed", "نیمه‌درست (Mixed)"],
+        ["unverified", "اثبات‌نشده (Unverified)"]
+      ],
+      "default": "false",
+      "editable": true
+    },
+    {
+      "key": "verdict_label",
+      "label": "متن دلخواه مهر حکم (اختیاری)",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "evidence",
+      "label": "شواهد و توضیح سند (Evidence)",
+      "type": "textarea",
+      "editable": true
+    },
+    {
+      "key": "source",
+      "label": "منبع سند (Source)",
+      "type": "text",
+      "editable": false
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["verdict-stamp", "مهر حکم راستی‌آزمایی"],
+        ["evidence-split", "ادعا در برابر سند"],
+        ["editorial-audit", "بررسی تحریریه"],
+        ["minimal-check", "راستی‌آزمایی تمیز"]
+      ],
+      "default": "verdict-stamp",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["curtain-rtl", "پرده از راست به چپ"],
+        ["paper-tear", "پاره‌شدن کاغذ تحریریه"],
+        ["soft-fade", "محو نرم"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
+    }
+  ],
+  "example": {
+    "eyebrow": "بررسی ادعای پرانتشار",
+    "claim": "«مصرف قهوه در شب باعث توقف کامل رشد مغز بزرگسالان می‌شود.»",
+    "verdict": "false",
+    "evidence": "پژوهش‌های عصب‌شناسی نشان می‌دهد کافئین فقط کیفیت خواب عمیق را کاهش می‌دهد و هیچ مدرکی مبنی بر توقف رشد مغز وجود ندارد.",
+    "source": "Journal of Sleep Research · 2024",
+    "layout": "SLIDE"
+  },
+  "order": 230,
+  "version": 1
+}

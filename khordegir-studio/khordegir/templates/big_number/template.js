@@ -73,7 +73,10 @@ Stage.template({
     if (capText) {
       const capEl = A.text(col, capText, "h1", "", { maxWidth: "1100px" });
       A.field("caption", capEl);
-      if (lively && preset === "kinetic-stat") {
+      const explicitTextMotion = s.textMotion || s.text_motion || null;
+      if (explicitTextMotion) {
+        A.kinetic(capEl, { at: A.at("title") + 0.22, mode: explicitTextMotion, role: "title" });
+      } else if (lively && preset === "kinetic-stat") {
         A.kinetic(capEl, { at: A.at("title") + 0.22, mode: "rise-mask", role: "title", stagger: 0.045, ease: "vox" });
       } else if (lively && preset === "dual-split") {
         A.kinetic(capEl, { at: A.at("title") + 0.22, mode: "glide-rtl", role: "title", stagger: 0.04, ease: "vox" });

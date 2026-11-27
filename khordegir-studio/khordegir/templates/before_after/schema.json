@@ -1,0 +1,111 @@
+{
+  "name": "before_after",
+  "label": "قبل و بعد پرده‌ای (Before / After Wipe)",
+  "description": "مقایسه تصویری یا متنی قبل و بعد با پرده متحرک و خط جداکننده زنده؛ سازگار با عکس یا کارت متنی در هر ۳ فرمت.",
+  "aliases": [
+    "before_after_wipe",
+    "قبل-بعد-تصویری",
+    "پرده-مقایسه"
+  ],
+  "category": "شبکه‌های اجتماعی",
+  "fields": [
+    {
+      "key": "eyebrow",
+      "label": "برچسب بالا",
+      "type": "text",
+      "default": "مقایسه تغییر",
+      "editable": true
+    },
+    {
+      "key": "title",
+      "label": "عنوان مقایسه",
+      "type": "text",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "before_label",
+      "label": "برچسب قبل (Before)",
+      "type": "text",
+      "default": "قبل",
+      "editable": true
+    },
+    {
+      "key": "before_text",
+      "label": "متن یا توضیح قبل",
+      "type": "textarea",
+      "editable": true
+    },
+    {
+      "key": "before_image",
+      "label": "عکس قبل (اختیاری)",
+      "type": "image",
+      "editable": true
+    },
+    {
+      "key": "after_label",
+      "label": "برچسب بعد (After)",
+      "type": "text",
+      "default": "بعد",
+      "editable": true
+    },
+    {
+      "key": "after_text",
+      "label": "متن یا توضیح بعد",
+      "type": "textarea",
+      "editable": true
+    },
+    {
+      "key": "after_image",
+      "label": "عکس بعد (اختیاری)",
+      "type": "image",
+      "editable": true
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["curtain-wipe", "پرده مقایسه قبل و بعد"],
+        ["split-delta", "تغییر دو نیمه"],
+        ["slider-sweep", "اسلایدر زنده"],
+        ["minimal-compare", "مقایسه تمیز"]
+      ],
+      "default": "slider-sweep",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["split-curtain", "پرده دوقسمتی"],
+        ["curtain-rtl", "پرده از راست به چپ"],
+        ["soft-fade", "محو نرم"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
+    }
+  ],
+  "example": {
+    "eyebrow": "بازطراحی صفحه",
+    "title": "تأثیر حذف شلوغی بصری بر نرخ خوانایی",
+    "before_label": "قبل از بازطراحی",
+    "before_text": "۱۲ ویجت هم‌زمان، ۳ رنگ هشدار متضاد و زمان پیدا کردن دکمه اصلی: ۹ ثانیه.",
+    "after_label": "بعد از بازطراحی",
+    "after_text": "سلسله‌مراتب تایپوگرافی شفاف، یک کنش اصلی و زمان انجام کار: ۲.۱ ثانیه.",
+    "layout": "SLIDE"
+  },
+  "order": 300,
+  "version": 1
+}

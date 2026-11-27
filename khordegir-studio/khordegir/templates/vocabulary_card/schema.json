@@ -1,0 +1,24 @@
+{
+  "name": "vocabulary_card",
+  "aliases": ["vocabulary", "واژه‌آموزی", "کارت-لغت"],
+  "order": 36,
+  "category": "آموزشی و توضیحی (Education)",
+  "label": "کارت واژگان و تلفظ (Vocabulary + IPA)",
+  "description": "آموزش واژه با تلفظ آوانگاری IPA، نقش دستوری، معنای فارسی و جملهٔ مثال در سه فرمت",
+  "fields": [
+    { "key": "eyebrow", "label": "برچسب درس (Eyebrow)", "type": "text", "editable": true },
+    { "key": "word", "label": "واژه (Word)", "type": "text", "editable": true },
+    { "key": "ipa", "label": "تلفظ آوانگاری (IPA)", "type": "text", "editable": true },
+    { "key": "pos", "label": "نقش دستوری (Part of Speech)", "type": "text", "editable": true },
+    { "key": "meaning", "label": "معنی فارسی (Meaning)", "type": "textarea", "editable": true },
+    { "key": "example_sentence", "label": "جملهٔ مثال (Example)", "type": "textarea", "editable": true }
+  ],
+  "example": {
+    "eyebrow": "واژگان تخصصی رسانه",
+    "word": "Heuristic",
+    "ipa": "/hjʊəˈrɪs.tɪk/",
+    "pos": "اسم / صفت · Noun",
+    "meaning": "قاعدهٔ سرانگشتی یا میان‌بر ذهنی برای *تصمیم‌گیری سریع* در شرایط پیچیده",
+    "example_sentence": "مغز انسان برای صرفه‌جویی در انرژی، اغلب از __میان‌برهای ذهنی__ استفاده می‌کند."
+  }
+}

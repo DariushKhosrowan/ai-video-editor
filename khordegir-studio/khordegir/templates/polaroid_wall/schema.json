@@ -1,0 +1,28 @@
+{
+  "name": "polaroid_wall",
+  "aliases": ["polaroid", "دیوار-عکس", "پولاروید"],
+  "order": 45,
+  "category": "روایی و تحریریه (Story & Editorial)",
+  "label": "دیوار عکس پولاروید (Polaroid Wall)",
+  "description": "نمایش ۳ قاب عکس پولاروید با چسب کاغذی، زاویهٔ چرخش قطعی، زیرنویس و عمق پارالاکس",
+  "fields": [
+    { "key": "eyebrow", "label": "برچسب آرشیو (Eyebrow)", "type": "text", "editable": true },
+    { "key": "title", "label": "تیتر روایت (Title)", "type": "text", "editable": true },
+    { "key": "caption1", "label": "زیرنویس عکس ۱", "type": "text", "editable": true },
+    { "key": "caption2", "label": "زیرنویس عکس ۲", "type": "text", "editable": true },
+    { "key": "caption3", "label": "زیرنویس عکس ۳", "type": "text", "editable": true },
+    { "key": "photo1", "label": "عکس ۱", "type": "image" },
+    { "key": "photo2", "label": "عکس ۲", "type": "image" },
+    { "key": "photo3", "label": "عکس ۳", "type": "image" }
+  ],
+  "example": {
+    "eyebrow": "آرشیو مستند",
+    "title": "سه قاب که *روند تغییر شهر* را ثبت کرد",
+    "caption1": "آزمایشگاه اقتصادی · ۱۳۷۸",
+    "caption2": "استودیو ضبط مستقل · ۱۳۹۶",
+    "caption3": "نقشهٔ ارتباطات امروز · ۱۴۰۴",
+    "photo1": "/assets/economic-lab.jpg",
+    "photo2": "/assets/podcast-studio-mic.jpg",
+    "photo3": "/assets/vintage-globe.jpg"
+  }
+}

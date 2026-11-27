@@ -1,0 +1,100 @@
+{
+  "name": "comparison_table",
+  "label": "جدول مقایسه‌ای (Comparison Table)",
+  "description": "جدول مقایسه‌ای تمیز و تحریریه با ستون برنده برجسته، ورود پلکانی ردیف‌ها و سازگاری کامل با ۱۶:۹، ۹:۱۶ و ۱:۱.",
+  "aliases": [
+    "comparison-table",
+    "جدول-مقایسه",
+    "ماتریس"
+  ],
+  "category": "داده",
+  "fields": [
+    {
+      "key": "eyebrow",
+      "label": "برچسب بالا",
+      "type": "text",
+      "default": "مقایسه جامع",
+      "editable": true
+    },
+    {
+      "key": "title",
+      "label": "عنوان جدول",
+      "type": "text",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "columns",
+      "label": "ستون‌ها (با ویرگول جدا کنید؛ ستون اول نام معیار است)",
+      "type": "text",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "rows",
+      "label": "ردیف‌ها (هر خط یک ردیف؛ مقادیر با | جدا شوند)",
+      "type": "textarea",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "highlight_col",
+      "label": "شماره ستون برنده برای برجسته‌سازی (مثلاً ۲ یا ۳؛ ۰ = بدون برجسته)",
+      "type": "number",
+      "default": 3,
+      "editable": false
+    },
+    {
+      "key": "source",
+      "label": "منبع داده‌ها",
+      "type": "text",
+      "editable": false
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["matrix-sweep", "جدول مقایسه‌ای زنده"],
+        ["winner-glow", "تأکید برنده"],
+        ["editorial-grid", "شبکه تحریریه"],
+        ["minimal-table", "جدول ساده"]
+      ],
+      "default": "matrix-sweep",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["shutter-bars", "کرکره ستونی"],
+        ["curtain-rtl", "پرده از راست به چپ"],
+        ["soft-fade", "محو نرم"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
+    }
+  ],
+  "example": {
+    "eyebrow": "مقایسه فنی",
+    "title": "روش سنتی در برابر خط تولید خودکار استودیو",
+    "columns": "معیار, تدوین دستی, استودیوی خرده‌گیر",
+    "rows": "زمان تولید هر اسلاید | ۴۵ دقیقه | ۳ دقیقه\nدقت تایپوگرافی فارسی | متغیر | ۱۰۰٪ استاندارد\nخروجی سه فرمت هم‌زمان | ✕ | ✓\nبازتولید قطعی (Deterministic) | ✕ | ✓",
+    "highlight_col": 3,
+    "source": "آزمون داخلی خط تولید · ۱۴۰۴",
+    "layout": "SLIDE"
+  },
+  "order": 320,
+  "version": 1
+}

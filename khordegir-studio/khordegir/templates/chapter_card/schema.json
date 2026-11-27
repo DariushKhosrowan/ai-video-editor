@@ -1,0 +1,20 @@
+{
+  "name": "chapter_card",
+  "aliases": ["chapter-card", "کارت-فصل", "بخش-پادکست"],
+  "order": 41,
+  "category": "پادکست و گفتگو (Podcast & Talk)",
+  "label": "کارت فصل و بخش‌بندی (Chapter Card)",
+  "description": "بازکنندهٔ تمیز هر فصل از پادکست یا مستند با شماره فصل بزرگ، رسم خط هندسی و زمان بخش",
+  "fields": [
+    { "key": "number", "label": "شماره فصل (Chapter #)", "type": "text", "editable": true },
+    { "key": "title", "label": "عنوان فصل (Chapter Title)", "type": "text", "editable": true },
+    { "key": "subtitle", "label": "توضیح کوتاه (Subtitle)", "type": "textarea", "editable": true },
+    { "key": "timestamp", "label": "زمان شروع / مدت (Timestamp)", "type": "text", "editable": true }
+  ],
+  "example": {
+    "number": "۰۳",
+    "title": "چرا *انگیزه‌های پنهان* همه‌چیز را عوض می‌کنند؟",
+    "subtitle": "نگاهی به سه آزمایش واقعی در اقتصاد رفتاری و سیاست‌گذاری عمومی",
+    "timestamp": "۱۲:۴۰ — بخش سوم"
+  }
+}

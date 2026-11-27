@@ -1,0 +1,98 @@
+{
+  "name": "definition_card",
+  "label": "کارت تعریف و مفهوم (Definition Card)",
+  "description": "معرفی دقیق یک اصطلاح یا مفهوم علمی با تلفظ/معادل انگلیسی، تعریف روشن، مثال کاربردی و ریشه‌شناسی.",
+  "aliases": [
+    "definition-card",
+    "تعریف",
+    "واژه‌نامه"
+  ],
+  "category": "آموزش",
+  "fields": [
+    {
+      "key": "eyebrow",
+      "label": "دسته‌بندی / حوزه",
+      "type": "text",
+      "default": "واژه‌نامه مفهومی",
+      "editable": true
+    },
+    {
+      "key": "term",
+      "label": "واژه یا اصطلاح اصلی",
+      "type": "text",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "phonetic",
+      "label": "معادل انگلیسی / تلفظ",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "part_of_speech",
+      "label": "نوع واژه (مثلاً: اصطلاح اقتصادی)",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "definition",
+      "label": "تعریف روشن و دقیق",
+      "type": "textarea",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "example",
+      "label": "مثال کاربردی در جمله",
+      "type": "textarea",
+      "editable": true
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["lexicon-reveal", "واژه‌نامه تحریریه"],
+        ["editorial-entry", "مدخل خوانا"],
+        ["etymology-focus", "ریشه و کاربرد"],
+        ["minimal-term", "تعریف مینیمال"]
+      ],
+      "default": "lexicon-reveal",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["page-turn", "ورق زدن صفحه"],
+        ["curtain-rtl", "پرده از راست به چپ"],
+        ["soft-fade", "محو نرم"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
+    }
+  ],
+  "example": {
+    "eyebrow": "مفهوم کلیدی اقتصاد رفتاری",
+    "term": "اثر لنگراندازی",
+    "phonetic": "Anchoring Bias",
+    "part_of_speech": "سوگیری شناختی",
+    "definition": "تمایل ذهن انسان به اتکای بیش از حد بر اولین عدد یا اطلاعاتی که هنگام تصمیم‌گیری دریافت می‌کند.",
+    "example": "وقتی قیمت اولیه‌ای خط خورده و تخفیف کنار آن نوشته می‌شود، قیمت اول به عنوان «لنگر» قضاوت ما را هدایت می‌کند.",
+    "layout": "SLIDE"
+  },
+  "order": 250,
+  "version": 1
+}

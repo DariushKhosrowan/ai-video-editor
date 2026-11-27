@@ -258,16 +258,21 @@ function buildStagePayload(slide, idx) {
   copy._num = idx + 1;
 
   if (state.data) {
-    ["preset", "transition", "logo", "logo_motion", "logo_position", "logo_text", "livingStage", "motionCurve", "puppet"].forEach((k) => {
+    [
+      "preset", "transition", "transitionTiming", "transition_timing",
+      "motionPersonality", "motion_personality", "textMotion", "text_motion",
+      "camera", "cameraConfig", "ambience", "particles", "weather",
+      "logo", "logo_motion", "logo_position", "logo_text", "livingStage", "motionCurve", "puppet",
+    ].forEach((k) => {
       if (state.data[k] !== undefined && copy[k] === undefined) {
         copy[k] = JSON.parse(JSON.stringify(state.data[k]));
       }
     });
   }
 
-  if (copy.image) copy.image = resolveImageUrl(copy.image);
-  if (copy.src) copy.src = resolveImageUrl(copy.src);
-  if (copy.bg_image) copy.bg_image = resolveImageUrl(copy.bg_image);
+  ["image", "src", "bg_image", "before_image", "after_image", "avatar", "photo1", "photo2", "photo3"].forEach((ik) => {
+    if (copy[ik]) copy[ik] = resolveImageUrl(copy[ik]);
+  });
   if (copy.livingStage && typeof copy.livingStage === "object" && copy.livingStage.bgImage) {
     copy.livingStage.bgImage = resolveImageUrl(copy.livingStage.bgImage);
   }
@@ -1441,21 +1446,100 @@ function renderContentTab(container, slide) {
   sayGroup.appendChild(sayTa);
   secNar.appendChild(sayGroup);
 
+  // Beginner one-click Motion Personality (5 presets, A1)
+  const mpGroup = document.createElement("div");
+  mpGroup.className = "field-group";
+  mpGroup.innerHTML = `<div class="field-label-row"><strong>شخصیت حرکتی (Motion Personality)</strong></div>`;
+  const mpSel = document.createElement("select");
+  mpSel.className = "select-ctrl";
+  const mpMap = FX_CAT.motionPersonalities || {};
+  [
+    { value: "", label: "ارث‌بری از پروژه (پیش‌فرض تحریریه)" },
+    ...Object.keys(mpMap).map((k) => ({ value: k, label: mpMap[k].label || k })),
+  ].forEach((opt) => {
+    const o = document.createElement("option");
+    o.value = opt.value;
+    o.textContent = opt.label;
+    mpSel.appendChild(o);
+  });
+  mpSel.value = slide.motionPersonality || slide.motion_personality || "";
+  mpSel.addEventListener("change", () => {
+    delete slide.motion_personality;
+    if (!mpSel.value) delete slide.motionPersonality;
+    else slide.motionPersonality = mpSel.value;
+    setDirty(true);
+    reloadStage(true);
+  });
+  mpGroup.appendChild(mpSel);
+  secNar.appendChild(mpGroup);
+
+  // Beginner one-click Text Animation Suite (14 RTL-safe presets, A2)
+  const tmGroup = document.createElement("div");
+  tmGroup.className = "field-group";
+  tmGroup.innerHTML = `<div class="field-label-row"><strong>انیمیشن متن (Text Animation)</strong></div>`;
+  const tmSel = document.createElement("select");
+  tmSel.className = "select-ctrl";
+  const tmMap = FX_CAT.textAnimations || {};
+  [
+    { value: "", label: "خودکار بر اساس قالب (Auto)" },
+    ...Object.keys(tmMap).map((k) => ({ value: k, label: tmMap[k].label || k })),
+  ].forEach((opt) => {
+    const o = document.createElement("option");
+    o.value = opt.value;
+    o.textContent = opt.label;
+    tmSel.appendChild(o);
+  });
+  tmSel.value = slide.textMotion || slide.text_motion || "";
+  tmSel.addEventListener("change", () => {
+    delete slide.text_motion;
+    if (!tmSel.value) delete slide.textMotion;
+    else slide.textMotion = tmSel.value;
+    setDirty(true);
+    reloadStage(true);
+  });
+  tmGroup.appendChild(tmSel);
+  secNar.appendChild(tmGroup);
+
+  // Transition Library 2.0 (32 categorized broadcast transitions, A4)
   const trGroup = document.createElement("div");
   trGroup.className = "field-group";
-  trGroup.innerHTML = `<div class="field-label-row"><strong>ترنزیشن ورود اسلاید</strong></div>`;
+  trGroup.innerHTML = `<div class="field-label-row"><strong>ترنزیشن ورود اسلاید (Transition · 32)</strong></div>`;
   const trSel = document.createElement("select");
   trSel.className = "select-ctrl";
   [
-    { value: "", label: "ارث‌بری از سبک پروژه" },
+    { value: "", label: "ارث‌بری از سبک پروژه (Inherit)" },
     { value: "random", label: "🎲 تصادفی (با بذر قطعی)" },
-    ...(FX_CAT.transitions || []).map((v) => ({ value: v, label: FX_CAT.transitionLabels[v] || v })),
   ].forEach((tr) => {
     const o = document.createElement("option");
     o.value = tr.value;
     o.textContent = tr.label;
     trSel.appendChild(o);
   });
+  const trLib = FX_CAT.transitionLibrary || {};
+  const trCats = FX_CAT.transitionCategories || {};
+  const catOrder = Object.keys(trCats);
+  if (catOrder.length && Object.keys(trLib).length) {
+    catOrder.forEach((ck) => {
+      const members = (FX_CAT.transitions || []).filter((k) => trLib[k] && trLib[k].cat === ck);
+      if (!members.length) return;
+      const og = document.createElement("optgroup");
+      og.label = `${trCats[ck].label} (${trCats[ck].labelEn})`;
+      members.forEach((v) => {
+        const o = document.createElement("option");
+        o.value = v;
+        o.textContent = FX_CAT.transitionLabels[v] || v;
+        og.appendChild(o);
+      });
+      trSel.appendChild(og);
+    });
+  } else {
+    (FX_CAT.transitions || []).forEach((v) => {
+      const o = document.createElement("option");
+      o.value = v;
+      o.textContent = FX_CAT.transitionLabels[v] || v;
+      trSel.appendChild(o);
+    });
+  }
   trSel.value = slide.transition || "";
   trSel.addEventListener("change", () => {
     if (!trSel.value) delete slide.transition;
@@ -1464,7 +1548,229 @@ function renderContentTab(container, slide) {
     reloadStage(true);
   });
   trGroup.appendChild(trSel);
+
+  // Collapsible Advanced Transition Timing (duration, delay, ease, intensity)
+  const trAdv = document.createElement("details");
+  trAdv.className = "advanced-block";
+  trAdv.style.marginTop = "8px";
+  const trAdvSum = document.createElement("summary");
+  trAdvSum.textContent = "پیشرفته: زمان‌بندی ترنزیشن (Advanced Timing)";
+  trAdvSum.style.cursor = "pointer";
+  trAdvSum.style.fontSize = "12px";
+  trAdvSum.style.opacity = "0.85";
+  trAdv.appendChild(trAdvSum);
+
+  const curTT = slide.transitionTiming || slide.transition_timing || {};
+  const ensureTT = () => {
+    if (!slide.transitionTiming || typeof slide.transitionTiming !== "object") {
+      slide.transitionTiming = Object.assign({}, slide.transition_timing || {});
+      delete slide.transition_timing;
+    }
+    return slide.transitionTiming;
+  };
+  const ttGrid = document.createElement("div");
+  ttGrid.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;";
+
+  const mkNumCtrl = (labelFa, key, placeholder, min, max, step) => {
+    const wrap = document.createElement("label");
+    wrap.style.cssText = "display:flex;flex-direction:column;gap:4px;font-size:11px;";
+    const sp = document.createElement("span");
+    sp.textContent = labelFa;
+    const inp = document.createElement("input");
+    inp.type = "number";
+    inp.className = "text-input";
+    inp.min = String(min);
+    inp.max = String(max);
+    inp.step = String(step);
+    inp.placeholder = placeholder;
+    if (curTT[key] != null) inp.value = String(curTT[key]);
+    inp.addEventListener("change", () => {
+      const tt = ensureTT();
+      if (inp.value === "") delete tt[key];
+      else tt[key] = Number(inp.value);
+      if (!Object.keys(tt).length) delete slide.transitionTiming;
+      setDirty(true);
+      reloadStage(true);
+    });
+    wrap.append(sp, inp);
+    return wrap;
+  };
+
+  ttGrid.appendChild(mkNumCtrl("مدت (Duration s)", "duration", "0.52", 0.14, 1.8, 0.04));
+  ttGrid.appendChild(mkNumCtrl("تأخیر (Delay s)", "delay", "0.0", 0, 1.0, 0.05));
+  ttGrid.appendChild(mkNumCtrl("شدت (Intensity)", "intensity", "1.0", 0.25, 1.6, 0.1));
+
+  const easeWrap = document.createElement("label");
+  easeWrap.style.cssText = "display:flex;flex-direction:column;gap:4px;font-size:11px;";
+  const easeLbl = document.createElement("span");
+  easeLbl.textContent = "منحنی شتاب (Ease)";
+  const easeSel = document.createElement("select");
+  easeSel.className = "select-ctrl";
+  [
+    { value: "", label: "پیش‌فرض (Auto)" },
+    ...(FX_CAT.easingFamilies || ["vox", "fluid", "snappy", "silk", "sharp", "cinematic", "spring"]).map((k) => ({ value: k, label: k })),
+  ].forEach((opt) => {
+    const o = document.createElement("option");
+    o.value = opt.value;
+    o.textContent = opt.label;
+    easeSel.appendChild(o);
+  });
+  easeSel.value = curTT.ease || "";
+  easeSel.addEventListener("change", () => {
+    const tt = ensureTT();
+    if (!easeSel.value) delete tt.ease;
+    else tt.ease = easeSel.value;
+    if (!Object.keys(tt).length) delete slide.transitionTiming;
+    setDirty(true);
+    reloadStage(true);
+  });
+  easeWrap.append(easeLbl, easeSel);
+  ttGrid.appendChild(easeWrap);
+
+  trAdv.appendChild(ttGrid);
+  trGroup.appendChild(trAdv);
   secNar.appendChild(trGroup);
+
+  // Beginner one-click Virtual Camera (8 presets, A5) + Collapsible Advanced
+  const camGroup = document.createElement("div");
+  camGroup.className = "field-group";
+  camGroup.innerHTML = `<div class="field-label-row"><strong>دوربین مجازی (Virtual Camera · A5)</strong></div>`;
+  const camSel = document.createElement("select");
+  camSel.className = "select-ctrl";
+  const camMap = FX_CAT.cameraPresets || {};
+  const curCamObj = (slide.camera && typeof slide.camera === "object") ? slide.camera : null;
+  const curCamPreset = typeof slide.camera === "string" ? slide.camera : (curCamObj ? (curCamObj.preset || "none") : "");
+  [
+    { value: "", label: "ارث‌بری / ثابت (Inherit · Static)" },
+    ...Object.keys(camMap).map((k) => ({ value: k, label: camMap[k].label || k })),
+  ].forEach((opt) => {
+    const o = document.createElement("option");
+    o.value = opt.value;
+    o.textContent = opt.label;
+    camSel.appendChild(o);
+  });
+  camSel.value = curCamPreset;
+  camSel.addEventListener("change", () => {
+    if (!camSel.value || camSel.value === "none") delete slide.camera;
+    else if (curCamObj) slide.camera = Object.assign({}, curCamObj, { preset: camSel.value });
+    else slide.camera = camSel.value;
+    setDirty(true);
+    reloadStage(true);
+  });
+  camGroup.appendChild(camSel);
+
+  const camAdv = document.createElement("details");
+  camAdv.className = "advanced-block";
+  camAdv.style.marginTop = "6px";
+  const camAdvSum = document.createElement("summary");
+  camAdvSum.textContent = "پیشرفته: شدت، پارالاکس و فوکوس دوربین (Advanced Camera)";
+  camAdvSum.style.cssText = "cursor:pointer;font-size:12px;opacity:0.85;";
+  camAdv.appendChild(camAdvSum);
+  const camGrid = document.createElement("div");
+  camGrid.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;";
+  const ensureCamObj = () => {
+    if (!slide.camera || typeof slide.camera !== "object") {
+      slide.camera = { preset: typeof slide.camera === "string" ? slide.camera : "gentle-dolly-in" };
+    }
+    return slide.camera;
+  };
+  const mkCamNum = (lbl, key, ph, min, max, step) => {
+    const w = document.createElement("label");
+    w.style.cssText = "display:flex;flex-direction:column;gap:4px;font-size:11px;";
+    const sp = document.createElement("span");
+    sp.textContent = lbl;
+    const inp = document.createElement("input");
+    inp.type = "number";
+    inp.className = "text-input";
+    inp.min = String(min); inp.max = String(max); inp.step = String(step); inp.placeholder = ph;
+    if (curCamObj && curCamObj[key] != null) inp.value = String(curCamObj[key]);
+    inp.addEventListener("change", () => {
+      const c = ensureCamObj();
+      if (inp.value === "") delete c[key];
+      else c[key] = Number(inp.value);
+      setDirty(true);
+      reloadStage(true);
+    });
+    w.append(sp, inp);
+    return w;
+  };
+  camGrid.appendChild(mkCamNum("شدت (Intensity)", "intensity", "1.0", 0.2, 1.5, 0.1));
+  camGrid.appendChild(mkCamNum("پارالاکس (Parallax px)", "parallax", "14", 0, 42, 2));
+  camGrid.appendChild(mkCamNum("فوکوس (Focus Blur)", "focusBlur", "0", 0, 12, 0.5));
+  camGrid.appendChild(mkCamNum("لرزش ظریف (Shake)", "shakeAmp", "0", 0, 10, 0.5));
+  camAdv.appendChild(camGrid);
+  camGroup.appendChild(camAdv);
+  secNar.appendChild(camGroup);
+
+  // Beginner one-click Particles & Weather Ambience (8 presets, A6) + Collapsible Advanced
+  const ambGroup = document.createElement("div");
+  ambGroup.className = "field-group";
+  ambGroup.innerHTML = `<div class="field-label-row"><strong>ذرات و اتمسفر قطعی (Particles & Weather · A6)</strong></div>`;
+  const ambSel = document.createElement("select");
+  ambSel.className = "select-ctrl";
+  const ambMap = FX_CAT.ambiencePresets || {};
+  const curAmbObj = (slide.ambience && typeof slide.ambience === "object") ? slide.ambience : null;
+  const curAmbPreset = typeof slide.ambience === "string" ? slide.ambience : (curAmbObj ? (curAmbObj.preset || "none") : "");
+  [
+    { value: "", label: "ارث‌بری / خاموش (Inherit · Off)" },
+    ...Object.keys(ambMap).map((k) => ({ value: k, label: ambMap[k].label || k })),
+  ].forEach((opt) => {
+    const o = document.createElement("option");
+    o.value = opt.value;
+    o.textContent = opt.label;
+    ambSel.appendChild(o);
+  });
+  ambSel.value = curAmbPreset;
+  ambSel.addEventListener("change", () => {
+    if (!ambSel.value || ambSel.value === "none") delete slide.ambience;
+    else if (curAmbObj) slide.ambience = Object.assign({}, curAmbObj, { preset: ambSel.value });
+    else slide.ambience = ambSel.value;
+    setDirty(true);
+    reloadStage(true);
+  });
+  ambGroup.appendChild(ambSel);
+
+  const ambAdv = document.createElement("details");
+  ambAdv.className = "advanced-block";
+  ambAdv.style.marginTop = "6px";
+  const ambAdvSum = document.createElement("summary");
+  ambAdvSum.textContent = "پیشرفته: تراکم، سرعت و شفافیت ذرات (Advanced Particles)";
+  ambAdvSum.style.cssText = "cursor:pointer;font-size:12px;opacity:0.85;";
+  ambAdv.appendChild(ambAdvSum);
+  const ambGrid = document.createElement("div");
+  ambGrid.style.cssText = "display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px;";
+  const ensureAmbObj = () => {
+    if (!slide.ambience || typeof slide.ambience !== "object") {
+      slide.ambience = { preset: typeof slide.ambience === "string" ? slide.ambience : "studio-dust" };
+    }
+    return slide.ambience;
+  };
+  const mkAmbNum = (lbl, key, ph, min, max, step) => {
+    const w = document.createElement("label");
+    w.style.cssText = "display:flex;flex-direction:column;gap:4px;font-size:11px;";
+    const sp = document.createElement("span");
+    sp.textContent = lbl;
+    const inp = document.createElement("input");
+    inp.type = "number";
+    inp.className = "text-input";
+    inp.min = String(min); inp.max = String(max); inp.step = String(step); inp.placeholder = ph;
+    if (curAmbObj && curAmbObj[key] != null) inp.value = String(curAmbObj[key]);
+    inp.addEventListener("change", () => {
+      const a = ensureAmbObj();
+      if (inp.value === "") delete a[key];
+      else a[key] = Number(inp.value);
+      setDirty(true);
+      reloadStage(true);
+    });
+    w.append(sp, inp);
+    return w;
+  };
+  ambGrid.appendChild(mkAmbNum("تراکم (Density)", "density", "1.0", 0.35, 1.8, 0.1));
+  ambGrid.appendChild(mkAmbNum("سرعت (Speed)", "speed", "1.0", 0.2, 2.5, 0.1));
+  ambGrid.appendChild(mkAmbNum("شفافیت (Opacity)", "opacity", "0.45", 0.05, 1.0, 0.05));
+  ambAdv.appendChild(ambGrid);
+  ambGroup.appendChild(ambAdv);
+  secNar.appendChild(ambGroup);
 
   const lmGroup = document.createElement("div");
   lmGroup.className = "field-group";

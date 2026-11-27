@@ -46,14 +46,20 @@ slides:
 5. خروجی در `videos/my-video/out/` است. برای کپی مستقیم در پوشه‌ی HarkStudio:
    `python3 -m khordegir build videos/my-video --copy-to ~/HarkStudio --copy mp4,png,steps,prompter`
 
-## قالب‌ها
+## قالب‌ها (۴۶ قالب آماده)
 فهرست کامل با تصویر و فیلدها: [`khordegir/gallery/GALLERY.md`](khordegir/gallery/GALLERY.md) — اسم‌ها:
-`title_card` `big_number` `image_text` `bar_chart` `bullet_list` `line_chart` `compare` `counter_grid` `quote`
-`section_break` `image_full` `three_cards` `chat` `timeline` `chart` (از فایل JSON) `layers` (طرح لایه‌ای JSON) `cam`.
+- **اصلی و پایه:** `title_card` `big_number` `image_text` `bar_chart` `bullet_list` `line_chart` `compare` `counter_grid` `quote` `section_break` `image_full` `three_cards` `chat` `timeline` `chart` (از فایل JSON) `layers` (طرح لایه‌ای JSON) `cam` `article_zoom` `icon_grid` `quote_photo` `stat_split` `mascot_talk`
+- **خبری و تحلیلی (B1):** `breaking_news` (خبر فوری) · `fact_check` (درستی‌سنجی) · `two_source_compare` (مقایسه دو منبع) · `by_the_numbers` (به زبان آمار)
+- **آموزشی و توضیحی (B2):** `definition_card` (تعریف واژه) · `vocabulary_card` (لغت + IPA) · `quiz_poll` (کوئیز/نظرسنجی) · `flashcard_flip` (فلش‌کارت چرخشی) · `mistake_vs_correct` (غلط در برابر درست) · `step_by_step` (گام‌به‌گام)
+- **شبکه‌های اجتماعی و شورتس (B3):** `hook_title` (تیتر قلاب) · `list_countdown` (فهرست شمارش معکوس) · `before_after` (پرده قبل/بعد) · `comment_reply` (پاسخ به کامنت)
+- **پادکست و گفتگو (B4):** `audiogram` (آدیوگرام موج صدا) · `guest_card` (کارت مهمان) · `chapter_card` (کارت فصل)
+- **داده و نمودار v2 (B5):** `comparison_table` (جدول مقایسه) · `bar_race` (مسابقه میله‌ای) · `donut_chart` (دونات/دایره‌ای) · `map_choropleth` (نقشه آماری آفلاین)
+- **روایی و عروسک (B6–B7):** `newspaper_clip` (بریده روزنامه) · `polaroid_wall` (دیوار پولاروید) · `mascot_pip` (اسلاید + عروسک تصویر در تصویر)
 
 نکته‌ها:
-- رنگ داخل متن: `*زرد*` ، `~قرمز~` ، `_خاکستری_` ، `==هایلایت==` ، `__زیرخط__`
-- هر اسلاید خودکار یک سبک ورود/حرکت می‌گیرد (ثابت برای هر بار ساخت). برای عوض کردن: `seed: 2` یا `variant: mask` (rise/slide/mask/blur/scale) یا `motion: zoom-out`.
+- رنگ و تأکید داخل متن: `*زرد*` ، `~قرمز~` ، `_خاکستری_` ، `==هایلایت==` ، `__زیرخط__` ، `~~خط‌خورده~~`
+- **موتور کامل انیمیشن استودیو (بخش A کامل · A1 تا A8):** ۵ شخصیت حرکتی (`motionPersonality`: `editorial` / `calm` / `punchy` / `playful` / `news`)، ۱۴ انیمیشن متن ایمن برای فارسی (`textMotion`)، ابزار رسم و مرف مسیرهای SVG بدون پلاگین (`A.drawPath`, `A.morphPath`, `A.maskWipe`, `A.blobReveal`, `A.lineArtReveal`)، ۳۲ ترنزیشن قطعی در ۶ دسته (`transition` + `transitionTiming`)، دوربین مجازی قطعی با ۸ پریست دالی/پارالاکس/فوکوس/لرزش (`camera` با سقف زوم `1.06` به‌جز نقشه)، ۸ اتمسفر ذرات و آب‌وهوای بذردار (`ambience`: غبار، بوکه طلایی، کاغذرنگی، جرقه، باران، برف، شبکه خبری) و بسته نمودار نسخه ۲ (`barRace`, `donut`, `pie`, `area`, `scatter`, `choropleth`) — همگی کاملاً آفلاین و سه‌فرمته (`16:9`، `9:16`، `1:1`).
+- برای عوض کردن سبک خودکار هر اسلاید: `seed: 2` یا `variant: mask` (rise/slide/mask/blur/scale) یا `motion: zoom-out`.
 - طول کلیپ: `duration: 20` (پیش‌فرض ۶ ثانیه؛ ۲٫۵ ثانیه‌ی آخر کاملاً ثابت است چون OBS روی فریم آخر می‌ماند).
 - قدم‌های بیشتر روی یک اسلاید (هر PageDown در OBS): `steps: [{say: "...", layout: SCAM}]`
 - فقط چند اسلاید:  `--only 3,9-12` ؛ فقط عکس و PDF (سریع):  `--no-video`

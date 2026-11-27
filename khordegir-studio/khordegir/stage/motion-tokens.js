@@ -1076,6 +1076,254 @@
     };
   }
 
+  /* ============================================================================
+     STUDIO MOTION DESIGN SYSTEM v2 (A1 Motion Audit · A2 Text Suite · A4 Transitions 2.0)
+     Consistent semantic duration & stagger tokens, easing families, role-based overshoot
+     & anticipation rules, 5 brand motion personalities, 14 RTL-safe kinetic text presets,
+     and 32 deterministic broadcast transitions (all strictly respecting STAGE_ZOOM_CAP 1.06).
+     ============================================================================ */
+
+  const DURATION_TOKENS = {
+    instant:    0.10,
+    micro:      0.18,
+    snappy:     0.32,
+    base:       0.50,
+    expressive: 0.68,
+    dramatic:   0.92,
+    slow:       1.25,
+  };
+
+  const STAGGER_TOKENS = {
+    tight:     0.028,
+    normal:    0.048,
+    editorial: 0.072,
+    list:      0.085,
+    grid:      0.064,
+    dramatic:  0.115,
+  };
+
+  const EASING_FAMILIES = {
+    // Editorial & Broadcast (crisp deceleration, zero tacky bounce)
+    editorial:   [0.22, 1.00, 0.36, 1.00],
+    vox:         [0.19, 1.00, 0.22, 1.00],
+    silk:        [0.33, 1.00, 0.68, 1.00],
+    fluid:       [0.25, 1.00, 0.35, 1.00],
+    // Snappy & High-Energy
+    snappy:      [0.16, 1.00, 0.30, 1.00],
+    power4:      [0.16, 1.00, 0.30, 1.00],
+    power3:      [0.22, 1.00, 0.36, 1.00],
+    expo:        [0.19, 1.00, 0.22, 1.00],
+    // Mechanical / Newsroom
+    sharp:       [0.40, 0.00, 0.20, 1.00],
+    snap:        [0.08, 0.92, 0.18, 1.00],
+    // Cinematic
+    cinematic:   [0.45, 0.00, 0.15, 1.00],
+    dramatic:    [0.12, 0.96, 0.24, 1.00],
+    // Overshoot & Spring (GSAP named curves for crisp follow-through)
+    back:        "back.out(1.18)",
+    spring:      "back.out(1.36)",
+    pop:         "back.out(1.65)",
+    overshoot:   "back.out(1.45)",
+    elasticSoft: "elastic.out(1, 0.68)",
+  };
+
+  /* Role-based overshoot & anticipation discipline:
+     - Body prose, notes & photographs NEVER bounce or overshoot (keeps editorial authority).
+     - Badges, bubbles, cards, numbers & headlines may use calibrated anticipation + follow-through. */
+  const OVERSHOOT_RULES = {
+    eyebrow: { maxScale: 1.00, allowOvershoot: false, anticipationPx: 0,  followThrough: 0.00, durToken: "snappy",     defaultEase: "vox" },
+    title:   { maxScale: 1.02, allowOvershoot: false, anticipationPx: 4,  followThrough: 0.06, durToken: "base",       defaultEase: "vox" },
+    body:    { maxScale: 1.00, allowOvershoot: false, anticipationPx: 0,  followThrough: 0.00, durToken: "base",       defaultEase: "fluid" },
+    card:    { maxScale: 1.025, allowOvershoot: true, anticipationPx: 6,  followThrough: 0.08, durToken: "expressive", defaultEase: "vox" },
+    badge:   { maxScale: 1.055, allowOvershoot: true, anticipationPx: 5,  followThrough: 0.10, durToken: "snappy",     defaultEase: "spring" },
+    bubble:  { maxScale: 1.05, allowOvershoot: true,  anticipationPx: 5,  followThrough: 0.09, durToken: "snappy",     defaultEase: "back" },
+    number:  { maxScale: 1.04, allowOvershoot: true,  anticipationPx: 4,  followThrough: 0.08, durToken: "dramatic",   defaultEase: "power4" },
+    bar:     { maxScale: 1.015, allowOvershoot: false, anticipationPx: 0, followThrough: 0.05, durToken: "expressive", defaultEase: "vox" },
+    image:   { maxScale: 1.00, allowOvershoot: false, anticipationPx: 0,  followThrough: 0.00, durToken: "expressive", defaultEase: "power4" },
+    note:    { maxScale: 1.00, allowOvershoot: false, anticipationPx: 0,  followThrough: 0.00, durToken: "base",       defaultEase: "silk" },
+  };
+
+  /* 5 Beginner One-Click Motion Personalities (A1 & A8) */
+  const MOTION_PERSONALITIES = {
+    editorial: {
+      label: "تحریریه و مستند (Editorial)", labelEn: "Editorial",
+      durScale: 1.00, staggerScale: 1.00, ease: "vox", bodyEase: "fluid",
+      overshootMult: 0.4, anticipation: false, textPreset: "rise-mask",
+    },
+    calm: {
+      label: "آرام و سینمایی (Calm)", labelEn: "Calm",
+      durScale: 1.28, staggerScale: 1.25, ease: "silk", bodyEase: "silk",
+      overshootMult: 0.0, anticipation: false, textPreset: "editorial-blur",
+    },
+    punchy: {
+      label: "پرانرژی و شورتس (Punchy)", labelEn: "Punchy",
+      durScale: 0.78, staggerScale: 0.76, ease: "snappy", bodyEase: "power4",
+      overshootMult: 1.0, anticipation: true, textPreset: "punch-scale",
+    },
+    playful: {
+      label: "بازیگوش و پویا (Playful)", labelEn: "Playful",
+      durScale: 0.88, staggerScale: 0.85, ease: "spring", bodyEase: "back",
+      overshootMult: 1.35, anticipation: true, textPreset: "pop-clean",
+    },
+    news: {
+      label: "خبری و فوری (Newsroom)", labelEn: "Newsroom",
+      durScale: 0.72, staggerScale: 0.68, ease: "sharp", bodyEase: "snappy",
+      overshootMult: 0.2, anticipation: false, textPreset: "glide-rtl",
+    },
+  };
+
+  /* A2: 14 RTL-Safe Persian + English Kinetic Typography Presets */
+  const TEXT_ANIMATION_PRESETS = {
+    "rise-mask":       { label: "صعود از ماسک (Rise Mask)",           labelEn: "Rise Mask",       unit: "word", dur: "base",       stagger: "normal",    ease: "vox" },
+    "glide-rtl":       { label: "ورود کشیده از راست (Glide RTL)",      labelEn: "Glide RTL",       unit: "word", dur: "base",       stagger: "normal",    ease: "expo" },
+    "editorial-blur":  { label: "وضوح تحریریه (Editorial Blur)",       labelEn: "Editorial Blur",  unit: "word", dur: "expressive", stagger: "tight",     ease: "fluid" },
+    "pop-clean":       { label: "پرش تمیز (Pop Clean)",                labelEn: "Pop Clean",       unit: "word", dur: "snappy",     stagger: "tight",     ease: "spring" },
+    "cascade-3d":      { label: "آبشار سه‌بعدی (Cascade 3D)",           labelEn: "Cascade 3D",      unit: "word", dur: "expressive", stagger: "normal",    ease: "power4" },
+    "line-curtain":    { label: "پرده خط‌به‌خط (Line Curtain)",          labelEn: "Line Curtain",    unit: "line", dur: "expressive", stagger: "editorial", ease: "vox" },
+    "letter-wave":     { label: "موج حروف ایمن (RTL-Safe Letter Wave)", labelEn: "Letter Wave",     unit: "auto", dur: "snappy",     stagger: "tight",     ease: "spring" },
+    "typewriter":      { label: "تایپ‌رایتر با مکان‌نما (Typewriter)",   labelEn: "Typewriter",      unit: "type", dur: "dramatic",   stagger: "tight",     ease: "none" },
+    "highlight-sweep": { label: "ماژیک هایلایت (Highlight Sweep)",      labelEn: "Highlight Sweep", unit: "word", dur: "base",       stagger: "tight",     ease: "vox" },
+    "underline-draw":  { label: "خط‌کشی زیر متن (Underline Draw)",      labelEn: "Underline Draw",  unit: "word", dur: "base",       stagger: "tight",     ease: "expo" },
+    "strike-through":  { label: "خط زدن نمایشی (Strike Through)",       labelEn: "Strike Through",  unit: "word", dur: "base",       stagger: "tight",     ease: "sharp" },
+    "split-reveal":    { label: "شکاف مرکزی (Split Reveal)",            labelEn: "Split Reveal",    unit: "line", dur: "expressive", stagger: "normal",    ease: "cinematic" },
+    "punch-scale":     { label: "ضربه تیتر با پیش‌حرکت (Punch Scale)",   labelEn: "Punch Scale",     unit: "word", dur: "snappy",     stagger: "tight",     ease: "overshoot" },
+    "counting-text":   { label: "شمارش اعداد در متن (Counting Text)",   labelEn: "Counting Text",   unit: "count", dur: "dramatic",  stagger: "normal",    ease: "power3" },
+  };
+
+  /* A4: Transition Library 2.0 — 32 Deterministic Broadcast Transitions */
+  const TRANSITION_LIBRARY = {
+    // Classic & Editorial (6)
+    "soft-fade":        { cat: "classic",   label: "محو نرم (Soft Fade)",                 labelEn: "Soft Fade",        dur: 0.36, ease: "fluid" },
+    "curtain-rtl":      { cat: "classic",   label: "پرده از راست به چپ (Curtain RTL)",    labelEn: "Curtain RTL",      dur: 0.54, ease: "vox" },
+    "curtain-ltr":      { cat: "classic",   label: "پرده از چپ به راست (Curtain LTR)",    labelEn: "Curtain LTR",      dur: 0.54, ease: "vox" },
+    "editorial-push":   { cat: "classic",   label: "پوش تحریریه (Editorial Push)",         labelEn: "Editorial Push",   dur: 0.58, ease: "vox" },
+    "split-curtain":    { cat: "classic",   label: "پرده دوقسمتی بالا/پایین (Split)",      labelEn: "Split Curtain",    dur: 0.52, ease: "vox" },
+    "cinema-bars":      { cat: "classic",   label: "کادر سینمایی (Cinema Bars)",          labelEn: "Cinema Bars",      dur: 0.58, ease: "fluid" },
+    // Push & Slide (6)
+    "push-left":        { cat: "push",      label: "هل دادن به چپ (Push Left)",           labelEn: "Push Left",        dur: 0.48, ease: "snappy" },
+    "push-right":       { cat: "push",      label: "هل دادن به راست (Push Right)",        labelEn: "Push Right",       dur: 0.48, ease: "snappy" },
+    "push-up":          { cat: "push",      label: "هل دادن به بالا (Push Up)",           labelEn: "Push Up",          dur: 0.50, ease: "snappy" },
+    "push-down":        { cat: "push",      label: "هل دادن به پایین (Push Down)",        labelEn: "Push Down",        dur: 0.50, ease: "snappy" },
+    "slide-over-rtl":   { cat: "push",      label: "لغزش روی صفحه از راست (Slide RTL)",   labelEn: "Slide Over RTL",   dur: 0.52, ease: "expo" },
+    "slide-over-up":    { cat: "push",      label: "لغزش روی صفحه از پایین (Slide Up)",   labelEn: "Slide Over Up",    dur: 0.52, ease: "expo" },
+    // Zoom & Optical (within 1.06 cap) (4)
+    "zoom-iris":        { cat: "optical",   label: "گشایش زوم نرم (Zoom Iris)",           labelEn: "Zoom Iris",        dur: 0.50, ease: "vox" },
+    "zoom-through-in":  { cat: "optical",   label: "عبور زوم به داخل (Zoom Through In)",  labelEn: "Zoom Through In",  dur: 0.52, ease: "dramatic" },
+    "zoom-through-out": { cat: "optical",   label: "عبور زوم به بیرون (Zoom Through Out)",labelEn: "Zoom Through Out", dur: 0.52, ease: "dramatic" },
+    "iris-rise":        { cat: "optical",   label: "باز شدن دایره‌ای (Iris Rise)",        labelEn: "Iris Rise",        dur: 0.52, ease: "vox" },
+    // Wipes & Geometry (6)
+    "diagonal-wipe":    { cat: "wipe",      label: "پاک‌شدن مورب (Diagonal Wipe)",         labelEn: "Diagonal Wipe",    dur: 0.52, ease: "vox" },
+    "accent-slash":     { cat: "wipe",      label: "نوار تأکید مورب (Accent Slash)",       labelEn: "Accent Slash",     dur: 0.52, ease: "power3" },
+    "shutter-bars":     { cat: "wipe",      label: "کرکره ستونی (Shutter Bars)",          labelEn: "Shutter Bars",     dur: 0.56, ease: "vox" },
+    "venetian-blinds":  { cat: "wipe",      label: "پرده کرکره‌ای افقی (Venetian Blinds)", labelEn: "Venetian Blinds",  dur: 0.58, ease: "snappy" },
+    "clock-wipe":       { cat: "wipe",      label: "پاک‌شدن ساعتی (Clock Wipe)",           labelEn: "Clock Wipe",       dur: 0.60, ease: "cinematic" },
+    "diamond-iris":     { cat: "wipe",      label: "گشایش لوزی (Diamond Iris)",           labelEn: "Diamond Iris",     dur: 0.54, ease: "vox" },
+    // Whip & Motion Blur (3)
+    "whip-pan-rtl":     { cat: "whip",      label: "چرخش سریع به چپ (Whip Pan RTL)",      labelEn: "Whip Pan RTL",     dur: 0.38, ease: "snap" },
+    "whip-pan-ltr":     { cat: "whip",      label: "چرخش سریع به راست (Whip Pan LTR)",    labelEn: "Whip Pan LTR",     dur: 0.38, ease: "snap" },
+    "whip-pan-up":      { cat: "whip",      label: "چرخش سریع عمودی (Whip Pan Up)",       labelEn: "Whip Pan Up",      dur: 0.38, ease: "snap" },
+    // Creative, Organic & Editorial FX (7)
+    "ink-splash":       { cat: "creative",  label: "پخش جوهر ارگانیک (Ink Splash)",       labelEn: "Ink Splash",       dur: 0.64, ease: "cinematic" },
+    "paper-tear":       { cat: "creative",  label: "پاره‌شدن کاغذ تحریریه (Paper Tear)",   labelEn: "Paper Tear",       dur: 0.58, ease: "vox" },
+    "glitch-lite":      { cat: "creative",  label: "گلیچ سبک دیجیتال (Glitch Lite)",      labelEn: "Glitch Lite",      dur: 0.42, ease: "sharp" },
+    "light-leak":       { cat: "creative",  label: "نشت نور سینمایی (Light Leak)",       labelEn: "Light Leak",       dur: 0.66, ease: "fluid" },
+    "film-flash":       { cat: "creative",  label: "فلش نگاتیو فیلم (Film Flash)",        labelEn: "Film Flash",       dur: 0.44, ease: "power4" },
+    "rgb-split":        { cat: "creative",  label: "شکاف رنگی RGB (RGB Split)",           labelEn: "RGB Split",        dur: 0.44, ease: "snap" },
+    "page-turn":        { cat: "creative",  label: "ورق زدن صفحه (Page Turn)",            labelEn: "Page Turn",        dur: 0.62, ease: "cinematic" },
+  };
+
+  function resolveMotionPersonality(name) {
+    const k = String(name || "editorial").trim().toLowerCase();
+    return Object.assign({ name: MOTION_PERSONALITIES[k] ? k : "editorial" }, MOTION_PERSONALITIES[k] || MOTION_PERSONALITIES.editorial);
+  }
+
+  function resolveTransitionTiming(mode, rawTiming) {
+    const spec = TRANSITION_LIBRARY[mode] || TRANSITION_LIBRARY["soft-fade"];
+    const t = (rawTiming && typeof rawTiming === "object") ? rawTiming : {};
+    return {
+      duration: numClamp(t.duration, spec.dur, 0.14, 1.80),
+      delay: numClamp(t.delay, 0.0, 0.0, 1.0),
+      ease: (typeof t.ease === "string" && t.ease.trim()) ? t.ease.trim() : spec.ease,
+      intensity: numClamp(t.intensity, 1.0, 0.25, 1.6),
+      accentColor: (typeof t.accentColor === "string" && t.accentColor.trim()) ? t.accentColor.trim() : null,
+    };
+  }
+
+  /* A3: Licence-Safe Shape & Mask Wipe Presets */
+  const SHAPE_WIPE_PRESETS = {
+    "wipe-rtl":      { label: "پاک‌شدن از راست (Wipe RTL)",      labelEn: "Wipe RTL" },
+    "wipe-ltr":      { label: "پاک‌شدن از چپ (Wipe LTR)",        labelEn: "Wipe LTR" },
+    "wipe-up":       { label: "پاک‌شدن به بالا (Wipe Up)",        labelEn: "Wipe Up" },
+    "wipe-down":     { label: "پاک‌شدن به پایین (Wipe Down)",     labelEn: "Wipe Down" },
+    "circle-reveal": { label: "گشایش دایره‌ای (Circle Reveal)",   labelEn: "Circle Reveal" },
+    "blob-organic":  { label: "پرده ارگانیک مایع (Blob Reveal)",  labelEn: "Organic Blob" },
+    "diagonal-cut":  { label: "برش مورب (Diagonal Cut)",          labelEn: "Diagonal Cut" },
+  };
+
+  /* A5: Deterministic Virtual Camera Presets (strictly obeys STAGE_ZOOM_CAP = 1.06 except allowMapCamera) */
+  const CAMERA_PRESETS = {
+    "none":            { label: "ثابت (بدون دوربین)",                   labelEn: "Static",          dolly: 0,     panX: 0,  panY: 0,  parallax: 0,   focusBlur: 0,   shakeAmp: 0 },
+    "gentle-dolly-in": { label: "دالی نرم به داخل (Gentle Dolly In)",   labelEn: "Gentle Dolly In", dolly: 0.045, panX: -8, panY: -4, parallax: 14,  focusBlur: 0,   shakeAmp: 0 },
+    "gentle-dolly-out":{ label: "دالی نرم به بیرون (Gentle Dolly Out)", labelEn: "Gentle Dolly Out",dolly: -0.045,panX: 8,  panY: 4,  parallax: 14,  focusBlur: 0,   shakeAmp: 0 },
+    "parallax-drift":  { label: "عمق پارالاکس (Parallax Drift)",        labelEn: "Parallax Drift",  dolly: 0.025, panX: 18, panY: -6, parallax: 26,  focusBlur: 0,   shakeAmp: 0 },
+    "focus-pull":      { label: "تغییر فوکوس سینمایی (Focus Pull)",     labelEn: "Focus Pull",      dolly: 0.03,  panX: -6, panY: 0,  parallax: 12,  focusBlur: 6.5, shakeAmp: 0 },
+    "handheld-subtle": { label: "دوربین دستی ظریف (Subtle Handheld)",   labelEn: "Subtle Handheld", dolly: 0.02,  panX: 6,  panY: 4,  parallax: 10,  focusBlur: 0,   shakeAmp: 2.8 },
+    "impact-shake":    { label: "ضربه کوتاه خبری (Impact Shake)",       labelEn: "Impact Shake",    dolly: 0.035, panX: 0,  panY: 0,  parallax: 8,   focusBlur: 0,   shakeAmp: 6.0, shakeDecay: 2.8 },
+    "editorial-pan":   { label: "پن تحریریه آرام (Editorial Pan)",       labelEn: "Editorial Pan",   dolly: 0.02,  panX: -24,panY: -3, parallax: 18,  focusBlur: 0,   shakeAmp: 0 },
+  };
+
+  /* A6: Deterministic Seeded Particles & Weather Ambience Presets */
+  const AMBIENCE_PRESETS = {
+    "none":                 { label: "بدون ذرات (Off)",                     labelEn: "None",        count: 0,  speed: 0,    opacity: 0 },
+    "studio-dust":          { label: "غبار نوری استودیو (Studio Dust)",     labelEn: "Studio Dust", count: 28, speed: 1.0,  opacity: 0.42 },
+    "gold-bokeh":           { label: "بوکه طلایی سینمایی (Gold Bokeh)",     labelEn: "Gold Bokeh",  count: 16, speed: 0.65, opacity: 0.34 },
+    "celebration-confetti": { label: "کاغذرنگی جشن (Confetti)",             labelEn: "Confetti",    count: 34, speed: 1.25, opacity: 0.82 },
+    "warm-sparks":          { label: "جرقه‌های گرم صعودی (Warm Sparks)",    labelEn: "Warm Sparks", count: 24, speed: 1.35, opacity: 0.68 },
+    "soft-rain":            { label: "باران ملایم (Soft Rain)",             labelEn: "Soft Rain",   count: 36, speed: 1.8,  opacity: 0.38 },
+    "gentle-snow":          { label: "برف آرام (Gentle Snow)",              labelEn: "Gentle Snow", count: 32, speed: 0.85, opacity: 0.56 },
+    "news-grid-pulse":      { label: "پالس شبکه خبری (News Grid Pulse)",    labelEn: "News Grid",   count: 18, speed: 0.9,  opacity: 0.28 },
+  };
+
+  function resolveCameraConfig(rawCam, opts = {}) {
+    const isStr = typeof rawCam === "string";
+    const obj = (rawCam && typeof rawCam === "object") ? rawCam : {};
+    const presetKey = String(isStr ? rawCam : (obj.preset || "none")).trim().toLowerCase();
+    const spec = CAMERA_PRESETS[presetKey] || CAMERA_PRESETS.none;
+    const allowMap = Boolean(opts.allowMapCamera || obj.allowMapCamera);
+    const maxZoom = allowMap ? 1.45 : STAGE_ZOOM_CAP;
+    const intensity = numClamp(obj.intensity, 1.0, 0.2, 1.5);
+    const dollyRaw = (obj.dolly != null ? Number(obj.dolly) : spec.dolly) * intensity;
+    const maxDelta = maxZoom - 1.0;
+    return {
+      preset: CAMERA_PRESETS[presetKey] ? presetKey : "none",
+      intensity,
+      dolly: Math.max(-maxDelta, Math.min(maxDelta, Number.isFinite(dollyRaw) ? dollyRaw : 0)),
+      panX: numClamp(obj.panX != null ? obj.panX : spec.panX * intensity, 0, -48, 48),
+      panY: numClamp(obj.panY != null ? obj.panY : spec.panY * intensity, 0, -32, 32),
+      parallax: numClamp(obj.parallax != null ? obj.parallax : spec.parallax * intensity, 0, 0, 42),
+      focusBlur: numClamp(obj.focusBlur != null ? obj.focusBlur : spec.focusBlur * intensity, 0, 0, 12),
+      shakeAmp: numClamp(obj.shakeAmp != null ? obj.shakeAmp : spec.shakeAmp * intensity, 0, 0, 10),
+      shakeDecay: numClamp(obj.shakeDecay != null ? obj.shakeDecay : (spec.shakeDecay || 0), 0, 0, 8),
+      allowMapCamera: allowMap,
+      maxZoom,
+    };
+  }
+
+  function resolveAmbienceConfig(rawAmb) {
+    const isStr = typeof rawAmb === "string";
+    const obj = (rawAmb && typeof rawAmb === "object") ? rawAmb : {};
+    const presetKey = String(isStr ? rawAmb : (obj.preset || "none")).trim().toLowerCase();
+    const spec = AMBIENCE_PRESETS[presetKey] || AMBIENCE_PRESETS.none;
+    const density = numClamp(obj.density, 1.0, 0.35, 1.8);
+    return {
+      preset: AMBIENCE_PRESETS[presetKey] ? presetKey : "none",
+      count: spec.count > 0 ? Math.max(6, Math.min(64, Math.round(spec.count * density))) : 0,
+      speed: numClamp(obj.speed != null ? obj.speed : spec.speed, spec.speed, 0.2, 2.5),
+      opacity: numClamp(obj.opacity != null ? obj.opacity : spec.opacity, spec.opacity, 0.05, 1.0),
+      color: (typeof obj.color === "string" && obj.color.trim()) ? obj.color.trim() : null,
+    };
+  }
+
   function clampZoom(val, fallback = 1) {
     const n = Number(val);
     if (!Number.isFinite(n)) return Math.min(STAGE_ZOOM_CAP, Math.max(0.5, Number(fallback) || 1));
@@ -1091,6 +1339,16 @@
     STAGE_ZOOM_CAP,
     PUPPET_SCHEMA_VERSION,
     FORMATS,
+    DURATION_TOKENS,
+    STAGGER_TOKENS,
+    EASING_FAMILIES,
+    OVERSHOOT_RULES,
+    MOTION_PERSONALITIES,
+    TEXT_ANIMATION_PRESETS,
+    TRANSITION_LIBRARY,
+    SHAPE_WIPE_PRESETS,
+    CAMERA_PRESETS,
+    AMBIENCE_PRESETS,
     MASCOT_PALETTE,
     CHARACTERS,
     ACCESSORIES,
@@ -1107,6 +1365,10 @@
     SECONDARY_DEFAULTS,
     DEFAULT_LIVE_HOTKEYS,
     DEFAULT_MIDI_MAP,
+    resolveMotionPersonality,
+    resolveTransitionTiming,
+    resolveCameraConfig,
+    resolveAmbienceConfig,
     resolveCharacterPalette,
     resolveToneConfig,
     resolvePuppetConfig,
@@ -1117,3 +1379,5 @@
     resolveFormat,
   };
 })();
+
+

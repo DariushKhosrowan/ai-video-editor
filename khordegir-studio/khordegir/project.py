@@ -292,6 +292,17 @@ def load_project(
     inherited_keys = (
         "preset",
         "transition",
+        "transitionTiming",
+        "transition_timing",
+        "motionPersonality",
+        "motion_personality",
+        "textMotion",
+        "text_motion",
+        "camera",
+        "cameraConfig",
+        "ambience",
+        "particles",
+        "weather",
         "logo",
         "logo_motion",
         "logo_position",
@@ -317,7 +328,7 @@ def load_project(
                 s[ik] = json.loads(json.dumps(data[ik]))
 
         # Resolve image URIs for local rendering when file exists
-        for img_key in ("image", "src", "bg_image"):
+        for img_key in ("image", "src", "bg_image", "before_image", "after_image", "avatar", "photo1", "photo2", "photo3"):
             if isinstance(s.get(img_key), str):
                 resolved = resolve_asset_path(pdir, s[img_key], kind="image")
                 if resolved is not None:
@@ -331,7 +342,7 @@ def load_project(
         has_puppet_context = (
             slide_puppet_raw is not None
             or proj_puppet_raw is not None
-            or tpl_norm == "mascot_talk"
+            or tpl_norm in ("mascot_talk", "mascot_pip")
             or isinstance(s.get("mascot"), dict)
         )
         active_cal: Optional[Dict[str, Any]] = None

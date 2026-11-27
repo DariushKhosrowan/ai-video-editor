@@ -22,7 +22,7 @@ Stage.template({
         right: right - 18, top: top + 16, bottom: bottom + 16, width: "5px",
         borderRadius: "4px", background: A.color("accent"), transformOrigin: "50% 0%",
       });
-      Stage.tl.from(rail, { scaleY: 0, opacity: 0, duration: 0.72, ease: Stage.ease("vox"), immediateRender: true }, A.at("card", 0));
+      Stage.tl.from(rail, { scaleY: 0, opacity: 0, duration: A.dur("expressive"), ease: Stage.ease("vox"), immediateRender: true }, A.at("card", 0));
     }
 
     items.forEach((it, i) => {

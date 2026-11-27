@@ -16,9 +16,9 @@ Stage.template({
     if (!A.scam) f.classList.add("fullbleed");
     if (!A.scam) {
       if (lively && preset === "curtain-reveal") {
-        Stage.tl.fromTo(f, { clipPath: "inset(0% 0% 0% 100%)", opacity: 0.4 }, { clipPath: "inset(0% 0% 0% 0%)", opacity: 1, duration: 0.85, ease: Stage.ease("vox"), immediateRender: true }, 0);
+        Stage.tl.fromTo(f, { clipPath: "inset(0% 0% 0% 100%)", opacity: 0.4 }, { clipPath: "inset(0% 0% 0% 0%)", opacity: 1, duration: A.dur("dramatic"), ease: Stage.ease("vox"), immediateRender: true }, 0);
       } else {
-        Stage.tl.from(f, { opacity: 0, duration: 0.72, ease: Stage.ease("fluid"), immediateRender: true }, 0);
+        Stage.tl.from(f, { opacity: 0, duration: A.dur("expressive"), ease: Stage.ease("fluid"), immediateRender: true }, 0);
       }
     }
     if (lively && preset === "noir-vignette" && !A.scam) {
@@ -56,7 +56,10 @@ Stage.template({
       A.field("title", col);
       if (s.title) {
         const tEl = A.text(col, s.title, "hero", "", { fontSize: "68px" });
-        if (lively && preset === "parallax-caption") {
+        const explicitTextMotion = s.textMotion || s.text_motion || null;
+        if (explicitTextMotion) {
+          A.kinetic(tEl, { at: A.at("title") + 0.16, mode: explicitTextMotion, role: "title" });
+        } else if (lively && preset === "parallax-caption") {
           A.kinetic(tEl, { at: A.at("title") + 0.16, mode: "rise-mask", role: "title", stagger: 0.045, ease: "vox" });
         } else {
           A.enter(tEl, "title", 0, 0.2, lively ? { ease: "vox" } : {});

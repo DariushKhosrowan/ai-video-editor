@@ -1,0 +1,34 @@
+{
+  "name": "donut_chart",
+  "aliases": ["donut", "pie-chart", "نمودار-دونات", "نمودار-دایره‌ای"],
+  "order": 43,
+  "category": "داده و نمودار (Data & Charts)",
+  "label": "نمودار دونات و دایره‌ای (Donut / Pie)",
+  "description": "نمایش سهم‌بندی درصدی با رسم حلقه‌های SVG، شمارشگر عدد میانی و کارت‌های راهنما در سه فرمت",
+  "fields": [
+    { "key": "eyebrow", "label": "برچسب بالا (Eyebrow)", "type": "text", "editable": true },
+    { "key": "title", "label": "عنوان نمودار (Title)", "type": "text", "editable": true },
+    { "key": "center_label", "label": "برچسب مرکز حلقه (Center Label)", "type": "text", "editable": true },
+    { "key": "suffix", "label": "پسوند عدد مرکز (Suffix)", "type": "text", "editable": true },
+    {
+      "key": "data",
+      "label": "بخش‌ها (برچسب، مقدار، رنگ)",
+      "type": "table",
+      "columns": [["label", "عنوان"], ["value", "مقدار"], ["color", "رنگ"]]
+    },
+    { "key": "pie", "label": "حالت دایره کامل (Pie)", "type": "boolean" }
+  ],
+  "example": {
+    "eyebrow": "ترکیب بودجه تولید",
+    "title": "سهم هر بخش در *ساخت یک ویدیوی تحلیلی*",
+    "center_label": "کل زمان",
+    "suffix": " ساعت",
+    "data": [
+      { "label": "پژوهش و راستی‌آزمایی", "value": 42, "color": "accent" },
+      { "label": "نگارش فیلمنامه", "value": 24, "color": "#38BDF8" },
+      { "label": "موشن‌گرافیک و تدوین", "value": 22, "color": "good" },
+      { "label": "صداگذاری و میکس", "value": 12, "color": "danger" }
+    ],
+    "pie": false
+  }
+}

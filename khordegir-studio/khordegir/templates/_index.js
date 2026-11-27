@@ -1738,6 +1738,319 @@ window.TEMPLATE_INDEX = [
   }
  },
  {
+  "name": "by_the_numbers",
+  "js": "../templates/by_the_numbers/template.js",
+  "schema": {
+   "name": "by_the_numbers",
+   "aliases": [
+    "by-the-numbers",
+    "به-زبان-آمار",
+    "آمار-سه-گانه"
+   ],
+   "order": 35,
+   "category": "خبری و تحلیلی (News & Explainer)",
+   "label": "به زبان آمار (By the Numbers)",
+   "description": "نمایش سه‌تایی آمارهای کلیدی خبری با شمارشگر عدد و جداکنندهٔ خطی رسم‌شونده در سه فرمت",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "روتیتر (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "تیتر اصلی (Title)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "summary",
+     "label": "جمع‌بندی کوتاه (Summary)",
+     "type": "textarea",
+     "editable": true
+    },
+    {
+     "key": "items",
+     "label": "آمارها (عدد، پسوند، توضیح)",
+     "type": "table",
+     "columns": [
+      [
+       "value",
+       "عدد"
+      ],
+      [
+       "suffix",
+       "پسوند"
+      ],
+      [
+       "label",
+       "عنوان"
+      ],
+      [
+       "color",
+       "رنگ"
+      ]
+     ]
+    },
+    {
+     "key": "source",
+     "label": "منبع (Source)",
+     "type": "text"
+    }
+   ],
+   "example": {
+    "eyebrow": "گزارش به زبان آمار",
+    "title": "سه عدد که *کل ماجرا* را توضیح می‌دهد",
+    "summary": "داده‌های رسمی سال گذشته نشان می‌دهد تغییر رفتار مخاطبان بسیار سریع‌تر از پیش‌بینی‌ها بوده است.",
+    "items": [
+     {
+      "value": 74,
+      "suffix": "٪",
+      "label": "رشد تماشای ویدیوهای کوتاه عمودی",
+      "color": "accent"
+     },
+     {
+      "value": 3.4,
+      "suffix": " برابر",
+      "label": "افزایش ماندگاری با موشن‌گرافیک دقیق",
+      "color": "good"
+     },
+     {
+      "value": 18,
+      "suffix": " ثانیه",
+      "label": "میانگین زمان تصمیم مخاطب در شروع ویدیو",
+      "color": "danger"
+     }
+    ],
+    "source": "مرکز پژوهش رسانه‌های دیجیتال · ۱۴۰۴"
+   }
+  }
+ },
+ {
+  "name": "vocabulary_card",
+  "js": "../templates/vocabulary_card/template.js",
+  "schema": {
+   "name": "vocabulary_card",
+   "aliases": [
+    "vocabulary",
+    "واژه‌آموزی",
+    "کارت-لغت"
+   ],
+   "order": 36,
+   "category": "آموزشی و توضیحی (Education)",
+   "label": "کارت واژگان و تلفظ (Vocabulary + IPA)",
+   "description": "آموزش واژه با تلفظ آوانگاری IPA، نقش دستوری، معنای فارسی و جملهٔ مثال در سه فرمت",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب درس (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "word",
+     "label": "واژه (Word)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "ipa",
+     "label": "تلفظ آوانگاری (IPA)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "pos",
+     "label": "نقش دستوری (Part of Speech)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "meaning",
+     "label": "معنی فارسی (Meaning)",
+     "type": "textarea",
+     "editable": true
+    },
+    {
+     "key": "example_sentence",
+     "label": "جملهٔ مثال (Example)",
+     "type": "textarea",
+     "editable": true
+    }
+   ],
+   "example": {
+    "eyebrow": "واژگان تخصصی رسانه",
+    "word": "Heuristic",
+    "ipa": "/hjʊəˈrɪs.tɪk/",
+    "pos": "اسم / صفت · Noun",
+    "meaning": "قاعدهٔ سرانگشتی یا میان‌بر ذهنی برای *تصمیم‌گیری سریع* در شرایط پیچیده",
+    "example_sentence": "مغز انسان برای صرفه‌جویی در انرژی، اغلب از __میان‌برهای ذهنی__ استفاده می‌کند."
+   }
+  }
+ },
+ {
+  "name": "flashcard_flip",
+  "js": "../templates/flashcard_flip/template.js",
+  "schema": {
+   "name": "flashcard_flip",
+   "aliases": [
+    "flashcard",
+    "فلش‌کارت",
+    "کارت-حافظه"
+   ],
+   "order": 37,
+   "category": "آموزشی و توضیحی (Education)",
+   "label": "فلش‌کارت آموزشی (Flashcard Flip)",
+   "description": "کارت پرسش و پاسخ با نوار زمان و چرخش قطعی روی زمان‌بندی برای نمایش پاسخ صحیح",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "موضوع درس (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "front",
+     "label": "روی کارت / پرسش (Front)",
+     "type": "textarea",
+     "editable": true
+    },
+    {
+     "key": "back",
+     "label": "پشت کارت / پاسخ (Back)",
+     "type": "textarea",
+     "editable": true
+    },
+    {
+     "key": "hint",
+     "label": "نکتهٔ تکمیلی (Hint)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "flip_at",
+     "label": "زمان چرخش به پاسخ (ثانیه)",
+     "type": "number",
+     "default": 2.4
+    }
+   ],
+   "example": {
+    "eyebrow": "مرور سریع · فلش‌کارت",
+    "front": "تفاوت اصلی *خطای شناختی* با *اشتباه محاسباتی* چیست؟",
+    "back": "خطای شناختی یک ==الگوی تکرارشونده و سیستماتیک== در قضاوت است، نه یک اشتباه تصادفی.",
+    "hint": "کانمن و تورسکی، ۱۹۷۴",
+    "flip_at": 2.4
+   }
+  }
+ },
+ {
+  "name": "list_countdown",
+  "js": "../templates/list_countdown/template.js",
+  "schema": {
+   "name": "list_countdown",
+   "aliases": [
+    "countdown-list",
+    "شمارش-معکوس-فهرست",
+    "فهرست-برترین"
+   ],
+   "order": 38,
+   "category": "شبکه‌های اجتماعی و شورتس (Social & Shorts)",
+   "label": "فهرست شمارش معکوس (List Countdown)",
+   "description": "فهرست رتبه‌بندی پرانرژی (از ۵ تا ۱ یا ۳ تا ۱) ویژه شورتس، ریلز و معرفی نکات کلیدی",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "تیتر اصلی (Title)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "items",
+     "label": "موارد فهرست (هر خط یک مورد)",
+     "type": "list"
+    },
+    {
+     "key": "cta",
+     "label": "جمع‌بندی کوتاه پایین (Footer Note)",
+     "type": "text",
+     "editable": true
+    }
+   ],
+   "example": {
+    "eyebrow": "۳ قانون طلایی تدوین",
+    "title": "چرا ویدیوهای *۳ ثانیه اول* برنده می‌شوند؟",
+    "items": [
+     "شروع مستقیم با پرسش یا عدد تکان‌دهنده، بدون مقدمهٔ طولانی",
+     "ریتم منظم حرکت متن هم‌زمان با تاکیدهای صدای گوینده",
+     "کادر تمیز با کنتراست بالا برای خوانایی روی موبایل"
+    ],
+    "cta": "کدام مورد را بیشتر رعایت می‌کنید؟"
+   }
+  }
+ },
+ {
+  "name": "comment_reply",
+  "js": "../templates/comment_reply/template.js",
+  "schema": {
+   "name": "comment_reply",
+   "aliases": [
+    "comment-reply",
+    "پاسخ-کامنت",
+    "دیدگاه-مخاطب"
+   ],
+   "order": 39,
+   "category": "شبکه‌های اجتماعی و شورتس (Social & Shorts)",
+   "label": "کارت پاسخ به کامنت (Comment Reply)",
+   "description": "نمایش دیدگاه مخاطب و پاسخ کانال برای ویدیوهای کوتاه و شورتس با شمارشگر لایک",
+   "fields": [
+    {
+     "key": "username",
+     "label": "نام کاربر (Username)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "comment",
+     "label": "متن دیدگاه مخاطب (Comment)",
+     "type": "textarea",
+     "editable": true
+    },
+    {
+     "key": "reply_author",
+     "label": "نام پاسخ‌دهنده (Channel)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "reply",
+     "label": "پاسخ شما (Reply)",
+     "type": "textarea",
+     "editable": true
+    },
+    {
+     "key": "likes",
+     "label": "تعداد لایک (Likes)",
+     "type": "number",
+     "default": 420
+    }
+   ],
+   "example": {
+    "username": "@sara_media",
+    "comment": "آیا برای ساخت انیمیشن‌های دقیق فارسی حتماً باید از افترافکت استفاده کنیم؟",
+    "reply_author": "خرده‌گیر استودیو",
+    "reply": "خیر! با ==موتور حرکت آفلاین== و تایپوگرافی ایمن فارسی، همه‌چیز با یک فایل `video.yaml` ساخته می‌شود.",
+    "likes": 1280
+   }
+  }
+ },
+ {
   "name": "bullet_list",
   "js": "../templates/bullet_list/template.js",
   "schema": {
@@ -1915,6 +2228,538 @@ window.TEMPLATE_INDEX = [
    "version": 1
   },
   "css": "../templates/bullet_list/template.css"
+ },
+ {
+  "name": "guest_card",
+  "js": "../templates/guest_card/template.js",
+  "schema": {
+   "name": "guest_card",
+   "aliases": [
+    "guest-card",
+    "معرفی-مهمان-کارت",
+    "کارت-مهمان"
+   ],
+   "order": 40,
+   "category": "پادکست و گفتگو (Podcast & Talk)",
+   "label": "کارت معرفی مهمان (Guest Card)",
+   "description": "کارت معرفی مهمان پادکست یا گفتگوی زنده با عکس/آواتار، سمت، سوابق و نوار تأکید متحرک",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب قسمت (Episode Tag)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "name",
+     "label": "نام مهمان (Guest Name)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "role",
+     "label": "سمت / تخصص (Role)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "bio",
+     "label": "معرفی کوتاه (Bio)",
+     "type": "textarea",
+     "editable": true
+    },
+    {
+     "key": "credentials",
+     "label": "سوابق کلیدی (هر خط یک مورد)",
+     "type": "list"
+    },
+    {
+     "key": "avatar",
+     "label": "تصویر مهمان (اختیاری)",
+     "type": "image"
+    }
+   ],
+   "example": {
+    "eyebrow": "مهمان قسمت ۴۲",
+    "name": "دکتر *آرش کاظمی*",
+    "role": "پژوهشگر اقتصاد رفتاری و طراحی سیاست عمومی",
+    "bio": "نویسندهٔ سه کتاب دربارهٔ تصمیم‌گیری جمعی و مدرس تحلیل داده در رسانه‌های مستقل.",
+    "credentials": [
+     "دکتری اقتصاد رفتاری و نظریه بازی‌ها",
+     "مدیر آزمایشگاه تحلیل رسانه‌های دیجیتال",
+     "مشاور ارشد مستندهای داده‌محور"
+    ]
+   }
+  }
+ },
+ {
+  "name": "chapter_card",
+  "js": "../templates/chapter_card/template.js",
+  "schema": {
+   "name": "chapter_card",
+   "aliases": [
+    "chapter-card",
+    "کارت-فصل",
+    "بخش-پادکست"
+   ],
+   "order": 41,
+   "category": "پادکست و گفتگو (Podcast & Talk)",
+   "label": "کارت فصل و بخش‌بندی (Chapter Card)",
+   "description": "بازکنندهٔ تمیز هر فصل از پادکست یا مستند با شماره فصل بزرگ، رسم خط هندسی و زمان بخش",
+   "fields": [
+    {
+     "key": "number",
+     "label": "شماره فصل (Chapter #)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "عنوان فصل (Chapter Title)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "subtitle",
+     "label": "توضیح کوتاه (Subtitle)",
+     "type": "textarea",
+     "editable": true
+    },
+    {
+     "key": "timestamp",
+     "label": "زمان شروع / مدت (Timestamp)",
+     "type": "text",
+     "editable": true
+    }
+   ],
+   "example": {
+    "number": "۰۳",
+    "title": "چرا *انگیزه‌های پنهان* همه‌چیز را عوض می‌کنند؟",
+    "subtitle": "نگاهی به سه آزمایش واقعی در اقتصاد رفتاری و سیاست‌گذاری عمومی",
+    "timestamp": "۱۲:۴۰ — بخش سوم"
+   }
+  }
+ },
+ {
+  "name": "bar_race",
+  "js": "../templates/bar_race/template.js",
+  "schema": {
+   "name": "bar_race",
+   "aliases": [
+    "bar-race",
+    "مسابقه-میله",
+    "نمودار-مسابقه‌ای"
+   ],
+   "order": 42,
+   "category": "داده و نمودار (Data & Charts)",
+   "label": "نمودار مسابقه میله‌ای (Bar Race)",
+   "description": "رقابت پویا و کاملاً قطعی میله‌ها در طول زمان با جابه‌جایی روان رتبه و شمارشگر دوره",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "عنوان نمودار (Title)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "suffix",
+     "label": "واحد / پسوند (Unit)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "frames",
+     "label": "دوره‌های زمانی (JSON)",
+     "type": "series"
+    },
+    {
+     "key": "source",
+     "label": "منبع (Source)",
+     "type": "text"
+    }
+   ],
+   "example": {
+    "eyebrow": "روند پنج‌ساله",
+    "title": "مسابقه رشد *سهم پلتفرم‌های ویدیویی*",
+    "suffix": " میلیون",
+    "frames": [
+     {
+      "period": "۱۳۹۹",
+      "values": {
+       "یوتیوب": 48,
+       "اینستاگرام": 42,
+       "آپارات": 28,
+       "تیک‌تاک": 18,
+       "تلگرام": 34
+      }
+     },
+     {
+      "period": "۱۴۰۱",
+      "values": {
+       "یوتیوب": 68,
+       "اینستاگرام": 64,
+       "آپارات": 39,
+       "تیک‌تاک": 54,
+       "تلگرام": 45
+      }
+     },
+     {
+      "period": "۱۴۰۳",
+      "values": {
+       "یوتیوب": 92,
+       "اینستاگرام": 81,
+       "آپارات": 48,
+       "تیک‌تاک": 88,
+       "تلگرام": 58
+      }
+     }
+    ],
+    "source": "گزارش تحلیلی استودیو · ۱۴۰۴"
+   }
+  }
+ },
+ {
+  "name": "donut_chart",
+  "js": "../templates/donut_chart/template.js",
+  "schema": {
+   "name": "donut_chart",
+   "aliases": [
+    "donut",
+    "pie-chart",
+    "نمودار-دونات",
+    "نمودار-دایره‌ای"
+   ],
+   "order": 43,
+   "category": "داده و نمودار (Data & Charts)",
+   "label": "نمودار دونات و دایره‌ای (Donut / Pie)",
+   "description": "نمایش سهم‌بندی درصدی با رسم حلقه‌های SVG، شمارشگر عدد میانی و کارت‌های راهنما در سه فرمت",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "عنوان نمودار (Title)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "center_label",
+     "label": "برچسب مرکز حلقه (Center Label)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "suffix",
+     "label": "پسوند عدد مرکز (Suffix)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "data",
+     "label": "بخش‌ها (برچسب، مقدار، رنگ)",
+     "type": "table",
+     "columns": [
+      [
+       "label",
+       "عنوان"
+      ],
+      [
+       "value",
+       "مقدار"
+      ],
+      [
+       "color",
+       "رنگ"
+      ]
+     ]
+    },
+    {
+     "key": "pie",
+     "label": "حالت دایره کامل (Pie)",
+     "type": "boolean"
+    }
+   ],
+   "example": {
+    "eyebrow": "ترکیب بودجه تولید",
+    "title": "سهم هر بخش در *ساخت یک ویدیوی تحلیلی*",
+    "center_label": "کل زمان",
+    "suffix": " ساعت",
+    "data": [
+     {
+      "label": "پژوهش و راستی‌آزمایی",
+      "value": 42,
+      "color": "accent"
+     },
+     {
+      "label": "نگارش فیلمنامه",
+      "value": 24,
+      "color": "#38BDF8"
+     },
+     {
+      "label": "موشن‌گرافیک و تدوین",
+      "value": 22,
+      "color": "good"
+     },
+     {
+      "label": "صداگذاری و میکس",
+      "value": 12,
+      "color": "danger"
+     }
+    ],
+    "pie": false
+   }
+  }
+ },
+ {
+  "name": "map_choropleth",
+  "js": "../templates/map_choropleth/template.js",
+  "schema": {
+   "name": "map_choropleth",
+   "aliases": [
+    "choropleth",
+    "نقشه-آماری",
+    "نقشه-پراکندگی"
+   ],
+   "order": 44,
+   "category": "داده و نمودار (Data & Charts)",
+   "label": "نقشه آماری آفلاین (Map Choropleth)",
+   "description": "نقشهٔ برداری کاملاً آفلاین با رنگ‌بندی شدت داده‌ها بر اساس مناطق، پین‌های متحرک و پشتیبانی از دوربین نقشه",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "تیتر نقشه (Title)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "caption",
+     "label": "توضیح پایین نقشه (Caption)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "suffix",
+     "label": "پسوند اعداد (Suffix)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "regions",
+     "label": "مقادیر مناطق (JSON)",
+     "type": "series"
+    },
+    {
+     "key": "color",
+     "label": "رنگ شاخص",
+     "type": "select",
+     "options": [
+      "accent",
+      "danger",
+      "good",
+      "#38BDF8"
+     ]
+    }
+   ],
+   "example": {
+    "eyebrow": "نمای جغرافیایی داده",
+    "title": "شاخص *رشد تولید محتوای مستقل* در مناطق جهان",
+    "caption": "مناطق پررنگ‌تر سهم رشد بالاتری در سال گذشته ثبت کرده‌اند.",
+    "suffix": "٪",
+    "color": "accent",
+    "regions": {
+     "middle_east": {
+      "label": "خاورمیانه",
+      "value": 84
+     },
+     "europe": {
+      "label": "اروپا",
+      "value": 68
+     },
+     "asia": {
+      "label": "آسیا",
+      "value": 92
+     },
+     "north_america": {
+      "label": "آمریکای شمالی",
+      "value": 76
+     }
+    }
+   }
+  }
+ },
+ {
+  "name": "polaroid_wall",
+  "js": "../templates/polaroid_wall/template.js",
+  "schema": {
+   "name": "polaroid_wall",
+   "aliases": [
+    "polaroid",
+    "دیوار-عکس",
+    "پولاروید"
+   ],
+   "order": 45,
+   "category": "روایی و تحریریه (Story & Editorial)",
+   "label": "دیوار عکس پولاروید (Polaroid Wall)",
+   "description": "نمایش ۳ قاب عکس پولاروید با چسب کاغذی، زاویهٔ چرخش قطعی، زیرنویس و عمق پارالاکس",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب آرشیو (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "تیتر روایت (Title)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "caption1",
+     "label": "زیرنویس عکس ۱",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "caption2",
+     "label": "زیرنویس عکس ۲",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "caption3",
+     "label": "زیرنویس عکس ۳",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "photo1",
+     "label": "عکس ۱",
+     "type": "image"
+    },
+    {
+     "key": "photo2",
+     "label": "عکس ۲",
+     "type": "image"
+    },
+    {
+     "key": "photo3",
+     "label": "عکس ۳",
+     "type": "image"
+    }
+   ],
+   "example": {
+    "eyebrow": "آرشیو مستند",
+    "title": "سه قاب که *روند تغییر شهر* را ثبت کرد",
+    "caption1": "آزمایشگاه اقتصادی · ۱۳۷۸",
+    "caption2": "استودیو ضبط مستقل · ۱۳۹۶",
+    "caption3": "نقشهٔ ارتباطات امروز · ۱۴۰۴",
+    "photo1": "/assets/economic-lab.jpg",
+    "photo2": "/assets/podcast-studio-mic.jpg",
+    "photo3": "/assets/vintage-globe.jpg"
+   }
+  }
+ },
+ {
+  "name": "mascot_pip",
+  "js": "../templates/mascot_pip/template.js",
+  "schema": {
+   "name": "mascot_pip",
+   "aliases": [
+    "mascot-pip",
+    "عروسک-تصویر-در-تصویر",
+    "مجری-گوشه"
+   ],
+   "order": 46,
+   "category": "عروسک و مجری (Puppet & Mascot)",
+   "label": "اسلاید + عروسک تصویر در تصویر (Mascot PiP)",
+   "description": "اسلاید تحلیلی کامل همراه با قاب تصویر در تصویر عروسک عقاب قرمز (یا ۵ شخصیت) همگام با صدا و لحن",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "تیتر اسلاید (Title)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "body",
+     "label": "توضیح اصلی (Body)",
+     "type": "textarea",
+     "editable": true
+    },
+    {
+     "key": "bullets",
+     "label": "نکات کلیدی (هر خط یک مورد)",
+     "type": "list"
+    },
+    {
+     "key": "pip_corner",
+     "label": "گوشهٔ قاب عروسک",
+     "type": "select",
+     "options": [
+      "bottom-left",
+      "bottom-right",
+      "top-left",
+      "top-right"
+     ]
+    },
+    {
+     "key": "expression",
+     "label": "حالت چهره عروسک",
+     "type": "select",
+     "options": [
+      "neutral",
+      "happy",
+      "smug",
+      "shocked",
+      "annoyed",
+      "thinking",
+      "excited"
+     ]
+    },
+    {
+     "key": "say",
+     "label": "متن گفتار عروسک (Say)",
+     "type": "textarea",
+     "editable": true
+    }
+   ],
+   "example": {
+    "eyebrow": "توضیح زنده با مجری",
+    "title": "چگونه *طراحی حرکت* پیام ویدیو را شفاف می‌کند؟",
+    "body": "وقتی عروسک در گوشهٔ تصویر با ریتم صدای شما واکنش نشان می‌دهد، مخاطب هم اسلاید را می‌خواند و هم ارتباط عاطفی می‌گیرد.",
+    "bullets": [
+     "واکنش زندهٔ ابرو، سر و منقار به لحن صدا",
+     "قاب تصویر در تصویر قابل جابه‌جایی در ۴ گوشه",
+     "سازگار با سه فرمت افقی، عمودی و مربعی"
+    ],
+    "pip_corner": "bottom-left",
+    "expression": "happy",
+    "say": "وقتی عروسک کنار اسلاید توضیح می‌دهد، مخاطب تا آخر ویدیو همراه می‌ماند."
+   }
+  }
  },
  {
   "name": "line_chart",
@@ -3878,6 +4723,1650 @@ window.TEMPLATE_INDEX = [
     "layout": "CAM"
    },
    "order": 160,
+   "version": 1
+  }
+ },
+ {
+  "name": "breaking_news",
+  "js": "../templates/breaking_news/template.js",
+  "schema": {
+   "name": "breaking_news",
+   "label": "خبر فوری (Breaking News)",
+   "description": "کارت خبری تلویزیونی با تیتر فوری، زیرتیتر تحلیلی، عکس اختیاری و نوار زیرنویس متحرک پایین صفحه (سازگار با ۱۶:۹، ۹:۱۶ و ۱:۱).",
+   "aliases": [
+    "breaking-news",
+    "خبر-فوری",
+    "فوری"
+   ],
+   "category": "خبر",
+   "fields": [
+    {
+     "key": "badge",
+     "label": "برچسب فوری (Badge)",
+     "type": "text",
+     "default": "خبر فوری",
+     "editable": true
+    },
+    {
+     "key": "timestamp",
+     "label": "ساعت / تاریخ خبر (Timestamp)",
+     "type": "text",
+     "default": "تهران · ۱۴:۳۰",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "تیتر اصلی خبر (*زرد* ، ~قرمز~)",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "summary",
+     "label": "چکیده خبر (Summary)",
+     "type": "textarea",
+     "editable": true
+    },
+    {
+     "key": "image",
+     "label": "عکس خبر (اختیاری)",
+     "type": "image",
+     "editable": true
+    },
+    {
+     "key": "ticker",
+     "label": "نوار زیرنویس پایین (Ticker)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "source",
+     "label": "منبع خبر (Source)",
+     "type": "text",
+     "editable": false
+    },
+    {
+     "key": "preset",
+     "label": "سبک انیمیشن",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "کلاسیک / ارث‌بری"
+      ],
+      [
+       "random",
+       "🎲 تصادفی"
+      ],
+      [
+       "urgent-flash",
+       "تیتر فوری خبری"
+      ],
+      [
+       "ticker-crawl",
+       "نوار زیرنویس زنده"
+      ],
+      [
+       "desk-split",
+       "میز خبر دو ستونه"
+      ],
+      [
+       "minimal-news",
+       "خبر مینیمال"
+      ]
+     ],
+     "default": "urgent-flash",
+     "editable": false
+    },
+    {
+     "key": "transition",
+     "label": "ترنزیشن ورود",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "ارث‌بری"
+      ],
+      [
+       "whip-pan-rtl",
+       "چرخش سریع به چپ"
+      ],
+      [
+       "accent-slash",
+       "نوار تأکید مورب"
+      ],
+      [
+       "curtain-rtl",
+       "پرده از راست به چپ"
+      ],
+      [
+       "soft-fade",
+       "محو نرم"
+      ]
+     ],
+     "default": "auto",
+     "editable": false
+    },
+    {
+     "key": "seed",
+     "label": "بذر تصادفی",
+     "type": "number",
+     "default": 0,
+     "editable": false
+    }
+   ],
+   "example": {
+    "badge": "خبر فوری",
+    "timestamp": "تهران · ۱۴:۳۰",
+    "title": "بانک مرکزی نرخ بهره بین‌بانکی را ~۲ درصد~ افزایش داد",
+    "summary": "تصمیم جدید از ابتدای هفته آینده اجرایی می‌شود و بازارهای ارزی در اولین ساعت واکنش نشان دادند.",
+    "ticker": "گزارش زنده تحریریه · واکنش بازار سرمایه · تحلیل کارشناسان اقتصادی در ادامه برنامه",
+    "source": "خبرگزاری رسمی · بخش اقتصاد",
+    "layout": "SLIDE"
+   },
+   "order": 220,
+   "version": 1
+  }
+ },
+ {
+  "name": "fact_check",
+  "js": "../templates/fact_check/template.js",
+  "schema": {
+   "name": "fact_check",
+   "label": "راستی‌آزمایی (Fact Check)",
+   "description": "نمایش ادعا در برابر سند و شواهد به همراه مهر حکم متحرک (درست، نادرست، گمراه‌کننده، نیمه‌درست یا اثبات‌نشده).",
+   "aliases": [
+    "fact-check",
+    "راستی-آزمایی",
+    "سنجش-ادعا"
+   ],
+   "category": "خبر",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا (Eyebrow)",
+     "type": "text",
+     "default": "راستی‌آزمایی",
+     "editable": true
+    },
+    {
+     "key": "claim",
+     "label": "ادعای مطرح‌شده (Claim)",
+     "type": "textarea",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "verdict",
+     "label": "حکم نهایی (Verdict)",
+     "type": "select",
+     "options": [
+      [
+       "false",
+       "نادرست (False)"
+      ],
+      [
+       "true",
+       "درست (True)"
+      ],
+      [
+       "misleading",
+       "گمراه‌کننده (Misleading)"
+      ],
+      [
+       "mixed",
+       "نیمه‌درست (Mixed)"
+      ],
+      [
+       "unverified",
+       "اثبات‌نشده (Unverified)"
+      ]
+     ],
+     "default": "false",
+     "editable": true
+    },
+    {
+     "key": "verdict_label",
+     "label": "متن دلخواه مهر حکم (اختیاری)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "evidence",
+     "label": "شواهد و توضیح سند (Evidence)",
+     "type": "textarea",
+     "editable": true
+    },
+    {
+     "key": "source",
+     "label": "منبع سند (Source)",
+     "type": "text",
+     "editable": false
+    },
+    {
+     "key": "preset",
+     "label": "سبک انیمیشن",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "کلاسیک / ارث‌بری"
+      ],
+      [
+       "random",
+       "🎲 تصادفی"
+      ],
+      [
+       "verdict-stamp",
+       "مهر حکم راستی‌آزمایی"
+      ],
+      [
+       "evidence-split",
+       "ادعا در برابر سند"
+      ],
+      [
+       "editorial-audit",
+       "بررسی تحریریه"
+      ],
+      [
+       "minimal-check",
+       "راستی‌آزمایی تمیز"
+      ]
+     ],
+     "default": "verdict-stamp",
+     "editable": false
+    },
+    {
+     "key": "transition",
+     "label": "ترنزیشن ورود",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "ارث‌بری"
+      ],
+      [
+       "curtain-rtl",
+       "پرده از راست به چپ"
+      ],
+      [
+       "paper-tear",
+       "پاره‌شدن کاغذ تحریریه"
+      ],
+      [
+       "soft-fade",
+       "محو نرم"
+      ]
+     ],
+     "default": "auto",
+     "editable": false
+    },
+    {
+     "key": "seed",
+     "label": "بذر تصادفی",
+     "type": "number",
+     "default": 0,
+     "editable": false
+    }
+   ],
+   "example": {
+    "eyebrow": "بررسی ادعای پرانتشار",
+    "claim": "«مصرف قهوه در شب باعث توقف کامل رشد مغز بزرگسالان می‌شود.»",
+    "verdict": "false",
+    "evidence": "پژوهش‌های عصب‌شناسی نشان می‌دهد کافئین فقط کیفیت خواب عمیق را کاهش می‌دهد و هیچ مدرکی مبنی بر توقف رشد مغز وجود ندارد.",
+    "source": "Journal of Sleep Research · 2024",
+    "layout": "SLIDE"
+   },
+   "order": 230,
+   "version": 1
+  }
+ },
+ {
+  "name": "two_source_compare",
+  "js": "../templates/two_source_compare/template.js",
+  "schema": {
+   "name": "two_source_compare",
+   "label": "مقایسه دو رسانه (Two-Source Compare)",
+   "description": "مقایسه رویکرد و تیتر دو رسانه یا منبع مختلف درباره یک رویداد واحد، همراه با جمع‌بندی تحریریه.",
+   "aliases": [
+    "two-source-compare",
+    "مقایسه-منابع",
+    "دو-رسانه"
+   ],
+   "category": "خبر",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا",
+     "type": "text",
+     "default": "یک خبر، دو روایت",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "عنوان رویداد",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "left_source",
+     "label": "نام رسانه اول (راست در RTL)",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "left_headline",
+     "label": "تیتر رسانه اول",
+     "type": "textarea",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "left_angle",
+     "label": "زاویه دید رسانه اول",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "right_source",
+     "label": "نام رسانه دوم (چپ در RTL)",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "right_headline",
+     "label": "تیتر رسانه دوم",
+     "type": "textarea",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "right_angle",
+     "label": "زاویه دید رسانه دوم",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "takeaway",
+     "label": "جمع‌بندی تحریریه (پایین)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "preset",
+     "label": "سبک انیمیشن",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "کلاسیک / ارث‌بری"
+      ],
+      [
+       "random",
+       "🎲 تصادفی"
+      ],
+      [
+       "headline-clash",
+       "تقابل دو تیتر"
+      ],
+      [
+       "editorial-mirror",
+       "آینه دو رسانه"
+      ],
+      [
+       "bias-delta",
+       "تحلیل زاویه دید"
+      ],
+      [
+       "minimal-sources",
+       "مقایسه ساده منابع"
+      ]
+     ],
+     "default": "headline-clash",
+     "editable": false
+    },
+    {
+     "key": "transition",
+     "label": "ترنزیشن ورود",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "ارث‌بری"
+      ],
+      [
+       "split-curtain",
+       "پرده دوقسمتی"
+      ],
+      [
+       "editorial-push",
+       "پوش تحریریه"
+      ],
+      [
+       "soft-fade",
+       "محو نرم"
+      ]
+     ],
+     "default": "auto",
+     "editable": false
+    },
+    {
+     "key": "seed",
+     "label": "بذر تصادفی",
+     "type": "number",
+     "default": 0,
+     "editable": false
+    }
+   ],
+   "example": {
+    "eyebrow": "یک رویداد، دو قاب خبری",
+    "title": "گزارش تورم فصل بهار چگونه تیتر شد؟",
+    "left_source": "رسانه اقتصادی الف",
+    "left_headline": "«کاهش شتاب تورم ماهانه برای سومین ماه پیاپی»",
+    "left_angle": "تمرکز بر تغییر نرخ ماهانه",
+    "right_source": "روزنامه تحلیلی ب",
+    "right_headline": "«تورم نقطه‌به‌نقطه همچنان بالای میانگین ده سال اخیر است»",
+    "right_angle": "تمرکز بر فشار معیشتی سالانه",
+    "takeaway": "هر دو آمار از یک گزارش رسمی استخراج شده‌اند، اما شاخص انتخابی روایت را تغییر می‌دهد.",
+    "layout": "SLIDE"
+   },
+   "order": 240,
+   "version": 1
+  }
+ },
+ {
+  "name": "definition_card",
+  "js": "../templates/definition_card/template.js",
+  "schema": {
+   "name": "definition_card",
+   "label": "کارت تعریف و مفهوم (Definition Card)",
+   "description": "معرفی دقیق یک اصطلاح یا مفهوم علمی با تلفظ/معادل انگلیسی، تعریف روشن، مثال کاربردی و ریشه‌شناسی.",
+   "aliases": [
+    "definition-card",
+    "تعریف",
+    "واژه‌نامه"
+   ],
+   "category": "آموزش",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "دسته‌بندی / حوزه",
+     "type": "text",
+     "default": "واژه‌نامه مفهومی",
+     "editable": true
+    },
+    {
+     "key": "term",
+     "label": "واژه یا اصطلاح اصلی",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "phonetic",
+     "label": "معادل انگلیسی / تلفظ",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "part_of_speech",
+     "label": "نوع واژه (مثلاً: اصطلاح اقتصادی)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "definition",
+     "label": "تعریف روشن و دقیق",
+     "type": "textarea",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "example",
+     "label": "مثال کاربردی در جمله",
+     "type": "textarea",
+     "editable": true
+    },
+    {
+     "key": "preset",
+     "label": "سبک انیمیشن",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "کلاسیک / ارث‌بری"
+      ],
+      [
+       "random",
+       "🎲 تصادفی"
+      ],
+      [
+       "lexicon-reveal",
+       "واژه‌نامه تحریریه"
+      ],
+      [
+       "editorial-entry",
+       "مدخل خوانا"
+      ],
+      [
+       "etymology-focus",
+       "ریشه و کاربرد"
+      ],
+      [
+       "minimal-term",
+       "تعریف مینیمال"
+      ]
+     ],
+     "default": "lexicon-reveal",
+     "editable": false
+    },
+    {
+     "key": "transition",
+     "label": "ترنزیشن ورود",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "ارث‌بری"
+      ],
+      [
+       "page-turn",
+       "ورق زدن صفحه"
+      ],
+      [
+       "curtain-rtl",
+       "پرده از راست به چپ"
+      ],
+      [
+       "soft-fade",
+       "محو نرم"
+      ]
+     ],
+     "default": "auto",
+     "editable": false
+    },
+    {
+     "key": "seed",
+     "label": "بذر تصادفی",
+     "type": "number",
+     "default": 0,
+     "editable": false
+    }
+   ],
+   "example": {
+    "eyebrow": "مفهوم کلیدی اقتصاد رفتاری",
+    "term": "اثر لنگراندازی",
+    "phonetic": "Anchoring Bias",
+    "part_of_speech": "سوگیری شناختی",
+    "definition": "تمایل ذهن انسان به اتکای بیش از حد بر اولین عدد یا اطلاعاتی که هنگام تصمیم‌گیری دریافت می‌کند.",
+    "example": "وقتی قیمت اولیه‌ای خط خورده و تخفیف کنار آن نوشته می‌شود، قیمت اول به عنوان «لنگر» قضاوت ما را هدایت می‌کند.",
+    "layout": "SLIDE"
+   },
+   "order": 250,
+   "version": 1
+  }
+ },
+ {
+  "name": "quiz_poll",
+  "js": "../templates/quiz_poll/template.js",
+  "schema": {
+   "name": "quiz_poll",
+   "label": "کوییز و نظرسنجی (Quiz / Poll)",
+   "description": "سؤال چندگزینه‌ای با نوار شمارش‌معکوس و نمایش پاسخ درست یا درصد آرای هر گزینه در لحظه مشخص.",
+   "aliases": [
+    "quiz-poll",
+    "کوییز",
+    "نظرسنجی",
+    "آزمون"
+   ],
+   "category": "آموزش",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا",
+     "type": "text",
+     "default": "آزمون کوتاه",
+     "editable": true
+    },
+    {
+     "key": "question",
+     "label": "متن سؤال اصلی",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "options",
+     "label": "گزینه‌ها (هر خط یک گزینه یا جدول label/percent)",
+     "type": "textarea",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "correct_index",
+     "label": "شماره گزینه درست (از ۱ شروع می‌شود؛ ۰ برای نظرسنجی بدون پاسخ درست)",
+     "type": "number",
+     "default": 2,
+     "editable": false
+    },
+    {
+     "key": "reveal_at",
+     "label": "زمان نمایش پاسخ درست (ثانیه)",
+     "type": "number",
+     "default": 2.4,
+     "editable": false
+    },
+    {
+     "key": "explanation",
+     "label": "توضیح کوتاه پاسخ (اختیاری)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "preset",
+     "label": "سبک انیمیشن",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "کلاسیک / ارث‌بری"
+      ],
+      [
+       "random",
+       "🎲 تصادفی"
+      ],
+      [
+       "option-cascade",
+       "ورود پلکانی گزینه‌ها"
+      ],
+      [
+       "countdown-reveal",
+       "تایمر و پاسخ درست"
+      ],
+      [
+       "studio-quiz",
+       "کوییز استودیویی"
+      ],
+      [
+       "minimal-poll",
+       "نظرسنجی ساده"
+      ]
+     ],
+     "default": "countdown-reveal",
+     "editable": false
+    },
+    {
+     "key": "transition",
+     "label": "ترنزیشن ورود",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "ارث‌بری"
+      ],
+      [
+       "push-up",
+       "هل دادن به بالا"
+      ],
+      [
+       "curtain-rtl",
+       "پرده از راست به چپ"
+      ],
+      [
+       "soft-fade",
+       "محو نرم"
+      ]
+     ],
+     "default": "auto",
+     "editable": false
+    },
+    {
+     "key": "seed",
+     "label": "بذر تصادفی",
+     "type": "number",
+     "default": 0,
+     "editable": false
+    }
+   ],
+   "example": {
+    "eyebrow": "حدس بزنید",
+    "question": "کدام عامل بیشترین سهم را در حفظ توجه مخاطب در ۱۰ ثانیه اول دارد؟",
+    "options": "۱. کیفیت میکروفون\n۲. شفافیت مسئله و کنجکاوی فوری\n۳. تعداد افکت‌های تصویری\n۴. طول ویدیو",
+    "correct_index": 2,
+    "reveal_at": 2.4,
+    "explanation": "مخاطب در ۳ تا ۱۰ ثانیه اول تصمیم می‌گیرد آیا موضوع به مسئله او پاسخ می‌دهد یا نه.",
+    "layout": "SLIDE"
+   },
+   "order": 260,
+   "version": 1
+  }
+ },
+ {
+  "name": "mistake_vs_correct",
+  "js": "../templates/mistake_vs_correct/template.js",
+  "schema": {
+   "name": "mistake_vs_correct",
+   "label": "اشتباه رایج در برابر روش درست (Mistake vs Correct)",
+   "description": "مقایسه آموزشی یک اشتباه پرتکرار (با خط‌زدن متحرک) در کنار روش صحیح و نکته اجرایی.",
+   "aliases": [
+    "mistake-vs-correct",
+    "غلط-درست",
+    "اشتباه-رایج"
+   ],
+   "category": "آموزش",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا",
+     "type": "text",
+     "default": "نکته آموزشی",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "عنوان درس",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "wrong_label",
+     "label": "تیتر ستون اشتباه",
+     "type": "text",
+     "default": "اشتباه رایج",
+     "editable": true
+    },
+    {
+     "key": "wrong_text",
+     "label": "توضیح اشتباه رایج",
+     "type": "textarea",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "right_label",
+     "label": "تیتر ستون درست",
+     "type": "text",
+     "default": "روش درست",
+     "editable": true
+    },
+    {
+     "key": "right_text",
+     "label": "توضیح روش درست",
+     "type": "textarea",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "tip",
+     "label": "نکته کلیدی مربی (پایین)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "preset",
+     "label": "سبک انیمیشن",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "کلاسیک / ارث‌بری"
+      ],
+      [
+       "random",
+       "🎲 تصادفی"
+      ],
+      [
+       "cross-to-check",
+       "خط زدن غلط و تأکید درست"
+      ],
+      [
+       "split-fix",
+       "اصلاح دو ستونه"
+      ],
+      [
+       "coach-callout",
+       "نکته مربی"
+      ],
+      [
+       "minimal-fix",
+       "اصلاح مینیمال"
+      ]
+     ],
+     "default": "cross-to-check",
+     "editable": false
+    },
+    {
+     "key": "transition",
+     "label": "ترنزیشن ورود",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "ارث‌بری"
+      ],
+      [
+       "push-left",
+       "هل دادن به چپ"
+      ],
+      [
+       "split-curtain",
+       "پرده دوقسمتی"
+      ],
+      [
+       "soft-fade",
+       "محو نرم"
+      ]
+     ],
+     "default": "auto",
+     "editable": false
+    },
+    {
+     "key": "seed",
+     "label": "بذر تصادفی",
+     "type": "number",
+     "default": 0,
+     "editable": false
+    }
+   ],
+   "example": {
+    "eyebrow": "اصول ارائه مؤثر",
+    "title": "چطور نمودار را روی صفحه توضیح دهیم؟",
+    "wrong_label": "اشتباه رایج",
+    "wrong_text": "پر کردن اسلاید با ۶ نمودار هم‌زمان و خواندن تک‌تک عددهای جدول با سرعت بالا.",
+    "right_label": "روش درست",
+    "right_text": "نمایش یک پیام اصلی، برجسته‌کردن یک عدد کلیدی و دادن ۲ ثانیه مکث برای درک مخاطب.",
+    "tip": "قاعده طلایی: هر اسلاید فقط یک ایده اصلی دارد، نه یک گزارش کامل.",
+    "layout": "SLIDE"
+   },
+   "order": 270,
+   "version": 1
+  }
+ },
+ {
+  "name": "step_by_step",
+  "js": "../templates/step_by_step/template.js",
+  "schema": {
+   "name": "step_by_step",
+   "label": "مراحل گام‌به‌گام (Step-by-Step)",
+   "description": "نمایش فرآیند یا آموزش ۳ تا ۵ مرحله‌ای با خط پیشرفت متحرک؛ در حالت ۱۶:۹ افقی و در ۹:۱۶ و ۱:۱ عمودی چیده می‌شود.",
+   "aliases": [
+    "step-by-step",
+    "گام-به-گام",
+    "مراحل"
+   ],
+   "category": "آموزش",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا",
+     "type": "text",
+     "default": "راهنمای اجرایی",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "عنوان فرآیند",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "steps",
+     "label": "مراحل (هر خط «عنوان: توضیح» یا جدول title/detail)",
+     "type": "textarea",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "active_step",
+     "label": "شماره مرحله برجسته (اختیاری، ۰ = همه یکسان)",
+     "type": "number",
+     "default": 0,
+     "editable": false
+    },
+    {
+     "key": "preset",
+     "label": "سبک انیمیشن",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "کلاسیک / ارث‌بری"
+      ],
+      [
+       "random",
+       "🎲 تصادفی"
+      ],
+      [
+       "rail-progress",
+       "خط پیشرفت مرحله‌ای"
+      ],
+      [
+       "card-ladder",
+       "نردبان کارت‌ها"
+      ],
+      [
+       "editorial-steps",
+       "مراحل تحریریه"
+      ],
+      [
+       "minimal-steps",
+       "گام‌های تمیز"
+      ]
+     ],
+     "default": "rail-progress",
+     "editable": false
+    },
+    {
+     "key": "transition",
+     "label": "ترنزیشن ورود",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "ارث‌بری"
+      ],
+      [
+       "curtain-rtl",
+       "پرده از راست به چپ"
+      ],
+      [
+       "push-left",
+       "هل دادن به چپ"
+      ],
+      [
+       "soft-fade",
+       "محو نرم"
+      ]
+     ],
+     "default": "auto",
+     "editable": false
+    },
+    {
+     "key": "seed",
+     "label": "بذر تصادفی",
+     "type": "number",
+     "default": 0,
+     "editable": false
+    }
+   ],
+   "example": {
+    "eyebrow": "روش ۴ مرحله‌ای",
+    "title": "چطور یک ویدیوی تحلیلی در ۶۰ دقیقه بسازیم؟",
+    "steps": "تعیین زاویه دید: فقط یک پرسش مشخص را انتخاب کنید\nجمع‌آوری ۲ سند: آمار معتبر و منبع دست‌اول بیاورید\nتدوین اسلایدها: هر ایده را در یک قاب ساده بچینید\nضبط و انتشار: با ریتم آرام و مکث‌های حساب‌شده بخوانید",
+    "active_step": 0,
+    "layout": "SLIDE"
+   },
+   "order": 280,
+   "version": 1
+  }
+ },
+ {
+  "name": "hook_title",
+  "js": "../templates/hook_title/template.js",
+  "schema": {
+   "name": "hook_title",
+   "label": "قلاب ۳ ثانیه (Hook Title)",
+   "description": "تیتر آغازین پرانرژی برای شورتس، ریلز و شروع یوتیوب با تأکید دو رنگ، عدد قلاب اختیاری و حرکت کینتیک سریع.",
+   "aliases": [
+    "hook-title",
+    "قلاب",
+    "تیتر-شورتس"
+   ],
+   "category": "شبکه‌های اجتماعی",
+   "fields": [
+    {
+     "key": "kicker",
+     "label": "برچسب قلاب بالا (Kicker)",
+     "type": "text",
+     "default": "نکته‌ای که کمتر گفته می‌شود",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "خط اول تیتر اصلی",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "accent_line",
+     "label": "خط دوم برجسته (رنگ تأکید)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "subtext",
+     "label": "زیرمتن کوتاه / دعوت به ادامه",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "stat",
+     "label": "عدد قلاب اختیاری (مثلاً ۹۲٪)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "preset",
+     "label": "سبک انیمیشن",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "کلاسیک / ارث‌بری"
+      ],
+      [
+       "random",
+       "🎲 تصادفی"
+      ],
+      [
+       "punch-hook",
+       "قلاب ۳ ثانیه پرضربه"
+      ],
+      [
+       "split-slam",
+       "تیتر دو تکه کوبنده"
+      ],
+      [
+       "vertical-viral",
+       "ریتم شورتس و ریلز"
+      ],
+      [
+       "minimal-hook",
+       "قلاب مینیمال"
+      ]
+     ],
+     "default": "punch-hook",
+     "editable": false
+    },
+    {
+     "key": "transition",
+     "label": "ترنزیشن ورود",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "ارث‌بری"
+      ],
+      [
+       "whip-pan-up",
+       "چرخش سریع عمودی"
+      ],
+      [
+       "zoom-through-in",
+       "عبور زوم به داخل"
+      ],
+      [
+       "film-flash",
+       "فلش نگاتیو فیلم"
+      ],
+      [
+       "soft-fade",
+       "محو نرم"
+      ]
+     ],
+     "default": "auto",
+     "editable": false
+    },
+    {
+     "key": "seed",
+     "label": "بذر تصادفی",
+     "type": "number",
+     "default": 0,
+     "editable": false
+    }
+   ],
+   "example": {
+    "kicker": "در ۳ ثانیه ببینید",
+    "title": "چرا ۹۰٪ ویدیوها قبل از ثانیه پنجم",
+    "accent_line": "رد می‌شوند؟",
+    "subtext": "سه خطای ساده که با یک تغییر کوچک حل می‌شود",
+    "stat": "۹۰٪",
+    "layout": "SLIDE"
+   },
+   "order": 290,
+   "version": 1
+  }
+ },
+ {
+  "name": "before_after",
+  "js": "../templates/before_after/template.js",
+  "schema": {
+   "name": "before_after",
+   "label": "قبل و بعد پرده‌ای (Before / After Wipe)",
+   "description": "مقایسه تصویری یا متنی قبل و بعد با پرده متحرک و خط جداکننده زنده؛ سازگار با عکس یا کارت متنی در هر ۳ فرمت.",
+   "aliases": [
+    "before_after_wipe",
+    "قبل-بعد-تصویری",
+    "پرده-مقایسه"
+   ],
+   "category": "شبکه‌های اجتماعی",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا",
+     "type": "text",
+     "default": "مقایسه تغییر",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "عنوان مقایسه",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "before_label",
+     "label": "برچسب قبل (Before)",
+     "type": "text",
+     "default": "قبل",
+     "editable": true
+    },
+    {
+     "key": "before_text",
+     "label": "متن یا توضیح قبل",
+     "type": "textarea",
+     "editable": true
+    },
+    {
+     "key": "before_image",
+     "label": "عکس قبل (اختیاری)",
+     "type": "image",
+     "editable": true
+    },
+    {
+     "key": "after_label",
+     "label": "برچسب بعد (After)",
+     "type": "text",
+     "default": "بعد",
+     "editable": true
+    },
+    {
+     "key": "after_text",
+     "label": "متن یا توضیح بعد",
+     "type": "textarea",
+     "editable": true
+    },
+    {
+     "key": "after_image",
+     "label": "عکس بعد (اختیاری)",
+     "type": "image",
+     "editable": true
+    },
+    {
+     "key": "preset",
+     "label": "سبک انیمیشن",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "کلاسیک / ارث‌بری"
+      ],
+      [
+       "random",
+       "🎲 تصادفی"
+      ],
+      [
+       "curtain-wipe",
+       "پرده مقایسه قبل و بعد"
+      ],
+      [
+       "split-delta",
+       "تغییر دو نیمه"
+      ],
+      [
+       "slider-sweep",
+       "اسلایدر زنده"
+      ],
+      [
+       "minimal-compare",
+       "مقایسه تمیز"
+      ]
+     ],
+     "default": "slider-sweep",
+     "editable": false
+    },
+    {
+     "key": "transition",
+     "label": "ترنزیشن ورود",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "ارث‌بری"
+      ],
+      [
+       "split-curtain",
+       "پرده دوقسمتی"
+      ],
+      [
+       "curtain-rtl",
+       "پرده از راست به چپ"
+      ],
+      [
+       "soft-fade",
+       "محو نرم"
+      ]
+     ],
+     "default": "auto",
+     "editable": false
+    },
+    {
+     "key": "seed",
+     "label": "بذر تصادفی",
+     "type": "number",
+     "default": 0,
+     "editable": false
+    }
+   ],
+   "example": {
+    "eyebrow": "بازطراحی صفحه",
+    "title": "تأثیر حذف شلوغی بصری بر نرخ خوانایی",
+    "before_label": "قبل از بازطراحی",
+    "before_text": "۱۲ ویجت هم‌زمان، ۳ رنگ هشدار متضاد و زمان پیدا کردن دکمه اصلی: ۹ ثانیه.",
+    "after_label": "بعد از بازطراحی",
+    "after_text": "سلسله‌مراتب تایپوگرافی شفاف، یک کنش اصلی و زمان انجام کار: ۲.۱ ثانیه.",
+    "layout": "SLIDE"
+   },
+   "order": 300,
+   "version": 1
+  }
+ },
+ {
+  "name": "audiogram",
+  "js": "../templates/audiogram/template.js",
+  "schema": {
+   "name": "audiogram",
+   "label": "آدیوگرام پادکست (Audiogram)",
+   "description": "کارت صوتی پادکست و گفتگو با موج صوتی زنده و قطعی، عکس یا کاور اپیزود، نام گوینده و نقل‌قول کینتیک.",
+   "aliases": [
+    "podcast-audiogram",
+    "آدیوگرام",
+    "موج-صوت"
+   ],
+   "category": "پادکست",
+   "fields": [
+    {
+     "key": "show",
+     "label": "نام پادکست یا برنامه (Show)",
+     "type": "text",
+     "default": "پادکست خرده‌گیر",
+     "editable": true
+    },
+    {
+     "key": "speaker",
+     "label": "نام گوینده / مهمان (Speaker)",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "role",
+     "label": "سمت یا عنوان اپیزود",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "quote",
+     "label": "جمله شاخص گفتار (Quote / Caption)",
+     "type": "textarea",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "avatar",
+     "label": "تصویر گوینده یا کاور اپیزود (اختیاری)",
+     "type": "image",
+     "editable": true
+    },
+    {
+     "key": "episode",
+     "label": "شماره اپیزود / زمان (مثلاً EP 42 · 18:24)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "preset",
+     "label": "سبک انیمیشن",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "کلاسیک / ارث‌بری"
+      ],
+      [
+       "random",
+       "🎲 تصادفی"
+      ],
+      [
+       "studio-wave",
+       "موج صوتی استودیو"
+      ],
+      [
+       "podcast-quote",
+       "نقل‌قول پادکست"
+      ],
+      [
+       "caption-pulse",
+       "نبض زیرنویس"
+      ],
+      [
+       "minimal-audio",
+       "آدیوگرام مینیمال"
+      ]
+     ],
+     "default": "studio-wave",
+     "editable": false
+    },
+    {
+     "key": "transition",
+     "label": "ترنزیشن ورود",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "ارث‌بری"
+      ],
+      [
+       "soft-fade",
+       "محو نرم"
+      ],
+      [
+       "zoom-iris",
+       "گشایش زوم نرم"
+      ],
+      [
+       "curtain-rtl",
+       "پرده از راست به چپ"
+      ]
+     ],
+     "default": "auto",
+     "editable": false
+    },
+    {
+     "key": "seed",
+     "label": "بذر تصادفی",
+     "type": "number",
+     "default": 0,
+     "editable": false
+    }
+   ],
+   "example": {
+    "show": "پادکست خرده‌گیر",
+    "speaker": "دکتر مریم رضایی",
+    "role": "پژوهشگر اقتصاد رفتاری",
+    "quote": "بخش بزرگی از تصمیم‌های مالی ما نه روی *ماشین‌حساب*، بلکه بر اساس داستانی که به خودمان می‌گوییم گرفته می‌شود.",
+    "episode": "اپیزود ۴۲ · ۱۸:۲۴",
+    "layout": "SLIDE"
+   },
+   "order": 310,
+   "version": 1
+  }
+ },
+ {
+  "name": "comparison_table",
+  "js": "../templates/comparison_table/template.js",
+  "schema": {
+   "name": "comparison_table",
+   "label": "جدول مقایسه‌ای (Comparison Table)",
+   "description": "جدول مقایسه‌ای تمیز و تحریریه با ستون برنده برجسته، ورود پلکانی ردیف‌ها و سازگاری کامل با ۱۶:۹، ۹:۱۶ و ۱:۱.",
+   "aliases": [
+    "comparison-table",
+    "جدول-مقایسه",
+    "ماتریس"
+   ],
+   "category": "داده",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا",
+     "type": "text",
+     "default": "مقایسه جامع",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "عنوان جدول",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "columns",
+     "label": "ستون‌ها (با ویرگول جدا کنید؛ ستون اول نام معیار است)",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "rows",
+     "label": "ردیف‌ها (هر خط یک ردیف؛ مقادیر با | جدا شوند)",
+     "type": "textarea",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "highlight_col",
+     "label": "شماره ستون برنده برای برجسته‌سازی (مثلاً ۲ یا ۳؛ ۰ = بدون برجسته)",
+     "type": "number",
+     "default": 3,
+     "editable": false
+    },
+    {
+     "key": "source",
+     "label": "منبع داده‌ها",
+     "type": "text",
+     "editable": false
+    },
+    {
+     "key": "preset",
+     "label": "سبک انیمیشن",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "کلاسیک / ارث‌بری"
+      ],
+      [
+       "random",
+       "🎲 تصادفی"
+      ],
+      [
+       "matrix-sweep",
+       "جدول مقایسه‌ای زنده"
+      ],
+      [
+       "winner-glow",
+       "تأکید برنده"
+      ],
+      [
+       "editorial-grid",
+       "شبکه تحریریه"
+      ],
+      [
+       "minimal-table",
+       "جدول ساده"
+      ]
+     ],
+     "default": "matrix-sweep",
+     "editable": false
+    },
+    {
+     "key": "transition",
+     "label": "ترنزیشن ورود",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "ارث‌بری"
+      ],
+      [
+       "shutter-bars",
+       "کرکره ستونی"
+      ],
+      [
+       "curtain-rtl",
+       "پرده از راست به چپ"
+      ],
+      [
+       "soft-fade",
+       "محو نرم"
+      ]
+     ],
+     "default": "auto",
+     "editable": false
+    },
+    {
+     "key": "seed",
+     "label": "بذر تصادفی",
+     "type": "number",
+     "default": 0,
+     "editable": false
+    }
+   ],
+   "example": {
+    "eyebrow": "مقایسه فنی",
+    "title": "روش سنتی در برابر خط تولید خودکار استودیو",
+    "columns": "معیار, تدوین دستی, استودیوی خرده‌گیر",
+    "rows": "زمان تولید هر اسلاید | ۴۵ دقیقه | ۳ دقیقه\nدقت تایپوگرافی فارسی | متغیر | ۱۰۰٪ استاندارد\nخروجی سه فرمت هم‌زمان | ✕ | ✓\nبازتولید قطعی (Deterministic) | ✕ | ✓",
+    "highlight_col": 3,
+    "source": "آزمون داخلی خط تولید · ۱۴۰۴",
+    "layout": "SLIDE"
+   },
+   "order": 320,
+   "version": 1
+  }
+ },
+ {
+  "name": "newspaper_clip",
+  "js": "../templates/newspaper_clip/template.js",
+  "schema": {
+   "name": "newspaper_clip",
+   "label": "بریده روزنامه آرشیوی (Newspaper Clip)",
+   "description": "بریده روزنامه یا مجله تحریریه با بافت کاغذ، نام نشریه، تاریخ، تیتر، متن گزارش و هایلایت ماژیک متحرک روی جمله کلیدی.",
+   "aliases": [
+    "newspaper-clip",
+    "بریده-روزنامه",
+    "روزنامه"
+   ],
+   "category": "داستان",
+   "fields": [
+    {
+     "key": "publication",
+     "label": "نام روزنامه یا نشریه (Publication)",
+     "type": "text",
+     "required": true,
+     "default": "روزنامه تحلیلی اقتصاد",
+     "editable": true
+    },
+    {
+     "key": "date",
+     "label": "تاریخ و شماره نسخه (Date)",
+     "type": "text",
+     "default": "۱۴ آبان ۱۴۰۳ · شماره ۴۸۱۲",
+     "editable": true
+    },
+    {
+     "key": "headline",
+     "label": "تیتر خبر در روزنامه",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "excerpt",
+     "label": "پاراگراف خبر (برای هایلایت ماژیک از ==متن== استفاده کنید)",
+     "type": "textarea",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "caption",
+     "label": "توضیح تحریریه پایین بریده (اختیاری)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "preset",
+     "label": "سبک انیمیشن",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "کلاسیک / ارث‌بری"
+      ],
+      [
+       "random",
+       "🎲 تصادفی"
+      ],
+      [
+       "press-zoom",
+       "زوم روزنامه آرشیوی"
+      ],
+      [
+       "marker-clip",
+       "بریده با هایلایت ماژیک"
+      ],
+      [
+       "archival-paper",
+       "بافت کاغذ تاریخی"
+      ],
+      [
+       "minimal-clip",
+       "بریده روزنامه تمیز"
+      ]
+     ],
+     "default": "marker-clip",
+     "editable": false
+    },
+    {
+     "key": "transition",
+     "label": "ترنزیشن ورود",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "ارث‌بری"
+      ],
+      [
+       "paper-tear",
+       "پاره‌شدن کاغذ تحریریه"
+      ],
+      [
+       "page-turn",
+       "ورق زدن صفحه"
+      ],
+      [
+       "soft-fade",
+       "محو نرم"
+      ]
+     ],
+     "default": "auto",
+     "editable": false
+    },
+    {
+     "key": "seed",
+     "label": "بذر تصادفی",
+     "type": "number",
+     "default": 0,
+     "editable": false
+    }
+   ],
+   "example": {
+    "publication": "آرشیو روزنامه اطلاعات اقتصادی",
+    "date": "۲۳ مهر ۱۳۸۷ · صفحه ۴",
+    "headline": "افزایش بی‌سابقه تقاضا برای انرژی‌های تجدیدپذیر در شهرهای بزرگ",
+    "excerpt": "بر اساس گزارش منتشرشده، ==هزینه تولید برق خورشیدی در کمتر از یک دهه بیش از ۸۰ درصد کاهش یافته== و این روند نقشه سرمایه‌گذاری دهه آینده را تغییر خواهد داد.",
+    "caption": "سندی که پیش‌بینی آن امروز به واقعیت تبدیل شده است.",
+    "layout": "SLIDE"
+   },
+   "order": 330,
    "version": 1
   }
  }

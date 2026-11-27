@@ -1,0 +1,108 @@
+{
+  "name": "mistake_vs_correct",
+  "label": "اشتباه رایج در برابر روش درست (Mistake vs Correct)",
+  "description": "مقایسه آموزشی یک اشتباه پرتکرار (با خط‌زدن متحرک) در کنار روش صحیح و نکته اجرایی.",
+  "aliases": [
+    "mistake-vs-correct",
+    "غلط-درست",
+    "اشتباه-رایج"
+  ],
+  "category": "آموزش",
+  "fields": [
+    {
+      "key": "eyebrow",
+      "label": "برچسب بالا",
+      "type": "text",
+      "default": "نکته آموزشی",
+      "editable": true
+    },
+    {
+      "key": "title",
+      "label": "عنوان درس",
+      "type": "text",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "wrong_label",
+      "label": "تیتر ستون اشتباه",
+      "type": "text",
+      "default": "اشتباه رایج",
+      "editable": true
+    },
+    {
+      "key": "wrong_text",
+      "label": "توضیح اشتباه رایج",
+      "type": "textarea",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "right_label",
+      "label": "تیتر ستون درست",
+      "type": "text",
+      "default": "روش درست",
+      "editable": true
+    },
+    {
+      "key": "right_text",
+      "label": "توضیح روش درست",
+      "type": "textarea",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "tip",
+      "label": "نکته کلیدی مربی (پایین)",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["cross-to-check", "خط زدن غلط و تأکید درست"],
+        ["split-fix", "اصلاح دو ستونه"],
+        ["coach-callout", "نکته مربی"],
+        ["minimal-fix", "اصلاح مینیمال"]
+      ],
+      "default": "cross-to-check",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["push-left", "هل دادن به چپ"],
+        ["split-curtain", "پرده دوقسمتی"],
+        ["soft-fade", "محو نرم"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
+    }
+  ],
+  "example": {
+    "eyebrow": "اصول ارائه مؤثر",
+    "title": "چطور نمودار را روی صفحه توضیح دهیم؟",
+    "wrong_label": "اشتباه رایج",
+    "wrong_text": "پر کردن اسلاید با ۶ نمودار هم‌زمان و خواندن تک‌تک عددهای جدول با سرعت بالا.",
+    "right_label": "روش درست",
+    "right_text": "نمایش یک پیام اصلی، برجسته‌کردن یک عدد کلیدی و دادن ۲ ثانیه مکث برای درک مخاطب.",
+    "tip": "قاعده طلایی: هر اسلاید فقط یک ایده اصلی دارد، نه یک گزارش کامل.",
+    "layout": "SLIDE"
+  },
+  "order": 270,
+  "version": 1
+}

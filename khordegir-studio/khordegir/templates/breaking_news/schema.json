@@ -1,0 +1,105 @@
+{
+  "name": "breaking_news",
+  "label": "خبر فوری (Breaking News)",
+  "description": "کارت خبری تلویزیونی با تیتر فوری، زیرتیتر تحلیلی، عکس اختیاری و نوار زیرنویس متحرک پایین صفحه (سازگار با ۱۶:۹، ۹:۱۶ و ۱:۱).",
+  "aliases": [
+    "breaking-news",
+    "خبر-فوری",
+    "فوری"
+  ],
+  "category": "خبر",
+  "fields": [
+    {
+      "key": "badge",
+      "label": "برچسب فوری (Badge)",
+      "type": "text",
+      "default": "خبر فوری",
+      "editable": true
+    },
+    {
+      "key": "timestamp",
+      "label": "ساعت / تاریخ خبر (Timestamp)",
+      "type": "text",
+      "default": "تهران · ۱۴:۳۰",
+      "editable": true
+    },
+    {
+      "key": "title",
+      "label": "تیتر اصلی خبر (*زرد* ، ~قرمز~)",
+      "type": "text",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "summary",
+      "label": "چکیده خبر (Summary)",
+      "type": "textarea",
+      "editable": true
+    },
+    {
+      "key": "image",
+      "label": "عکس خبر (اختیاری)",
+      "type": "image",
+      "editable": true
+    },
+    {
+      "key": "ticker",
+      "label": "نوار زیرنویس پایین (Ticker)",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "source",
+      "label": "منبع خبر (Source)",
+      "type": "text",
+      "editable": false
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["urgent-flash", "تیتر فوری خبری"],
+        ["ticker-crawl", "نوار زیرنویس زنده"],
+        ["desk-split", "میز خبر دو ستونه"],
+        ["minimal-news", "خبر مینیمال"]
+      ],
+      "default": "urgent-flash",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["whip-pan-rtl", "چرخش سریع به چپ"],
+        ["accent-slash", "نوار تأکید مورب"],
+        ["curtain-rtl", "پرده از راست به چپ"],
+        ["soft-fade", "محو نرم"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
+    }
+  ],
+  "example": {
+    "badge": "خبر فوری",
+    "timestamp": "تهران · ۱۴:۳۰",
+    "title": "بانک مرکزی نرخ بهره بین‌بانکی را ~۲ درصد~ افزایش داد",
+    "summary": "تصمیم جدید از ابتدای هفته آینده اجرایی می‌شود و بازارهای ارزی در اولین ساعت واکنش نشان دادند.",
+    "ticker": "گزارش زنده تحریریه · واکنش بازار سرمایه · تحلیل کارشناسان اقتصادی در ادامه برنامه",
+    "source": "خبرگزاری رسمی · بخش اقتصاد",
+    "layout": "SLIDE"
+  },
+  "order": 220,
+  "version": 1
+}

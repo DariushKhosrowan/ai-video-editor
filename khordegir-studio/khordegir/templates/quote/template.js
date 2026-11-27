@@ -21,15 +21,18 @@ Stage.template({
         color: A.color("accent"), opacity: 0.14, pointerEvents: "none",
       });
       mark.textContent = "«";
-      Stage.tl.from(mark, { opacity: 0, y: 18, scale: 0.88, duration: 0.72, ease: Stage.ease("vox"), immediateRender: true }, A.at("eyebrow"));
+      Stage.tl.from(mark, { opacity: 0, y: 18, scale: 0.88, duration: A.dur("expressive"), ease: Stage.ease("vox"), immediateRender: true }, A.at("eyebrow"));
     }
 
     const r = A.el("div", "rule", col, { transformOrigin: "100% 50%" });
-    Stage.tl.from(r, { scaleX: 0, duration: 0.56, ease: Stage.ease("vox"), immediateRender: true }, A.at("eyebrow"));
+    Stage.tl.from(r, { scaleX: 0, duration: A.dur("base"), ease: Stage.ease("vox"), immediateRender: true }, A.at("eyebrow"));
 
     const textEl = A.text(col, s.text, "hero", "", { fontSize: (s.size || (Stage.plain(s.text).length > 60 ? 64 : 84)) + "px", maxWidth: "1250px" });
     A.field("text", textEl);
-    if (lively && preset === "kinetic-words") {
+    const explicitTextMotion = s.textMotion || s.text_motion || null;
+    if (explicitTextMotion) {
+      A.kinetic(textEl, { at: A.at("title"), mode: explicitTextMotion, role: "title" });
+    } else if (lively && preset === "kinetic-words") {
       A.kinetic(textEl, { at: A.at("title"), mode: "rise-mask", role: "title", stagger: 0.042, ease: "vox" });
     } else if (lively && (preset === "spotlight-serif" || preset === "bold-contrast")) {
       A.kinetic(textEl, { at: A.at("title"), mode: "editorial-blur", role: "title", stagger: 0.038, ease: "fluid" });

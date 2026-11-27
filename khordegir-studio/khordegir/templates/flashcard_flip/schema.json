@@ -1,0 +1,22 @@
+{
+  "name": "flashcard_flip",
+  "aliases": ["flashcard", "فلش‌کارت", "کارت-حافظه"],
+  "order": 37,
+  "category": "آموزشی و توضیحی (Education)",
+  "label": "فلش‌کارت آموزشی (Flashcard Flip)",
+  "description": "کارت پرسش و پاسخ با نوار زمان و چرخش قطعی روی زمان‌بندی برای نمایش پاسخ صحیح",
+  "fields": [
+    { "key": "eyebrow", "label": "موضوع درس (Eyebrow)", "type": "text", "editable": true },
+    { "key": "front", "label": "روی کارت / پرسش (Front)", "type": "textarea", "editable": true },
+    { "key": "back", "label": "پشت کارت / پاسخ (Back)", "type": "textarea", "editable": true },
+    { "key": "hint", "label": "نکتهٔ تکمیلی (Hint)", "type": "text", "editable": true },
+    { "key": "flip_at", "label": "زمان چرخش به پاسخ (ثانیه)", "type": "number", "default": 2.4 }
+  ],
+  "example": {
+    "eyebrow": "مرور سریع · فلش‌کارت",
+    "front": "تفاوت اصلی *خطای شناختی* با *اشتباه محاسباتی* چیست؟",
+    "back": "خطای شناختی یک ==الگوی تکرارشونده و سیستماتیک== در قضاوت است، نه یک اشتباه تصادفی.",
+    "hint": "کانمن و تورسکی، ۱۹۷۴",
+    "flip_at": 2.4
+  }
+}

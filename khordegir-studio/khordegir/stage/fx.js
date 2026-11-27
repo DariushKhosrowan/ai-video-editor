@@ -1,11 +1,12 @@
 /* Variants, presets, transitions, animated logo & atmosphere for every template (zero-config, 100% deterministic).
    - Seeded randomness: mulberry32 PRNG keyed on video + project seed + slide number + slide.seed -> reproducible rebuilds.
    - Backwards-compatible defaults: omitting `preset` keeps "classic" behavior; omitting `transition` keeps "soft-fade" (.fadein).
-   - Setting "random" / "تصادفی" deterministically picks from rich motion presets, 8 transitions, and 7 animated logo modes.
-   - All motion strictly driven via real GSAP 3 paused timelines (`Stage.tl` / `Stage.amb`) — no unseeded Math.random(). */
+   - Setting "random" / "تصادفی" deterministically picks from rich motion presets, 32 transitions, and 7 animated logo modes.
+   - All motion strictly driven via real GSAP 3 paused timelines (`Stage.tl` / `Stage.amb`) — 100% seeded and deterministic. */
 (function () {
   "use strict";
   const S = window.Stage;
+  const MT = window.StageMotionTokens || {};
   const FX = S.fx = {};
 
   /* ---------------------------------------------------------- seeded RNG (FNV/Murmur hash + mulberry32) */
@@ -68,6 +69,30 @@
     podcast_end: ["spotlight", "kinetic-hero", "curtain-editorial", "minimal-type"],
     article_zoom: ["cinematic-push", "tilt-glide", "marker-sweep", "split-paper"],
     mascot_talk: ["editorial-host", "debate-card", "reaction-pop", "podcast-desk"],
+    breaking_news: ["urgent-flash", "ticker-crawl", "desk-split", "minimal-news"],
+    fact_check: ["verdict-stamp", "evidence-split", "editorial-audit", "minimal-check"],
+    two_source_compare: ["headline-clash", "editorial-mirror", "bias-delta", "minimal-sources"],
+    definition_card: ["lexicon-reveal", "editorial-entry", "etymology-focus", "minimal-term"],
+    quiz_poll: ["option-cascade", "countdown-reveal", "studio-quiz", "minimal-poll"],
+    mistake_vs_correct: ["cross-to-check", "split-fix", "coach-callout", "minimal-fix"],
+    step_by_step: ["rail-progress", "card-ladder", "editorial-steps", "minimal-steps"],
+    hook_title: ["punch-hook", "split-slam", "vertical-viral", "minimal-hook"],
+    before_after: ["curtain-wipe", "split-delta", "slider-sweep", "minimal-compare"],
+    audiogram: ["studio-wave", "podcast-quote", "caption-pulse", "minimal-audio"],
+    comparison_table: ["matrix-sweep", "winner-glow", "editorial-grid", "minimal-table"],
+    newspaper_clip: ["press-zoom", "marker-clip", "archival-paper", "minimal-clip"],
+    by_the_numbers: ["tier-counters", "editorial-grid", "slam-count", "minimal-count"],
+    vocabulary_card: ["lexicon-reveal", "editorial-entry", "minimal-term"],
+    flashcard_flip: ["card-flip-3d", "studio-quiz", "minimal-clean"],
+    list_countdown: ["countdown-pop", "stagger-cards", "vertical-viral", "minimal-clean"],
+    comment_reply: ["social-card", "pop-bubbles", "minimal-clean"],
+    guest_card: ["editorial-split", "spotlight", "minimal-clean"],
+    chapter_card: ["chapter-banner", "axis-sweep", "minimal-divider"],
+    bar_race: ["race-live", "editorial-bars", "minimal-bars"],
+    donut_chart: ["ring-draw", "editorial-spec", "minimal-spec"],
+    map_choropleth: ["geo-pulse", "editorial-spec", "minimal-spec"],
+    polaroid_wall: ["gallery-drop", "card-float", "minimal-frame"],
+    mascot_pip: ["pip-host", "editorial-host", "podcast-desk"],
   };
 
   const PRESET_LABELS = {
@@ -181,32 +206,77 @@
     "debate-card": "کارت مناظره و استدلال",
     "reaction-pop": "واکنش سریع و پویا",
     "podcast-desk": "میز پادکست تمام‌قاب",
+    "urgent-flash": "تیتر فوری خبری",
+    "ticker-crawl": "نوار زیرنویس زنده",
+    "desk-split": "میز خبر دو ستونه",
+    "minimal-news": "خبر مینیمال",
+    "verdict-stamp": "مهر حکم راستی‌آزمایی",
+    "evidence-split": "ادعا در برابر سند",
+    "editorial-audit": "بررسی تحریریه",
+    "minimal-check": "راستی‌آزمایی تمیز",
+    "headline-clash": "تقابل دو تیتر",
+    "editorial-mirror": "آینه دو رسانه",
+    "bias-delta": "تحلیل زاویه دید",
+    "minimal-sources": "مقایسه ساده منابع",
+    "lexicon-reveal": "واژه‌نامه تحریریه",
+    "editorial-entry": "مدخل خوانا",
+    "etymology-focus": "ریشه و کاربرد",
+    "minimal-term": "تعریف مینیمال",
+    "option-cascade": "ورود پلکانی گزینه‌ها",
+    "countdown-reveal": "تایمر و پاسخ درست",
+    "studio-quiz": "کوییز استودیویی",
+    "minimal-poll": "نظرسنجی ساده",
+    "cross-to-check": "خط زدن غلط و تأکید درست",
+    "split-fix": "اصلاح دو ستونه",
+    "coach-callout": "نکته مربی",
+    "minimal-fix": "اصلاح مینیمال",
+    "rail-progress": "خط پیشرفت مرحله‌ای",
+    "card-ladder": "نردبان کارت‌ها",
+    "editorial-steps": "مراحل تحریریه",
+    "minimal-steps": "گام‌های تمیز",
+    "punch-hook": "قلاب ۳ ثانیه پرضربه",
+    "split-slam": "تیتر دو تکه کوبنده",
+    "vertical-viral": "ریتم شورتس و ریلز",
+    "minimal-hook": "قلاب مینیمال",
+    "curtain-wipe": "پرده مقایسه قبل و بعد",
+    "split-delta": "تغییر دو نیمه",
+    "slider-sweep": "اسلایدر زنده",
+    "studio-wave": "موج صوتی استودیو",
+    "podcast-quote": "نقل‌قول پادکست",
+    "caption-pulse": "نبض زیرنویس",
+    "minimal-audio": "آدیوگرام مینیمال",
+    "matrix-sweep": "جدول مقایسه‌ای زنده",
+    "winner-glow": "تأکید برنده",
+    "minimal-table": "جدول ساده",
+    "press-zoom": "زوم روزنامه آرشیوی",
+    "marker-clip": "بریده با هایلایت ماژیک",
+    "archival-paper": "بافت کاغذ تاریخی",
+    "minimal-clip": "بریده روزنامه تمیز",
   };
 
-  const TRANSITIONS = [
-    "curtain-rtl",
-    "accent-slash",
-    "iris-rise",
-    "soft-fade",
-    "split-curtain",
-    "diagonal-wipe",
-    "zoom-iris",
-    "shutter-bars",
-    "editorial-push",
-    "cinema-bars",
-  ];
-  const TRANSITION_LABELS = {
-    "curtain-rtl": "پرده از راست به چپ",
-    "accent-slash": "نوار تأکید مورب",
-    "iris-rise": "باز شدن دایره‌ای (Iris)",
-    "soft-fade": "محو نرم از سیاهی (کلاسیک)",
-    "split-curtain": "پردهٔ دوقسمتی بالا و پایین",
-    "diagonal-wipe": "پاک‌شدن مورب سینمایی",
-    "zoom-iris": "گشایش زوم سریع",
-    "shutter-bars": "کرکرهٔ ستونی",
-    "editorial-push": "پوش تحریریه سینمایی",
-    "cinema-bars": "باز شدن کادر سینمایی",
+  const TRANSITION_LIB = MT.TRANSITION_LIBRARY || {
+    "soft-fade": { cat: "classic", label: "محو نرم (Soft Fade)", labelEn: "Soft Fade", dur: 0.36, ease: "fluid" },
+    "curtain-rtl": { cat: "classic", label: "پرده از راست به چپ", labelEn: "Curtain RTL", dur: 0.54, ease: "vox" },
+    "accent-slash": { cat: "wipe", label: "نوار تأکید مورب", labelEn: "Accent Slash", dur: 0.52, ease: "power3" },
+    "iris-rise": { cat: "optical", label: "باز شدن دایره‌ای", labelEn: "Iris Rise", dur: 0.52, ease: "vox" },
+    "split-curtain": { cat: "classic", label: "پرده دوقسمتی", labelEn: "Split Curtain", dur: 0.52, ease: "vox" },
+    "diagonal-wipe": { cat: "wipe", label: "پاک‌شدن مورب", labelEn: "Diagonal Wipe", dur: 0.52, ease: "vox" },
+    "zoom-iris": { cat: "optical", label: "گشایش زوم نرم", labelEn: "Zoom Iris", dur: 0.50, ease: "vox" },
+    "shutter-bars": { cat: "wipe", label: "کرکره ستونی", labelEn: "Shutter Bars", dur: 0.56, ease: "vox" },
+    "editorial-push": { cat: "classic", label: "پوش تحریریه", labelEn: "Editorial Push", dur: 0.58, ease: "vox" },
+    "cinema-bars": { cat: "classic", label: "کادر سینمایی", labelEn: "Cinema Bars", dur: 0.58, ease: "fluid" },
   };
+  const TRANSITIONS = Object.keys(TRANSITION_LIB);
+  const TRANSITION_LABELS = {};
+  const TRANSITION_CATEGORIES = {
+    classic:  { label: "کلاسیک و تحریریه", labelEn: "Classic & Editorial" },
+    push:     { label: "هل‌دادن و لغزش",   labelEn: "Push & Slide" },
+    optical:  { label: "زوم و دایره‌ای",    labelEn: "Zoom & Iris" },
+    wipe:     { label: "پاک‌شدن و هندسی",   labelEn: "Wipes & Geometry" },
+    whip:     { label: "چرخش سریع",        labelEn: "Whip Pan" },
+    creative: { label: "خلاقانه و فیلم",    labelEn: "Creative & Film FX" },
+  };
+  TRANSITIONS.forEach((k) => { TRANSITION_LABELS[k] = TRANSITION_LIB[k].label; });
 
   const LOGO_MOTIONS = [
     "pop-spin",
@@ -232,6 +302,14 @@
     presetLabels: PRESET_LABELS,
     transitions: TRANSITIONS,
     transitionLabels: TRANSITION_LABELS,
+    transitionLibrary: TRANSITION_LIB,
+    transitionCategories: TRANSITION_CATEGORIES,
+    motionPersonalities: MT.MOTION_PERSONALITIES || {},
+    textAnimations: MT.TEXT_ANIMATION_PRESETS || {},
+    shapeWipes: MT.SHAPE_WIPE_PRESETS || {},
+    cameraPresets: MT.CAMERA_PRESETS || {},
+    ambiencePresets: MT.AMBIENCE_PRESETS || {},
+    easingFamilies: Object.keys(MT.EASING_FAMILIES || { vox: 1, fluid: 1, snappy: 1, silk: 1, sharp: 1, spring: 1 }),
     logoMotions: LOGO_MOTIONS,
     logoMotionLabels: LOGO_MOTION_LABELS,
     logoPositions: ["top-left", "top-right", "bottom-right", "bottom-left"],
@@ -427,162 +505,431 @@
     }, 0);
   };
 
-  /* ---------------------------------------------------------- 10 slide transitions */
+  /* ---------------------------------------------------------- A4: Transition Library 2.0 (32 deterministic broadcast transitions) */
   FX.transitionIn = function (stage, slide, th) {
     const mode = (FX.cur && FX.cur.transition) || "soft-fade";
     const clip = th.clip || { fade: 0.3 };
     const col = th.colors || {};
-    const fadeDur = clip.fade > 0 ? clip.fade : 0.35;
     const content = stage.querySelector(".content");
+    const W = S.W || 1920;
+    const H = S.H || 1080;
+    const rawTiming = slide.transitionTiming || slide.transition_timing || null;
+    const timing = MT.resolveTransitionTiming
+      ? MT.resolveTransitionTiming(mode, rawTiming)
+      : { duration: 0.52, delay: 0, ease: "vox", intensity: 1, accentColor: null };
+    const dur = timing.duration;
+    const t0 = timing.delay;
+    const ez = S.ease(timing.ease || "vox");
+    const k = timing.intensity || 1.0;
+    const accent = timing.accentColor || col.accent || "#FFD600";
+    const bgMain = col.bg || "#121212";
+    const bgAlt = col.bg2 || col.surface || "#16161a";
+    const cap = (z) => (S.capZoom ? S.capZoom(z, 1) : Math.min(1.06, Math.max(0.5, z)));
+    const rng = FX.rngFor(`${slide._seed || "tr"}:${mode}`);
 
+    const makeOverlay = (cls, styles) => {
+      const el = document.createElement("div");
+      el.className = "transition-overlay " + cls;
+      Object.assign(el.style, { position: "absolute", pointerEvents: "none", zIndex: 90 }, styles || {});
+      stage.appendChild(el);
+      return el;
+    };
+
+    /* 1. soft-fade (classic default) */
     if (mode === "soft-fade") {
       const fade = document.createElement("div");
       fade.className = "fadein";
       stage.appendChild(fade);
-      if (clip.fade > 0) S.tl.fromTo(fade, { opacity: 1 }, { opacity: 0, duration: clip.fade, ease: "power1.out", immediateRender: true }, 0);
+      const fd = rawTiming && rawTiming.duration != null ? dur : (clip.fade > 0 ? clip.fade : 0);
+      if (fd > 0) S.tl.fromTo(fade, { opacity: 1 }, { opacity: 0, duration: fd, ease: "power1.out", immediateRender: true }, t0);
       else fade.remove();
       return;
     }
 
+    /* 2. curtain-rtl */
     if (mode === "curtain-rtl") {
-      const panel = document.createElement("div");
-      panel.className = "transition-overlay transition-curtain-rtl";
-      Object.assign(panel.style, {
-        position: "absolute", inset: "0", background: col.bg2 || col.surface || "#16161a",
-        borderLeft: `10px solid ${col.accent || "#FFD600"}`, pointerEvents: "none", zIndex: 90,
+      const panel = makeOverlay("transition-curtain-rtl", {
+        inset: "0", background: bgAlt, borderLeft: `10px solid ${accent}`,
       });
-      stage.appendChild(panel);
-      S.tl.fromTo(panel, { x: 0, opacity: 1 }, { x: -2000, opacity: 0, duration: 0.54, ease: S.ease("vox"), immediateRender: true }, 0);
-      if (content) S.tl.fromTo(content, { x: 26, scale: 1.015 }, { x: 0, scale: 1, duration: 0.56, ease: S.ease("fluid"), immediateRender: true }, 0.04);
+      S.tl.fromTo(panel, { x: 0, opacity: 1 }, { x: -(W + 80), opacity: 0, duration: dur, ease: ez, immediateRender: true }, t0);
+      if (content) S.tl.fromTo(content, { x: Math.round(28 * k), scale: cap(1 + 0.015 * k) }, { x: 0, scale: 1, duration: dur * 1.04, ease: S.ease("fluid"), immediateRender: true }, t0 + 0.04);
       return;
     }
 
-    if (mode === "accent-slash") {
-      const veil = document.createElement("div");
-      veil.className = "transition-overlay transition-accent-slash";
-      Object.assign(veil.style, {
-        position: "absolute", inset: "0", background: col.bg || "#121212", pointerEvents: "none", zIndex: 89,
+    /* 3. curtain-ltr */
+    if (mode === "curtain-ltr") {
+      const panel = makeOverlay("transition-curtain-ltr", {
+        inset: "0", background: bgAlt, borderRight: `10px solid ${accent}`,
       });
-      const slash = document.createElement("div");
-      slash.className = "transition-overlay transition-slash-bar";
-      Object.assign(slash.style, {
-        position: "absolute", top: "-15%", bottom: "-15%", right: "-20%", width: "260px",
-        background: col.accent || "#FFD600", transform: "skewX(-14deg)", pointerEvents: "none", zIndex: 91,
-      });
-      stage.appendChild(veil);
-      stage.appendChild(slash);
-      S.tl.fromTo(veil, { opacity: 1 }, { opacity: 0, duration: 0.36, ease: "power2.out", immediateRender: true }, 0.08);
-      S.tl.fromTo(slash, { x: 200, opacity: 1 }, { x: -2350, opacity: 0.9, duration: 0.52, ease: "power3.inOut", immediateRender: true }, 0);
-      if (content) S.tl.fromTo(content, { scale: 1.022 }, { scale: 1, duration: 0.52, ease: S.ease("vox"), immediateRender: true }, 0.05);
+      S.tl.fromTo(panel, { x: 0, opacity: 1 }, { x: W + 80, opacity: 0, duration: dur, ease: ez, immediateRender: true }, t0);
+      if (content) S.tl.fromTo(content, { x: -Math.round(28 * k), scale: cap(1 + 0.015 * k) }, { x: 0, scale: 1, duration: dur * 1.04, ease: S.ease("fluid"), immediateRender: true }, t0 + 0.04);
       return;
     }
 
-    if (mode === "iris-rise") {
-      const veil = document.createElement("div");
-      veil.className = "transition-overlay transition-iris-rise";
-      Object.assign(veil.style, {
-        position: "absolute", inset: "0", background: col.bg || "#121212",
-        clipPath: "circle(110% at 50% 50%)", pointerEvents: "none", zIndex: 90,
+    /* 4. editorial-push */
+    if (mode === "editorial-push") {
+      const veil = makeOverlay("transition-editorial-push", {
+        inset: "0", background: bgMain, borderLeft: `6px solid ${accent}`,
       });
-      stage.appendChild(veil);
-      S.tl.fromTo(veil, { scale: 1, opacity: 1 }, { scale: 1.48, opacity: 0, duration: 0.5, ease: S.ease("vox"), immediateRender: true }, 0);
-      if (content) S.tl.fromTo(content, { scale: 0.98 }, { scale: 1, duration: 0.5, ease: S.ease("fluid"), immediateRender: true }, 0.02);
+      S.tl.fromTo(veil, { x: 0, opacity: 1 }, { x: -(W + 40), opacity: 0.15, duration: dur, ease: ez, immediateRender: true }, t0);
+      if (content) S.tl.fromTo(content, { x: Math.round(72 * k), opacity: 0.35, scale: 0.985 }, { x: 0, opacity: 1, scale: 1, duration: dur * 1.08, ease: ez, immediateRender: true }, t0 + 0.02);
       return;
     }
 
+    /* 5. split-curtain */
     if (mode === "split-curtain") {
-      const top = document.createElement("div");
-      const bot = document.createElement("div");
-      top.className = "transition-overlay transition-split-top";
-      bot.className = "transition-overlay transition-split-bot";
-      Object.assign(top.style, {
-        position: "absolute", left: "0", right: "0", top: "0", height: "540px",
-        background: col.bg2 || col.bg || "#121212", borderBottom: `4px solid ${col.accent || "#FFD600"}`,
-        pointerEvents: "none", zIndex: 90,
+      const halfH = Math.ceil(H / 2);
+      const top = makeOverlay("transition-split-top", {
+        left: "0", right: "0", top: "0", height: halfH + "px",
+        background: bgAlt, borderBottom: `4px solid ${accent}`,
       });
-      Object.assign(bot.style, {
-        position: "absolute", left: "0", right: "0", bottom: "0", height: "540px",
-        background: col.bg2 || col.bg || "#121212", borderTop: `4px solid ${col.accent || "#FFD600"}`,
-        pointerEvents: "none", zIndex: 90,
+      const bot = makeOverlay("transition-split-bot", {
+        left: "0", right: "0", bottom: "0", height: halfH + "px",
+        background: bgAlt, borderTop: `4px solid ${accent}`,
       });
-      stage.appendChild(top); stage.appendChild(bot);
-      S.tl.fromTo(top, { y: 0, opacity: 1 }, { y: -560, opacity: 0, duration: 0.5, ease: S.ease("vox"), immediateRender: true }, 0);
-      S.tl.fromTo(bot, { y: 0, opacity: 1 }, { y: 560, opacity: 0, duration: 0.5, ease: S.ease("vox"), immediateRender: true }, 0);
-      if (content) S.tl.fromTo(content, { scale: 1.02 }, { scale: 1, duration: 0.5, ease: S.ease("fluid"), immediateRender: true }, 0.03);
+      S.tl.fromTo(top, { y: 0, opacity: 1 }, { y: -(halfH + 24), opacity: 0, duration: dur, ease: ez, immediateRender: true }, t0);
+      S.tl.fromTo(bot, { y: 0, opacity: 1 }, { y: halfH + 24, opacity: 0, duration: dur, ease: ez, immediateRender: true }, t0);
+      if (content) S.tl.fromTo(content, { scale: cap(1 + 0.02 * k) }, { scale: 1, duration: dur, ease: S.ease("fluid"), immediateRender: true }, t0 + 0.03);
       return;
     }
 
-    if (mode === "diagonal-wipe") {
-      const wipe = document.createElement("div");
-      wipe.className = "transition-overlay transition-diagonal-wipe";
-      Object.assign(wipe.style, {
-        position: "absolute", top: "-20%", bottom: "-20%", left: "-25%", right: "-25%",
-        background: `linear-gradient(120deg, ${col.bg2 || col.bg || "#121212"} 70%, ${col.accent || "#FFD600"} 100%)`,
-        pointerEvents: "none", zIndex: 90,
+    /* 6. cinema-bars */
+    if (mode === "cinema-bars") {
+      const halfH = Math.ceil(H / 2);
+      const topBar = makeOverlay("transition-cinema-top", { left: "0", right: "0", top: "0", height: halfH + "px", background: bgMain });
+      const botBar = makeOverlay("transition-cinema-bot", { left: "0", right: "0", bottom: "0", height: halfH + "px", background: bgMain });
+      S.tl.fromTo(topBar, { y: 0 }, { y: -(halfH + 24), duration: dur, ease: ez, immediateRender: true }, t0);
+      S.tl.fromTo(botBar, { y: 0 }, { y: halfH + 24, duration: dur, ease: ez, immediateRender: true }, t0);
+      if (content) S.tl.fromTo(content, { scale: cap(1 + 0.03 * k) }, { scale: 1, duration: dur * 1.1, ease: S.ease("vox"), immediateRender: true }, t0 + 0.04);
+      return;
+    }
+
+    /* 7–10. push-left / push-right / push-up / push-down */
+    if (mode === "push-left" || mode === "push-right" || mode === "push-up" || mode === "push-down") {
+      const dx = mode === "push-left" ? -W : (mode === "push-right" ? W : 0);
+      const dy = mode === "push-up" ? -H : (mode === "push-down" ? H : 0);
+      const veil = makeOverlay("transition-" + mode, {
+        inset: "0", background: bgAlt,
+        boxShadow: `0 0 48px rgba(0,0,0,0.45)`,
       });
-      stage.appendChild(wipe);
-      S.tl.fromTo(wipe, { x: 0, y: 0, opacity: 1 }, { x: -2400, y: 260, opacity: 0, duration: 0.52, ease: S.ease("vox"), immediateRender: true }, 0);
-      if (content) S.tl.fromTo(content, { x: 18, scale: 1.018 }, { x: 0, scale: 1, duration: 0.52, ease: S.ease("fluid"), immediateRender: true }, 0.04);
-      return;
-    }
-
-    if (mode === "zoom-iris") {
-      const fade = document.createElement("div");
-      fade.className = "transition-overlay transition-zoom-iris";
-      Object.assign(fade.style, { position: "absolute", inset: "0", background: col.bg || "#121212", pointerEvents: "none", zIndex: 90 });
-      stage.appendChild(fade);
-      S.tl.fromTo(fade, { opacity: 0.92 }, { opacity: 0, duration: Math.max(0.28, fadeDur), ease: "power2.out", immediateRender: true }, 0);
-      if (content) S.tl.fromTo(content, { scale: 1.04 }, { scale: 1, duration: 0.5, ease: S.ease("vox"), immediateRender: true }, 0);
-      return;
-    }
-
-    if (mode === "shutter-bars") {
-      for (let i = 0; i < 4; i++) {
-        const bar = document.createElement("div");
-        bar.className = "transition-overlay transition-shutter-bar";
-        Object.assign(bar.style, {
-          position: "absolute", top: "0", bottom: "0", left: (i * 480) + "px", width: "484px",
-          background: i % 2 === 0 ? (col.bg || "#121212") : (col.bg2 || col.surface || "#1a1a1f"),
-          transformOrigin: "50% 0%", pointerEvents: "none", zIndex: 90,
-        });
-        stage.appendChild(bar);
-        S.tl.fromTo(bar, { scaleY: 1, opacity: 1 }, { scaleY: 0, opacity: 0, duration: 0.44, ease: S.ease("vox"), immediateRender: true }, i * 0.05);
+      S.tl.fromTo(veil, { x: 0, y: 0, opacity: 1 }, { x: dx, y: dy, opacity: 0.4, duration: dur, ease: ez, immediateRender: true }, t0);
+      if (content) {
+        S.tl.fromTo(content,
+          { x: Math.round(-dx * 0.14 * k), y: Math.round(-dy * 0.14 * k), opacity: 0.4 },
+          { x: 0, y: 0, opacity: 1, duration: dur * 1.05, ease: ez, immediateRender: true },
+          t0
+        );
       }
       return;
     }
 
-    if (mode === "editorial-push") {
-      const veil = document.createElement("div");
-      veil.className = "transition-overlay transition-editorial-push";
-      Object.assign(veil.style, {
-        position: "absolute", inset: "0", background: col.bg || "#121212",
-        borderLeft: `6px solid ${col.accent || "#FFD600"}`, pointerEvents: "none", zIndex: 90,
-      });
-      stage.appendChild(veil);
-      S.tl.fromTo(veil, { x: 0, opacity: 1 }, { x: -1960, opacity: 0.15, duration: 0.56, ease: S.ease("vox"), immediateRender: true }, 0);
-      if (content) S.tl.fromTo(content, { x: 72, opacity: 0.35, scale: 0.985 }, { x: 0, opacity: 1, scale: 1, duration: 0.62, ease: S.ease("vox"), immediateRender: true }, 0.02);
+    /* 11–12. slide-over-rtl / slide-over-up */
+    if (mode === "slide-over-rtl" || mode === "slide-over-up") {
+      const isUp = mode === "slide-over-up";
+      const shade = makeOverlay("transition-" + mode, { inset: "0", background: bgMain, opacity: 0.85, zIndex: 88 });
+      S.tl.fromTo(shade, { opacity: 0.85 }, { opacity: 0, duration: dur * 0.85, ease: "power2.out", immediateRender: true }, t0);
+      if (content) {
+        S.tl.fromTo(content,
+          { x: isUp ? 0 : Math.round(W * 0.18 * k), y: isUp ? Math.round(H * 0.16 * k) : 0, opacity: 0.1 },
+          { x: 0, y: 0, opacity: 1, duration: dur, ease: ez, immediateRender: true },
+          t0
+        );
+      }
       return;
     }
 
-    if (mode === "cinema-bars") {
-      const topBar = document.createElement("div");
-      const botBar = document.createElement("div");
-      topBar.className = "transition-overlay transition-cinema-top";
-      botBar.className = "transition-overlay transition-cinema-bot";
-      Object.assign(topBar.style, {
-        position: "absolute", left: "0", right: "0", top: "0", height: "540px",
-        background: col.bg || "#0e0e11", pointerEvents: "none", zIndex: 90,
-      });
-      Object.assign(botBar.style, {
-        position: "absolute", left: "0", right: "0", bottom: "0", height: "540px",
-        background: col.bg || "#0e0e11", pointerEvents: "none", zIndex: 90,
-      });
-      stage.appendChild(topBar);
-      stage.appendChild(botBar);
-      S.tl.fromTo(topBar, { y: 0 }, { y: -560, duration: 0.58, ease: S.ease("fluid"), immediateRender: true }, 0);
-      S.tl.fromTo(botBar, { y: 0 }, { y: 560, duration: 0.58, ease: S.ease("fluid"), immediateRender: true }, 0);
-      if (content) S.tl.fromTo(content, { scale: 1.03 }, { scale: 1, duration: 0.64, ease: S.ease("vox"), immediateRender: true }, 0.04);
+    /* 13. zoom-iris */
+    if (mode === "zoom-iris") {
+      const fade = makeOverlay("transition-zoom-iris", { inset: "0", background: bgMain });
+      S.tl.fromTo(fade, { opacity: 0.92 }, { opacity: 0, duration: Math.max(0.24, dur * 0.72), ease: "power2.out", immediateRender: true }, t0);
+      if (content) S.tl.fromTo(content, { scale: cap(1 + 0.04 * k) }, { scale: 1, duration: dur, ease: ez, immediateRender: true }, t0);
+      return;
     }
+
+    /* 14–15. zoom-through-in / zoom-through-out (strictly within STAGE_ZOOM_CAP 1.06) */
+    if (mode === "zoom-through-in" || mode === "zoom-through-out") {
+      const isIn = mode === "zoom-through-in";
+      const ring = makeOverlay("transition-" + mode, {
+        inset: "0", background: bgMain,
+        border: `16px solid ${accent}`,
+      });
+      S.tl.fromTo(ring, { opacity: 0.96, scale: isIn ? 0.92 : 1.06 }, { opacity: 0, scale: isIn ? 1.18 : 0.86, duration: dur * 0.88, ease: ez, immediateRender: true }, t0);
+      if (content) {
+        const startScale = isIn ? Math.max(0.92, 1 - 0.055 * k) : cap(1 + 0.055 * k);
+        S.tl.fromTo(content, { scale: startScale, opacity: 0.15 }, { scale: 1, opacity: 1, duration: dur, ease: ez, immediateRender: true }, t0);
+      }
+      return;
+    }
+
+    /* 16. iris-rise */
+    if (mode === "iris-rise") {
+      const veil = makeOverlay("transition-iris-rise", {
+        inset: "0", background: bgMain, clipPath: "circle(110% at 50% 50%)",
+      });
+      S.tl.fromTo(veil, { scale: 1, opacity: 1 }, { scale: 1.48, opacity: 0, duration: dur, ease: ez, immediateRender: true }, t0);
+      if (content) S.tl.fromTo(content, { scale: 0.98 }, { scale: 1, duration: dur, ease: S.ease("fluid"), immediateRender: true }, t0 + 0.02);
+      return;
+    }
+
+    /* 17. diagonal-wipe */
+    if (mode === "diagonal-wipe") {
+      const wipe = makeOverlay("transition-diagonal-wipe", {
+        top: "-20%", bottom: "-20%", left: "-25%", right: "-25%",
+        background: `linear-gradient(120deg, ${bgAlt} 70%, ${accent} 100%)`,
+      });
+      S.tl.fromTo(wipe, { x: 0, y: 0, opacity: 1 }, { x: -(W * 1.35), y: Math.round(H * 0.24), opacity: 0, duration: dur, ease: ez, immediateRender: true }, t0);
+      if (content) S.tl.fromTo(content, { x: Math.round(18 * k), scale: cap(1 + 0.018 * k) }, { x: 0, scale: 1, duration: dur, ease: S.ease("fluid"), immediateRender: true }, t0 + 0.04);
+      return;
+    }
+
+    /* 18. accent-slash */
+    if (mode === "accent-slash") {
+      const veil = makeOverlay("transition-accent-slash", { inset: "0", background: bgMain, zIndex: 89 });
+      const slash = makeOverlay("transition-slash-bar", {
+        top: "-15%", bottom: "-15%", right: "-20%", width: Math.round(W * 0.14) + "px",
+        background: accent, transform: "skewX(-14deg)", zIndex: 91,
+      });
+      S.tl.fromTo(veil, { opacity: 1 }, { opacity: 0, duration: dur * 0.72, ease: "power2.out", immediateRender: true }, t0 + 0.08);
+      S.tl.fromTo(slash, { x: Math.round(W * 0.12), opacity: 1 }, { x: -(W * 1.35), opacity: 0.9, duration: dur, ease: "power3.inOut", immediateRender: true }, t0);
+      if (content) S.tl.fromTo(content, { scale: cap(1 + 0.022 * k) }, { scale: 1, duration: dur, ease: S.ease("vox"), immediateRender: true }, t0 + 0.05);
+      return;
+    }
+
+    /* 19. shutter-bars */
+    if (mode === "shutter-bars") {
+      const cols = 4;
+      const bw = Math.ceil(W / cols);
+      for (let i = 0; i < cols; i++) {
+        const bar = makeOverlay("transition-shutter-bar", {
+          top: "0", bottom: "0", left: (i * bw) + "px", width: (bw + 4) + "px",
+          background: i % 2 === 0 ? bgMain : bgAlt, transformOrigin: "50% 0%",
+        });
+        S.tl.fromTo(bar, { scaleY: 1, opacity: 1 }, { scaleY: 0, opacity: 0, duration: dur * 0.82, ease: ez, immediateRender: true }, t0 + i * 0.045);
+      }
+      return;
+    }
+
+    /* 20. venetian-blinds */
+    if (mode === "venetian-blinds") {
+      const rows = 6;
+      const rh = Math.ceil(H / rows);
+      for (let i = 0; i < rows; i++) {
+        const slat = makeOverlay("transition-venetian-slat", {
+          left: "0", right: "0", top: (i * rh) + "px", height: (rh + 3) + "px",
+          background: i % 2 === 0 ? bgMain : bgAlt,
+          borderBottom: `1px solid rgba(255,255,255,0.06)`,
+          transformOrigin: "50% 0%",
+        });
+        S.tl.fromTo(slat, { scaleY: 1, opacity: 1 }, { scaleY: 0, opacity: 0, duration: dur * 0.78, ease: ez, immediateRender: true }, t0 + i * 0.038);
+      }
+      return;
+    }
+
+    /* 21. clock-wipe (deterministic conic-mask / SVG wedge proxy driven by S.tl) */
+    if (mode === "clock-wipe") {
+      const overlay = makeOverlay("transition-clock-wipe", {
+        inset: "0", background: `conic-gradient(from 0deg, transparent 0deg, ${bgMain} 0deg)`,
+      });
+      const proxy = { deg: 0 };
+      const paint = () => {
+        const d = Math.max(0, Math.min(360, proxy.deg));
+        overlay.style.background = `conic-gradient(from 0deg, transparent ${d.toFixed(1)}deg, ${bgMain} ${d.toFixed(1)}deg)`;
+        overlay.style.opacity = d >= 359 ? "0" : "1";
+      };
+      paint();
+      S.tl.to(proxy, { deg: 360, duration: dur, ease: ez, onUpdate: paint }, t0);
+      if (content) S.tl.fromTo(content, { scale: cap(1 + 0.02 * k) }, { scale: 1, duration: dur, ease: S.ease("fluid"), immediateRender: true }, t0);
+      return;
+    }
+
+    /* 22. diamond-iris */
+    if (mode === "diamond-iris") {
+      const veil = makeOverlay("transition-diamond-iris", { inset: "0", background: bgMain });
+      const diamond = makeOverlay("transition-diamond-frame", {
+        left: "50%", top: "50%", width: Math.round(Math.max(W, H) * 0.72) + "px", height: Math.round(Math.max(W, H) * 0.72) + "px",
+        marginLeft: -Math.round(Math.max(W, H) * 0.36) + "px", marginTop: -Math.round(Math.max(W, H) * 0.36) + "px",
+        border: `6px solid ${accent}`, transform: "rotate(45deg)", zIndex: 91,
+      });
+      S.tl.fromTo(veil, { opacity: 1 }, { opacity: 0, duration: dur * 0.75, ease: "power2.out", immediateRender: true }, t0 + dur * 0.14);
+      S.tl.fromTo(diamond, { scale: 0.08, opacity: 1, rotation: 45 }, { scale: 2.2, opacity: 0, rotation: 45, duration: dur, ease: ez, immediateRender: true }, t0);
+      if (content) S.tl.fromTo(content, { scale: 0.965, opacity: 0.2 }, { scale: 1, opacity: 1, duration: dur, ease: ez, immediateRender: true }, t0);
+      return;
+    }
+
+    /* 23–25. whip-pan-rtl / whip-pan-ltr / whip-pan-up */
+    if (mode === "whip-pan-rtl" || mode === "whip-pan-ltr" || mode === "whip-pan-up") {
+      const isUp = mode === "whip-pan-up";
+      const dir = mode === "whip-pan-ltr" ? -1 : 1;
+      const streak = makeOverlay("transition-" + mode, {
+        inset: "-10%",
+        background: isUp
+          ? `linear-gradient(180deg, transparent 0%, ${bgAlt} 28%, ${accent} 50%, ${bgMain} 72%, transparent 100%)`
+          : `linear-gradient(90deg, transparent 0%, ${bgAlt} 28%, ${accent} 50%, ${bgMain} 72%, transparent 100%)`,
+        filter: "blur(18px)", zIndex: 92,
+      });
+      S.tl.fromTo(streak,
+        { x: isUp ? 0 : dir * W * 0.95, y: isUp ? H * 0.95 : 0, opacity: 0.95 },
+        { x: isUp ? 0 : -dir * W * 1.1, y: isUp ? -H * 1.1 : 0, opacity: 0, duration: dur, ease: ez, immediateRender: true },
+        t0
+      );
+      if (content) {
+        S.tl.fromTo(content,
+          { x: isUp ? 0 : Math.round(dir * 120 * k), y: isUp ? Math.round(120 * k) : 0, filter: "blur(6px)", opacity: 0.3 },
+          { x: 0, y: 0, filter: "blur(0px)", opacity: 1, duration: dur * 1.06, ease: ez, immediateRender: true },
+          t0
+        );
+      }
+      return;
+    }
+
+    /* 26. ink-splash (seeded organic SVG ink blobs clearing from stage) */
+    if (mode === "ink-splash") {
+      const wrap = makeOverlay("transition-ink-splash", { inset: "0", overflow: "hidden" });
+      const svgNS = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(svgNS, "svg");
+      svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+      Object.assign(svg.style, { width: "100%", height: "100%", display: "block" });
+      const blobs = [];
+      for (let i = 0; i < 9; i++) {
+        const c = document.createElementNS(svgNS, "circle");
+        const cx = (0.12 + rng() * 0.76) * W;
+        const cy = (0.12 + rng() * 0.76) * H;
+        const rad = Math.max(W, H) * (0.24 + rng() * 0.22);
+        c.setAttribute("cx", cx.toFixed(1));
+        c.setAttribute("cy", cy.toFixed(1));
+        c.setAttribute("r", rad.toFixed(1));
+        c.setAttribute("fill", i % 4 === 0 ? accent : bgMain);
+        svg.appendChild(c);
+        blobs.push(c);
+      }
+      wrap.appendChild(svg);
+      blobs.forEach((b, idx) => {
+        S.tl.fromTo(b,
+          { scale: 1.45, opacity: 1, transformOrigin: "50% 50%" },
+          { scale: 0, opacity: 0, duration: dur * 0.85, ease: ez, immediateRender: true },
+          t0 + idx * 0.025
+        );
+      });
+      if (content) S.tl.fromTo(content, { scale: cap(1 + 0.024 * k), opacity: 0.25 }, { scale: 1, opacity: 1, duration: dur, ease: S.ease("fluid"), immediateRender: true }, t0 + 0.04);
+      return;
+    }
+
+    /* 27. paper-tear (seeded jagged editorial paper halves parting cleanly) */
+    if (mode === "paper-tear") {
+      const svgNS = "http://www.w3.org/2000/svg";
+      const midX = W * 0.5;
+      const pts = [];
+      const steps = 14;
+      for (let i = 0; i <= steps; i++) {
+        const y = (i / steps) * H;
+        const jitter = (rng() - 0.5) * Math.min(72, W * 0.055);
+        pts.push([midX + jitter, y]);
+      }
+      const leftPts = `0,0 ${pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" ")} 0,${H}`;
+      const rightPts = `${W},0 ${pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" ")} ${W},${H}`;
+      const mkHalf = (polyPts, cls) => {
+        const hEl = makeOverlay(cls, { inset: "0", filter: "drop-shadow(0 8px 22px rgba(0,0,0,0.45))" });
+        const svg = document.createElementNS(svgNS, "svg");
+        svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+        Object.assign(svg.style, { width: "100%", height: "100%", display: "block" });
+        const poly = document.createElementNS(svgNS, "polygon");
+        poly.setAttribute("points", polyPts);
+        poly.setAttribute("fill", col.isDark === false ? "#F4F1EA" : bgAlt);
+        poly.setAttribute("stroke", accent);
+        poly.setAttribute("stroke-width", "3");
+        svg.appendChild(poly);
+        hEl.appendChild(svg);
+        return hEl;
+      };
+      const leftHalf = mkHalf(leftPts, "transition-paper-left");
+      const rightHalf = mkHalf(rightPts, "transition-paper-right");
+      S.tl.fromTo(leftHalf, { x: 0, rotation: 0, opacity: 1 }, { x: -(W * 0.62), rotation: -4 * k, opacity: 0, duration: dur, ease: ez, immediateRender: true }, t0);
+      S.tl.fromTo(rightHalf, { x: 0, rotation: 0, opacity: 1 }, { x: W * 0.62, rotation: 4 * k, opacity: 0, duration: dur, ease: ez, immediateRender: true }, t0);
+      if (content) S.tl.fromTo(content, { scale: 0.98 }, { scale: 1, duration: dur, ease: S.ease("fluid"), immediateRender: true }, t0 + 0.04);
+      return;
+    }
+
+    /* 28. glitch-lite (seeded crisp digital scan slices snapping out cleanly) */
+    if (mode === "glitch-lite") {
+      const slices = 6;
+      const sh = Math.ceil(H / slices);
+      for (let i = 0; i < slices; i++) {
+        const dir = rng() < 0.5 ? -1 : 1;
+        const bar = makeOverlay("transition-glitch-slice", {
+          left: "0", right: "0", top: (i * sh) + "px", height: (sh + 2) + "px",
+          background: i % 3 === 0 ? accent : (i % 2 === 0 ? bgMain : "#00E5FF"),
+          opacity: i % 3 === 0 ? 0.55 : 0.85,
+        });
+        S.tl.fromTo(bar, { x: dir * 24 * k, opacity: 0.88 }, { x: -dir * (W * 0.45), opacity: 0, duration: dur * 0.65, ease: ez, immediateRender: true }, t0 + i * 0.025);
+      }
+      if (content) {
+        S.tl.fromTo(content, { x: Math.round(-16 * k), skewX: 3 * k, opacity: 0.45 }, { x: 0, skewX: 0, opacity: 1, duration: dur * 0.85, ease: ez, immediateRender: true }, t0);
+      }
+      return;
+    }
+
+    /* 29. light-leak (warm optical anamorphic flare sweeping across stage) */
+    if (mode === "light-leak") {
+      const leak = makeOverlay("transition-light-leak", {
+        inset: "-15%",
+        background: `radial-gradient(ellipse 65% 75% at 50% 50%, rgba(255,205,95,0.92) 0%, ${accent} 38%, rgba(239,68,68,0.42) 64%, transparent 82%)`,
+        mixBlendMode: col.isDark === false ? "normal" : "screen",
+        zIndex: 92,
+      });
+      S.tl.fromTo(leak, { x: W * 0.55, opacity: 0.95, scale: 1.05 }, { x: -W * 0.65, opacity: 0, scale: 1.25, duration: dur, ease: ez, immediateRender: true }, t0);
+      if (content) S.tl.fromTo(content, { opacity: 0.35, scale: cap(1 + 0.02 * k) }, { opacity: 1, scale: 1, duration: dur * 0.85, ease: S.ease("fluid"), immediateRender: true }, t0);
+      return;
+    }
+
+    /* 30. film-flash (clean cinema overexposure flash) */
+    if (mode === "film-flash") {
+      const flash = makeOverlay("transition-film-flash", {
+        inset: "0", background: "#FFF9E8", zIndex: 93,
+      });
+      S.tl.fromTo(flash, { opacity: 0.96 }, { opacity: 0, duration: dur, ease: ez, immediateRender: true }, t0);
+      if (content) S.tl.fromTo(content, { scale: cap(1 + 0.03 * k), opacity: 0.5 }, { scale: 1, opacity: 1, duration: dur * 0.95, ease: S.ease("vox"), immediateRender: true }, t0);
+      return;
+    }
+
+    /* 31. rgb-split (chromatic cyan/red fringe convergence) */
+    if (mode === "rgb-split") {
+      const rLayer = makeOverlay("transition-rgb-r", {
+        inset: "0", background: "rgba(255,48,72,0.34)", mixBlendMode: "screen", zIndex: 91,
+      });
+      const cLayer = makeOverlay("transition-rgb-c", {
+        inset: "0", background: "rgba(0,229,255,0.34)", mixBlendMode: "screen", zIndex: 91,
+      });
+      const shift = Math.round(46 * k);
+      S.tl.fromTo(rLayer, { x: -shift, opacity: 0.85 }, { x: 0, opacity: 0, duration: dur, ease: ez, immediateRender: true }, t0);
+      S.tl.fromTo(cLayer, { x: shift, opacity: 0.85 }, { x: 0, opacity: 0, duration: dur, ease: ez, immediateRender: true }, t0);
+      if (content) S.tl.fromTo(content, { x: Math.round(14 * k), opacity: 0.35 }, { x: 0, opacity: 1, duration: dur, ease: ez, immediateRender: true }, t0);
+      return;
+    }
+
+    /* 32. page-turn (editorial book sheet folding off right spine) */
+    if (mode === "page-turn") {
+      const sheet = makeOverlay("transition-page-turn", {
+        inset: "0",
+        background: `linear-gradient(90deg, ${bgAlt} 0%, ${bgMain} 86%, rgba(0,0,0,0.65) 100%)`,
+        borderLeft: `4px solid ${accent}`,
+        transformOrigin: "100% 50%",
+        boxShadow: "-24px 0 60px rgba(0,0,0,0.5)",
+        zIndex: 92,
+      });
+      S.tl.fromTo(sheet,
+        { scaleX: 1, skewY: 0, opacity: 1 },
+        { scaleX: 0, skewY: -3.5 * k, opacity: 0, duration: dur, ease: ez, immediateRender: true },
+        t0
+      );
+      if (content) S.tl.fromTo(content, { x: Math.round(24 * k), opacity: 0.4 }, { x: 0, opacity: 1, duration: dur * 0.95, ease: S.ease("fluid"), immediateRender: true }, t0 + 0.04);
+      return;
+    }
+
+    // Fallback to clean soft-fade for any unknown transition string
+    const fallback = document.createElement("div");
+    fallback.className = "fadein";
+    stage.appendChild(fallback);
+    S.tl.fromTo(fallback, { opacity: 1 }, { opacity: 0, duration: Math.max(0.24, dur), ease: "power1.out", immediateRender: true }, t0);
   };
 
   /* ---------------------------------------------------------- 7 animated logo modes (SCAM-safe + A.field) */
@@ -681,6 +1028,11 @@
       el.classList.add("ul-on");
       const t = timeOf(el) + 0.08;
       S.tl.fromTo(el, { backgroundSize: "0% 6px" }, { backgroundSize: "100% 6px", duration: 0.5, ease: S.ease("power3"), immediateRender: true }, t);
+    });
+    content.querySelectorAll(".strike").forEach((el) => {
+      const t = timeOf(el) + 0.1;
+      S.tl.fromTo(el, { backgroundSize: "0% 5px" }, { backgroundSize: "100% 5px", duration: 0.46, ease: S.ease("sharp"), immediateRender: true }, t);
+      FX.cue(t, "strike", el.textContent);
     });
   };
 
@@ -1097,4 +1449,208 @@
       }
     });
   };
+
+  /* ---------------------------------------------------------- A5: Deterministic Virtual Camera (Dolly, Parallax, Focus Pull, Shake) */
+  FX.camera = function (stage, content, slide, A) {
+    const rawCam = slide && (slide.camera || slide.cameraConfig || slide.camera_preset);
+    if (!rawCam || rawCam === "none") return;
+    const isMapTemplate = slide.template === "map_choropleth" || slide.allowMapCamera === true;
+    const cfg = MT.resolveCameraConfig
+      ? MT.resolveCameraConfig(rawCam, { allowMapCamera: isMapTemplate })
+      : { preset: "none", dolly: 0, panX: 0, panY: 0, parallax: 0, focusBlur: 0, shakeAmp: 0, shakeDecay: 0, maxZoom: 1.06 };
+    if (cfg.preset === "none" && !cfg.dolly && !cfg.panX && !cfg.panY && !cfg.focusBlur && !cfg.shakeAmp) return;
+
+    const camSeed = FX.hash(`${slide._seed || "cam"}:${cfg.preset}`);
+    const p1 = ((camSeed & 0xff) / 255) * Math.PI * 2;
+    const p2 = (((camSeed >> 8) & 0xff) / 255) * Math.PI * 2;
+    const depthNodes = content ? [...content.querySelectorAll("[data-depth]")] : [];
+    const bgNode = stage ? stage.querySelector(".bgimg") : null;
+    const durSpan = Math.max(4, Number(slide.duration) || 6);
+
+    const applyCamAt = (t) => {
+      const u = Math.max(0, Math.min(1, t / durSpan));
+      // Smooth quintic ease across clip so dolly/pan feels like a real motorized slider
+      const easeU = u * u * u * (10 - u * (15 - 6 * u));
+      let sc = 1 + cfg.dolly * easeU;
+      sc = Math.max(0.94, Math.min(cfg.maxZoom, sc));
+
+      let tx = cfg.panX * easeU;
+      let ty = cfg.panY * easeU;
+      let rot = 0;
+
+      if (cfg.shakeAmp > 0) {
+        const decay = cfg.shakeDecay > 0 ? Math.exp(-t * cfg.shakeDecay) : 1;
+        const env = cfg.shakeDecay > 0 ? decay : Math.min(1, t / 0.35);
+        tx += cfg.shakeAmp * env * (0.65 * Math.sin(t * 7.4 + p1) + 0.35 * Math.sin(t * 13.8 + p2));
+        ty += cfg.shakeAmp * env * 0.72 * (0.6 * Math.cos(t * 6.2 + p2) + 0.4 * Math.sin(t * 11.4 + p1));
+        rot = cfg.shakeAmp * env * 0.09 * Math.sin(t * 5.2 + p1);
+      }
+
+      if (content) {
+        content.style.transformOrigin = "50% 50%";
+        content.style.transform = `translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, 0) scale(${sc.toFixed(5)}) rotate(${rot.toFixed(3)}deg)`;
+        content.dataset.cameraScale = sc.toFixed(5);
+      }
+
+      // Deterministic Parallax on [data-depth] nodes (-1 background, +1 foreground)
+      if (cfg.parallax > 0 && depthNodes.length) {
+        const pxShift = (easeU - 0.5) * cfg.parallax;
+        for (let i = 0; i < depthNodes.length; i += 1) {
+          const dn = depthNodes[i];
+          const dVal = Number(dn.dataset.depth) || 0;
+          dn.style.translate = `${(pxShift * dVal).toFixed(2)}px ${(pxShift * dVal * 0.35).toFixed(2)}px 0px`;
+        }
+      }
+
+      // Deterministic Focus Pull (soft depth blur rack into razor-sharp focus over first 1.15s)
+      if (cfg.focusBlur > 0) {
+        const fProg = Math.max(0, Math.min(1, t / 1.15));
+        const fEase = 1 - Math.pow(1 - fProg, 3);
+        const contentBlur = cfg.focusBlur * (1 - fEase);
+        if (content) content.style.filter = contentBlur > 0.05 ? `blur(${contentBlur.toFixed(2)}px)` : "";
+        if (bgNode) {
+          const bgBlur = cfg.focusBlur * 0.45 * fEase;
+          bgNode.style.filter = bgBlur > 0.05 ? `blur(${bgBlur.toFixed(2)}px)` : "";
+        }
+      }
+    };
+
+    applyCamAt(0);
+    S.onSeek(applyCamAt);
+  };
+
+  /* ---------------------------------------------------------- A6: Deterministic Seeded Particles & Weather Ambience */
+  FX.ambience = function (stage, slide, A) {
+    const rawAmb = slide && (slide.ambience || slide.particles || slide.weather);
+    if (!rawAmb || rawAmb === "none") return;
+    const cfg = MT.resolveAmbienceConfig
+      ? MT.resolveAmbienceConfig(rawAmb)
+      : { preset: "none", count: 0, speed: 1, opacity: 0.4, color: null };
+    if (cfg.preset === "none" || cfg.count <= 0) return;
+
+    const W = (A && A.W) || S.W || 1920;
+    const H = (A && A.H) || S.H || 1080;
+    const col = (S.theme && S.theme.colors) || {};
+    const accent = cfg.color || col.accent || "#FFD600";
+    const confettiPalette = [accent, col.danger || "#E53935", "#38BDF8", "#22C55E", "#F472B6", "#FFFFFF"];
+
+    const layer = document.createElement("div");
+    layer.className = `ambience-layer ambience-${cfg.preset}`;
+    Object.assign(layer.style, {
+      position: "absolute", inset: "0", pointerEvents: "none", overflow: "hidden",
+      zIndex: cfg.preset === "celebration-confetti" || cfg.preset === "soft-rain" || cfg.preset === "gentle-snow" ? 65 : 15,
+    });
+    stage.appendChild(layer);
+
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("width", W);
+    svg.setAttribute("height", H);
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    Object.assign(svg.style, { position: "absolute", left: "0", top: "0", width: "100%", height: "100%" });
+    layer.appendChild(svg);
+
+    const rng = FX.rngFor(`${slide._seed || "amb"}:${cfg.preset}`);
+    const particles = [];
+    for (let i = 0; i < cfg.count; i += 1) {
+      const p = {
+        x0: rng() * W,
+        y0: rng() * H,
+        size: 3 + rng() * 11,
+        vx: (rng() - 0.5) * 44,
+        vy: 30 + rng() * 90,
+        phase: rng() * Math.PI * 2,
+        freq: 0.6 + rng() * 1.6,
+        spin: (rng() - 0.5) * 240,
+        op: (0.45 + rng() * 0.55) * cfg.opacity,
+        color: confettiPalette[Math.floor(rng() * confettiPalette.length)],
+      };
+      let node;
+      if (cfg.preset === "soft-rain") {
+        node = document.createElementNS(svgNS, "line");
+        node.setAttribute("stroke", cfg.color || "#CBE8FF");
+        node.setAttribute("stroke-width", (1.2 + rng() * 1.4).toFixed(1));
+        node.setAttribute("stroke-linecap", "round");
+        p.len = 22 + rng() * 28;
+      } else if (cfg.preset === "celebration-confetti") {
+        node = document.createElementNS(svgNS, "rect");
+        node.setAttribute("width", (8 + rng() * 10).toFixed(1));
+        node.setAttribute("height", (5 + rng() * 6).toFixed(1));
+        node.setAttribute("rx", "2");
+        node.setAttribute("fill", p.color);
+      } else if (cfg.preset === "news-grid-pulse") {
+        node = document.createElementNS(svgNS, "rect");
+        const sq = (10 + rng() * 14).toFixed(1);
+        node.setAttribute("width", sq);
+        node.setAttribute("height", sq);
+        node.setAttribute("fill", "none");
+        node.setAttribute("stroke", accent);
+        node.setAttribute("stroke-width", "2");
+      } else {
+        node = document.createElementNS(svgNS, "circle");
+        const rad = cfg.preset === "gold-bokeh" ? (18 + rng() * 44) : (cfg.preset === "gentle-snow" ? (3 + rng() * 7) : (2.2 + rng() * 5.2));
+        node.setAttribute("r", rad.toFixed(1));
+        node.setAttribute("fill", cfg.preset === "warm-sparks" ? accent : (cfg.preset === "gentle-snow" ? "#FFFFFF" : (cfg.preset === "gold-bokeh" ? accent : (col.text || "#FFFFFF"))));
+      }
+      node.setAttribute("opacity", p.op.toFixed(3));
+      svg.appendChild(node);
+      p.node = node;
+      particles.push(p);
+    }
+
+    const wrapMod = (val, max) => ((val % max) + max) % max;
+
+    const evalParticlesAt = (t) => {
+      const ts = t * cfg.speed;
+      for (let i = 0; i < particles.length; i += 1) {
+        const p = particles[i];
+        if (cfg.preset === "soft-rain") {
+          const x = wrapMod(p.x0 - ts * 55, W);
+          const y = wrapMod(p.y0 + ts * (p.vy * 4.2 + 260), H);
+          p.node.setAttribute("x1", x.toFixed(1));
+          p.node.setAttribute("y1", y.toFixed(1));
+          p.node.setAttribute("x2", (x - 8).toFixed(1));
+          p.node.setAttribute("y2", (y + p.len).toFixed(1));
+        } else if (cfg.preset === "gentle-snow") {
+          const x = wrapMod(p.x0 + Math.sin(ts * p.freq + p.phase) * 32 + ts * p.vx * 0.35, W);
+          const y = wrapMod(p.y0 + ts * (p.vy * 0.9 + 28), H);
+          p.node.setAttribute("cx", x.toFixed(1));
+          p.node.setAttribute("cy", y.toFixed(1));
+        } else if (cfg.preset === "warm-sparks") {
+          const x = wrapMod(p.x0 + Math.sin(ts * p.freq * 1.4 + p.phase) * 26 + ts * p.vx * 0.4, W);
+          const y = wrapMod(p.y0 - ts * (p.vy * 1.5 + 40), H);
+          const pulse = 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(ts * 4.2 + p.phase));
+          p.node.setAttribute("cx", x.toFixed(1));
+          p.node.setAttribute("cy", y.toFixed(1));
+          p.node.setAttribute("opacity", (p.op * pulse).toFixed(3));
+        } else if (cfg.preset === "celebration-confetti") {
+          const x = wrapMod(p.x0 + Math.sin(ts * p.freq * 1.6 + p.phase) * 44 + ts * p.vx * 0.5, W);
+          const y = wrapMod(p.y0 + ts * (p.vy * 1.6 + 64), H);
+          const rot = (ts * p.spin + p.phase * 57.3) % 360;
+          p.node.setAttribute("x", x.toFixed(1));
+          p.node.setAttribute("y", y.toFixed(1));
+          p.node.setAttribute("transform", `rotate(${rot.toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)})`);
+        } else if (cfg.preset === "news-grid-pulse") {
+          const gx = Math.round(p.x0 / 96) * 96;
+          const gy = Math.round(p.y0 / 96) * 96;
+          const pulse = 0.2 + 0.8 * Math.pow(0.5 + 0.5 * Math.sin(ts * p.freq * 2.0 + p.phase), 2);
+          p.node.setAttribute("x", gx.toFixed(1));
+          p.node.setAttribute("y", gy.toFixed(1));
+          p.node.setAttribute("opacity", (p.op * pulse).toFixed(3));
+        } else {
+          // studio-dust & gold-bokeh: gentle closed-form Lissajous drift
+          const x = wrapMod(p.x0 + Math.sin(ts * 0.45 * p.freq + p.phase) * 38 + ts * p.vx * 0.22, W);
+          const y = wrapMod(p.y0 + Math.cos(ts * 0.38 * p.freq + p.phase) * 28 - ts * 14, H);
+          const breathe = 0.55 + 0.45 * Math.sin(ts * 0.9 * p.freq + p.phase);
+          p.node.setAttribute("cx", x.toFixed(1));
+          p.node.setAttribute("cy", y.toFixed(1));
+          p.node.setAttribute("opacity", (p.op * breathe).toFixed(3));
+        }
+      }
+    };
+
+    evalParticlesAt(0);
+    S.onSeek(evalParticlesAt);
+  };
 })();
+

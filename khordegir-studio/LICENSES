@@ -54,6 +54,14 @@ Khordegir Studio — Third-Party & Original Component Licenses
       mapping named `<g>` layers (English + Persian aliases) to the 18-part Puppet Schema v2 with anatomical auto-pivots.
     - Implementation License: MIT License (clean original implementation).
 
+11. Studio Motion Design System v2, RTL-Safe Kinetic Typography Suite (14 Presets), Transition Library 2.0 (32 Broadcast
+    Transitions), and 12 New Broadcast Slide Templates (`khordegir/stage/motion-tokens.js`, `khordegir/stage/core.js`,
+    `khordegir/stage/fx.js`, `khordegir/stage/template-lib.js`, `khordegir/templates/*`)
+    - Implementation: Original deterministic GSAP 3 timeline patterns, cubic-bezier easing families, seeded PRNG
+      (`mulberry32`) organic transitions (`ink-splash`, `paper-tear`, `glitch-lite`), and Unicode-safe Persian/English
+      grapheme/word segmentation (`Intl.Segmenter` standard web API with fallback). Zero external dependencies.
+    - Implementation License: MIT License (same as repository `/LICENSE`).
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of the MIT-licensed
 components above, subject to the conditions of the repository `/LICENSE`.
 

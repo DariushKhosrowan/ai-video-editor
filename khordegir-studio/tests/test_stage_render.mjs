@@ -1152,6 +1152,758 @@ test("Phase 4: Offline JS SVG Rig Importer maps English & Persian layers with de
   assert.ok(Math.abs(r1.parts.beak_lower.pivotY - 249.0) < 0.2);
 });
 
+/* ============================================================================
+   STUDIO MOTION v2 TESTS (A1 Motion Tokens, A2 14 Text Presets, A4 32 Transitions, B1-B6 12 Templates)
+   ============================================================================ */
+
+function createRichDomElement(tag, docRef) {
+  const listeners = Object.create(null);
+  const styleObj = Object.create(null);
+  styleObj.setProperty = function (k, v) { this[k] = String(v); };
+  styleObj.getPropertyValue = function (k) { return this[k] || ""; };
+
+  const el = {
+    tagName: String(tag).toUpperCase(),
+    nodeType: 1,
+    attrs: Object.create(null),
+    style: styleObj,
+    children: [],
+    parentNode: null,
+    get parentElement() { return this.parentNode; },
+    get firstElementChild() { return this.children[0] || null; },
+    className: "",
+    _text: "",
+    _html: "",
+    dataset: Object.create(null),
+    offsetHeight: 96,
+    offsetWidth: 120,
+    scrollHeight: 90,
+    scrollWidth: 320,
+    clientHeight: 120,
+    clientWidth: 420,
+    get textContent() {
+      if (this.children.length) return this.children.map((c) => c.textContent).join("");
+      return this._text;
+    },
+    set textContent(v) {
+      this._text = String(v ?? "");
+      this._html = this._text;
+      this.children = [];
+    },
+    get innerHTML() {
+      return this._html || this.textContent;
+    },
+    set innerHTML(v) {
+      this._html = String(v ?? "");
+      this.children = [];
+      this._text = "";
+      // Stack-based lightweight HTML parser supporting nested spans (.k-line > .k-word-group > .k-char, .hl, .ul, .strike, .k-count-num)
+      const tokenRe = /<(\/?)([a-zA-Z0-9-]+)([^>]*)>|([^<]+)/g;
+      const stack = [this];
+      let m;
+      while ((m = tokenRe.exec(this._html)) !== null) {
+        const cur = stack[stack.length - 1];
+        if (m[4] !== undefined) {
+          cur._text += m[4];
+          cur.children.push({
+            nodeType: 3,
+            tagName: "#TEXT",
+            className: "",
+            _text: m[4],
+            textContent: m[4],
+            children: [],
+            style: {},
+            matches: () => false,
+          });
+        } else {
+          const isClose = m[1] === "/";
+          const tagName = m[2].toLowerCase();
+          const attrsStr = m[3] || "";
+          const selfClose = /\/\s*$/.test(attrsStr) || tagName === "br" || tagName === "img" || tagName === "hr";
+          if (isClose) {
+            if (stack.length > 1) stack.pop();
+          } else {
+            const child = createRichDomElement(tagName, docRef);
+            const clsM = attrsStr.match(/class\s*=\s*["']([^"']+)["']/i);
+            if (clsM) child.className = clsM[1];
+            const idM = attrsStr.match(/id\s*=\s*["']([^"']+)["']/i);
+            if (idM) child.id = idM[1];
+            const attrRe = /data-([a-z0-9_-]+)\s*=\s*["']([^"']*)["']/gi;
+            let am;
+            while ((am = attrRe.exec(attrsStr)) !== null) {
+              const dk = am[1].replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+              child.dataset[dk] = am[2];
+            }
+            cur.appendChild(child);
+            if (!selfClose) stack.push(child);
+          }
+        }
+      }
+    },
+    classList: {
+      add(...cls) {
+        const cur = new Set(String(el.className || "").split(/\s+/).filter(Boolean));
+        cls.forEach((c) => cur.add(c));
+        el.className = [...cur].join(" ");
+      },
+      remove(...cls) {
+        const cur = new Set(String(el.className || "").split(/\s+/).filter(Boolean));
+        cls.forEach((c) => cur.delete(c));
+        el.className = [...cur].join(" ");
+      },
+      toggle(c, force) {
+        const has = String(el.className || "").split(/\s+/).includes(c);
+        const want = force !== undefined ? !!force : !has;
+        if (want) this.add(c); else this.remove(c);
+      },
+      contains(c) {
+        return String(el.className || "").split(/\s+/).includes(c);
+      },
+    },
+    setAttribute(k, v) {
+      this.attrs[k] = String(v);
+      if (k === "class") this.className = String(v);
+      if (k === "id") this.id = String(v);
+    },
+    getAttribute(k) {
+      if (k === "class") return this.className;
+      return Object.prototype.hasOwnProperty.call(this.attrs, k) ? this.attrs[k] : null;
+    },
+    appendChild(child) {
+      if (!child) return child;
+      child.parentNode = this;
+      this.children.push(child);
+      return child;
+    },
+    append(...nodes) {
+      nodes.forEach((n) => this.appendChild(n));
+    },
+    insertBefore(child, ref) {
+      child.parentNode = this;
+      const idx = this.children.indexOf(ref);
+      if (idx < 0) this.children.push(child);
+      else this.children.splice(idx, 0, child);
+      return child;
+    },
+    replaceChild(newChild, oldChild) {
+      const idx = this.children.indexOf(oldChild);
+      newChild.parentNode = this;
+      if (idx >= 0) this.children[idx] = newChild;
+      else this.children.push(newChild);
+      return oldChild;
+    },
+    remove() {
+      if (!this.parentNode) return;
+      const i = this.parentNode.children.indexOf(this);
+      if (i >= 0) this.parentNode.children.splice(i, 1);
+      this.parentNode = null;
+    },
+    matches(sel) {
+      return sel.split(",").some((part) => {
+        const s = part.trim();
+        if (s.startsWith(".")) return this.classList.contains(s.slice(1));
+        if (s.startsWith("[data-")) {
+          const key = s.slice(6, -1).replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+          return this.dataset[key] !== undefined;
+        }
+        return this.tagName === s.toUpperCase();
+      });
+    },
+    closest(sel) {
+      let cur = this;
+      while (cur) {
+        if (cur.matches && cur.matches(sel)) return cur;
+        cur = cur.parentNode;
+      }
+      return null;
+    },
+    querySelectorAll(sel) {
+      const out = [];
+      const parts = sel.split(",").map((p) => p.trim()).filter(Boolean);
+      const walk = (n) => {
+        for (const c of n.children || []) {
+          if (parts.some((p) => {
+            if (p.includes(" ")) {
+              const last = p.split(/\s+/).pop();
+              return c.matches(last);
+            }
+            return c.matches(p);
+          })) out.push(c);
+          walk(c);
+        }
+      };
+      walk(this);
+      return out;
+    },
+    querySelector(sel) {
+      return this.querySelectorAll(sel)[0] || null;
+    },
+    addEventListener(ev, fn) {
+      listeners[ev] = listeners[ev] || [];
+      listeners[ev].push(fn);
+    },
+    getBoundingClientRect() {
+      return { left: 0, top: 0, width: 420, height: 120 };
+    },
+    decode() {
+      return Promise.resolve();
+    },
+  };
+  return el;
+}
+
+function createFullStageEngineSandbox() {
+  const stageEl = createRichDomElement("div");
+  stageEl.id = "stage";
+  const bodyEl = createRichDomElement("body");
+  bodyEl.appendChild(stageEl);
+  const htmlEl = createRichDomElement("html");
+  htmlEl.appendChild(bodyEl);
+
+  const doc = {
+    documentElement: htmlEl,
+    body: bodyEl,
+    head: createRichDomElement("head"),
+    fonts: { ready: Promise.resolve() },
+    createElement: (tag) => createRichDomElement(tag, doc),
+    createElementNS: (_ns, tag) => createRichDomElement(tag, doc),
+    getElementById: (id) => (id === "stage" ? stageEl : null),
+    querySelector: (sel) => (sel === "#stage" ? stageEl : bodyEl.querySelector(sel)),
+    querySelectorAll: (sel) => bodyEl.querySelectorAll(sel),
+  };
+
+  // Minimal deterministic timeline shim (same API surface as GSAP paused timelines)
+  const makeTl = () => {
+    const entries = [];
+    let curT = 0;
+    const tl = {
+      _entries: entries,
+      _t: 0,
+      fromTo(target, fromVars, toVars, at = 0) {
+        entries.push({ kind: "fromTo", target, from: Object.assign({}, fromVars), to: Object.assign({}, toVars), at: Number(at) || 0, dur: Number(toVars?.duration) || 0.3 });
+        return tl;
+      },
+      from(target, vars, at = 0) {
+        entries.push({ kind: "from", target, from: Object.assign({}, vars), at: Number(at) || 0, dur: Number(vars?.duration) || 0.3 });
+        return tl;
+      },
+      to(target, vars, at = 0) {
+        entries.push({ kind: "to", target, to: Object.assign({}, vars), at: Number(at) || 0, dur: Number(vars?.duration) || 0.3 });
+        return tl;
+      },
+      set(target, vars, at = 0) {
+        entries.push({ kind: "set", target, to: Object.assign({}, vars), at: Number(at) || 0, dur: 0 });
+        return tl;
+      },
+      time(t) {
+        if (t === undefined) return curT;
+        curT = Number(t) || 0;
+        tl._t = curT;
+        for (const e of entries) {
+          const p = e.dur > 0 ? Math.max(0, Math.min(1, (curT - e.at) / e.dur)) : (curT >= e.at ? 1 : 0);
+          if (e.target && typeof e.target === "object" && !e.target.tagName) {
+            for (const k of Object.keys(e.to || {})) {
+              if (typeof e.to[k] === "number" && k !== "duration" && k !== "repeat" && k !== "stagger") {
+                const startV = (e.from && typeof e.from[k] === "number") ? e.from[k] : 0;
+                e.target[k] = startV + (e.to[k] - startV) * p;
+              }
+            }
+          }
+          if (e.to && typeof e.to.onUpdate === "function") e.to.onUpdate();
+        }
+        return tl;
+      },
+      duration() {
+        return entries.reduce((mx, e) => Math.max(mx, e.at + e.dur), 0);
+      },
+      kill() { entries.length = 0; },
+    };
+    return tl;
+  };
+
+  const sandbox = {
+    window: null,
+    document: doc,
+    Math,
+    Number,
+    String,
+    Boolean,
+    Array,
+    Object,
+    JSON,
+    Set,
+    Map,
+    RegExp,
+    Intl,
+    Promise,
+    console,
+    performance: { now: () => 0 },
+    requestAnimationFrame: () => 0,
+    cancelAnimationFrame: () => {},
+    getComputedStyle: (el) => ({ fontSize: (el && el.style && el.style.fontSize) || "48px" }),
+    addEventListener: () => {},
+    gsap: { timeline: () => makeTl(), set: () => {} },
+    parent: { postMessage: () => {} },
+  };
+  sandbox.window = sandbox;
+  vm.createContext(sandbox);
+
+  const loadScript = (rel) => {
+    const src = fs.readFileSync(path.join(KH_DIR, rel), "utf8");
+    vm.runInContext(src, sandbox, { filename: rel });
+  };
+  loadScript("stage/motion-tokens.js");
+  loadScript("stage/core.js");
+  loadScript("stage/fx.js");
+  loadScript("stage/charts.js");
+  loadScript("stage/mascot-rig.js");
+  loadScript("stage/template-lib.js");
+  loadScript("themes/khordegir-dark.js");
+
+  // Override Stage.script so templates load synchronously from disk in Node VM
+  sandbox.Stage.script = async (relUrl) => {
+    const clean = String(relUrl).replace(/^\.\.\//, "");
+    loadScript(clean);
+  };
+
+  return { sandbox, stageEl, loadScript };
+}
+
+test("Studio A1: Motion tokens, 5 personalities, overshoot protection on body/image, anticipation & enhanced A.stagger", async () => {
+  const { sandbox } = createFullStageEngineSandbox();
+  const MT = sandbox.StageMotionTokens;
+  const S = sandbox.Stage;
+
+  // Verify A1 token catalogs
+  assert.equal(Object.keys(MT.DURATION_TOKENS).length, 7);
+  assert.equal(Object.keys(MT.STAGGER_TOKENS).length, 6);
+  assert.ok(Object.keys(MT.EASING_FAMILIES).length >= 16);
+  assert.equal(Object.keys(MT.MOTION_PERSONALITIES).length, 5);
+  assert.equal(MT.OVERSHOOT_RULES.body.allowOvershoot, false);
+  assert.equal(MT.OVERSHOOT_RULES.image.allowOvershoot, false);
+  assert.equal(MT.OVERSHOOT_RULES.badge.allowOvershoot, true);
+
+  // Register a probe template verifying A.dur, A.enter overshoot guard, anticipation, and A.stagger modes
+  let probeStats = null;
+  S.template({
+    name: "probe_a1",
+    build(s, A) {
+      const bodyEl = A.text(A.root, "متن بدنه رسمی", "body");
+      const badgeEl = A.text(A.root, "فوری", "caption", "badge");
+      A.enter(bodyEl, "body", 0, 0, { ease: "spring" }); // Must be clamped away from bounce!
+      A.enter(badgeEl, "badge");
+      const items = [0, 1, 2, 3].map((i) => A.el("div", "card", A.root, {}));
+      const endCenter = A.stagger(items, "card", { from: "center", step: "grid" });
+      probeStats = {
+        personality: A.personality.name,
+        durBase: A.dur("base"),
+        endCenter,
+        tlCount: S.tl._entries.length,
+      };
+    },
+  });
+
+  await S.load({ template: "probe_a1", motionPersonality: "calm" });
+  const calmDur = probeStats.durBase;
+  await S.load({ template: "probe_a1", motionPersonality: "punchy" });
+  const punchyDur = probeStats.durBase;
+
+  assert.ok(calmDur > punchyDur, `Calm personality (${calmDur}s) should be slower than Punchy (${punchyDur}s)`);
+  assert.ok(probeStats.endCenter > 0);
+  // Check that body element never received a spring/back ease
+  const bodyTweens = S.tl._entries.filter((e) => e.target && e.target.className && e.target.className.includes("t-body"));
+  assert.ok(bodyTweens.length > 0);
+  bodyTweens.forEach((tw) => {
+    const ez = tw.to && tw.to.ease;
+    assert.ok(!/back|elastic|spring/.test(String(ez || "")), `Body must never use bouncy ease, got ${ez}`);
+  });
+});
+
+test("Studio A2: All 14 RTL-safe Text Animation presets preserve Persian cursive words while splitting English cleanly", async () => {
+  const { sandbox } = createFullStageEngineSandbox();
+  const MT = sandbox.StageMotionTokens;
+  const S = sandbox.Stage;
+
+  const presetNames = Object.keys(MT.TEXT_ANIMATION_PRESETS);
+  assert.equal(presetNames.length, 14);
+
+  let lastEl = null;
+  S.template({
+    name: "probe_a2",
+    build(s, A) {
+      const el = A.text(A.root, s.sampleText, "hero");
+      A.kinetic(el, { mode: s.textMotion, role: "title" });
+      lastEl = el;
+    },
+  });
+
+  const bilingualSample = "خرده‌گیر می‌شود 2026 Studio";
+  for (const preset of presetNames) {
+    await S.load({ template: "probe_a2", textMotion: preset, sampleText: bilingualSample });
+    assert.ok(S.tl._entries.length > 0, `Preset ${preset} should schedule deterministic GSAP timeline entries`);
+    S.seek(0.0);
+    S.seek(0.45);
+    S.seek(2.2);
+
+    if (preset === "letter-wave") {
+      // Persian cursive words with ZWNJ must stay intact as .k-word spans, NEVER broken into .k-char!
+      const words = lastEl.querySelectorAll(".k-word").map((n) => n.textContent);
+      const chars = lastEl.querySelectorAll(".k-char").map((n) => n.textContent);
+      assert.ok(words.some((w) => w.includes("می‌شود") || w.includes("خرده‌گیر")), "Persian cursive words must stay intact in letter-wave");
+      assert.ok(chars.length >= 6, `English run 'Studio' should split into .k-char spans, got ${chars.length}`);
+      assert.ok(chars.every((ch) => !/[\u0600-\u06FF]/.test(ch)), "No Arabic/Persian letters may ever be placed in disconnected .k-char spans");
+    }
+
+    if (preset === "typewriter") {
+      S.seek(0.0);
+      const atStart = lastEl.querySelector(".k-type-text").textContent;
+      S.seek(4.0);
+      const atEnd = lastEl.querySelector(".k-type-text").textContent;
+      assert.equal(atStart, "");
+      assert.equal(atEnd, "خرده‌گیر می‌شود ۲۰۲۶ Studio");
+      // Determinism: seeking back to 0.0 restores empty string
+      S.seek(0.0);
+      assert.equal(lastEl.querySelector(".k-type-text").textContent, "");
+    }
+
+    if (preset === "counting-text") {
+      const cNodes = lastEl.querySelectorAll(".k-count-num");
+      assert.ok(cNodes.length >= 1, "counting-text should detect and animate embedded numbers");
+    }
+  }
+});
+
+test("Studio A4: Transition Library 2.0 — all 32 broadcast transitions run deterministically across 3 formats within 1.06 zoom cap", async () => {
+  const { sandbox } = createFullStageEngineSandbox();
+  const S = sandbox.Stage;
+  const FX = S.fx;
+
+  assert.equal(FX.CATALOG.transitions.length, 32, `Expected 32 transitions, got ${FX.CATALOG.transitions.length}`);
+
+  S.template({
+    name: "probe_a4",
+    build(s, A) {
+      const t = A.text(A.root, s.title || "عنوان تست", "hero");
+      A.enter(t, "title");
+    },
+  });
+
+  for (const tr of FX.CATALOG.transitions) {
+    for (const fmt of ["16:9", "9:16", "1:1"]) {
+      await S.load(
+        {
+          template: "probe_a4",
+          title: `تست ${tr}`,
+          transition: tr,
+          transitionTiming: { duration: 0.48, delay: 0.02, intensity: 1.15 },
+          seed: 7,
+        },
+        { format: fmt }
+      );
+      // Verify no .content tween ever exceeds STAGE_ZOOM_CAP = 1.06
+      for (const entry of S.tl._entries) {
+        if (entry.target && entry.target.className === "content") {
+          if (entry.from && typeof entry.from.scale === "number") {
+            assert.ok(entry.from.scale <= 1.06001, `Transition ${tr} (${fmt}) exceeded 1.06 zoom cap: ${entry.from.scale}`);
+          }
+          if (entry.to && typeof entry.to.scale === "number") {
+            assert.ok(entry.to.scale <= 1.06001, `Transition ${tr} (${fmt}) exceeded 1.06 zoom cap: ${entry.to.scale}`);
+          }
+        }
+      }
+      // Deterministic seek out-of-order
+      S.seek(0.25);
+      S.seek(1.5);
+      S.seek(0.25);
+    }
+  }
+});
+
+test("Studio B1–B6: All 12 new broadcast templates render & seek deterministically across 16:9, 9:16, and 1:1", async () => {
+  const { sandbox, loadScript } = createFullStageEngineSandbox();
+  const S = sandbox.Stage;
+  loadScript("templates/_index.js");
+  const newTemplates = [
+    "breaking_news",
+    "fact_check",
+    "two_source_compare",
+    "definition_card",
+    "quiz_poll",
+    "mistake_vs_correct",
+    "step_by_step",
+    "hook_title",
+    "before_after",
+    "audiogram",
+    "comparison_table",
+    "newspaper_clip",
+  ];
+  for (const name of newTemplates) {
+    loadScript(`templates/${name}/template.js`);
+  }
+
+  for (const name of newTemplates) {
+    const schema = JSON.parse(fs.readFileSync(path.join(KH_DIR, "templates", name, "schema.json"), "utf8"));
+    for (const fmt of ["16:9", "9:16", "1:1"]) {
+      const slide = Object.assign({}, schema.example, {
+        template: name,
+        motionPersonality: fmt === "9:16" ? "punchy" : "editorial",
+        seed: 12,
+      });
+      const info = await S.load(slide, { format: fmt });
+      assert.ok(info && info.duration >= 4, `Template ${name} (${fmt}) should build with valid duration, got ${info && info.duration}`);
+      assert.ok(S.tl._entries.length > 0, `Template ${name} (${fmt}) should create GSAP entrance animations`);
+
+      // Verify WYSIWYG A.field wrappers exist
+      const stageEl = sandbox.document.getElementById("stage");
+      const fieldWraps = stageEl.querySelectorAll("[data-field-wrap]");
+      assert.ok(fieldWraps.length >= 2, `Template ${name} (${fmt}) should register editable A.field wrappers`);
+
+      // Seek determinism check (especially for audiogram seek-driven waveform & quiz_poll countdown)
+      const serializeTree = (node) =>
+        `${node.tagName}.${node.className}[${JSON.stringify(node.style)}:${node._text}](${(node.children || []).map(serializeTree).join(",")})`;
+      S.seek(0.6);
+      const midSnap = serializeTree(stageEl);
+      S.seek(2.8);
+      S.seek(0.6);
+      assert.equal(serializeTree(stageEl), midSnap, `Template ${name} (${fmt}) seek(t) must be 100% deterministic`);
+    }
+  }
+});
+
+test("Studio A3: Shape & Path Engine — drawPath, equal-vertex morphPath, maskWipe, blobReveal & lineArtReveal", async () => {
+  const { sandbox } = createFullStageEngineSandbox();
+  const MT = sandbox.StageMotionTokens;
+  const S = sandbox.Stage;
+
+  assert.equal(Object.keys(MT.SHAPE_WIPE_PRESETS).length, 7);
+
+  let morphPathEl = null;
+  let blobEl = null;
+  let drawEl = null;
+  S.template({
+    name: "probe_a3",
+    build(s, A) {
+      const svg = A.svg(A.root, 0, 0, 400, 300, "0 0 400 300");
+      drawEl = A.svgEl(svg, "path", { d: "M10 10 L180 10 L180 120", fill: "none", stroke: "#FFD600", "stroke-width": 4 });
+      A.drawPath(drawEl, { at: 0.1, dur: "base" });
+
+      morphPathEl = A.svgEl(svg, "path", { d: "M20 20 L100 20 L100 100 L20 100 Z", fill: "#FFD600" });
+      A.morphPath(
+        morphPathEl,
+        "M20 20 L100 20 L100 100 L20 100 Z",
+        "M60 10 L110 110 L10 110 Z",
+        { at: 0.2, dur: 1.0, samples: 16 }
+      );
+
+      const wipeBox = A.el("div", "card", A.root, { width: "200px", height: "120px" });
+      A.maskWipe(wipeBox, "wipe-rtl", { at: 0.15, dur: 0.5 });
+
+      blobEl = A.el("div", "card", A.root, { width: "200px", height: "120px" });
+      A.blobReveal(blobEl, { at: 0.3, dur: 1.0, seed: 29, lobes: 7 });
+
+      const artSvg = A.svg(A.root, 0, 150, 200, 100, "0 0 200 100");
+      A.svgEl(artSvg, "line", { x1: 0, y1: 10, x2: 180, y2: 10 });
+      A.svgEl(artSvg, "circle", { cx: 60, cy: 50, r: 22 });
+      A.svgEl(artSvg, "rect", { x: 110, y: 20, width: 60, height: 40 });
+      A.lineArtReveal(artSvg, { at: 0.25, stagger: "tight" });
+    },
+  });
+
+  await S.load({ template: "probe_a3" });
+  assert.ok(Number(drawEl.style.strokeDasharray) > 200, "drawPath should compute analytical path length");
+
+  S.seek(0.2);
+  const dStart = morphPathEl.getAttribute("d");
+  const blobStart = blobEl.style.clipPath;
+  S.seek(0.7);
+  const dMid = morphPathEl.getAttribute("d");
+  const blobMid = blobEl.style.clipPath;
+  S.seek(1.5);
+  const dEnd = morphPathEl.getAttribute("d");
+  const blobEnd = blobEl.style.clipPath;
+
+  assert.notEqual(dStart, dMid, "morphPath d attribute must evolve at mid-progress");
+  assert.notEqual(dMid, dEnd, "morphPath d attribute must evolve to end-progress");
+  assert.equal(blobStart, "circle(0% at 50% 50%)");
+  assert.ok(blobMid.startsWith("polygon("), `Expected organic polygon clipPath at mid-progress, got ${blobMid}`);
+  assert.equal(blobEnd, "circle(82% at 50% 50%)");
+
+  // Out-of-order determinism
+  S.seek(0.7);
+  assert.equal(morphPathEl.getAttribute("d"), dMid);
+  assert.equal(blobEl.style.clipPath, blobMid);
+});
+
+test("Studio A5 & A6: Virtual Camera (8 presets, 1.06 cap + map exception, parallax, focus-pull) & Seeded Particles/Weather (8 presets)", async () => {
+  const { sandbox } = createFullStageEngineSandbox();
+  const MT = sandbox.StageMotionTokens;
+  const S = sandbox.Stage;
+
+  const camNames = Object.keys(MT.CAMERA_PRESETS);
+  const ambNames = Object.keys(MT.AMBIENCE_PRESETS);
+  assert.equal(camNames.length, 8);
+  assert.equal(ambNames.length, 8);
+
+  S.template({
+    name: "probe_a5_a6",
+    build(s, A) {
+      const fg = A.el("div", "card", A.root, { width: "260px", height: "140px" });
+      fg.dataset.depth = "1";
+      const bg = A.el("div", "card", A.root, { width: "260px", height: "140px" });
+      bg.dataset.depth = "-1";
+      A.enter(fg, "card");
+    },
+  });
+
+  // 1. All 8 camera presets enforce STAGE_ZOOM_CAP = 1.06 on standard templates
+  for (const preset of camNames) {
+    await S.load({ template: "probe_a5_a6", camera: { preset, dolly: 0.25 }, duration: 6, seed: 42 });
+    const stageEl = sandbox.document.getElementById("stage");
+    const content = stageEl.querySelector(".content");
+    S.seek(5.5);
+    if (preset !== "none") {
+      const sc = Number(content.dataset.cameraScale);
+      assert.ok(sc <= 1.06001, `Camera preset ${preset} exceeded 1.06 cap on standard slide: ${sc}`);
+    }
+    if (preset === "parallax-drift") {
+      const depthEls = content.querySelectorAll("[data-depth]");
+      assert.ok(depthEls[0].style.translate && depthEls[0].style.translate !== depthEls[1].style.translate, "Parallax should shift foreground and background opposite ways");
+    }
+    if (preset === "focus-pull") {
+      S.seek(0.05);
+      assert.ok(content.style.filter.includes("blur("), "Focus-pull should blur at start");
+      S.seek(1.5);
+      assert.equal(content.style.filter, "", "Focus-pull should clear blur after 1.15s");
+    }
+  }
+
+  // Map camera exception (allowMapCamera: true allows zoom > 1.06 up to 1.45)
+  await S.load({ template: "probe_a5_a6", allowMapCamera: true, camera: { preset: "gentle-dolly-in", dolly: 0.22 }, duration: 6, seed: 42 });
+  S.seek(5.8);
+  const mapContent = sandbox.document.getElementById("stage").querySelector(".content");
+  assert.ok(Number(mapContent.dataset.cameraScale) > 1.1, "Map camera should allow > 1.06 dolly zoom");
+
+  // 2. All 8 ambience presets render & seek deterministically with bit-identical SVG attributes
+  const snapSvgAttrs = (layer) =>
+    layer.querySelectorAll("circle,rect,line").map((n) => JSON.stringify(n.attrs)).join("|");
+
+  for (const amb of ambNames) {
+    await S.load({ template: "probe_a5_a6", ambience: amb, duration: 6, seed: 99 });
+    const stageEl = sandbox.document.getElementById("stage");
+    const layer = stageEl.querySelector(".ambience-layer");
+    if (amb === "none") {
+      assert.equal(layer, null);
+      continue;
+    }
+    assert.ok(layer, `Expected .ambience-layer for preset ${amb}`);
+    S.seek(1.2);
+    const snap1 = snapSvgAttrs(layer);
+    S.seek(4.4);
+    const snapLater = snapSvgAttrs(layer);
+    assert.notEqual(snap1, snapLater, `Ambience ${amb} should animate over time`);
+    S.seek(1.2);
+    assert.equal(snapSvgAttrs(layer), snap1, `Ambience ${amb} seek(t) must be bit-identical out-of-order`);
+  }
+});
+
+test("Studio A7: Chart Pack v2 — barRace, donut, pie, area, scatter & offline choropleth map", async () => {
+  const { sandbox } = createFullStageEngineSandbox();
+  const S = sandbox.Stage;
+
+  assert.ok(S.charts.barRace && S.charts.donut && S.charts.pie && S.charts.area && S.charts.scatter && S.charts.choropleth);
+
+  let raceBox = null;
+  S.template({
+    name: "probe_a7",
+    build(s, A) {
+      const box = A.el("div", "abs", A.root, { left: 40, top: 40, width: 1000, height: 560 });
+      box.clientWidth = 1000;
+      box.clientHeight = 560;
+      if (s.chartKind === "barRace") raceBox = box;
+      S.chart(A, box, s.spec, 0.2);
+    },
+  });
+
+  const specs = [
+    ["barRace", { type: "barRace", suffix: "٪", frames: [{ period: "۱۴۰۰", values: { "الف": 20, "ب": 50, "ج": 35 } }, { period: "۱۴۰۳", values: { "الف": 90, "ب": 40, "ج": 70 } }] }],
+    ["donut", { type: "donut", center_label: "کل", items: [{ label: "A", value: 45 }, { label: "B", value: 35 }, { label: "C", value: 20 }] }],
+    ["pie", { type: "pie", items: [{ label: "A", value: 60 }, { label: "B", value: 40 }] }],
+    ["area", { type: "area", series: [{ name: "روند", values: [12, 24, 38, 52] }] }],
+    ["scatter", { type: "scatter", points: [{ x: 1, y: 12, r: 12, label: "نقطه۱" }, { x: 4, y: 34, r: 16, label: "نقطه۲" }, { x: 8, y: 66, r: 20, label: "نقطه۳" }] }],
+    ["choropleth", { type: "choropleth", suffix: "٪", regions: { middle_east: 88, europe: 71, asia: 94 } }],
+  ];
+
+  for (const [kind, spec] of specs) {
+    await S.load({ template: "probe_a7", chartKind: kind, spec, duration: 5 });
+    assert.ok(S.tl._entries.length > 0, `Chart ${kind} should schedule timeline entries`);
+    if (kind === "barRace") {
+      S.seek(0.2);
+      const pEarly = raceBox.children[0].textContent;
+      const wEarly = raceBox.querySelectorAll(".bar").map((b) => b.style.width).join(",");
+      S.seek(3.5);
+      const pLate = raceBox.children[0].textContent;
+      const wLate = raceBox.querySelectorAll(".bar").map((b) => b.style.width).join(",");
+      assert.notEqual(pEarly, pLate, "barRace period label should advance with seek(t)");
+      assert.notEqual(wEarly, wLate, "barRace bar widths should interpolate over time");
+      S.seek(0.2);
+      assert.equal(raceBox.querySelectorAll(".bar").map((b) => b.style.width).join(","), wEarly, "barRace seek(t) must be deterministic");
+    }
+  }
+});
+
+test("Studio B1–B7 Wave 2: All 12 new broadcast templates render & seek deterministically across 16:9, 9:16, and 1:1", async () => {
+  const { sandbox, loadScript } = createFullStageEngineSandbox();
+  const S = sandbox.Stage;
+  loadScript("templates/_index.js");
+  const wave2Templates = [
+    "by_the_numbers",
+    "vocabulary_card",
+    "flashcard_flip",
+    "list_countdown",
+    "comment_reply",
+    "guest_card",
+    "chapter_card",
+    "bar_race",
+    "donut_chart",
+    "map_choropleth",
+    "polaroid_wall",
+    "mascot_pip",
+  ];
+  for (const name of wave2Templates) {
+    loadScript(`templates/${name}/template.js`);
+  }
+
+  for (const name of wave2Templates) {
+    const schema = JSON.parse(fs.readFileSync(path.join(KH_DIR, "templates", name, "schema.json"), "utf8"));
+    for (const fmt of ["16:9", "9:16", "1:1"]) {
+      const slide = Object.assign({}, schema.example, {
+        template: name,
+        motionPersonality: fmt === "9:16" ? "punchy" : "editorial",
+        camera: name === "map_choropleth" ? { preset: "gentle-dolly-in", dolly: 0.14 } : "gentle-dolly-in",
+        ambience: "studio-dust",
+        seed: 24,
+      });
+      const info = await S.load(slide, { format: fmt });
+      assert.ok(info && info.duration >= 4, `Template ${name} (${fmt}) should build with valid duration, got ${info && info.duration}`);
+      assert.ok(S.tl._entries.length > 0, `Template ${name} (${fmt}) should create GSAP entrance animations`);
+
+      const stageEl = sandbox.document.getElementById("stage");
+      const fieldWraps = stageEl.querySelectorAll("[data-field-wrap]");
+      assert.ok(fieldWraps.length >= 2, `Template ${name} (${fmt}) should register editable A.field wrappers`);
+
+      const serializeTree = (node) =>
+        `${node.tagName}.${node.className}[${JSON.stringify(node.style)}:${JSON.stringify(node.attrs)}:${node._text}](${(node.children || []).map(serializeTree).join(",")})`;
+      S.seek(0.65);
+      const midSnap = serializeTree(stageEl);
+      S.seek(3.1);
+      S.seek(0.65);
+      assert.equal(serializeTree(stageEl), midSnap, `Template ${name} (${fmt}) seek(t) must be 100% deterministic`);
+    }
+  }
+});
+
+
+
 
 
 

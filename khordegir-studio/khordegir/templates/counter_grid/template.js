@@ -20,7 +20,7 @@ Stage.template({
           left: 0, right: 0, top: 0, height: "5px",
           background: A.color(tone), transformOrigin: "100% 50%",
         });
-        Stage.tl.from(bar, { scaleX: 0, duration: 0.52, ease: Stage.ease("vox"), immediateRender: true }, A.at("card", i) + 0.08);
+        Stage.tl.from(bar, { scaleX: 0, duration: A.dur("base"), ease: Stage.ease("vox"), immediateRender: true }, A.at("card", i) + 0.08);
       }
       const n = A.el("div", "t-number", card, { color: A.color(tone), fontSize: (cards.length > 2 ? 130 : 160) + "px" });
       A.count(n, { to: c.value, prefix: c.prefix, suffix: c.suffix, decimals: c.decimals, at: A.at("card", i) + 0.18 });
