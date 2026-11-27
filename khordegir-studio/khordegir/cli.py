@@ -133,6 +133,107 @@ def cmd_build(a):
     (out / "build-report.txt").write_text("\n".join(report + ["", "هشدارها:"] + pr.warnings) + "\n", encoding="utf-8")
     extras = []
     try:
+        import re, subprocess
+        from .music import parse_music_block, render_music_track, build_ffmpeg_filter_complex, estimate_slide_durations
+        music_cfg = parse_music_block(pr.data, khordegir_root=PKG)
+        # ------------------ Music Mixing Engine (Sample-accurate, LUFS leveled, Ducked) ------------------
+        if music_cfg.enabled and not a.no_video:
+            rendered_slides = [s for s in pr.render_slides() if not only or s["_num"] in only]
+            est_durs = estimate_slide_durations(pr.data)
+            all_slides = pr.render_slides()
+
+            slide_durs = {}
+            for idx, s in enumerate(all_slides):
+                n = s["_num"]
+                r_info = next((r for r in results if Path(r.get("file", "")).stem == f"slide-{n:02d}"), None)
+                if r_info and r_info.get("duration"):
+                    slide_durs[n] = float(r_info["duration"])
+                elif idx < len(est_durs):
+                    slide_durs[n] = float(est_durs[idx])
+                else:
+                    slide_durs[n] = float(s.get("duration") or pr.default_duration or 6.0)
+
+            total_dur = sum(slide_durs.get(s["_num"], 6.0) for s in rendered_slides)
+            if total_dur <= 0:
+                total_dur = 6.0
+
+            # 1. Render deterministic master music bed
+            music_wav = out / "music.wav"
+            music_info = render_music_track(
+                pr.data,
+                out_wav_path=music_wav,
+                sample_rate=44100,
+                khordegir_root=PKG,
+                total_duration=total_dur,
+            )
+
+            # 2. Build and save FFmpeg filter complex representation
+            ff_filter = build_ffmpeg_filter_complex(pr.data, khordegir_root=PKG)
+            if ff_filter.get("filter_complex"):
+                (out / "music_filter.txt").write_text(ff_filter["filter_complex"], encoding="utf-8")
+
+            # 3. Mix mood audio into individual slide MP4s
+            cursor = 0.0
+            for s in rendered_slides:
+                n = s["_num"]
+                s_mp4 = sd / f"slide-{n:02d}.mp4"
+                s_dur = slide_durs.get(n, 6.0)
+                if s_mp4.exists() and music_wav.exists():
+                    tmp_mp4 = sd / f".slide-{n:02d}-music.mp4"
+                    mux_cmd = [
+                        "ffmpeg", "-y", "-v", "error",
+                        "-i", str(s_mp4),
+                        "-ss", f"{cursor:.4f}", "-t", f"{s_dur:.4f}",
+                        "-i", str(music_wav),
+                        "-map", "0:v:0", "-map", "1:a:0",
+                        "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+                        "-shortest",
+                        str(tmp_mp4)
+                    ]
+                    res_mux = subprocess.run(mux_cmd, capture_output=True, text=True)
+                    if res_mux.returncode == 0 and tmp_mp4.exists():
+                        tmp_mp4.replace(s_mp4)
+                cursor += s_dur
+
+            # 4. Assemble the final full video MP4 mixing all slides with the continuous mood track
+            concat_txt = out / ".slides_concat.txt"
+            manifest = []
+            for s in rendered_slides:
+                s_file = sd / f"slide-{s['_num']:02d}.mp4"
+                if s_file.exists():
+                    manifest.append(f"file '{s_file.resolve()}'")
+
+            final_mp4 = out / "video.mp4"
+            if manifest and music_wav.exists():
+                concat_txt.write_text("\n".join(manifest) + "\n", encoding="utf-8")
+                concat_cmd = [
+                    "ffmpeg", "-y", "-v", "error",
+                    "-f", "concat", "-safe", "0", "-i", str(concat_txt),
+                    "-i", str(music_wav),
+                    "-map", "0:v:0", "-map", "1:a:0",
+                    "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+                    "-shortest",
+                    str(final_mp4)
+                ]
+                res_concat = subprocess.run(concat_cmd, capture_output=True, text=True)
+                if res_concat.returncode == 0 and final_mp4.exists():
+                    title_clean = re.sub(r'[\\/*?:"<>|]', "_", str(pr.title)).strip()
+                    title_mp4 = out / f"{title_clean}.mp4"
+                    if title_mp4 != final_mp4:
+                        try:
+                            if title_mp4.exists():
+                                title_mp4.unlink()
+                            os.link(str(final_mp4), str(title_mp4))
+                        except OSError:
+                            shutil.copy2(str(final_mp4), str(title_mp4))
+
+            lufs_val = music_info.get("lufs_measured", music_cfg.lufs_target)
+            extras.append(f"موسیقی متن: مود {fa(music_cfg.mood or 1)} ({lufs_val:.1f} LUFS) روی ویدیوی نهایی")
+            print(f"  ♫ موسیقی متن: مود {fa(music_cfg.mood or 1)} ({lufs_val:.1f} LUFS) با داکینگ و نرم‌شدگی روی ویدیو میکس شد.")
+    except Exception as e:
+        print('  ⚠ موسیقی میکس نشد: '+str(e))
+
+    try:
         from .captions import write_captions
         cap_res = write_captions(pr, out)
         if cap_res:
