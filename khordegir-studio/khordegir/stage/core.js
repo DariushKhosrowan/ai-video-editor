@@ -6,29 +6,62 @@
    so frame i of the video is strictly deterministic: Stage.seek(i / fps).                        */
 (function () {
   "use strict";
-  /* Frame formats. W/H follow the current slide's format (Stage.setFormat); landscape is the default
-     and renders exactly as before. */
-  const FORMATS = {
-    landscape: { w: 1920, h: 1080, typeScale: 1 },
-    portrait: { w: 1080, h: 1920, typeScale: 1.12 },
-    square: { w: 1080, h: 1080, typeScale: 1 },
-  };
-  /* per-format safe areas & camera box (SCAM) when the theme does not give its own layout.formats[fmt] */
-  const FORMAT_LAYOUT = {
-    portrait: { margin: 72, top: 160, bottom: 280, cam: [48, 1088, 1032, 1641] },
-    square: { margin: 64, top: 64, bottom: 64, cam: [24, 786, 504, 1056] },
-  };
-  const FORMAT_ALIASES = {
-    landscape: "landscape", horizontal: "landscape", wide: "landscape", "16:9": "landscape", "16x9": "landscape", "افقی": "landscape",
-    portrait: "portrait", vertical: "portrait", tall: "portrait", "9:16": "portrait", "9x16": "portrait", "عمودی": "portrait",
-    square: "square", "1:1": "square", "1x1": "square", "مربع": "square", "مربعی": "square",
-  };
+  const MT = window.StageMotionTokens || { STAGE_ZOOM_CAP: 1.06, resolveFormat: () => ({ width: 1920, height: 1080 }), clampZoom: (z) => Math.min(1.06, Math.max(0.5, Number(z) || 1)) };
   let W = 1920, H = 1080;
-  const MT = window.MOTION_TOKENS || (window.Stage && window.Stage.MOTION);
-  const S = window.Stage = Object.assign(window.Stage || {}, {
-    W, H, fps: 30, themes: (window.Stage && window.Stage.themes) || {}, templates: {}, theme: null, tl: null, amb: null, slide: null,
-    ready: false, _dur: 6, _base: "", _clipSeq: 0, _lang: "fa", MOTION: MT, motionTokens: MT,
-  });
+  const S = window.Stage = {
+    W, H, fps: 30, format: "16:9", ZOOM_CAP: MT.STAGE_ZOOM_CAP || 1.06,
+    themes: {}, templates: {}, theme: null, tl: null, amb: null, slide: null,
+    ready: false, _dur: 6, _base: "", _clipSeq: 0, _seekHooks: [], _mascots: [], _liveVoiceActive: false,
+    capZoom: (z) => MT.clampZoom ? MT.clampZoom(z) : Math.min(1.06, Math.max(0.5, Number(z) || 1)),
+    onSeek(fn) { if (typeof fn === "function") S._seekHooks.push(fn); },
+    registerMascot(inst) { if (inst) S._mascots.push(inst); },
+    getMascotState() { return S._mascots.length && S._mascots[0].getState ? S._mascots[0].getState() : null; },
+    setMascotTone(toneCfg) {
+      S._mascots.forEach((m) => { if (m && m.setTone) m.setTone(toneCfg); });
+      return S.getMascotState();
+    },
+    setPuppetConfig(puppetCfg) {
+      S._mascots.forEach((m) => { if (m && m.setPuppetConfig) m.setPuppetConfig(puppetCfg); });
+      return S.getMascotState();
+    },
+    setLiveEmotion(name, intensity) {
+      S._mascots.forEach((m) => { if (m && m.setLiveEmotion) m.setLiveEmotion(name, intensity); });
+      return S.getMascotState();
+    },
+    triggerLiveGesture(name, opts) {
+      S._mascots.forEach((m) => { if (m && m.triggerLiveGesture) m.triggerLiveGesture(name, opts); });
+      return S.getMascotState();
+    },
+    setLiveVoice(sample, dt = 1 / 60) {
+      S._liveVoiceActive = Boolean(sample && sample.active !== false);
+      if (!S._liveVoiceActive) return null;
+      if (sample && sample.loudness != null && S.setMicLevel) S.setMicLevel(sample.loudness);
+      let st = null;
+      for (let i = 0; i < S._mascots.length; i += 1) {
+        if (S._mascots[i] && S._mascots[i].applyLiveVoice) {
+          st = S._mascots[i].applyLiveVoice(sample, dt);
+        }
+      }
+      return st;
+    },
+    setFormat(fmt) {
+      const spec = MT.resolveFormat ? MT.resolveFormat(fmt) : { width: 1920, height: 1080 };
+      W = S.W = spec.width;
+      H = S.H = spec.height;
+      S.format = fmt || "16:9";
+      const st = document.getElementById("stage");
+      if (st) {
+        st.style.width = W + "px";
+        st.style.height = H + "px";
+        st.setAttribute("data-format", S.format);
+      }
+      if (document.body && !document.body.classList.contains("obs-body")) {
+        document.body.style.width = W + "px";
+        document.body.style.height = H + "px";
+      }
+      return { width: W, height: H, format: S.format };
+    },
+  };
 
   /* ---------------------------------------------------------------- utils */
   const FA = "۰۱۲۳۴۵۶۷۸۹";
@@ -49,85 +82,17 @@
     const neg = v < 0; v = Math.abs(v);
     const s = v.toFixed(dec);
     let [i, f] = s.split(".");
-    if (S._lang === "en") {
-      if (thousands && i.length > 3) i = i.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-      return (neg ? "-" : "") + i + (f ? "." + f : "");
-    }
     if (thousands && i.length > 3) i = i.replace(/\B(?=(\d{3})+(?!\d))/g, "٬");
     return (neg ? "-" : "") + fa(i + (f ? "٫" + f : ""));
   };
   const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const hasFa = S.hasFa = (s) => /[\u0620-\u064A\u0671-\u06D3\u06FA-\u06FF]/.test(String(s ?? ""));
-  const applyRichMarks = (h) => h
-    .replace(/==([^=]+)==/g, '<span class="hl">$1</span>')
-    .replace(/__([^_]+)__/g, '<span class="ul">$1</span>')
-    .replace(/\*([^*]+)\*/g, '<span class="acc">$1</span>')
-    .replace(/~([^~]+)~/g, '<span class="dng">$1</span>')
-    .replace(/(^|[\s(«])_([^_]+)_/g, '$1<span class="mut">$2</span>')
-    .replace(/\n/g, "<br>");
-
-  function wrapInlineDelights(html, { isEn, allowCount, allowMicro }) {
-    if (!allowCount && !allowMicro) return html;
-    const parts = String(html).split(/(<[^>]+>)/g);
-    let insideLatBdi = 0;
-    return parts.map((seg) => {
-      if (!seg) return seg;
-      if (seg.startsWith("<")) {
-        if (/^<bdi\b/i.test(seg)) insideLatBdi++;
-        else if (/^<\/bdi>/i.test(seg) && insideLatBdi > 0) insideLatBdi--;
-        return seg;
-      }
-      let out = seg;
-      if (allowCount) {
-        out = out.replace(
-          /(?<![A-Za-z0-9۰-۹_:\/\\.\-])([+\-±])?([0-9۰-۹]+(?:[٬,][0-9۰-۹]{3})*(?:[٫.][0-9۰-۹]+)?)(\s?[٪%])?(?![A-Za-z0-9۰-۹:\/\\])/g,
-          (full, sign, numRaw, pctRaw) => {
-            if (!numRaw) return full;
-            const enDigits = numRaw.replace(/[۰-۹]/g, (d) => String(FA.indexOf(d))).replace(/٬/g, ",").replace(/٫/g, ".");
-            if (/^0\d/.test(enDigits)) return full;
-            const clean = enDigits.replace(/,/g, "");
-            const val = Number(clean);
-            if (!Number.isFinite(val)) return full;
-            const dec = (clean.split(".")[1] || "").length;
-            const hasTh = /[٬,]/.test(numRaw) ? 1 : 0;
-            const pre = sign === "+" ? "+" : (sign === "-" ? "-" : (sign === "±" ? "±" : ""));
-            const signedVal = sign === "-" ? -val : val;
-            const preForFmt = sign === "-" ? "" : pre;
-            const suf = pctRaw ? (isEn ? pctRaw.replace("٪", "%") : pctRaw.replace("%", "٪")) : "";
-            const isYear = !sign && !pctRaw && !hasTh && dec === 0 && val >= 1300 && val <= 2150 ? 1 : 0;
-            if (isYear) return full; // years stay still: rolling dates reads as a gimmick
-            const display = (sign === "-" ? "-" : preForFmt) + S.fmt(val, dec, hasTh === 1) + suf;
-            return `<span class="auto-num" data-to="${signedVal}" data-dec="${dec}" data-th="${hasTh}" data-pre="${esc(preForFmt)}" data-suf="${esc(suf)}" data-year="${isYear}"><bdi dir="ltr" class="auto-num-core">${display}</bdi></span>`;
-          },
-        );
-      }
-      if (allowMicro && !insideLatBdi) {
-        try {
-          out = out.replace(/(\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic})*)/gu, (em) => {
-            if (/^[0-9#*]+$/.test(em)) return em;
-            return `<span class="emo-pop">${em}</span>`;
-          });
-        } catch (_) { /* older regex engines */ }
-      }
-      return out;
-    }).join("");
-  }
 
   /* Rich text: *accent*  ~danger~  _muted_  ==highlight==  __underline__  newline -> <br>;
-     Includes deterministic inline auto-count numbers & emoji pops unless disabled. */
-  S.rich = function (s, opts = {}) {
+     Latin runs isolated LTR (keep latin digits); other digits become Persian. */
+  S.rich = function (s) {
     s = String(s ?? "");
-    const allowCount = opts.count !== false && (!S.slide || S.slide.count !== false);
-    const allowMicro = opts.micro !== false && (!S.slide || S.slide.micro_fx !== false);
-    const isEn = S._lang === "en";
-    if (isEn) {
-      const h = wrapInlineDelights(applyRichMarks(esc(s)), { isEn: true, allowCount, allowMicro });
-      return hasFa(s) ? h : `<bdi dir="ltr" class="lat">${h}</bdi>`;
-    }
-    if (!hasFa(s) && /[A-Za-z]/.test(s)) {
-      const h = wrapInlineDelights(applyRichMarks(esc(s)), { isEn: false, allowCount, allowMicro });
-      return `<bdi dir="ltr" class="lat">${h}</bdi>`;
-    }
+    if (!hasFa(s) && /[A-Za-z]/.test(s)) return `<bdi dir="ltr" class="lat">${esc(s)}</bdi>`;
     let h = esc(s);
     const lat = [];
     h = h.replace(/\(?[A-Za-z][A-Za-z0-9.,&;:'’\-\/() ]*[A-Za-z0-9.)]|[A-Za-z]/g, (m) => {
@@ -135,10 +100,14 @@
       return String.fromCharCode(0xE000 + lat.length - 1);
     });
     h = fa(h);
-    h = applyRichMarks(h)
-      .replace(/([≈+−±])\s?([۰-۹][۰-۹٫٬]*\s?[٪%]?)/g, '<bdi dir="ltr">$1$2</bdi>');
+    h = h.replace(/==([^=]+)==/g, '<span class="hl">$1</span>').replace(/__([^_]+)__/g, '<span class="ul">$1</span>')
+         .replace(/\*([^*]+)\*/g, '<span class="acc">$1</span>')
+         .replace(/~([^~]+)~/g, '<span class="dng">$1</span>')
+         .replace(/(^|[\s(«])_([^_]+)_/g, '$1<span class="mut">$2</span>')
+         .replace(/\n/g, "<br>")
+         .replace(/([≈+−±])\s?([۰-۹][۰-۹٫٬]*\s?[٪%]?)/g, '<bdi dir="ltr">$1$2</bdi>');
     h = h.replace(/[\uE000-\uE0FF]/g, (m) => `<bdi dir="ltr" class="lat">${lat[m.charCodeAt(0) - 0xE000]}</bdi>`);
-    return wrapInlineDelights(h, { isEn: false, allowCount, allowMicro });
+    return h;
   };
   S.plain = (s) => String(s ?? "").replace(/[*~=]/g, "");
 
@@ -160,262 +129,49 @@
     return +(Math.max(4.5, Math.min(26, words / 2.25 + 1.15 + pauses))).toFixed(2);
   };
 
-  /* True exponential easing resolution helpers for S.ease */
-  function getExpHelpers() {
-    const root = typeof window !== "undefined" ? window : typeof globalThis !== "undefined" ? globalThis : {};
-    const KM = root.KhordegirMotion || (root.Stage && root.Stage.KhordegirMotion) || (MT && MT.expOut && MT) || null;
-    if (KM && typeof KM.expOut === "function" && typeof KM.expIn === "function" && typeof KM.expInOut === "function") {
-      return KM;
-    }
-    const expOut = (k = 5) => {
-      const K = Number(k) || 5;
-      const d = 1 - Math.exp(-K);
-      return (t) => (t <= 0 ? 0 : t >= 1 ? 1 : (1 - Math.exp(-K * t)) / d);
-    };
-    const expIn = (k = 5) => {
-      const K = Number(k) || 5;
-      const d = Math.exp(K) - 1;
-      return (t) => (t <= 0 ? 0 : t >= 1 ? 1 : (Math.exp(K * t) - 1) / d);
-    };
-    const expInOut = (k = 5) => {
-      const fi = expIn(k), fo = expOut(k);
-      return (t) => (t <= 0 ? 0 : t >= 1 ? 1 : (t < 0.5 ? fi(2 * t) / 2 : 0.5 + fo(2 * t - 1) / 2));
-    };
-    const linear = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t);
-    return { expOut, expIn, expInOut, linear };
-  }
-
-  function mapBezierToExp(arr, KM) {
-    const [x1 = 0, y1 = 0, x2 = 1, y2 = 1] = Array.isArray(arr) ? arr : [];
-    const s0 = y1 / (x1 || 1e-4);
-    const s1 = (1 - y2) / ((1 - x2) || 1e-4);
-    if (s0 > 1.2 && s1 < 0.8) return KM.expOut(5);
-    if (s0 < 0.8 && s1 > 1.2) return KM.expIn(5);
-    if (s0 < 1 && s1 < 1) return KM.expInOut(5);
-    return KM.expOut(5);
-  }
-
-  function mapEaseStringToExp(str, KM) {
-    const s = String(str || "").trim().toLowerCase();
-    if (!s || s === "none" || s === "linear") {
-      return KM.linear || ((t) => (t <= 0 ? 0 : t >= 1 ? 1 : t));
-    }
-    if (s === "chartgrow" && MT && MT.eases && typeof MT.eases.chartGrow === "function") {
-      return MT.eases.chartGrow;
-    }
-
-    // Direct semantic token lookup
-    if (s === "textin" || s === "wordstagger") return KM.expOut(5);
-    if (s === "textout") return KM.expIn(5);
-    if (s === "zoomin" || s === "camerapan" || s === "ambient" || s === "zoompoint") return KM.expInOut(3);
-    if (s === "zoompointtravel") return KM.expInOut(4);
-    if (s === "zoompointreturn") return KM.expInOut(5);
-    // Explicit e^(-x) exponential curve strings e.g. "expOut(6)", "expInOut(5)"
-    const expMatch = s.match(/^exp(inout|in|out)\(\s*([0-9.]+)\s*\)$/);
-    if (expMatch) {
-      const kVal = Math.max(0.5, Math.min(12, parseFloat(expMatch[2]) || 5));
-      if (expMatch[1] === "inout") return KM.expInOut(kVal);
-      if (expMatch[1] === "in") return KM.expIn(kVal);
-      return KM.expOut(kVal);
-    }
-    if (s === "zoomout" || s === "transitionslash") return KM.expInOut(5);
-    if (s === "chartreveal" || s === "transition" || s === "snappy") return KM.expOut(6);
-    if (s === "transitionsoft") return KM.expOut(3);
-
-    // Strength mapping: power1/sine->3, power2->4, power3/back->5, power4/expo->6
-    let k = 5;
-    if (s.includes("power1") || s.includes("sine")) {
-      k = 3;
-    } else if (s.includes("power2") || s.includes("quad")) {
-      k = 4;
-    } else if (s.includes("power3") || s.includes("back") || s.includes("cubic") || s.includes("spring") || s.includes("editorial")) {
-      k = 5;
-    } else if (s.includes("power4") || s.includes("expo") || s.includes("quart") || s.includes("quint")) {
-      k = 6;
-    }
-
-    // Direction mapping: .out->expOut, .in->expIn, .inOut->expInOut
-    const isInOut = s.includes("inout") || s.includes("in-out");
-    if (isInOut) {
-      return KM.expInOut(k);
-    }
-    const isIn = s.includes(".in") || (s.endsWith("in") && !s.includes("inout"));
-    if (isIn) {
-      return KM.expIn(k);
-    }
-    return KM.expOut(k);
-  }
-
-  /* cubic-bezier ease function mapped to true exponential family so nothing bypasses e^(-x) */
+  /* cubic-bezier ease function compatible with real GSAP 3 ease callbacks */
   function bezier(x1, y1, x2, y2) {
-    const KM = getExpHelpers();
-    return mapBezierToExp([x1, y1, x2, y2], KM);
+    const bx = (t) => 3 * x1 * t * (1 - t) ** 2 + 3 * x2 * t * t * (1 - t) + t ** 3;
+    const by = (t) => 3 * y1 * t * (1 - t) ** 2 + 3 * y2 * t * t * (1 - t) + t ** 3;
+    return (x) => {
+      if (x <= 0) return 0; if (x >= 1) return 1;
+      let lo = 0, hi = 1, t = x;
+      for (let i = 0; i < 30; i++) {
+        const v = bx(t);
+        if (Math.abs(v - x) < 1e-5) break;
+        if (v < x) lo = t; else hi = t;
+        t = (lo + hi) / 2;
+      }
+      return by(t);
+    };
   }
-
+  S.bezier = bezier;
+  const DEFAULT_EASES = {
+    power4: [0.16, 1, 0.3, 1],
+    power3: [0.22, 1, 0.36, 1],
+    editorial: [0.22, 1, 0.36, 1],
+    vox: [0.19, 1, 0.22, 1],
+    fluid: [0.25, 1, 0.35, 1],
+    silk: [0.33, 1, 0.68, 1],
+    snappy: [0.16, 1, 0.3, 1],
+    expo: [0.19, 1, 0.22, 1],
+    back: "back.out(1.18)",
+    spring: "back.out(1.32)",
+  };
   S.ease = function (name) {
-    const KM = getExpHelpers();
-    if (name == null || name === "") {
-      return (MT && MT.eases && MT.eases.textIn) || KM.expOut(5);
-    }
-    const resolved = ((S.theme && S.theme.ease) || {})[name] ?? (MT && MT.eases && MT.eases[name]) ?? name;
-    if (typeof resolved === "function") return resolved;
-    if (Array.isArray(resolved)) return mapBezierToExp(resolved, KM);
-    if (typeof resolved === "string") return mapEaseStringToExp(resolved, KM);
-    return (MT && MT.eases && MT.eases.textIn) || KM.expOut(5);
-  };
-
-  function hexToRgb(hex, fallback) {
-    const m = String(hex || "").trim().match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
-    if (!m) return fallback;
-    let h = m[1];
-    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
-    const n = parseInt(h, 16);
-    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-  }
-
-  S.FORMATS = FORMATS;
-  S.format = "landscape";
-  S.normFormat = function (v) {
-    const k = String(v == null ? "" : v).trim().toLowerCase();
-    return FORMAT_ALIASES[k] || "landscape";
-  };
-  /* Resize the stage (and the page body) for a format. Returns {format, w, h}. */
-  S.setFormat = function (v) {
-    const f = S.normFormat(v), F = FORMATS[f];
-    W = F.w; H = F.h; S.W = W; S.H = H; S.format = f;
-    const root = document.documentElement;
-    if (root && root.style) { root.style.setProperty("--stage-w", W + "px"); root.style.setProperty("--stage-h", H + "px"); }
-    const st = document.getElementById("stage");
-    if (st) st.setAttribute("data-format", f);
-    return { format: f, w: W, h: H };
-  };
-  /* Theme layout for a format: landscape = the theme's own layout object untouched. Other formats take
-     FORMAT_LAYOUT, then the theme's layout.formats[fmt]; the camera sits under full-width content. */
-  S.layoutFor = function (th, fmt) {
-    const base = (th && th.layout) || { margin: 80, top: 64, bottom: 64, radius: 16, badgeRadius: 8, cam: [24, 740, 584, 1055], scamLeft: 650 };
-    const f = S.normFormat(fmt);
-    if (f === "landscape") return base;
-    const own = (base.formats && base.formats[f]) || {};
-    const L = Object.assign({}, base, FORMAT_LAYOUT[f], own);
-    delete L.formats;
-    if (own.scamLeft == null) L.scamLeft = L.margin;
-    return L;
-  };
-
-  function getZoomCap() {
-    const tokens = (typeof window !== "undefined" && (window.MOTION_TOKENS || window.MotionTokens)) || null;
-    const cap = tokens && Number(tokens.STAGE_ZOOM_CAP);
-    return (Number.isFinite(cap) && cap >= 1) ? cap : 1.06;
-  }
-
-  function buildCameraTimeline(stage, slide, curW, curH) {
-    const rawPts = slide && Array.isArray(slide.zoom_points) ? slide.zoom_points : [];
-    const ZOOM_CAP = getZoomCap();
-    S._camState = { scale: 1, x: 0, y: 0 };
-    S._applyCamera = null;
-
-    if (!rawPts.length) {
-      if (stage && stage.style) {
-        stage.style.transform = "";
-        stage.style.transformOrigin = "";
-      }
-      S.camTl = null;
-      return 0;
-    }
-
-    const ordered = rawPts
-      .map((pt, idx) => {
-        if (!pt || typeof pt !== "object") return null;
-        const x = (pt.x != null && Number.isFinite(+pt.x)) ? Math.max(0, Math.min(1, +pt.x)) : 0.5;
-        const y = (pt.y != null && Number.isFinite(+pt.y)) ? Math.max(0, Math.min(1, +pt.y)) : 0.5;
-        const sc = (pt.scale != null && Number.isFinite(+pt.scale)) ? Math.max(1, Math.min(ZOOM_CAP, +pt.scale)) : Math.min(1.04, ZOOM_CAP);
-        const at = (pt.at != null && Number.isFinite(+pt.at)) ? Math.max(0, +pt.at) : 0;
-        const dur = (pt.dur != null && Number.isFinite(+pt.dur) && +pt.dur > 0) ? +pt.dur : 0.9;
-        const ease = typeof pt.ease === "string" && pt.ease.trim() ? pt.ease.trim() : "expOut(5)";
-        return { x, y, scale: sc, at, dur, ease, _idx: idx };
-      })
-      .filter(Boolean)
-      .sort((a, b) => (a.at - b.at) || (a._idx - b._idx));
-
-    if (!ordered.length) {
-      if (stage && stage.style) {
-        stage.style.transform = "";
-        stage.style.transformOrigin = "";
-      }
-      S.camTl = null;
-      return 0;
-    }
-
-    const poseFor = (pt) => {
-      const sc = Math.max(1, Math.min(ZOOM_CAP, pt.scale));
-      const maxTx = (curW * (sc - 1)) / 2;
-      const maxTy = (curH * (sc - 1)) / 2;
-      const idealX = -(pt.x - 0.5) * curW * sc;
-      const idealY = -(pt.y - 0.5) * curH * sc;
-      return {
-        scale: sc,
-        x: Math.max(-maxTx, Math.min(maxTx, idealX)),
-        y: Math.max(-maxTy, Math.min(maxTy, idealY)),
-      };
-    };
-
-    const cam = S._camState;
-    const applyCamera = () => {
-      const sc = Math.max(1, Math.min(ZOOM_CAP, Number(cam.scale) || 1));
-      const maxTx = (curW * (sc - 1)) / 2;
-      const maxTy = (curH * (sc - 1)) / 2;
-      const tx = Math.max(-maxTx, Math.min(maxTx, Number(cam.x) || 0));
-      const ty = Math.max(-maxTy, Math.min(maxTy, Number(cam.y) || 0));
-      cam._appliedScale = sc;
-      cam._appliedX = tx;
-      cam._appliedY = ty;
-      if (stage && stage.style) {
-        stage.style.transformOrigin = "50% 50%";
-        if (Math.abs(sc - 1) < 1e-6 && Math.abs(tx) < 1e-4 && Math.abs(ty) < 1e-4) {
-          stage.style.transform = "translate(0px, 0px) scale(1)";
-        } else {
-          stage.style.transform = `translate(${tx.toFixed(3)}px, ${ty.toFixed(3)}px) scale(${sc.toFixed(5)})`;
-        }
-      }
-    };
-    S._applyCamera = applyCamera;
-
-    const tl = S.camTl = gsap.timeline({ paused: true });
-    if (typeof tl.set === "function") {
-      tl.set(cam, { scale: 1, x: 0, y: 0, onUpdate: applyCamera }, 0);
-    }
-
-    let prev = { scale: 1, x: 0, y: 0 };
-    ordered.forEach((pt) => {
-      const next = poseFor(pt);
-      tl.fromTo(
-        cam,
-        { scale: prev.scale, x: prev.x, y: prev.y },
-        {
-          scale: next.scale,
-          x: next.x,
-          y: next.y,
-          duration: pt.dur,
-          ease: S.ease(pt.ease),
-          immediateRender: false,
-          onUpdate: applyCamera,
-        },
-        pt.at
+    if (name === "none") return "none";
+    const mc = S.slide && S.slide.motionCurve;
+    if (mc && Array.isArray(mc.points) && mc.points.length === 4 && mc.type !== "none") {
+      return bezier(
+        Number(mc.points[0]) || 0,
+        Number(mc.points[1]) || 0,
+        Number(mc.points[2]) || 1,
+        Number(mc.points[3]) || 1
       );
-      prev = next;
-    });
-
-    applyCamera();
-    return ordered.length;
-  }
-
-  S.cameraState = function () {
-    const cam = S._camState || { scale: 1, x: 0, y: 0 };
-    return {
-      scale: cam._appliedScale != null ? cam._appliedScale : (Number(cam.scale) || 1),
-      x: cam._appliedX != null ? cam._appliedX : (Number(cam.x) || 0),
-      y: cam._appliedY != null ? cam._appliedY : (Number(cam.y) || 0),
-    };
+    }
+    const e = ((S.theme && S.theme.ease) || {})[name] ?? DEFAULT_EASES[name] ?? name;
+    if (Array.isArray(e)) return bezier(...e);
+    return e || "power3.out";
   };
 
   /* ---------------------------------------------------------------- themes */
@@ -428,47 +184,15 @@
     if (!t) return;
     S.theme = t;
     const c = t.colors || t.tokens || {}, ty = t.type || {}, lay = t.layout || { radius: 16, badgeRadius: 8 };
-    const isLight = c.isDark === false;
-    const [sr, sg, sb] = isLight ? hexToRgb(c.text, [15, 23, 42]) : [0, 0, 0];
-    const [ar, ag, ab] = hexToRgb(c.accent, [255, 214, 0]);
-    const sh = t.shadows || {};
-    const shadowCard = sh.card || (isLight
-      ? `0 2px 6px rgba(${sr},${sg},${sb},.05), 0 10px 26px rgba(${sr},${sg},${sb},.08), 0 24px 52px rgba(${sr},${sg},${sb},.06), inset 0 1px 0 rgba(255,255,255,.78)`
-      : `0 2px 6px rgba(0,0,0,.30), 0 12px 28px rgba(0,0,0,.36), 0 28px 60px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.06)`);
-    const shadowImage = sh.image || (isLight
-      ? `0 4px 12px rgba(${sr},${sg},${sb},.08), 0 16px 34px rgba(${sr},${sg},${sb},.12), 0 32px 64px rgba(${sr},${sg},${sb},.09)`
-      : `0 4px 12px rgba(0,0,0,.38), 0 16px 38px rgba(0,0,0,.46), 0 34px 72px rgba(0,0,0,.34)`);
-    const shadowTitle = sh.title || (isLight
-      ? `0 1px 2px rgba(${sr},${sg},${sb},.06), 0 6px 18px rgba(${sr},${sg},${sb},.05)`
-      : `0 2px 6px rgba(0,0,0,.48), 0 10px 28px rgba(0,0,0,.34)`);
-    const shadowBubble = sh.bubble || (isLight
-      ? `0 2px 6px rgba(${sr},${sg},${sb},.05), 0 10px 22px rgba(${sr},${sg},${sb},.08)`
-      : `0 2px 6px rgba(0,0,0,.28), 0 10px 24px rgba(0,0,0,.32)`);
-    const shadowLogo = sh.logo || (isLight
-      ? `0 3px 10px rgba(${sr},${sg},${sb},.08), 0 12px 28px rgba(${sr},${sg},${sb},.10)`
-      : `0 4px 12px rgba(0,0,0,.34), 0 14px 32px rgba(0,0,0,.42)`);
-    const shadowAccent = `0 6px 20px rgba(${ar},${ag},${ab},.18), 0 18px 44px rgba(${ar},${ag},${ab},.10)`;
-    const vignetteBg = t.vignette || (isLight
-      ? `radial-gradient(ellipse 114% 98% at 50% 50%, transparent 62%, rgba(${sr},${sg},${sb},.045) 84%, rgba(${sr},${sg},${sb},.11) 100%)`
-      : `radial-gradient(ellipse 112% 96% at 50% 48%, transparent 56%, rgba(0,0,0,.22) 82%, rgba(0,0,0,.46) 100%)`);
-
     let css = `:root{`;
     for (const k in c) if (typeof c[k] === "string") css += `--c-${k}:${c[k]};`;
-    css += `--radius:${lay.radius}px;--badge-radius:${lay.badgeRadius}px;`;
-    css += `--shadow-card:${shadowCard};--shadow-image:${shadowImage};--shadow-title:${shadowTitle};`;
-    css += `--shadow-bubble:${shadowBubble};--shadow-logo:${shadowLogo};--shadow-accent:${shadowAccent};`;
-    css += `--vignette-bg:${vignetteBg};}`;
+    css += `--radius:${lay.radius}px;--badge-radius:${lay.badgeRadius}px;}`;
     for (const k in ty) css += `.t-${k}{font-size:${ty[k].size}px;font-weight:${ty[k].weight};line-height:${ty[k].lh};}`;
-    for (const f in FORMATS) {
-      const sc = FORMATS[f].typeScale;
-      if (sc === 1) continue;
-      for (const k in ty) css += `#stage[data-format="${f}"] .t-${k}{font-size:${Math.round(ty[k].size * sc)}px;}`;
-    }
     let st = document.getElementById("theme-vars");
     if (!st) { st = document.createElement("style"); st.id = "theme-vars"; document.head.appendChild(st); }
     st.textContent = css;
     const stageEl = document.getElementById("stage");
-    if (stageEl) stageEl.setAttribute("data-theme-mode", isLight ? "light" : "dark");
+    if (stageEl) stageEl.setAttribute("data-theme-mode", c.isDark === false ? "light" : "dark");
   };
 
   /* ---------------------------------------------------------------- templates */
@@ -488,131 +212,50 @@
   };
 
   /* ---------------------------------------------------------------- build API given to templates */
-  function wrapHtmlWords(html, mode = "word") {
-    const lineCls = mode === "line" ? "k-line k-line-block" : "k-line";
+  function wrapHtmlWords(html) {
     const lines = String(html || "").split(/<br\s*\/?>/i);
     return lines.map((line) => {
-      if (mode === "line") {
-        return `<span class="${lineCls}">${line}</span>`;
-      }
       const tokens = line.match(/(<[^>]+>|\s+|[^\s<]+)/g) || [];
+      let openTag = "";
+      let depth = 0;
       const out = [];
       for (const tok of tokens) {
         if (tok.startsWith("<")) {
-          out.push(tok);
+          if (tok.startsWith("</")) {
+            depth = Math.max(0, depth - 1);
+            if (depth === 0) openTag = "";
+            out.push(tok);
+          } else {
+            out.push(tok);
+            if (!tok.endsWith("/>") && !/^<(br|img|hr)\b/i.test(tok)) {
+              depth += 1;
+              if (depth === 1) openTag = tok;
+            }
+          }
         } else if (/^\s+$/.test(tok)) {
           out.push(" ");
         } else {
-          // Wrap whole Persian/Latin word intact (never split connected letters or ZWNJ)
+          // Wrap whole Persian/Latin word intact (never split glyphs or ZWNJ)
           out.push(`<span class="k-word">${tok}</span>`);
         }
       }
-      return `<span class="${lineCls}">${out.join("")}</span>`;
+      return `<span class="k-line">${out.join("")}</span>`;
     }).join("<br>");
   }
 
-
-  /* ---- per-object animation presets (video.yaml anim / anim_objects, resolved by anim_presets.py) ---- */
-  const ANIM_TEXT_ROLES = ["eyebrow", "title", "body", "note", "bubble", "badge"];
-  function animCfgFor(slide, e, role) {
-    if (!slide) return null;
-    const objs = slide.anim_objects;
-    const fieldKey = e && ((e.dataset && e.dataset.field) ||
-      (e.parentElement && e.parentElement.dataset && e.parentElement.dataset.fieldWrap));
-    return (objs && ((fieldKey && objs[fieldKey]) || objs[role])) || slide.anim || null;
-  }
-  /* returns the end time, or null when the config has nothing to say (role defaults then apply) */
-  function animEnter(e, role, t, cfg, over, m) {
-    const scl = (o) => { if (o && o.scale != null) o.scale = MT.clampScale(o.scale); return o; };
-    const cue = () => {
-      if (!S.fx) return;
-      if (role === "title") S.fx.cue(t, "whoosh", e.textContent.slice(0, 30));
-      else if (role === "bubble" || role === "badge") S.fx.cue(t, "pop", e.textContent.slice(0, 30));
-    };
-    const kfs = Array.isArray(cfg.keyframes) ? cfg.keyframes : null;
-    if (kfs && kfs.length) {   /* Advanced: sequential tweens at keyframe times (e^-x ease per step) */
-      const first = Object.assign({}, kfs[0]); delete first.t; delete first.ease; scl(first);
-      S.tl.set(e, Object.assign({ opacity: 0 }, first), 0);
-      const kfTl = gsap.timeline();
-      for (let j = 1; j < kfs.length; j++) {
-        const props = Object.assign({}, kfs[j]);
-        const ez = props.ease || cfg.ease || "expOut(5)";
-        const dt = Math.max(0, kfs[j].t - kfs[j - 1].t);
-        delete props.t; delete props.ease; scl(props);
-        kfTl.to(e, Object.assign(props, { duration: dt, ease: S.ease(ez) }), kfs[j - 1].t - kfs[0].t);
-      }
-      S.tl.add(kfTl, t);
-      const total = kfs[kfs.length - 1].t - kfs[0].t;
-      e.dataset.end = (t + total).toFixed(3);
-      cue();
-      return t + total;
-    }
-    const dur = cfg.duration != null ? cfg.duration : (m.dur || 0.5);
-    const ease = S.ease(cfg.ease || m.ease || "expOut(5)");
-    const from = scl(Object.assign({ opacity: 0 }, cfg.from || {}));
-    const to = scl(Object.assign({ opacity: 1, x: 0, y: 0, scale: 1 }, cfg.to || {}));
-    if (over) {
-      if (over.x != null) from.x = over.x;
-      if (over.y != null) from.y = over.y;
-      if (over.scale != null) from.scale = MT.clampScale(over.scale);
-    }
-    if (cfg.mode && ANIM_TEXT_ROLES.indexOf(role) >= 0 && !e.querySelector("img,svg,canvas,video")) {
-      const mode = cfg.mode === "line" ? "line" : "word";   /* whole words only: Persian joins + ZWNJ stay intact */
-      if (!e.querySelector(".k-word, .k-line")) e.innerHTML = wrapHtmlWords(e.innerHTML, mode);
-      const units = [...e.querySelectorAll(mode === "line" ? ".k-line" : ".k-word")];
-      if (units.length) {
-        const st = cfg.stagger != null ? cfg.stagger : 0.045;
-        units.forEach((u, idx) => S.tl.fromTo(u, from, Object.assign({}, to, { duration: dur, ease, immediateRender: true }), t + idx * st));
-        const end = t + Math.max(0, units.length - 1) * st + dur;
-        e.dataset.end = end.toFixed(3);
-        cue();
-        return end;
-      }
-    }
-    S.tl.fromTo(e, from, Object.assign(to, { duration: dur, ease, immediateRender: true }), t);
-    e.dataset.end = (t + dur).toFixed(3);
-    cue();
-    return t + dur;
-  }
-
   function makeAPI(slide, root) {
-    const th = S.theme, fmt = S.format, L = S.layoutFor(th, fmt), M = th.motion || MT.themeMotion();
+    const th = S.theme, L = th.layout, M = th.motion;
     const scam = (slide.layout || "SLIDE").toUpperCase() === "SCAM";
-    const base = MT.ui.baseDelay;
-    S._L = L;
+    const base = 0.1;
+    const marginX = Math.min(L.margin, Math.round(W * 0.05));
+    const marginY = Math.min(L.top, Math.round(H * 0.055));
     const A = {
-      slide, root, th, scam, W, H, L,
-      format: fmt, landscape: fmt === "landscape", portrait: fmt === "portrait", square: fmt === "square",
-      stack: fmt !== "landscape",                 // side-by-side columns stack vertically
-      typeScale: FORMATS[fmt].typeScale,          // inline font sizes are multiplied by this (1 in landscape)
-      /* pick a value per format: A.pick(landscapeValue, portraitValue, squareValue = portraitValue) */
-      pick(land, por, sq) { return fmt === "landscape" ? land : fmt === "portrait" ? por : (sq === undefined ? por : sq); },
-      /* font size scaled for the format (number px) */
-      fs(px) { return Math.round(px * A.typeScale); },
-      /* how many grid columns n items get in this format (landscape: min(n, max)) */
-      columns(n, o = {}) {
-        n = Math.max(1, +n || 1);
-        if (fmt === "landscape") return Math.min(n, o.max || n);
-        if (fmt === "portrait") return o.portrait || (n >= 4 ? 2 : 1);
-        return o.square || (n <= 2 ? n : n === 4 ? 2 : 1);
-      },
-      /* bottom gap of a content block: landscape keeps the template's own value; other formats use
-         the safe area, plus the camera band in SCAM, plus room for a note/source line */
-      gapB(land, extra = 0) {
-        if (fmt === "landscape") return land;
-        const camGap = scam ? H - L.cam[1] + 40 : 0;
-        return Math.max(L.bottom, camGap) + extra;
-      },
-      /* rectangle of the free content area (below `top`, above gapB) */
-      region(top, extra = 0) {
-        const t = top == null ? L.top : top;
-        return { x: L.margin, y: t, w: W - 2 * L.margin, h: H - A.gapB(0, extra) - t };
-      },
+      slide, root, th, scam, W, H, L, format: S.format,
       area: {
-        x: L.margin, y: L.top, w: W - 2 * L.margin, h: H - L.top - L.bottom,
-        right: W - L.margin, bottom: H - L.bottom,
-        left: scam ? L.scamLeft : L.margin,
-        camTop: L.cam[1] - 40,
+        x: marginX, y: marginY, w: W - 2 * marginX, h: H - marginY - Math.min(L.bottom, Math.round(H * 0.055)),
+        right: W - marginX, bottom: H - Math.min(L.bottom, Math.round(H * 0.055)),
+        left: scam ? Math.min(L.scamLeft, Math.round(W * 0.34)) : marginX,
+        camTop: (L.cam ? L.cam[1] : H * 0.68) - 40,
       },
       el(tag, cls, parent, style) {
         const e = document.createElement(tag || "div");
@@ -623,12 +266,7 @@
       },
       css(e, st) {
         for (const k in st) {
-          let v = st[k];
-          if (v === undefined) continue;
-          if (k === "fontSize" && A.typeScale !== 1 && v != null && v !== "") {
-            const n = typeof v === "number" ? v : (/^\d+(\.\d+)?px$/.test(String(v)) ? parseFloat(v) : null);
-            if (n != null) v = Math.round(n * A.typeScale * 10) / 10 + "px";
-          }
+          const v = st[k];
           e.style[k] = (typeof v === "number" && !/opacity|zIndex|fontWeight|lineHeight|flex/.test(k)) ? v + "px" : v;
         }
         return e;
@@ -636,11 +274,9 @@
       box(parent, x, y, w, h, cls) {
         return A.el("div", "abs " + (cls || ""), parent, { left: x, top: y, width: w, height: h });
       },
-      text(parent, str, role, cls, style, richOpts) {
+      text(parent, str, role, cls, style) {
         const e = A.el("div", `t-${role || "body"} ${cls || ""}`, parent, style);
-        const isSource = /\bsource\b/.test(cls || "");
-        const noCount = isSource || role === "axis" || role === "label"; // chart ticks and category labels never count
-        e.innerHTML = S.rich(str, Object.assign(isSource ? { count: false, micro: false } : (noCount ? { count: false } : {}), richOpts || {}));
+        e.innerHTML = S.rich(str);
         if (!hasFa(str) && /[A-Za-z]/.test(String(str))) e.setAttribute("dir", "ltr");
         return e;
       },
@@ -693,10 +329,7 @@
           }
         }
 
-        const ovRoot = slide && slide.overrides;
-        /* drag/resize overrides belong to a format: landscape reads the top level (as before),
-           portrait/square read overrides[format] only */
-        const allOv = (fmt === "landscape") ? ovRoot : (ovRoot && typeof ovRoot === "object" ? ovRoot[fmt] : null);
+        const allOv = slide && slide.overrides;
         const layoutKey = scam ? "SCAM" : "SLIDE";
         let ov = null;
         if (allOv && typeof allOv === "object") {
@@ -745,119 +378,117 @@
         return k;
       },
       at(role, i = 0, extra = 0) {
-        const m = M[role] || M.body || MT.text.body;
-        const ac = animCfgFor(slide, null, role);
-        return base + (m.delay || 0) + (ac && ac.delay ? ac.delay : 0) + i * (m.stagger || 0) + extra;
+        const m = M[role] || M.body || { delay: 0.2, stagger: 0.08 };
+        const mc = S.slide && S.slide.motionCurve;
+        const stScale = mc && Number.isFinite(+mc.staggerScale) ? Math.max(0.25, Math.min(2.5, +mc.staggerScale)) : 1;
+        return base + (m.delay || 0) + i * (m.stagger || 0) * stScale + extra;
       },
-      /* entrance by role: eyebrow | title | body | card | bubble | badge | image | imageFull | note */
+      /* entrance by role: eyebrow | title | body | card | bubble | badge | image | note */
       enter(e, role, i = 0, extra = 0, over) {
         if (!e) return 0;
         if (e.dataset && e.dataset.fieldWrap && e.firstElementChild) e = e.firstElementChild;
-        const baseRole = M[role] || MT.ui[role] || M.body || MT.text.body;
-        const m = Object.assign({}, baseRole, over || {});
-        const animCfg = animCfgFor(slide, e, role);
-        if (animCfg) {   /* A.at already adds the preset delay on top of the role delay (keeps title/body order) */
-          const at0 = (over && over.at != null) ? over.at : A.at(role, i, extra);
-          return animEnter(e, role, at0, animCfg, over, m);
-        }
-        const explicit = over && (over.x != null || over.y != null || over.scale != null);
+        const m = Object.assign({}, M[role] || M.body, over || {});
+        const mc = S.slide && S.slide.motionCurve;
+        const durScale = mc && Number.isFinite(+mc.durationScale) ? Math.max(0.3, Math.min(2.5, +mc.durationScale)) : 1;
+        const dur = (m.dur || 0.55) * durScale;
+        const explicit = over && (over.x != null || over.y != null || over.scale != null || over.clipPath != null || over.filter != null || over.rotation != null);
         let from;
         if (explicit || !S.fx) {
           from = { opacity: 0 };
-          const dir = S._lang === "en" ? -1 : 1;
-          if (m.x) from.x = (over && over.x != null) ? m.x : m.x * dir;
+          if (m.x) from.x = m.x;
           if (m.y) from.y = m.y;
-          if (m.scale) from.scale = MT.clampScale(m.scale);
+          if (m.scale) from.scale = m.scale;
+          if (m.clipPath) from.clipPath = m.clipPath;
+          if (m.filter) from.filter = m.filter;
+          if (m.rotation) from.rotation = m.rotation;
         } else {
           from = S.fx.from(role, m);
-          if (from.scale != null) from.scale = MT.clampScale(from.scale);
         }
         const t = (over && over.at != null) ? over.at : A.at(role, i, extra);
-        const to = Object.assign({ opacity: 1, x: 0, y: 0, scale: 1 }, S.fx ? S.fx.to(from) : {});
+        const to = Object.assign({ opacity: 1, x: 0, y: 0, scale: 1, rotation: 0 }, S.fx ? S.fx.to(from) : {});
         Object.keys(to).forEach((k) => { if (!(k in from)) delete to[k]; });
-        const dur = m.dur ?? MT.text.in.dur;
-        S.tl.fromTo(e, from, Object.assign(to, { duration: dur, ease: S.ease(m.ease || MT.eases.textIn), immediateRender: true }), t);
+        if (over && over.toClipPath) to.clipPath = over.toClipPath;
+
+        // Decouple opacity settle (~52% of duration) from motion settle for crisp, non-ghostly entrances
+        const motionKeys = Object.keys(from).filter((k) => k !== "opacity");
+        if ("opacity" in from && motionKeys.length > 0) {
+          const opDur = Math.max(0.18, Math.min(dur * 0.65, dur * 0.54));
+          S.tl.fromTo(e, { opacity: from.opacity }, { opacity: to.opacity ?? 1, duration: opDur, ease: "power2.out", immediateRender: true }, t);
+          const mFrom = {};
+          const mTo = {};
+          motionKeys.forEach((k) => { mFrom[k] = from[k]; mTo[k] = to[k]; });
+          S.tl.fromTo(e, mFrom, Object.assign(mTo, { duration: dur, ease: S.ease(m.ease), immediateRender: true }), t);
+        } else {
+          S.tl.fromTo(e, from, Object.assign(to, { duration: dur, ease: S.ease(m.ease), immediateRender: true }), t);
+        }
+
         e.dataset.end = (t + dur).toFixed(3);
         if (S.fx) {
           if (role === "title") S.fx.cue(t, "whoosh", e.textContent.slice(0, 30));
-          else if (role === "bubble" || role === "badge") S.fx.cue(t, "pop", e.textContent.slice(0, 30));
-          else if (role === "card" && i === 0) S.fx.cue(t, "soft", "");
+          else if (role === "bubble") S.fx.cue(t, "bubble", e.textContent.slice(0, 30), { index: i, pitch: i });
+          else if (role === "badge") S.fx.cue(t, "ding", e.textContent.slice(0, 30), { index: i, pitch: i });
+          else if (role === "card") S.fx.cue(t, "card", e.textContent.slice(0, 30), { index: i, pitch: i });
+          else if (role === "eyebrow") S.fx.cue(t, "tick", e.textContent.slice(0, 30));
+          else if (role === "image") S.fx.cue(t, "shutter", e.textContent.slice(0, 30));
+          else if (role === "bar") S.fx.cue(t, "bar", e.textContent.slice(0, 30), { index: i, pitch: i });
+          else if (role === "note") S.fx.cue(t, "whoosh-subtle", e.textContent.slice(0, 30));
         }
         return t + dur;
       },
-      /* fast accelerating exit using textOut token (~0.25-0.35s power2.in) */
-      exit(e, at, opts = {}) {
-        if (!e) return 0;
-        if (e.dataset && e.dataset.fieldWrap && e.firstElementChild) e = e.firstElementChild;
-        const tok = MT.text[opts.variant || "out"] || MT.text.out;
-        const dur = opts.dur ?? tok.dur;
-        const to = {
-          opacity: 0,
-          y: opts.y ?? tok.y,
-          scale: MT.clampScale(opts.scale ?? tok.scale),
-          duration: dur,
-          ease: S.ease(opts.ease || tok.ease),
-        };
-        if (opts.x != null) to.x = opts.x;
-        S.tl.to(e, to, at);
-        return at + dur;
-      },
-      /* Kinetic Persian RTL word-by-word or line-by-line animation (NEVER splits connected letters; preserves ZWNJ) */
+      /* Kinetic Persian RTL word-by-word animation (NEVER splits words into letters; preserves ZWNJ) */
       kinetic(e, opts = {}) {
         if (!e) return 0;
         if (e.dataset && e.dataset.fieldWrap && e.firstElementChild) e = e.firstElementChild;
-        const presetKey = opts.preset || "default";
-        const tok = MT.wordStagger[presetKey] || MT.wordStagger.default;
-        const mode = opts.mode || tok.mode || "word";
+        const mc = S.slide && S.slide.motionCurve;
+        const durScale = mc && Number.isFinite(+mc.durationScale) ? Math.max(0.35, Math.min(2.2, +mc.durationScale)) : 1;
+        const stScale = mc && Number.isFinite(+mc.staggerScale) ? Math.max(0.35, Math.min(2.2, +mc.staggerScale)) : 1;
+        const mode = opts.mode || "rise-mask";
         const at = opts.at ?? A.at(opts.role || "title", 0, opts.extra || 0);
-        const dur = opts.dur ?? tok.dur;
-        const stagger = opts.stagger ?? tok.stagger;
-        const fromY = opts.y ?? tok.y;
-        const fromX = opts.x ?? ((S._lang === "en" && tok.x) ? -tok.x : tok.x);
-        const fromScale = MT.clampScale(opts.scale ?? tok.scale);
-        const ease = S.ease(opts.ease || tok.ease);
+        const dur = (opts.dur ?? 0.46) * durScale;
+        const stagger = (opts.stagger ?? (mode === "glide-rtl" ? 0.042 : 0.036)) * stScale;
 
-        if (!e.querySelector(".k-word, .k-line")) {
-          e.innerHTML = wrapHtmlWords(e.innerHTML, mode);
+        let fromBase;
+        let easeName = opts.ease;
+        if (mode === "editorial-blur") {
+          fromBase = { y: opts.y ?? 14, x: opts.x ?? 0, scale: opts.scale ?? 0.985, filter: "blur(8px)" };
+          easeName = easeName || "expo";
+        } else if (mode === "glide-rtl") {
+          fromBase = { x: opts.x ?? 26, y: opts.y ?? 0, scale: opts.scale ?? 1 };
+          easeName = easeName || "expo";
+        } else if (mode === "pop-clean") {
+          fromBase = { y: opts.y ?? 16, x: opts.x ?? 0, scale: opts.scale ?? 0.9 };
+          easeName = easeName || "back";
+        } else if (mode === "cascade-3d") {
+          fromBase = { y: opts.y ?? 18, x: opts.x ?? 0, scale: opts.scale ?? 0.97, rotationX: -22 };
+          easeName = easeName || "power4";
+        } else {
+          // rise-mask: natural vertical glide with zero lateral wobble
+          fromBase = { y: opts.y ?? 20, x: opts.x ?? 0, scale: opts.scale ?? 0.98 };
+          easeName = easeName || "power4";
         }
-        const units = [...e.querySelectorAll(mode === "line" ? ".k-line" : ".k-word")];
-        if (!units.length) return A.enter(e, opts.role || "title", 0, opts.extra || 0);
+        const ease = S.ease(easeName);
 
-        units.forEach((u, idx) => {
+        e.innerHTML = wrapHtmlWords(e.innerHTML);
+        const words = [...e.querySelectorAll(".k-word")];
+        if (!words.length) return A.enter(e, opts.role || "title", 0, opts.extra || 0);
+
+        if (mode === "cascade-3d") {
+          e.style.perspective = "900px";
+        }
+        const opDur = Math.max(0.16, dur * 0.5);
+        words.forEach((w, idx) => {
           const wt = at + idx * stagger;
-          S.tl.fromTo(u,
-            { opacity: 0, y: fromY, x: fromX, scale: fromScale },
-            { opacity: 1, y: 0, x: 0, scale: 1, duration: dur, ease, immediateRender: true },
-            wt);
+          if (mode === "cascade-3d") w.style.transformOrigin = "50% 100%";
+          S.tl.fromTo(w, { opacity: 0 }, { opacity: 1, duration: opDur, ease: "power2.out", immediateRender: true }, wt);
+          const toVars = { y: 0, x: 0, scale: 1, duration: dur, ease, immediateRender: true };
+          if ("filter" in fromBase) toVars.filter = "blur(0px)";
+          if ("rotationX" in fromBase) toVars.rotationX = 0;
+          S.tl.fromTo(w, fromBase, toVars, wt);
         });
-        const end = at + Math.max(0, units.length - 1) * stagger + dur;
+        const end = at + Math.max(0, words.length - 1) * stagger + dur;
         e.dataset.end = end.toFixed(3);
         if (S.fx) S.fx.cue(at, "whoosh", e.textContent.slice(0, 30));
         return end;
-      },
-      /* Camera zoom & pan helpers (capped <= 1.06) */
-      zoom(e, mode = "in", opts = {}) {
-        if (!e) return 0;
-        const isOut = mode === "out";
-        const tok = isOut ? MT.camera.zoomOut : MT.camera.zoomIn;
-        const dur = opts.dur ?? tok.dur;
-        const at = opts.at ?? 0;
-        const fromScale = MT.clampScale(opts.fromScale ?? (isOut ? tok.fromScale : 1));
-        const toScale = MT.clampScale(opts.scale ?? (isOut ? tok.toScale : tok.scale));
-        S.tl.fromTo(e, { scale: fromScale }, { scale: toScale, duration: dur, ease: S.ease(opts.ease || tok.ease), immediateRender: true }, at);
-        return at + dur;
-      },
-      pan(e, opts = {}) {
-        if (!e) return 0;
-        const tok = MT.camera.pan;
-        const dur = opts.dur ?? tok.dur;
-        const at = opts.at ?? 0;
-        const to = { duration: dur, ease: S.ease(opts.ease || tok.ease) };
-        if (opts.x != null) to.x = opts.x;
-        if (opts.y != null) to.y = opts.y;
-        if (opts.scale != null) to.scale = MT.clampScale(opts.scale);
-        S.tl.to(e, to, at);
-        return at + dur;
       },
       /* Animated accent rule / sweep line */
       sweepLine(parent, opts = {}) {
@@ -865,37 +496,30 @@
         const r = A.el("div", cls.trim(), parent, Object.assign({
           width: (opts.width || 160) + "px",
           height: (opts.height || 6) + "px",
-          transformOrigin: opts.origin || (A.scam ? (S._lang === "en" ? "0% 50%" : "100% 50%") : "50% 50%"),
+          transformOrigin: opts.origin || (A.scam ? "100% 50%" : "50% 50%"),
         }, opts.style || {}));
-        const tok = MT.ui.sweepLine;
-        S.tl.fromTo(r, { scaleX: 0, opacity: 0 }, {
-          scaleX: 1, opacity: 1, duration: opts.dur ?? tok.dur, ease: S.ease(opts.ease || tok.ease), immediateRender: true,
-        }, opts.at ?? A.at("body", 1));
+        const at = opts.at ?? A.at("body", 1);
+        S.tl.fromTo(r, { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: opts.dur || 0.58, ease: S.ease(opts.ease || "expo"), immediateRender: true }, at);
+        if (S.fx) S.fx.cue(at, "whoosh-subtle", "line");
         return r;
       },
-      /* Gentle secondary ambient float (for glass panels/spotlights) */
+      /* Imperceptible secondary ambient optical glide (never jittery) */
       drift(el, opts = {}) {
         if (!el) return;
-        const tok = MT.atmosphere.drift;
-        const dx = opts.x ?? tok.x, dy = opts.y ?? tok.y, dur = opts.dur ?? tok.dur;
-        S.amb.fromTo(el, { x: -dx, y: -dy }, {
-          x: dx, y: dy, duration: dur, ease: S.ease(opts.ease || tok.ease), yoyo: true, repeat: tok.repeat,
-        }, 0);
+        const dx = opts.x ?? 2.0, dy = opts.y ?? 1.2, dur = opts.dur ?? 18;
+        S.amb.fromTo(el, { x: -dx, y: -dy }, { x: dx, y: dy, duration: dur, ease: "sine.inOut", yoyo: true, repeat: 99, force3D: true }, 0);
       },
       stagger(list, role, extra = 0) {
         list.forEach((e, i) => A.enter(e, role, i, extra));
       },
-      /* number counting up; tabular Persian or English digits; scale .92 -> 1 */
+      /* number counting up; tabular Persian digits; scale .92 -> 1 */
       count(e, o) {
         if (e && e.dataset && e.dataset.fieldWrap && e.firstElementChild) e = e.firstElementChild;
-        const m = M.number || MT.chart.number;
+        const m = M.number || { delay: 0.2, dur: 1.15, scale: 0.92, ease: "power3" };
         const to = toNum(o.to), from = toNum(o.from ?? 0), dec = o.decimals ?? decOf(o.to), th1 = o.thousands !== false;
         const pre = o.prefix ?? "", suf = o.suffix ?? "";
-        const isEn = S._lang === "en";
-        const fmtPart = (p) => (isEn ? String(p) : fa(p));
-        const coreStr = (v) => esc(fmtPart(hasFa(pre) ? "" : pre)) + S.fmt(v, dec, th1) + esc(fmtPart(hasFa(suf) ? "" : suf));
         const html = (v) => {
-          const n = `<bdi dir="ltr" class="num-core">${coreStr(v)}</bdi>`;
+          const n = `<bdi dir="ltr" class="num-core">${esc(fa(hasFa(pre) ? "" : pre))}${S.fmt(v, dec, th1)}${esc(fa(hasFa(suf) ? "" : suf))}</bdi>`;
           return (hasFa(pre) ? `<span class="num-word">${esc(pre)}</span> ` : "") + n + (hasFa(suf) ? ` <span class="num-word">${esc(suf)}</span>` : "");
         };
         e.classList.add("num");
@@ -909,41 +533,64 @@
           v: to, duration: dur, ease: S.ease(o.ease || m.ease),
           onUpdate: () => {
             const c = e.querySelector(".num-core");
-            if (c) c.innerHTML = coreStr(obj.v);
+            if (c) c.innerHTML = esc(fa(hasFa(pre) ? "" : pre)) + S.fmt(obj.v, dec, th1) + esc(fa(hasFa(suf) ? "" : suf));
           },
         }, t);
-        if (core) core.innerHTML = coreStr(from);
+        if (core) core.innerHTML = esc(fa(hasFa(pre) ? "" : pre)) + S.fmt(from, dec, th1) + esc(fa(hasFa(suf) ? "" : suf));
         if (o.enter !== false) {
-          const enterDur = Math.min(MT.chart.number.enterDur, dur);
-          S.tl.from(e, {
-            opacity: 0, scale: MT.clampScale(o.scale ?? m.scale ?? 1), duration: enterDur,
-            ease: S.ease(o.enterEase || m.ease), immediateRender: true,
-          }, t);
+          S.tl.from(e, { opacity: 0, scale: o.scale ?? m.scale ?? 1, duration: Math.min(0.55, dur), ease: S.ease(o.enterEase || m.ease), immediateRender: true }, t);
         }
         e.dataset.end = (t + dur).toFixed(3);
-        if (S.fx) { S.fx.cue(t, "count-start", String(o.to)); S.fx.cue(t + dur * MT.chart.countEndCueFrac, "count-end", String(o.to)); }
+        if (S.fx) { S.fx.cue(t, "count-start", String(o.to)); S.fx.cue(t + dur * 0.85, "count-end", String(o.to)); }
         return t + dur;
       },
-      /* image in a rounded frame + Ken Burns inside the frame */
+      /* image in a rounded frame + counter-scale reveal + continuous silky Ken Burns inside the frame */
       image(parent, src, x, y, w, h, o = {}) {
+        const rad = o.radius ?? L.radius;
         const f = A.el("div", "frame" + (o.shadow === false ? "" : " shadow") + (o.border ? " bordered" : ""), parent,
-          { left: x, top: y, width: w, height: h, borderRadius: (o.radius ?? L.radius) + "px" });
+          { left: x, top: y, width: w, height: h, borderRadius: rad + "px" });
         if (o.border) f.style.setProperty("--frame-border", S.color(o.border));
         const inner = A.el("div", "frame-inner", f);
+        const cam = A.el("div", "frame-cam", inner);
         if (src) {
-          const im = A.el("img", "", inner);
+          const im = A.el("img", "", cam);
           im.src = src; im.alt = "";
           im.style.objectFit = o.fit || "cover";
           if (o.focus) im.style.objectPosition = o.focus;
-          im.onerror = () => { im.remove(); A.placeholder(inner, src); };
+          im.onerror = () => { im.remove(); A.placeholder(cam, src); };
           S._imgs.push(im);
           A._imgIndex = (A._imgIndex || 0) + 1;
           let mo = S.fx ? S.fx.imageMotion(o.motion, A._imgIndex) : o.motion;
           if (mo === "depth") { if (o.depth !== false && w * h > 200000 && S.fx) S.fx.depth(src); mo = "breathe"; }
           A.kenburns(im, mo);
-        } else A.placeholder(inner, o.name || "");
+        } else A.placeholder(cam, o.name || "");
         if (o.dim) A.el("div", "dim", inner, { opacity: o.dim });
-        if (o.enter !== false) A.enter(f, "image", 0, o.delay || 0);
+        if (o.enter !== false) {
+          const entAt = o.at ?? A.at("image", 0, o.delay || 0);
+          let enterOver = o.enterOver || null;
+          if (o.reveal === "wipe") {
+            enterOver = Object.assign({
+              clipPath: `inset(0% 0% 0% 100% round ${rad}px)`,
+              toClipPath: `inset(0% 0% 0% 0% round ${rad}px)`,
+              dur: 0.72,
+              ease: "expo",
+              at: entAt,
+            }, enterOver || {});
+          } else if (o.reveal === "curtain") {
+            enterOver = Object.assign({
+              clipPath: `inset(7% 7% 7% 7% round ${rad}px)`,
+              toClipPath: `inset(0% 0% 0% 0% round ${rad}px)`,
+              dur: 0.75,
+              ease: "power4",
+              at: entAt,
+            }, enterOver || {});
+          } else if (o.delay) {
+            enterOver = Object.assign({ at: entAt }, enterOver || {});
+          }
+          A.enter(f, "image", 0, o.delay || 0, enterOver);
+          // Smooth inner optical counter-scale settle (separate .frame-cam node avoids GSAP conflict with .frame & <img>)
+          S.tl.fromTo(cam, { scale: S.capZoom(o.counterScale || 1.06) }, { scale: 1, duration: 0.92, ease: S.ease("power4"), immediateRender: true }, entAt);
+        }
         return f;
       },
       placeholder(parent, name) {
@@ -953,29 +600,16 @@
         return p;
       },
       kenburns(im, motion) {
-        const kb = MT.camera.kenburns;
-        const thKb = th.kenburns || kb.breathe;
-        motion = motion || "breathe";
+        const kb = th.kenburns || { period: 28, scale: 0.036, x: -9 }; motion = motion || "breathe";
         if (motion === "none") return;
-        let a = { scale: 1, x: 0 }, b = { scale: MT.clampScale(1 + thKb.scale), x: thKb.x };
-        let dur = thKb.period, ease = S.ease(thKb.ease || kb.breathe.ease);
-        if (motion === "zoom-out") {
-          a = { scale: MT.clampScale(kb.zoomOut.fromScale), x: kb.zoomOut.x };
-          b = { scale: MT.clampScale(kb.zoomOut.toScale), x: kb.zoomOut.x };
-          dur = kb.zoomOut.period;
-          ease = S.ease(kb.zoomOut.ease);
-        } else if (motion === "pan-left") {
-          a = { scale: MT.clampScale(kb.pan.scale), x: kb.pan.dx };
-          b = { scale: MT.clampScale(kb.pan.scale), x: -kb.pan.dx };
-          dur = kb.pan.period;
-          ease = S.ease(kb.pan.ease);
-        } else if (motion === "pan-right") {
-          a = { scale: MT.clampScale(kb.pan.scale), x: -kb.pan.dx };
-          b = { scale: MT.clampScale(kb.pan.scale), x: kb.pan.dx };
-          dur = kb.pan.period;
-          ease = S.ease(kb.pan.ease);
-        }
-        S.amb.fromTo(im, a, Object.assign(b, { duration: dur, ease }), 0);
+        const period = Math.max(24, Number(kb.period) || 28);
+        const sc = Math.min(S.ZOOM_CAP - 1, Math.min(0.042, Number(kb.scale) || 0.034));
+        let a = { scale: 1.0, x: 0, y: 0 }, b = { scale: S.capZoom(1 + sc), x: -7, y: -3 };
+        if (motion === "zoom-out") { a = { scale: S.capZoom(1 + sc + 0.006), x: 4, y: 2 }; b = { scale: 1.004, x: -4, y: -2 }; }
+        else if (motion === "pan-left") { a = { scale: S.capZoom(1.04), x: 16, y: 0 }; b = { scale: S.capZoom(1.04), x: -16, y: -2 }; }
+        else if (motion === "pan-right") { a = { scale: S.capZoom(1.04), x: -16, y: 0 }; b = { scale: S.capZoom(1.04), x: 16, y: 2 }; }
+        else if (motion === "gentle-drift") { a = { scale: S.capZoom(1.016), x: -9, y: 4 }; b = { scale: S.capZoom(1.036), x: 9, y: -4 }; }
+        S.amb.fromTo(im, a, Object.assign(b, { duration: period, ease: "sine.inOut", yoyo: true, repeat: 99, force3D: true }), 0);
       },
       color: (c) => S.color(c),
       svg(parent, x, y, w, h, viewBox) {
@@ -989,10 +623,11 @@
         for (const k in attrs || {}) e.setAttribute(k, attrs[k]);
         svg.appendChild(e); return e;
       },
-      draw(el, at, dur = MT.ui.draw.dur, ease = MT.ui.draw.ease) {
+      draw(el, at, dur = 0.9, ease = "power3") {
         const L1 = el.getTotalLength ? el.getTotalLength() : 1000;
         el.style.strokeDasharray = L1; el.style.strokeDashoffset = L1;
         S.tl.to(el, { strokeDashoffset: 0, duration: dur, ease: S.ease(ease) }, at ?? A.at("body"));
+        if (S.fx) S.fx.cue(at ?? A.at("body"), "swish", "draw");
         return (at ?? A.at("body")) + dur;
       },
       pop(el, at, i = 0) { return A.enter(el, "badge", i, 0, at != null ? { at } : null); },
@@ -1016,32 +651,26 @@
   S.load = async function (slide, opts = {}) {
     if (opts.theme) S.useTheme(opts.theme);
     const th = S.theme;
-    slide = Object.assign({}, slide || {});
-    const fmtInfo = S.setFormat(slide.format || opts.format || S.defaultFormat || "landscape");
-    slide.format = fmtInfo.format;
-    /* hard per-format overrides: format_overrides: {portrait: {size: 70, columns: 1, ...}} */
-    const fo = slide.format_overrides && slide.format_overrides[fmtInfo.format];
-    if (fo && typeof fo === "object") Object.assign(slide, fo);
-    S.slide = slide;
-    if (S.tl) S.tl.kill(); if (S.amb) S.amb.kill(); if (S.camTl) S.camTl.kill(); S.camTl = null;
-    S.tl = gsap.timeline({ paused: true, defaults: { ease: S.ease("textIn") } }); S.amb = gsap.timeline({ paused: true, defaults: { ease: S.ease("ambient") } });
+    S.slide = slide = Object.assign({}, slide || {});
+    if (S.tl) S.tl.kill(); if (S.amb) S.amb.kill();
+    S.tl = gsap.timeline({ paused: true }); S.amb = gsap.timeline({ paused: true });
     S._imgs = [];
+    S._seekHooks = [];
+    S._mascots = [];
+    S._liveVoiceActive = false;
     S._clipSeq = 0;
 
+    S.setFormat(opts.format || slide.format || S.format || "16:9");
     const stage = document.getElementById("stage");
     stage.innerHTML = "";
-    const lang = String(slide.lang || opts.lang || "fa").toLowerCase() === "en" ? "en" : "fa";
-    S._lang = lang;
+    const isTrans = !!(opts.transparent || S._transparent);
+    stage.classList.toggle("stage-transparent", isTrans);
+    document.body.classList.toggle("stage-transparent", isTrans);
+    document.documentElement.classList.toggle("stage-transparent", isTrans);
+
     const layout = (slide.layout || "SLIDE").toUpperCase();
-    stage.className = "layout-" + layout.toLowerCase();
-    stage.setAttribute("dir", lang === "en" ? "ltr" : "rtl");
-    stage.setAttribute("data-lang", lang);
-    stage.setAttribute("data-format", S.format);
+    stage.className = "layout-" + layout.toLowerCase() + (isTrans ? " stage-transparent" : "");
     stage.setAttribute("data-theme-mode", (th.colors && th.colors.isDark === false) ? "light" : "dark");
-    // scene surface (none | corkboard | paper | dark-grid): pure-CSS texture under the content
-    const _sc = String(slide.scene || "none").trim().toLowerCase();
-    S.scene = (_sc === "corkboard" || _sc === "paper" || _sc === "dark-grid") ? _sc : "none";
-    stage.setAttribute("data-scene", S.scene);
 
     // background
     const bg = document.createElement("div"); bg.className = "bg"; stage.appendChild(bg);
@@ -1053,7 +682,7 @@
       const im = document.createElement("img"); im.src = bgimg; wrap.appendChild(im); S._imgs.push(im);
       im.onerror = () => wrap.remove();
       const d = document.createElement("div"); d.className = "dim"; d.style.opacity = bgs.dim ?? slide.bg_dim ?? 0.55; wrap.appendChild(d);
-      S.amb.fromTo(im, { scale: 1 }, { scale: MT.clampScale(MT.camera.kenburns.bg.scale), duration: MT.camera.kenburns.bg.period, ease: S.ease(MT.camera.kenburns.bg.ease) }, 0);
+      S.amb.fromTo(im, { scale: 1 }, { scale: 1.028, duration: Math.max(24, th.kenburns.period || 26), ease: "sine.inOut", yoyo: true, repeat: 99, force3D: true }, 0);
     }
     const FXC = S.fx ? S.fx.setup(slide) : null;
     const g = th.glow ? Object.assign({}, th.glow, FXC ? { x: FXC.glowPos[0], y: FXC.glowPos[1] } : {}) : null;
@@ -1066,9 +695,57 @@
       });
       const half = g.period / 2;
       S.amb.fromTo(gl, { opacity: g.opacity[0], x: -g.move, y: -g.move * 0.6 },
-        { opacity: g.opacity[1], x: g.move, y: g.move * 0.6, duration: half, ease: S.ease(MT.atmosphere.glow.ease), yoyo: true, repeat: MT.atmosphere.glow.repeat }, 0);
+        { opacity: g.opacity[1], x: g.move, y: g.move * 0.6, duration: half, ease: "sine.inOut", yoyo: true, repeat: 99 }, 0);
     }
-    if (S.fx) S.fx.atmosphere(stage, slide);
+    if (S.fx) {
+      if (S.fx.livingStage) S.fx.livingStage(stage, slide);
+      S.fx.atmosphere(stage, slide);
+    }
+    // Resolve viseme_track (inline object, JSON string, or relative/local URL) once per load
+    if (!slide.visemeTrack && slide.viseme_track) {
+      if (typeof slide.viseme_track === "object") {
+        slide.visemeTrack = slide.viseme_track;
+      } else if (typeof slide.viseme_track === "string") {
+        const vtRaw = slide.viseme_track.trim();
+        if (vtRaw.startsWith("{")) {
+          try { slide.visemeTrack = JSON.parse(vtRaw); } catch (_) { /* ignore malformed inline json */ }
+        } else if (typeof fetch === "function" && vtRaw) {
+          const url = /^(https?:|file:|\/|data:|blob:)/.test(vtRaw) ? vtRaw : `/${vtRaw.replace(/^\.?\//, "")}`;
+          try {
+            const resp = await fetch(url);
+            if (resp && resp.ok) slide.visemeTrack = await resp.json();
+          } catch (_) { /* offline or not served; template falls back to say-track deterministically */ }
+        }
+      }
+    }
+    // Resolve prosody_track (inline object, JSON string, URL, or sibling *.prosody.json)
+    if (!slide.prosodyTrack) {
+      let ptRaw = slide.prosody_track || (slide.mascot && slide.mascot.prosody_track);
+      if (!ptRaw && typeof slide.viseme_track === "string" && /\.visemes\.json$/i.test(slide.viseme_track.trim())) {
+        ptRaw = slide.viseme_track.trim().replace(/\.visemes\.json$/i, ".prosody.json");
+      }
+      if (ptRaw && typeof ptRaw === "object") {
+        slide.prosodyTrack = ptRaw;
+      } else if (typeof ptRaw === "string" && ptRaw.trim()) {
+        const cleanPt = ptRaw.trim();
+        if (cleanPt.startsWith("{")) {
+          try { slide.prosodyTrack = JSON.parse(cleanPt); } catch (_) { /* ignore malformed inline json */ }
+        } else if (typeof fetch === "function") {
+          const url = /^(https?:|file:|\/|data:|blob:)/.test(cleanPt) ? cleanPt : `/${cleanPt.replace(/^\.?\//, "")}`;
+          try {
+            const resp = await fetch(url);
+            if (resp && resp.ok) slide.prosodyTrack = await resp.json();
+          } catch (_) { /* fallback to deterministic synthesis from visemes */ }
+        }
+      }
+    }
+    if (slide.mascot && typeof slide.mascot === "object" && !slide.mascot.visemeTrack && slide.mascot.viseme_track && typeof slide.mascot.viseme_track === "object") {
+      slide.mascot.visemeTrack = slide.mascot.viseme_track;
+    }
+    if (slide.mascot && typeof slide.mascot === "object" && !slide.mascot.prosodyTrack && slide.prosodyTrack) {
+      slide.mascot.prosodyTrack = slide.prosodyTrack;
+    }
+
     const content = document.createElement("div"); content.className = "content"; stage.appendChild(content);
     const A = makeAPI(slide, content);
     const tname = (slide.template || "layers").replace(/-/g, "_");
@@ -1082,56 +759,60 @@
     }
     if (S.fx) {
       if (S.fx.logo) S.fx.logo(content, slide, A);
+      if (S.fx.annotations) S.fx.annotations(content, slide, A);
       S.fx.post(content);
+      if (S.fx.applyMicroMotion) S.fx.applyMicroMotion(content, slide);
       S.fx.grain(stage);
     }
-    if (slide.vignette !== false) {
-      const vig = document.createElement("div");
-      vig.className = "vignette";
-      stage.appendChild(vig);
+    // Optional mascot overlay layer on any slide (in addition to mascot_talk template)
+    if (slide.mascot && slide.mascot.enabled !== false && tname !== "mascot_talk" && window.StageMascot) {
+      const mCfg = Object.assign({}, slide.mascot, {
+        say: slide.mascot.say || slide.say || "",
+        visemeTrack: slide.mascot.visemeTrack || slide.visemeTrack || null,
+        prosodyTrack: slide.mascot.prosodyTrack || slide.prosodyTrack || null,
+        tone: slide.mascot.tone || slide.tone || null,
+        puppet: slide.puppet || slide.mascot.puppet || null,
+        duration: +slide.duration || estimateSayDuration(slide) || (slide.visemeTrack && Number(slide.visemeTrack.duration)) || th.clip.min,
+        seed: slide._seed || slide.seed || "mascot-layer",
+        stageW: W,
+        stageH: H,
+      });
+      const mInst = window.StageMascot.createMascotInstance(content, mCfg);
+      S.registerMascot(mInst);
+      A.field("mascot", mInst.container);
+      S.onSeek((t) => { if (!S._liveVoiceActive) mInst.seek(t); });
     }
     // common extras: source credit + note
-    const Lf = A.L, footB = A.landscape ? null : Math.max(26, Lf.bottom - 70);
-    if (slide.source) {
-      const s = A.text(content, slide.source, "caption", "source");
-      if (!A.landscape) A.css(s, { bottom: footB, right: Lf.margin, maxWidth: W - 2 * Lf.margin });
-      A.enter(s, "note");
-    }
-    if (slide.note) {
-      const n = A.text(content, slide.note, "caption", "note " + (A.scam ? "note-scam" : ""));
-      if (!A.landscape) {
-        A.css(n, { left: Lf.margin, right: Lf.margin, maxWidth: "none", bottom: A.scam ? H - Lf.cam[1] + 8 : footB + (slide.source ? 40 : 0) });
-      }
-      A.enter(n, "note");
-    }
+    if (slide.source) { const s = A.text(content, slide.source, "caption", "source"); A.enter(s, "note"); }
+    if (slide.note) { const n = A.text(content, slide.note, "caption", "note " + (A.scam ? "note-scam" : "")); A.enter(n, "note"); }
     if (opts.camGuide || S._camGuide) {
-      const c = A.L.cam; const cg = document.createElement("div"); cg.className = "camguide";
+      const c = th.layout.cam; const cg = document.createElement("div"); cg.className = "camguide";
       Object.assign(cg.style, {
         left: c[0] + "px", top: c[1] + "px", width: (c[2] - c[0]) + "px", height: (c[3] - c[1]) + "px",
         display: layout === "SCAM" ? "flex" : "none",
       });
-      cg.textContent = S._lang === "en" ? "Camera Zone" : "جای دوربین"; stage.appendChild(cg);
+      cg.textContent = "جای دوربین"; stage.appendChild(cg);
     }
     // Transition in (default "soft-fade" matches classic .fadein)
-    if (S.fx && S.fx.transitionIn) {
-      S.fx.transitionIn(stage, slide, th);
-    } else {
-      const fade = document.createElement("div"); fade.className = "fadein"; stage.appendChild(fade);
-      const fadeTok = MT.transitions.softFade;
-      const fadeDur = (th.clip && th.clip.fade > 0) ? th.clip.fade : fadeTok.dur;
-      if (fadeDur > 0) S.tl.fromTo(fade, { opacity: 1 }, { opacity: 0, duration: fadeDur, ease: S.ease(fadeTok.ease), immediateRender: true }, 0);
-      else fade.remove();
+    if (!isTrans) {
+      if (S.fx && S.fx.transitionIn) {
+        S.fx.transitionIn(stage, slide, th);
+      } else {
+        const fade = document.createElement("div"); fade.className = "fadein"; stage.appendChild(fade);
+        if (th.clip.fade > 0) S.tl.fromTo(fade, { opacity: 1 }, { opacity: 0, duration: th.clip.fade, ease: "power1.out", immediateRender: true }, 0);
+        else fade.remove();
+      }
     }
 
     await Promise.all(S._imgs.map((im) => im.decode().catch(() => {})));
-    const zoomCount = buildCameraTimeline(stage, slide, W, H);
-    const camDur = S.camTl ? S.camTl.duration() : 0;
     const ent = S.tl.duration();
     S._entrances = ent;
-    const clip = th.clip || MT.clip;
     const sayDur = estimateSayDuration(slide);
-    const baseMin = +slide.duration ? +slide.duration : Math.max(clip.min, sayDur || 0);
-    S._dur = zoomCount > 0 ? Math.max(baseMin, ent + clip.hold, camDur) : Math.max(baseMin, ent + clip.hold);
+    const trackDur = (slide.visemeTrack && Number(slide.visemeTrack.duration)) || (slide.mascot && slide.mascot.visemeTrack && Number(slide.mascot.visemeTrack.duration)) || 0;
+    const baseMin = +slide.duration ? +slide.duration : Math.max(th.clip.min, sayDur || 0, trackDur || 0);
+    S._dur = Math.max(baseMin, ent + th.clip.hold);
+    S._lastCueIdx = -1;
+    S._liveLoop = Boolean(opts.liveLoop || S._liveLoop);
     S.seek(0);
     S.ready = true;
     const fxi = S.fx ? {
@@ -1139,16 +820,11 @@
       preset: S.fx.cur.preset,
       motion: S.fx.cur.motion,
       transition: S.fx.cur.transition,
-      transitionOpts: S.fx.cur.transitionOpts,
       logoMotion: S.fx.cur.logoMotion,
       leak: S.fx.cur.leak,
       dust: S.fx.cur.dust,
     } : {};
     return {
-      format: S.format,
-      scene: S.scene || "none",
-      width: W,
-      height: H,
       duration: S._dur,
       entrances: ent,
       sayDuration: sayDur,
@@ -1156,25 +832,102 @@
       frames: Math.round(S._dur * S.fps),
       fx: fxi,
       cues: (S.cues || []).sort((a, b) => a.t - b.t),
-      zoomPoints: zoomCount,
     };
   };
-  S.seek = function (t) {
+  S.setTransparent = function (flag) {
+    S._transparent = Boolean(flag);
+    const stage = document.getElementById("stage");
+    if (stage) stage.classList.toggle("stage-transparent", S._transparent);
+    document.body.classList.toggle("stage-transparent", S._transparent);
+    document.documentElement.classList.toggle("stage-transparent", S._transparent);
+  };
+  S.setMicLevel = function (level) {
+    const stage = document.getElementById("stage");
+    if (!stage) return;
+    const lvl = Math.max(0, Math.min(1, Number(level) || 0));
+    stage.style.setProperty("--mic-level", lvl.toFixed(3));
+    const wave = stage.querySelector(".living-wave");
+    if (wave) {
+      wave.style.transform = `scaleY(${(1 + lvl * 0.65).toFixed(3)})`;
+      wave.style.opacity = (0.55 + lvl * 0.45).toFixed(2);
+    }
+  };
+  S.updateFloat = function (t) {
+    const items = S._floats;
+    if (!Array.isArray(items) || !items.length) return;
+    const cfg = S._floatCfg || { enabled: false, baseAmp: 2, speed: 0.45, style: "silk-glide" };
+    if (!cfg.enabled || cfg.baseAmp <= 0) {
+      for (let i = 0; i < items.length; i += 1) {
+        items[i].el.style.translate = "0px 0px 0px";
+        items[i].el.style.rotate = "0deg";
+        items[i].el.style.scale = "1";
+      }
+      return;
+    }
+    const speed = cfg.speed || 0.45;
+    for (let i = 0; i < items.length; i += 1) {
+      const it = items[i];
+      if (t <= it.startAt) {
+        it.el.style.translate = "0px 0px 0px";
+        it.el.style.rotate = "0deg";
+        it.el.style.scale = "1";
+        continue;
+      }
+      // Quintic C2 smootherstep fade-in over 2.8s so entrance transitions imperceptibly into optical glide
+      const u = Math.min(1, (t - it.startAt) / 2.8);
+      const fade = u * u * u * (10 - u * (15 - 6 * u));
+      const wt = (t - it.startAt) * speed;
+      const dx = fade * it.ampX * Math.sin(wt * it.w2 + it.p2);
+      const dy = fade * it.ampY * Math.sin(wt * it.w1 + it.p1);
+      it.el.style.translate = `${dx.toFixed(3)}px ${dy.toFixed(3)}px 0px`;
+      it.el.style.rotate = "0deg";
+      if (it.ampScale) {
+        const sc = 1 + fade * it.ampScale * Math.sin(wt * it.w3 + it.p3);
+        it.el.style.scale = sc.toFixed(5);
+      } else {
+        it.el.style.scale = "1";
+      }
+    }
+  };
+  S.seek = function (t, fireSfx = false) {
     if (S.tl) S.tl.time(Math.min(t, S.tl.duration()), false);
-    if (S.amb) S.amb.time(t, false);
-    if (S.camTl) {
-      S.camTl.time(Math.min(t, S.camTl.duration()), false);
-      if (S._applyCamera) S._applyCamera();
+    if (S.amb) {
+      const ambDur = S.amb.duration();
+      const ambTime = S._liveLoop && ambDur > 0 ? (t % Math.max(20, ambDur)) : t;
+      S.amb.time(ambTime, false);
+    }
+    S.updateFloat(t);
+    if (Array.isArray(S._seekHooks)) {
+      for (let i = 0; i < S._seekHooks.length; i += 1) {
+        try { S._seekHooks[i](t); } catch (_) { /* keep deterministic seek resilient */ }
+      }
+    }
+    if (S._mascots.length && window.parent && window.parent !== window) {
+      const now = performance.now ? performance.now() : 0;
+      if (!S._lastTelemetryAt || (now - S._lastTelemetryAt) >= 45) {
+        S._lastTelemetryAt = now;
+        try { window.parent.postMessage({ cmd: "mascotTelemetry", state: S.getMascotState() }, "*"); } catch (_) {}
+      }
+    }
+    if (fireSfx && window.StageSFX && Array.isArray(S.cues) && S.cues.length) {
+      const prevT = S._t || 0;
+      if (t >= prevT) {
+        S.cues.forEach((c) => {
+          if (c.t > prevT && c.t <= t && (t - prevT) < 0.25) {
+            window.StageSFX.play(c.type, c.vol ?? 0.55, c.opts || {});
+          }
+        });
+      }
     }
     S._t = t;
   };
   S.duration = () => S._dur;
   S.camOverlap = function () {
     if ((S.slide.layout || "").toUpperCase() !== "SCAM") return [];
-    const c = (S._L || S.theme.layout).cam, st = document.getElementById("stage").getBoundingClientRect();
+    const c = S.theme.layout.cam, st = document.getElementById("stage").getBoundingClientRect();
     const bad = [];
     document.querySelectorAll("#stage .content *").forEach((e) => {
-      if (e.closest(".fullbleed")) return;
+      if (e.closest(".fullbleed") || e.closest(".stage-annotations")) return;
       if (e.children.length && !e.matches(".frame,.card,.bubble,.bar,.t-body,.t-h1,.t-hero,.t-label,.t-caption,.t-eyebrow,.t-quote,.num,.stage-logo")) return;
       const r = e.getBoundingClientRect(); if (!r.width || !r.height) return;
       const x0 = r.left - st.left, y0 = r.top - st.top, x1 = x0 + r.width, y1 = y0 + r.height;
@@ -1183,60 +936,22 @@
     return bad;
   };
 
-  S.getFieldBoxes = function () {
-    const stage = document.getElementById("stage");
-    if (!stage) return [];
-    const st = stage.getBoundingClientRect();
-    const scaleX = st.width ? (W / st.width) : 1;
-    const scaleY = st.height ? (H / st.height) : 1;
-    const boxes = [];
-    stage.querySelectorAll("[data-field-wrap]").forEach((wrap) => {
-      const key = wrap.dataset.fieldWrap;
-      if (!key) return;
-      const r = wrap.getBoundingClientRect();
-      if (!r.width || !r.height) return;
-      boxes.push({
-        key,
-        rect: {
-          x: Math.round((r.left - st.left) * scaleX),
-          y: Math.round((r.top - st.top) * scaleY),
-          w: Math.round(r.width * scaleX),
-          h: Math.round(r.height * scaleY),
-        },
-      });
-    });
-    return boxes;
-  };
-
-  function applyLiveOverride(key, x, y, scale) {
-    const stage = document.getElementById("stage");
-    if (!stage || !key) return;
-    let wrap = null;
-    stage.querySelectorAll("[data-field-wrap]").forEach((el) => {
-      if (!wrap && el.dataset.fieldWrap === String(key)) wrap = el;
-    });
-    if (!wrap) return;
-    const nx = Number.isFinite(+x) ? +x : 0;
-    const ny = Number.isFinite(+y) ? +y : 0;
-    const nsc = Number.isFinite(+scale) ? +scale : 1;
-    wrap.style.transform = (nx === 0 && ny === 0 && nsc === 1) ? "" : `translate(${nx}px, ${ny}px) scale(${nsc})`;
-    if (S.slide) {
-      if (!S.slide.overrides || typeof S.slide.overrides !== "object") S.slide.overrides = {};
-      if (nx === 0 && ny === 0 && nsc === 1) delete S.slide.overrides[key];
-      else S.slide.overrides[key] = { x: nx, y: ny, scale: nsc };
-    }
-  }
-
-  /* preview playback (editor): drives the same seek() from the clock */
+  /* preview playback (editor + live OBS loop): drives the same seek() from the clock */
   let raf = null;
-  S.play = function (from = 0) {
+  S.play = function (from = 0, opts = {}) {
     cancelAnimationFrame(raf);
+    const keepLiving = Boolean(opts.liveLoop || S._liveLoop);
     const t0 = performance.now() - from * 1000;
     const loop = () => {
       const t = (performance.now() - t0) / 1000;
-      S.seek(Math.min(t, S._dur));
-      if (t < S._dur) raf = requestAnimationFrame(loop);
-      else S.onEnd && S.onEnd();
+      if (keepLiving) {
+        S.seek(t, true);
+        raf = requestAnimationFrame(loop);
+      } else {
+        S.seek(Math.min(t, S._dur), true);
+        if (t < S._dur) raf = requestAnimationFrame(loop);
+        else S.onEnd && S.onEnd();
+      }
     };
     raf = requestAnimationFrame(loop);
   };
@@ -1247,16 +962,55 @@
     const d = e.data || {};
     if (d.cmd === "load") {
       S._camGuide = !!d.camGuide;
-      const info = await S.load(d.slide, { theme: d.theme, camGuide: d.camGuide });
-      if (d.at != null) S.seek(d.at); else S.play(0);
-      parent.postMessage({ cmd: "loaded", info, cam: S.camOverlap(), fields: S.getFieldBoxes(), camRect: (S._L || S.theme.layout).cam }, "*");
-    } else if (d.cmd === "seek") { S.stop(); S.seek(d.t); }
-    else if (d.cmd === "play") S.play(d.from || 0);
-    else if (d.cmd === "getFields") {
-      parent.postMessage({ cmd: "fields", fields: S.getFieldBoxes(), cam: S.camOverlap() }, "*");
-    } else if (d.cmd === "setOverride") {
-      applyLiveOverride(d.key, d.x, d.y, d.scale);
-      parent.postMessage({ cmd: "fields", fields: S.getFieldBoxes(), cam: S.camOverlap() }, "*");
+      if (d.sfxMuted !== undefined && window.StageSFX) window.StageSFX.setMuted(d.sfxMuted);
+      if (d.sfxVolume !== undefined && window.StageSFX) window.StageSFX.setVolume(d.sfxVolume);
+      const info = await S.load(d.slide, {
+        theme: d.theme,
+        format: d.format,
+        camGuide: d.camGuide,
+        transparent: d.transparent,
+        liveLoop: d.liveLoop,
+      });
+      if (d.at != null) {
+        const seekT = (d.at === 0) ? Math.max(1.8, (info && info.entrances) || 1.8) : d.at;
+        S.seek(seekT, false);
+      } else {
+        S.play(0, { liveLoop: d.liveLoop });
+      }
+      parent.postMessage({ cmd: "loaded", info, cam: S.camOverlap() }, "*");
+    } else if (d.cmd === "seek") {
+      S.stop();
+      S.seek(d.t, Boolean(d.fireSfx));
+    } else if (d.cmd === "play") {
+      S.play(d.from || 0, { liveLoop: d.liveLoop });
+    } else if (d.cmd === "sfxConfig" && window.StageSFX) {
+      if (d.muted !== undefined) window.StageSFX.setMuted(d.muted);
+      if (d.volume !== undefined) window.StageSFX.setVolume(d.volume);
+    } else if (d.cmd === "livingConfig" && d.livingStage && S.slide) {
+      S.slide.livingStage = Object.assign({}, S.slide.livingStage || {}, d.livingStage);
+      if (Array.isArray(S._floats)) {
+        S._floats.forEach((it) => {
+          it.el.style.translate = "0px 0px 0px";
+          it.el.style.rotate = "0deg";
+          it.el.style.scale = "1";
+        });
+      }
+      const content = document.querySelector("#stage .content");
+      if (content && S.fx && S.fx.applyMicroMotion) {
+        content.querySelectorAll(".card-sheen").forEach((el) => el.remove());
+        S.fx.applyMicroMotion(content, S.slide);
+        S.updateFloat(S._t || 0);
+      }
+    } else if (d.cmd === "mascotTone") {
+      const st = S.setMascotTone(d.tone || {});
+      if (st && parent && parent !== window) {
+        parent.postMessage({ cmd: "mascotTelemetry", state: st }, "*");
+      }
+    } else if (d.cmd === "puppetConfig") {
+      const st = S.setPuppetConfig(d.puppet || {});
+      if (st && parent && parent !== window) {
+        parent.postMessage({ cmd: "mascotTelemetry", state: st }, "*");
+      }
     }
   });
 })();

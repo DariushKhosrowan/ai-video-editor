@@ -8,10 +8,10 @@ Stage.template({
       const badgeEl = A.text(A.root, spec.badge, "caption", "badge acc abs", { left: A.area.x, top: A.area.y + 10 });
       A.enter(badgeEl, "badge");
     }
-    const top = h.bottom + 30, left = A.area.left + (A.scam || A.stack ? 0 : 40), right = A.area.x;
-    const box = A.box(A.root, left, top, A.W - right - left, A.H - top - A.gapB((s.note || spec.note) ? 120 : (A.scam ? 420 : 90), (s.note || spec.note) ? 60 : 0));
+    const top = h.bottom + 30, left = A.area.left + (A.scam ? 0 : 40), right = A.area.x;
+    const box = A.box(A.root, left, top, A.W - right - left, A.H - top - ((s.note || spec.note) ? 120 : (A.scam ? 420 : 90)));
     A.field("chart", box);
     if (spec.type === "line" && typeof spec.series === "string") Object.assign(spec, Stage.T.lineSpec(spec));
-    Stage.chart(A, box, spec, Stage.MOTION.chart.startOffset);
+    Stage.chart(A, box, spec, 0.25);
   }
 });

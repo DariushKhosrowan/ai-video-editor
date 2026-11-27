@@ -1,0 +1,59 @@
+Khordegir Studio — Third-Party & Original Component Licenses
+==============================================================
+
+1. GSAP 3 (`khordegir/vendor/gsap.min.js`)
+   - License: Standard "No Charge" GreenSock License (https://gsap.com/standard-license)
+   - Status: Unmodified vendored binary included for deterministic timeline playback.
+
+2. js-yaml (`khordegir/vendor/js-yaml.min.js`)
+   - License: MIT License (see `khordegir/vendor/js-yaml.LICENSE`)
+   - Copyright (c) 2011-2015 Vitaly Puzrin.
+
+3. Vazirmatn Font Family (`khordegir/fonts/Vazirmatn-*.woff2`)
+   - License: SIL Open Font License 1.1 (OFL-1.1)
+
+4. Cooley-Tukey Radix-2 FFT & Offline DSP Lip-Sync (`khordegir/mascot_lipsync.py`, `khordegir/editor/mascot-ui.js`)
+   - Algorithm: Classic 1965 Cooley-Tukey iterative radix-2 decimation-in-time FFT with Hann windowing,
+     RMS envelope smoothing, spectral centroid, and zero-crossing rate analysis.
+   - Implementation License: MIT License (clean original implementation; zero external dependencies).
+
+5. YIN Fundamental Frequency (F0) Prosody Estimator (`khordegir/mascot_lipsync.py`, `khordegir/obs_stage/obs-stage.js`, `khordegir/editor/mascot-ui.js`)
+   - Reference Algorithm: Alain de Cheveigné & Hideki Kawahara (2002), "YIN, a fundamental frequency estimator
+     for speech and music", JASA 111(4):1917–1930 (open published DSP method: squared difference function +
+     cumulative mean normalized difference + parabolic interpolation; accelerated via FFT cross-correlation
+     with optional NumPy or pure-stdlib fallback).
+   - Implementation License: MIT License (clean original implementation).
+
+6. Analytical 2nd-Order Mass-Spring-Damper & Critically Damped Spring Integrator (`khordegir/stage/mascot-rig.js`, `khordegir/stage/motion-tokens.js`)
+   - Mathematical Pattern: Classical closed-form second-order harmonic oscillator ODE
+     (`m·x'' + c·x' + k·(x - target) = 0`) across underdamped (`ζ < 1`), critically damped (`ζ = 1`),
+     and overdamped (`ζ > 1`) regimes (public-domain classical mechanics / animation formulation).
+   - Implementation License: MIT License (clean original implementation; pre-baked deterministically per frame).
+
+7. Red Eagle Mascot SVG Rig, Multi-Character Cast (5 Characters), Outfits (6), Seasonal Skins (7),
+   13 Accessories, Dialogue Mode, Puppet Schema v2, Puppet Inspector, Motion Tokens & Deterministic Stage Engine
+   (`khordegir/puppet_schema.py`, `khordegir/stage/motion-tokens.js`, `khordegir/stage/mascot-rig.js`,
+    `khordegir/editor/puppet-inspector.js`, `khordegir/templates/mascot_talk/*`,
+    `khordegir/index.py`, `khordegir/project.py`, `khordegir/outputs.py`, `khordegir/render.py`, `khordegir/cli.py`)
+   - License: MIT License (same as repository `/LICENSE`).
+
+8. Offline Phoneme Forced Aligner, Coarticulation & 10-Second Speaker Calibration
+   (`khordegir/mascot_lipsync.py`, `khordegir/stage/motion-tokens.js`)
+   - Algorithms: Classical Viterbi monotonic dynamic-programming alignment over acoustic-phonetic features,
+     bilingual Persian/English grapheme-to-phoneme lookup rules, look-ahead/carry-over coarticulation blending,
+     and robust percentile F0 / noise-floor calibration (zero external ML downloads or cloud dependencies).
+   - Implementation License: MIT License (clean original implementation).
+
+9. Live OBS Real-Time Voice Pipeline & MIDI / Stream Deck Router (`khordegir/obs_stage/obs-stage.js`)
+   - Algorithms & Standards: Standard single-pole 80 Hz IIR high-pass filter for software noise suppression,
+     adaptive noise gate, Push-to-Talk gating, W3C Web Audio API & Web MIDI API (standard browser APIs).
+   - Implementation License: MIT License (clean original implementation).
+
+10. Offline SVG Rig Importer (`khordegir/rig_importer.py`, `khordegir/stage/motion-tokens.js`)
+    - Implementation: Pure Python standard library (`xml.etree.ElementTree`) and zero-dependency JS stack parser
+      mapping named `<g>` layers (English + Persian aliases) to the 18-part Puppet Schema v2 with anatomical auto-pivots.
+    - Implementation License: MIT License (clean original implementation).
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of the MIT-licensed
+components above, subject to the conditions of the repository `/LICENSE`.
+

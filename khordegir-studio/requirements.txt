@@ -1,3 +1,3 @@
-playwright>=1.40
-pyyaml>=6
-Pillow>=10
+# Optional enhancement dependencies (core lipsync + project/index run cleanly on Python 3.11+ stdlib + ffmpeg)
+PyYAML>=6.0
+playwright>=1.45.0

@@ -6,16 +6,7 @@ Stage.template({
     const lively = preset !== "classic";
     let colBox;
 
-    let colTop = A.area.y;
-    if (hasImg && A.stack) {
-      /* portrait / square: picture on top, number below it */
-      const R = A.region(A.area.y, s.note ? 60 : 0);
-      const ih = Math.round(R.h * A.pick(0.5, 0.46, 0.42));
-      const imgFrame = A.image(A.root, s.image, R.x, R.y, R.w, ih, { motion: s.motion });
-      A.field("image", imgFrame);
-      colBox = { left: A.area.left, right: L.margin };
-      colTop = R.y + ih + 30;
-    } else if (hasImg) {
+    if (hasImg) {
       let imgFrame;
       if (A.scam) {
         imgFrame = A.image(A.root, s.image, 1300, 110, 540, 820, { motion: s.motion });
@@ -29,9 +20,9 @@ Stage.template({
       colBox = { left: A.area.left, right: L.margin };
     }
 
-    const centered = !hasImg || A.stack;
+    const centered = !hasImg;
     const col = A.el("div", "col", A.root, {
-      left: colBox.left, right: colBox.right, top: colTop, bottom: A.gapB(A.scam ? 120 : 110, s.note ? 60 : 0),
+      left: colBox.left, right: colBox.right, top: A.area.y, bottom: A.scam ? 120 : 110,
       alignItems: centered ? "center" : "flex-start",
       textAlign: centered ? "center" : "right",
       gap: "6px",
@@ -41,6 +32,16 @@ Stage.template({
       const ey = A.text(col, s.eyebrow, "eyebrow");
       A.field("eyebrow", ey);
       A.enter(ey, "eyebrow");
+    }
+
+    if (lively && preset === "halo-pulse") {
+      const aura = A.el("div", "abs", A.root, {
+        left: centered ? "50%" : (A.scam ? "38%" : "68%"), top: "42%",
+        width: "560px", height: "340px", transform: "translate(-50%, -50%)",
+        borderRadius: "999px", pointerEvents: "none",
+        background: `radial-gradient(circle, ${A.color(s.color || "accent")}24 0%, transparent 70%)`,
+      });
+      Stage.tl.fromTo(aura, { opacity: 0, scale: 0.72 }, { opacity: 1, scale: 1, duration: 0.85, ease: Stage.ease("fluid"), immediateRender: true }, 0.1);
     }
 
     const n = A.el("div", "t-number", col, {
@@ -54,18 +55,17 @@ Stage.template({
       prefix: s.prefix,
       suffix: s.suffix ?? s.unit,
       decimals: s.decimals,
-      enterEase: preset === "slam-count" || preset === "halo-pulse" ? "spring" : undefined,
-      scale: preset === "slam-count" ? 0.72 : undefined,
+      enterEase: preset === "slam-count" ? "vox" : preset === "halo-pulse" ? "fluid" : undefined,
+      scale: preset === "slam-count" ? 0.86 : (lively ? 0.94 : undefined),
     });
 
-    const extra = Stage.MOTION.ui.bigNumExtra;
     if (lively && preset === "bar-meter") {
       A.sweepLine(col, {
         width: hasImg ? 320 : 420,
         height: 8,
         origin: centered ? "50% 50%" : "100% 50%",
         style: { marginTop: "8px", marginBottom: "8px", background: A.color(s.color || "accent") },
-        at: A.at("number") + extra,
+        at: A.at("number") + 0.25,
       });
     }
 
@@ -73,15 +73,20 @@ Stage.template({
     if (capText) {
       const capEl = A.text(col, capText, "h1", "", { maxWidth: "1100px" });
       A.field("caption", capEl);
-      if (lively && preset === "kinetic-stat") A.kinetic(capEl, { at: A.at("title") + extra, role: "title" });
-      else A.enter(capEl, "title", 0, extra);
+      if (lively && preset === "kinetic-stat") {
+        A.kinetic(capEl, { at: A.at("title") + 0.22, mode: "rise-mask", role: "title", stagger: 0.045, ease: "vox" });
+      } else if (lively && preset === "dual-split") {
+        A.kinetic(capEl, { at: A.at("title") + 0.22, mode: "glide-rtl", role: "title", stagger: 0.04, ease: "vox" });
+      } else {
+        A.enter(capEl, "title", 0, 0.25, lively ? { ease: "vox" } : {});
+      }
     }
 
     const detText = s.detail ?? s.subtitle;
     if (detText) {
       const detEl = A.text(col, detText, "body", "", { color: A.th.colors.muted, maxWidth: "1000px" });
       A.field("detail", detEl);
-      A.enter(detEl, "body", 1, extra);
+      A.enter(detEl, "body", 1, 0.25, lively ? { ease: "fluid" } : {});
     }
 
     A.fit(col, 0.55);

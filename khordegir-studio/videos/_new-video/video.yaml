@@ -10,6 +10,16 @@ images: [img]      # عکس‌ها را در پوشه‌ی img کنار همین
 # studio: ../../../slides/studio    # پوشه‌ی HarkStudio برای کپی خودکار خروجی
 copy: [mp4, png, steps, prompter]
 duration: 6
+livingStage:
+  bgStyle: dreamy-bokeh
+  intensity: podcast
+  microMotion: true
+  floatMode: images-only
+  floatStyle: silk-glide
+  floatAmplitude: 2
+  floatSpeed: 0.45
+  floatRatio: 0.65
+  floatSeed: 0
 
 slides:
 
@@ -18,8 +28,25 @@ slides:
     eyebrow: یک سؤال ساده
     title: پول می‌دی یا به *پلیس* زنگ می‌زنی؟
     subtitle: قانونی که پشت همه‌ی باج‌گیری‌ها هست
+    image: /assets/podcast-studio-mic.jpg
     layout: SLIDE
     say: متن تله‌پرامپتر این اسلاید اینجا.
+
+  # ── مقاله و زوم روی متن: نمایش برگهٔ پژوهش یا روزنامه و زوم سینمایی روی جملهٔ کلیدی + هایلایت ماژیکی
+  - template: article_zoom
+    eyebrow: بررسی سند و پژوهش
+    publication: Journal of Behavioral Economics · 2024
+    article_title: چرا ==پاداش غیرقابل‌پیش‌بینی== رفتار را تثبیت می‌کند؟
+    author: گزیدهٔ گزارش آزمایشگاهی · صفحهٔ ۱۴
+    article_body: |
+      در آزمایش‌های رفتاری مشخص شد زمانی که نظام پاداش کاملاً ثابت است، واکنش مغز خیلی زود افت می‌کند.
+      اما تغییر نامنظم زمانِ پاداش باعث تداوم دو برابری کنش و پیگیری می‌شود.
+    focus_text: پاداشِ گاه‌به‌گاه و غیرقابل‌پیش‌بینی تا ۳ برابر ماندگاری رفتار را افزایش می‌دهد.
+    image: /assets/archive-newspaper.jpg
+    paper_theme: warm-paper
+    zoom_scale: 1.36
+    layout: SCAM
+    say: به این پاراگراف کلیدی در پژوهش دقت کنید؛ دقیقاً همین جمله علت ماندگاری رفتار را توضیح می‌دهد.
 
   # ── عدد بزرگ: یک عدد خیلی بزرگ که از صفر می‌شمارد (مثل ۸۰٪) با یک جمله زیرش؛ اختیاری با عکس کنارش.
   - template: big_number
@@ -38,6 +65,7 @@ slides:
     title: پاداشِ گاه‌به‌گاه
     text: سرسخت‌ترین رفتار وقتی ساخته می‌شه که *فقط گاهی* جواب بگیره
     source: Ferster & Skinner, 1957
+    image: /assets/psychology-lab.jpg
     layout: SCAM
     say: متن تله‌پرامپتر این اسلاید اینجا.
 
@@ -133,6 +161,7 @@ slides:
   - template: image_full
     title: '*تنبیه ضداجتماعی* در ۱۶ شهر دنیا'
     text: ضعیف‌تر بودن اعتماد و قانون ← حمله‌ی مفت‌خور به آدمِ درستکار
+    image: /assets/world-map-dark.jpg
     dots:
     - 20,40
     - 26,36

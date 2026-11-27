@@ -1,12 +1,11 @@
 /* Variants, presets, transitions, animated logo & atmosphere for every template (zero-config, 100% deterministic).
    - Seeded randomness: mulberry32 PRNG keyed on video + project seed + slide number + slide.seed -> reproducible rebuilds.
    - Backwards-compatible defaults: omitting `preset` keeps "classic" behavior; omitting `transition` keeps "soft-fade" (.fadein).
-   - Setting "random" / "تصادفی" deterministically picks from rich motion presets, 14 transitions (8 classic + 6 viral), and 7 animated logo modes.
+   - Setting "random" / "تصادفی" deterministically picks from rich motion presets, 8 transitions, and 7 animated logo modes.
    - All motion strictly driven via real GSAP 3 paused timelines (`Stage.tl` / `Stage.amb`) — no unseeded Math.random(). */
 (function () {
   "use strict";
   const S = window.Stage;
-  const MT = window.MOTION_TOKENS || (S && S.MOTION);
   const FX = S.fx = {};
 
   /* ---------------------------------------------------------- seeded RNG (FNV/Murmur hash + mulberry32) */
@@ -44,7 +43,7 @@
 
   /* ---------------------------------------------------------- catalog of variants, presets, transitions, logo modes */
   FX.VARIANTS = ["rise", "slide", "mask", "blur", "scale"];
-  FX.MOTIONS = { breathe: 3, "zoom-out": 2, "pan-left": 1, "pan-right": 1, depth: 2 };
+  FX.MOTIONS = { breathe: 3, "gentle-drift": 2, "zoom-out": 2, "pan-left": 1, "pan-right": 1, depth: 2 };
 
   const PRESETS = {
     title_card: ["kinetic-hero", "spotlight", "curtain-editorial", "split-contrast", "minimal-type", "glitch-pop"],
@@ -62,9 +61,13 @@
     image_full: ["cinema-zoom", "curtain-reveal", "radar-dots", "parallax-caption", "noir-vignette", "minimal-frame"],
     three_cards: ["trio-cascade", "elastic-fan", "spotlight-cards", "floating-trio", "sweep-grid", "minimal-cards"],
     timeline: ["track-sweep", "milestone-pop", "editorial-arc", "elastic-nodes", "stagger-eras", "minimal-rail"],
-    map_talk: ["vox-atlas", "air-corridor", "editorial-focus", "radar-pulse", "route-tracer", "minimal-map"],
     layers: ["layered-depth", "kinetic-stage", "sweep-compose", "elastic-nodes", "cinematic-pass", "minimal-layers"],
     cam: ["cam-clean", "cam-soft", "cam-pulse", "cam-editorial", "cam-focus", "cam-minimal"],
+    guest_intro: ["editorial-split", "card-float", "spotlight", "minimal-clean"],
+    podcast_question: ["kinetic-words", "spotlight", "glitch-pop", "editorial-mark"],
+    podcast_end: ["spotlight", "kinetic-hero", "curtain-editorial", "minimal-type"],
+    article_zoom: ["cinematic-push", "tilt-glide", "marker-sweep", "split-paper"],
+    mascot_talk: ["editorial-host", "debate-card", "reaction-pop", "podcast-desk"],
   };
 
   const PRESET_LABELS = {
@@ -170,77 +173,40 @@
     "cam-editorial": "دوربین تحریریه",
     "cam-focus": "تمرکز دوربین",
     "cam-minimal": "دوربین ساده",
-    "vox-atlas": "اطلس تحریریه (Vox)",
-    "air-corridor": "مسیر هوایی سینمایی",
-    "editorial-focus": "زوم تمرکز خبری",
-    "radar-pulse": "پین راداری",
-    "route-tracer": "رسم پیوسته مسیر",
-    "minimal-map": "نقشهٔ مینیمال",
+    "cinematic-push": "زوم سینمایی روی جمله",
+    "tilt-glide": "نمای سه‌بعدی مورب و زوم",
+    "marker-sweep": "ماژیک هایلایت زنده + زوم نزدیک",
+    "split-paper": "برگهٔ مقاله + توضیح کناری",
+    "editorial-host": "مجری تحریریه و کارت گفتگو",
+    "debate-card": "کارت مناظره و استدلال",
+    "reaction-pop": "واکنش سریع و پویا",
+    "podcast-desk": "میز پادکست تمام‌قاب",
   };
 
   const TRANSITIONS = [
-    "soft-fade",
     "curtain-rtl",
     "accent-slash",
     "iris-rise",
+    "soft-fade",
     "split-curtain",
     "diagonal-wipe",
     "zoom-iris",
     "shutter-bars",
-    "whip-pan",
-    "zoom-punch",
-    "glitch-slice",
-    "push",
-    "mask-wipe",
-    "light-leak-fade",
+    "editorial-push",
+    "cinema-bars",
   ];
   const TRANSITION_LABELS = {
-    "soft-fade": "محو نرم از سیاهی (کلاسیک)",
     "curtain-rtl": "پرده از راست به چپ",
     "accent-slash": "نوار تأکید مورب",
     "iris-rise": "باز شدن دایره‌ای (Iris)",
+    "soft-fade": "محو نرم از سیاهی (کلاسیک)",
     "split-curtain": "پردهٔ دوقسمتی بالا و پایین",
     "diagonal-wipe": "پاک‌شدن مورب سینمایی",
     "zoom-iris": "گشایش زوم سریع",
     "shutter-bars": "کرکرهٔ ستونی",
-    "whip-pan": "شلاق دوربین (Whip Pan)",
-    "zoom-punch": "ضربهٔ زوم (Zoom Punch)",
-    "glitch-slice": "برش گلیچ دیجیتال (Glitch Slice)",
-    push: "هل دادن صفحه (Push)",
-    "mask-wipe": "پردهٔ برش ماسکی (Mask Wipe)",
-    "light-leak-fade": "محو نوری گرم (Light Leak)",
+    "editorial-push": "پوش تحریریه سینمایی",
+    "cinema-bars": "باز شدن کادر سینمایی",
   };
-  const TRANSITION_ALIASES = {
-    fade: "soft-fade",
-    "simple-fade": "soft-fade",
-    simple_fade: "soft-fade",
-    soft_fade: "soft-fade",
-    whip: "whip-pan",
-    whippan: "whip-pan",
-    whip_pan: "whip-pan",
-    zoom: "zoom-punch",
-    zoom_punch: "zoom-punch",
-    glitch: "glitch-slice",
-    glitch_slice: "glitch-slice",
-    "push-rtl": "push",
-    push_rtl: "push",
-    wipe: "mask-wipe",
-    mask_wipe: "mask-wipe",
-    "light-leak": "light-leak-fade",
-    lightleak: "light-leak-fade",
-    light_leak: "light-leak-fade",
-    light_leak_fade: "light-leak-fade",
-  };
-  const TRANSITION_PRESETS = [
-    { id: "soft-fade", label: "محو ساده" },
-    { id: "whip-pan", label: "شلاق دوربین" },
-    { id: "zoom-punch", label: "ضربهٔ زوم" },
-    { id: "glitch-slice", label: "گلیچ" },
-    { id: "push", label: "هل دادن" },
-    { id: "mask-wipe", label: "پرده ماسکی" },
-    { id: "light-leak-fade", label: "نور گرم" },
-    { id: "random", label: "🎲 تصادفی" },
-  ];
 
   const LOGO_MOTIONS = [
     "pop-spin",
@@ -266,21 +232,15 @@
     presetLabels: PRESET_LABELS,
     transitions: TRANSITIONS,
     transitionLabels: TRANSITION_LABELS,
-    transitionAliases: TRANSITION_ALIASES,
-    transitionPresets: TRANSITION_PRESETS,
     logoMotions: LOGO_MOTIONS,
     logoMotionLabels: LOGO_MOTION_LABELS,
     logoPositions: ["top-left", "top-right", "bottom-right", "bottom-left"],
-    imageMotions: ["breathe", "zoom-out", "pan-left", "pan-right", "depth", "none"],
+    imageMotions: ["breathe", "gentle-drift", "zoom-out", "pan-left", "pan-right", "depth", "none"],
+    floatStyles: ["silk-glide", "optical-breathe"],
   };
 
   const isRand = (v) => v === "random" || v === "تصادفی";
   const isUnset = (v) => v == null || v === "" || v === "auto";
-  const normTransition = (v) => {
-    const raw = String(v || "").trim().toLowerCase();
-    const mapped = TRANSITION_ALIASES[raw] || raw;
-    return TRANSITIONS.includes(mapped) ? mapped : "soft-fade";
-  };
 
   /* ---------------------------------------------------------- per-slide seeded setup */
   FX.setup = function (slide) {
@@ -301,26 +261,7 @@
     let transition;
     if (isRand(slide.transition)) transition = pick(r, TRANSITIONS);
     else if (isUnset(slide.transition)) transition = "soft-fade";
-    else transition = normTransition(slide.transition);
-
-    const B = (MT && MT.transitions && MT.transitions.bounds) || { minDur: 0.15, maxDur: 1.5, minIntensity: 0.4, maxIntensity: 1.5 };
-    const rawDir = String(slide.transition_dir || "auto").trim().toLowerCase();
-    const validDir = ["auto", "left", "right", "up", "down", "in", "out"].includes(rawDir) ? rawDir : "auto";
-    const numDur = slide.transition_dur != null && slide.transition_dur !== "" ? Number(slide.transition_dur) : NaN;
-    const validDur = Number.isFinite(numDur) && numDur > 0 ? Math.min(B.maxDur, Math.max(B.minDur, numDur)) : null;
-    const rawEase = String(slide.transition_ease || "").trim();
-    const validEase = rawEase && rawEase !== "auto" ? rawEase : null;
-    const numInt = slide.transition_intensity != null && slide.transition_intensity !== "" ? Number(slide.transition_intensity) : NaN;
-    const validInt = Number.isFinite(numInt) && numInt > 0 ? Math.min(B.maxIntensity, Math.max(B.minIntensity, numInt)) : 1;
-    const rawColor = String(slide.transition_color || "").trim();
-    const validColor = rawColor && rawColor !== "auto" ? rawColor : null;
-    const transitionOpts = {
-      dir: validDir,
-      dur: validDur,
-      ease: validEase,
-      intensity: validInt,
-      color: validColor,
-    };
+    else transition = slide.transition;
 
     let logoMotion;
     if (isRand(slide.logo_motion)) logoMotion = pick(r, LOGO_MOTIONS);
@@ -331,7 +272,6 @@
       variant: want(slide.variant) ? pick(r, dflt.variants || FX.VARIANTS) : slide.variant,
       preset,
       transition,
-      transitionOpts,
       logoMotion,
       motion: want(slide.motion) ? wpick(r, dflt.motions || FX.MOTIONS) : slide.motion,
       glowPos: pick(r, [[0.86, 0.06], [0.14, 0.08], [0.78, 0.92], [0.5, -0.05]]),
@@ -342,36 +282,32 @@
       r,
     };
     S.cues = [];
-    if (transition !== "soft-fade") FX.cue(0, "transition", transition);
     return c;
   };
 
   /* ---------------------------------------------------------- entrance from-vars */
   FX.from = function (role, m) {
     const v = (FX.cur && FX.cur.variant) || "rise";
-    const V = MT.variants;
-    const isEn = S._lang === "en";
-    const dir = isEn ? -1 : 1;
     const from = { opacity: 0 };
     const textish = ["title", "eyebrow", "body", "note"].includes(role);
     const cardish = ["card"].includes(role);
     if (["bubble", "badge", "number"].includes(role) || v === "rise") {
-      if (m.x) from.x = m.x * dir; if (m.y) from.y = m.y; if (m.scale) from.scale = MT.clampScale(m.scale);
+      if (m.x) from.x = m.x; if (m.y) from.y = m.y; if (m.scale) from.scale = m.scale;
       return from;
     }
     if (v === "slide") {
-      if (textish) from.x = (role === "title" ? V.slideTitleX : V.slideBodyX) * dir;
-      else if (cardish) { from.x = V.slideCardX * dir; from.scale = V.slideCardScale; }
-      else if (role === "image") from.x = V.slideImageX * dir;
+      if (textish) from.x = role === "title" ? 36 : 22;
+      else if (cardish) { from.x = 28; from.scale = 0.985; }
+      else if (role === "image") from.x = -32;
     } else if (v === "mask") {
-      if (textish) { from.clipPath = "inset(-25% -6% 100% -6%)"; from.y = V.maskTextY; }
-      else if (cardish) { from.clipPath = isEn ? "inset(0% 100% 0% 0%)" : "inset(0% 0% 0% 100%)"; }
-      else if (role === "image") { from.clipPath = isEn ? "inset(0% 100% 0% 0% round 16px)" : "inset(0% 0% 0% 100% round 16px)"; }
+      if (textish) { from.clipPath = "inset(-18% -4% 100% -4%)"; from.y = 12; }
+      else if (cardish) { from.clipPath = "inset(0% 0% 0% 100%)"; }
+      else if (role === "image") { from.clipPath = "inset(0% 0% 0% 100% round 16px)"; }
     } else if (v === "blur") {
-      from.filter = `blur(${V.blurPx}px)`;
-      if (textish) from.y = V.blurTextY; if (cardish) from.scale = V.blurCardScale; if (role === "image") from.scale = MT.clampScale(V.blurImageScale);
+      from.filter = "blur(10px)";
+      if (textish) from.y = 8; if (cardish) from.scale = 0.982; if (role === "image") from.scale = 1.028;
     } else if (v === "scale") {
-      from.scale = MT.clampScale(textish ? V.scaleText : role === "image" ? V.scaleImage : V.scaleCard);
+      from.scale = textish ? 0.968 : role === "image" ? 1.032 : 0.96;
     }
     return from;
   };
@@ -390,8 +326,8 @@
     return "breathe";
   };
 
-  FX.cue = function (t, type, label) {
-    if (S.cues) S.cues.push({ t: +t.toFixed(3), type, label: label || "" });
+  FX.cue = function (t, type, label, opts = {}) {
+    if (S.cues) S.cues.push({ t: +t.toFixed(3), type, label: label || "", opts: opts || {} });
   };
 
   /* ---------------------------------------------------------- atmosphere (ambient, behind content) */
@@ -424,7 +360,6 @@
     const th = S.theme || {}, col = th.colors || {}, c = FX.cur || {};
     const W = S.W, H = S.H, r = FX.rngFor((slide._seed || "") + ":atm");
     const isLight = col.isDark === false;
-    const ATM = MT.atmosphere;
 
     if (c.leak && !isLight) {
       const lk = document.createElement("div");
@@ -432,37 +367,31 @@
       stage.appendChild(lk);
       const fromLeft = r() < 0.5;
       Object.assign(lk.style, {
-        width: "1300px", height: "900px", top: (-300 + r() * 500) + "px", left: fromLeft ? "-700px" : (S.W - 620) + "px",
+        width: "1300px", height: "900px", top: (-300 + r() * 500) + "px", left: fromLeft ? "-700px" : "1300px",
         background: `radial-gradient(ellipse at center, rgba(255,170,60,.55) 0%, rgba(255,120,40,.18) 35%, transparent 70%)`,
       });
-      S.amb.fromTo(lk, { opacity: 0.0, x: 0 }, {
-        opacity: ATM.leak.maxOpacity, x: fromLeft ? 260 : -260,
-        duration: ATM.leak.dur, ease: S.ease(ATM.leak.ease), yoyo: true, repeat: ATM.leak.repeat,
-      }, 0);
+      S.amb.fromTo(lk, { opacity: 0.0, x: 0 }, { opacity: 0.11, x: fromLeft ? 260 : -260, duration: 9, ease: "sine.inOut", yoyo: true, repeat: 9 }, 0);
     }
 
-    if (c.dust) {
+    if (c.dust && (!slide.livingStage || slide.livingStage.intensity === "off")) {
       const box = document.createElement("div");
       box.className = "dust";
       stage.appendChild(box);
-      const n = 34;
+      const n = 14;
       for (let i = 0; i < n; i++) {
         const d = document.createElement("i");
-        const s = 1.5 + r() * 3.5;
+        const s = 3.5 + r() * 4.5;
         Object.assign(d.style, {
           left: (r() * W) + "px",
           top: (r() * H) + "px",
           width: s + "px",
           height: s + "px",
           background: isLight ? (col.muted || "#666") : "#fff8dc",
-          opacity: (isLight ? (0.04 + r() * 0.12) : (0.08 + r() * 0.22)).toFixed(2),
-          filter: s > 4 ? "blur(1.5px)" : "none",
+          opacity: (isLight ? (0.04 + r() * 0.08) : (0.06 + r() * 0.14)).toFixed(2),
+          filter: "blur(1.5px)",
         });
         box.appendChild(d);
-        S.amb.to(d, {
-          x: (r() - 0.5) * 160, y: -40 - r() * 140,
-          duration: ATM.dust.baseDur + r() * ATM.dust.spanDur, ease: S.ease(ATM.dust.ease),
-        }, 0);
+        S.amb.to(d, { x: (r() - 0.5) * 110, y: -30 - r() * 90, duration: 22 + r() * 10, ease: "sine.inOut", yoyo: true, repeat: 99 }, 0);
       }
     }
 
@@ -471,32 +400,21 @@
       const sw = document.createElement("div");
       sw.className = "light-sweep";
       stage.appendChild(sw);
-      S.amb.fromTo(sw, { x: 600, opacity: 0 }, {
-        x: -1600, opacity: isLight ? 0.16 : 0.24,
-        duration: ATM.lightSweep.dur, ease: S.ease(ATM.lightSweep.ease), yoyo: true, repeat: ATM.lightSweep.repeat,
-      }, 0);
+      S.amb.fromTo(sw, { x: 600, opacity: 0 }, { x: -1600, opacity: isLight ? 0.14 : 0.2, duration: 12, ease: "sine.inOut", yoyo: true, repeat: 99 }, 0);
     }
   };
 
   FX.grain = function (stage) {
-    if (!FX.cur || !FX.cur.grain) return;
+    // Keep film texture completely static and ultra-subtle (no 24fps position jumping that looks like noise on text/shapes)
+    if (!FX.cur || !FX.cur.grain || !(S.slide && S.slide.fx && S.slide.fx.grain === true)) return;
     const gr = document.createElement("div");
     gr.className = "grain";
     stage.appendChild(gr);
+    gr.style.opacity = "0.018";
     gr.style.backgroundImage = `url(${grainTile()})`;
-    const G = MT.atmosphere.grain;
-    const proxy = { t: 0 }, r = mulberry32(99);
-    const offs = Array.from({ length: G.steps }, () => [Math.floor(r() * 256), Math.floor(r() * 256)]);
-    S.amb.to(proxy, {
-      t: G.dur, duration: G.dur, ease: S.ease(G.ease),
-      onUpdate: () => {
-        const k = Math.floor(proxy.t * G.steps) % G.steps;
-        gr.style.backgroundPosition = `${offs[k][0]}px ${offs[k][1]}px`;
-      },
-    }, 0);
   };
 
-  /* "depth" idle variant: a big blurred copy of the image behind everything drifts the other way */
+  /* "depth" idle variant: a big blurred copy of the image behind everything drifts smoothly in continuous yoyo */
   FX.depth = function (src) {
     const stage = document.getElementById("stage");
     if (!stage || stage.querySelector(".depth")) return;
@@ -504,26 +422,167 @@
     const im = document.createElement("img"); im.src = src; d.appendChild(im);
     stage.insertBefore(d, stage.querySelector(".content"));
     S._imgs.push(im);
-    const D = MT.atmosphere.depth;
-    S.amb.fromTo(im,
-      { scale: MT.clampScale(D.fromScale), x: D.fromX },
-      { scale: MT.clampScale(D.toScale), x: D.toX, duration: D.dur, ease: S.ease(D.ease) },
-      0);
+    S.amb.fromTo(im, { scale: 1.11, x: -8, y: 0 }, {
+      scale: 1.15, x: 18, y: -6, duration: 28, ease: "sine.inOut", yoyo: true, repeat: 99, force3D: true,
+    }, 0);
   };
 
-  /* ---------------------------------------------------------- 14 slide transitions (8 classic + 6 viral) */
+  /* ---------------------------------------------------------- 10 slide transitions */
   FX.transitionIn = function (stage, slide, th) {
-    if (S.transitions && typeof S.transitions.apply === "function") {
-      return S.transitions.apply(stage, slide, th, FX.cur);
+    const mode = (FX.cur && FX.cur.transition) || "soft-fade";
+    const clip = th.clip || { fade: 0.3 };
+    const col = th.colors || {};
+    const fadeDur = clip.fade > 0 ? clip.fade : 0.35;
+    const content = stage.querySelector(".content");
+
+    if (mode === "soft-fade") {
+      const fade = document.createElement("div");
+      fade.className = "fadein";
+      stage.appendChild(fade);
+      if (clip.fade > 0) S.tl.fromTo(fade, { opacity: 1 }, { opacity: 0, duration: clip.fade, ease: "power1.out", immediateRender: true }, 0);
+      else fade.remove();
+      return;
     }
-    const T = MT.transitions;
-    const clip = (th && th.clip) || MT.clip;
-    const fade = document.createElement("div");
-    fade.className = "fadein";
-    stage.appendChild(fade);
-    if (clip.fade > 0) S.tl.fromTo(fade, { opacity: 1 }, { opacity: 0, duration: clip.fade, ease: S.ease(T.softFade.ease), immediateRender: true }, 0);
-    else fade.remove();
-    return "soft-fade";
+
+    if (mode === "curtain-rtl") {
+      const panel = document.createElement("div");
+      panel.className = "transition-overlay transition-curtain-rtl";
+      Object.assign(panel.style, {
+        position: "absolute", inset: "0", background: col.bg2 || col.surface || "#16161a",
+        borderLeft: `10px solid ${col.accent || "#FFD600"}`, pointerEvents: "none", zIndex: 90,
+      });
+      stage.appendChild(panel);
+      S.tl.fromTo(panel, { x: 0, opacity: 1 }, { x: -2000, opacity: 0, duration: 0.54, ease: S.ease("vox"), immediateRender: true }, 0);
+      if (content) S.tl.fromTo(content, { x: 26, scale: 1.015 }, { x: 0, scale: 1, duration: 0.56, ease: S.ease("fluid"), immediateRender: true }, 0.04);
+      return;
+    }
+
+    if (mode === "accent-slash") {
+      const veil = document.createElement("div");
+      veil.className = "transition-overlay transition-accent-slash";
+      Object.assign(veil.style, {
+        position: "absolute", inset: "0", background: col.bg || "#121212", pointerEvents: "none", zIndex: 89,
+      });
+      const slash = document.createElement("div");
+      slash.className = "transition-overlay transition-slash-bar";
+      Object.assign(slash.style, {
+        position: "absolute", top: "-15%", bottom: "-15%", right: "-20%", width: "260px",
+        background: col.accent || "#FFD600", transform: "skewX(-14deg)", pointerEvents: "none", zIndex: 91,
+      });
+      stage.appendChild(veil);
+      stage.appendChild(slash);
+      S.tl.fromTo(veil, { opacity: 1 }, { opacity: 0, duration: 0.36, ease: "power2.out", immediateRender: true }, 0.08);
+      S.tl.fromTo(slash, { x: 200, opacity: 1 }, { x: -2350, opacity: 0.9, duration: 0.52, ease: "power3.inOut", immediateRender: true }, 0);
+      if (content) S.tl.fromTo(content, { scale: 1.022 }, { scale: 1, duration: 0.52, ease: S.ease("vox"), immediateRender: true }, 0.05);
+      return;
+    }
+
+    if (mode === "iris-rise") {
+      const veil = document.createElement("div");
+      veil.className = "transition-overlay transition-iris-rise";
+      Object.assign(veil.style, {
+        position: "absolute", inset: "0", background: col.bg || "#121212",
+        clipPath: "circle(110% at 50% 50%)", pointerEvents: "none", zIndex: 90,
+      });
+      stage.appendChild(veil);
+      S.tl.fromTo(veil, { scale: 1, opacity: 1 }, { scale: 1.48, opacity: 0, duration: 0.5, ease: S.ease("vox"), immediateRender: true }, 0);
+      if (content) S.tl.fromTo(content, { scale: 0.98 }, { scale: 1, duration: 0.5, ease: S.ease("fluid"), immediateRender: true }, 0.02);
+      return;
+    }
+
+    if (mode === "split-curtain") {
+      const top = document.createElement("div");
+      const bot = document.createElement("div");
+      top.className = "transition-overlay transition-split-top";
+      bot.className = "transition-overlay transition-split-bot";
+      Object.assign(top.style, {
+        position: "absolute", left: "0", right: "0", top: "0", height: "540px",
+        background: col.bg2 || col.bg || "#121212", borderBottom: `4px solid ${col.accent || "#FFD600"}`,
+        pointerEvents: "none", zIndex: 90,
+      });
+      Object.assign(bot.style, {
+        position: "absolute", left: "0", right: "0", bottom: "0", height: "540px",
+        background: col.bg2 || col.bg || "#121212", borderTop: `4px solid ${col.accent || "#FFD600"}`,
+        pointerEvents: "none", zIndex: 90,
+      });
+      stage.appendChild(top); stage.appendChild(bot);
+      S.tl.fromTo(top, { y: 0, opacity: 1 }, { y: -560, opacity: 0, duration: 0.5, ease: S.ease("vox"), immediateRender: true }, 0);
+      S.tl.fromTo(bot, { y: 0, opacity: 1 }, { y: 560, opacity: 0, duration: 0.5, ease: S.ease("vox"), immediateRender: true }, 0);
+      if (content) S.tl.fromTo(content, { scale: 1.02 }, { scale: 1, duration: 0.5, ease: S.ease("fluid"), immediateRender: true }, 0.03);
+      return;
+    }
+
+    if (mode === "diagonal-wipe") {
+      const wipe = document.createElement("div");
+      wipe.className = "transition-overlay transition-diagonal-wipe";
+      Object.assign(wipe.style, {
+        position: "absolute", top: "-20%", bottom: "-20%", left: "-25%", right: "-25%",
+        background: `linear-gradient(120deg, ${col.bg2 || col.bg || "#121212"} 70%, ${col.accent || "#FFD600"} 100%)`,
+        pointerEvents: "none", zIndex: 90,
+      });
+      stage.appendChild(wipe);
+      S.tl.fromTo(wipe, { x: 0, y: 0, opacity: 1 }, { x: -2400, y: 260, opacity: 0, duration: 0.52, ease: S.ease("vox"), immediateRender: true }, 0);
+      if (content) S.tl.fromTo(content, { x: 18, scale: 1.018 }, { x: 0, scale: 1, duration: 0.52, ease: S.ease("fluid"), immediateRender: true }, 0.04);
+      return;
+    }
+
+    if (mode === "zoom-iris") {
+      const fade = document.createElement("div");
+      fade.className = "transition-overlay transition-zoom-iris";
+      Object.assign(fade.style, { position: "absolute", inset: "0", background: col.bg || "#121212", pointerEvents: "none", zIndex: 90 });
+      stage.appendChild(fade);
+      S.tl.fromTo(fade, { opacity: 0.92 }, { opacity: 0, duration: Math.max(0.28, fadeDur), ease: "power2.out", immediateRender: true }, 0);
+      if (content) S.tl.fromTo(content, { scale: 1.04 }, { scale: 1, duration: 0.5, ease: S.ease("vox"), immediateRender: true }, 0);
+      return;
+    }
+
+    if (mode === "shutter-bars") {
+      for (let i = 0; i < 4; i++) {
+        const bar = document.createElement("div");
+        bar.className = "transition-overlay transition-shutter-bar";
+        Object.assign(bar.style, {
+          position: "absolute", top: "0", bottom: "0", left: (i * 480) + "px", width: "484px",
+          background: i % 2 === 0 ? (col.bg || "#121212") : (col.bg2 || col.surface || "#1a1a1f"),
+          transformOrigin: "50% 0%", pointerEvents: "none", zIndex: 90,
+        });
+        stage.appendChild(bar);
+        S.tl.fromTo(bar, { scaleY: 1, opacity: 1 }, { scaleY: 0, opacity: 0, duration: 0.44, ease: S.ease("vox"), immediateRender: true }, i * 0.05);
+      }
+      return;
+    }
+
+    if (mode === "editorial-push") {
+      const veil = document.createElement("div");
+      veil.className = "transition-overlay transition-editorial-push";
+      Object.assign(veil.style, {
+        position: "absolute", inset: "0", background: col.bg || "#121212",
+        borderLeft: `6px solid ${col.accent || "#FFD600"}`, pointerEvents: "none", zIndex: 90,
+      });
+      stage.appendChild(veil);
+      S.tl.fromTo(veil, { x: 0, opacity: 1 }, { x: -1960, opacity: 0.15, duration: 0.56, ease: S.ease("vox"), immediateRender: true }, 0);
+      if (content) S.tl.fromTo(content, { x: 72, opacity: 0.35, scale: 0.985 }, { x: 0, opacity: 1, scale: 1, duration: 0.62, ease: S.ease("vox"), immediateRender: true }, 0.02);
+      return;
+    }
+
+    if (mode === "cinema-bars") {
+      const topBar = document.createElement("div");
+      const botBar = document.createElement("div");
+      topBar.className = "transition-overlay transition-cinema-top";
+      botBar.className = "transition-overlay transition-cinema-bot";
+      Object.assign(topBar.style, {
+        position: "absolute", left: "0", right: "0", top: "0", height: "540px",
+        background: col.bg || "#0e0e11", pointerEvents: "none", zIndex: 90,
+      });
+      Object.assign(botBar.style, {
+        position: "absolute", left: "0", right: "0", bottom: "0", height: "540px",
+        background: col.bg || "#0e0e11", pointerEvents: "none", zIndex: 90,
+      });
+      stage.appendChild(topBar);
+      stage.appendChild(botBar);
+      S.tl.fromTo(topBar, { y: 0 }, { y: -560, duration: 0.58, ease: S.ease("fluid"), immediateRender: true }, 0);
+      S.tl.fromTo(botBar, { y: 0 }, { y: 560, duration: 0.58, ease: S.ease("fluid"), immediateRender: true }, 0);
+      if (content) S.tl.fromTo(content, { scale: 1.03 }, { scale: 1, duration: 0.64, ease: S.ease("vox"), immediateRender: true }, 0.04);
+    }
   };
 
   /* ---------------------------------------------------------- 7 animated logo modes (SCAM-safe + A.field) */
@@ -546,7 +605,7 @@
       padding: "10px 18px", borderRadius: "14px", zIndex: 35, pointerEvents: "none",
       background: isLight ? "rgba(255, 255, 255, 0.88)" : "rgba(18, 18, 22, 0.72)",
       border: `1.5px solid ${isLight ? (col.cardBorder || "rgba(0,0,0,0.12)") : "rgba(255,255,255,0.14)"}`,
-      boxShadow: "var(--shadow-logo)",
+      boxShadow: isLight ? "0 8px 24px rgba(0,0,0,0.08)" : "0 10px 28px rgba(0,0,0,0.45)",
       color: col.text || "#FFFFFF",
     };
     const mx = Math.max(36, (L.margin || 80) * 0.65);
@@ -577,158 +636,465 @@
     content.appendChild(badge);
     A.field("logo", badge);
 
-    const LM = MT.logo;
     const mode = (FX.cur && FX.cur.logoMotion) || "pop-spin";
-    const t0 = LM.t0;
-    const logoDir = S._lang === "en" ? -1 : 1;
+    const t0 = 0.08;
     if (mode === "pop-spin") {
-      const m = LM.popSpin;
-      S.tl.fromTo(badge, { opacity: 0, scale: m.fromScale, rotation: m.fromRot }, { opacity: 1, scale: 1, rotation: 0, duration: m.dur, ease: S.ease(m.ease), immediateRender: true }, t0);
+      S.tl.fromTo(badge, { opacity: 0, scale: 0.45, rotation: -18 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.58, ease: "back.out(1.5)", immediateRender: true }, t0);
     } else if (mode === "slide-rtl") {
-      const m = LM.slideRtl;
-      S.tl.fromTo(badge, { opacity: 0, x: m.fromX * logoDir }, { opacity: 1, x: 0, duration: m.dur, ease: S.ease(m.ease), immediateRender: true }, t0);
+      S.tl.fromTo(badge, { opacity: 0, x: 56 }, { opacity: 1, x: 0, duration: 0.52, ease: S.ease("power4"), immediateRender: true }, t0);
     } else if (mode === "orbit-pulse") {
-      const m = LM.orbitPulse;
-      S.tl.fromTo(badge, { opacity: 0, scale: m.fromScale, y: m.fromY }, { opacity: 1, scale: 1, y: 0, duration: m.dur, ease: S.ease(m.ease), immediateRender: true }, t0);
-      S.amb.fromTo(badge, { scale: 1 }, { scale: MT.clampScale(m.ambScale), duration: m.ambDur, ease: S.ease(MT.eases.ambient), yoyo: true, repeat: m.ambRepeat }, m.ambDelay);
+      S.tl.fromTo(badge, { opacity: 0, scale: 0.72, y: -14 }, { opacity: 1, scale: 1, y: 0, duration: 0.52, ease: S.ease("power3"), immediateRender: true }, t0);
     } else if (mode === "flip-reveal") {
-      const m = LM.flipReveal;
-      S.tl.fromTo(badge, { opacity: 0, scaleX: m.fromScaleX, scaleY: m.fromScaleY }, { opacity: 1, scaleX: 1, scaleY: 1, duration: m.dur, ease: S.ease(m.ease), immediateRender: true }, t0);
+      S.tl.fromTo(badge, { opacity: 0, scaleX: 0.15, scaleY: 0.9 }, { opacity: 1, scaleX: 1, scaleY: 1, duration: 0.55, ease: "back.out(1.3)", immediateRender: true }, t0);
     } else if (mode === "stamp-drop") {
-      const m = LM.stampDrop;
-      S.tl.fromTo(badge, { opacity: 0, scale: MT.clampScale(m.fromScale), y: m.fromY }, { opacity: 1, scale: 1, y: 0, duration: m.dur, ease: S.ease(m.ease), immediateRender: true }, t0);
+      S.tl.fromTo(badge, { opacity: 0, scale: 1.7, y: -22 }, { opacity: 1, scale: 1, y: 0, duration: 0.44, ease: "power4.out", immediateRender: true }, t0);
     } else if (mode === "glitch-snap") {
-      const m = LM.glitchSnap;
-      S.tl.fromTo(badge, { opacity: 0, x: m.fromX * logoDir, skewX: 16 * logoDir }, { opacity: 1, x: m.midX * logoDir, skewX: -6 * logoDir, duration: m.inDur, ease: S.ease(m.inEase), immediateRender: true }, t0);
-      S.tl.to(badge, { x: 0, skewX: 0, duration: m.settleDur, ease: S.ease(m.settleEase) }, t0 + m.inDur);
+      S.tl.fromTo(badge, { opacity: 0, x: -24, skewX: 16 }, { opacity: 1, x: 6, skewX: -6, duration: 0.2, ease: "power2.out", immediateRender: true }, t0);
+      S.tl.to(badge, { x: 0, skewX: 0, duration: 0.24, ease: "power3.out" }, t0 + 0.2);
     } else {
-      const m = LM.floatFade;
-      S.tl.fromTo(badge, { opacity: 0, y: m.fromY }, { opacity: 1, y: 0, duration: m.dur, ease: S.ease(m.ease), immediateRender: true }, t0);
-      S.amb.fromTo(badge, { y: 0 }, { y: m.ambY, duration: m.ambDur, ease: S.ease(MT.eases.ambient), yoyo: true, repeat: m.ambRepeat }, m.ambDelay);
+      // float-fade
+      S.tl.fromTo(badge, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.65, ease: S.ease("power3"), immediateRender: true }, t0);
     }
     FX.cue(t0, "logo", mode);
     return badge;
   };
 
-  /* ---------------------------------------------------------- key-word effects, auto-counters & micro-delights after build */
+  /* ---------------------------------------------------------- key-word effects after build */
   FX.post = function (content) {
     const c = FX.cur || {};
-    const P = MT.post;
-    const slide = S.slide || {};
     const timeOf = (el) => {
       let p = el;
       while (p && p !== content) {
         if (p.dataset && p.dataset.end) return +p.dataset.end;
         p = p.parentElement;
       }
-      return P.fallbackTime;
+      return 0.9;
     };
-    const isExcluded = (el) => !!(el.closest && el.closest(".source,.camguide,.stage-logo,[data-no-count]"));
-
     content.querySelectorAll(".hl").forEach((el) => {
-      const t = timeOf(el) + P.highlight.delayOffset;
-      S.tl.fromTo(el, { backgroundSize: "0% 42%" }, { backgroundSize: "100% 42%", duration: P.highlight.dur, ease: S.ease(P.highlight.ease), immediateRender: true }, t);
+      const t = timeOf(el) + 0.05;
+      S.tl.fromTo(el, { backgroundSize: "0% 42%" }, { backgroundSize: "100% 42%", duration: 0.55, ease: S.ease("power3"), immediateRender: true }, t);
       FX.cue(t, "swish", el.textContent);
     });
     const uls = [...content.querySelectorAll(".ul")];
     if (c.accentFx === "underline") uls.push(...content.querySelectorAll(".t-hero .acc, .t-h1 .acc, .t-quote .acc"));
     uls.forEach((el) => {
       el.classList.add("ul-on");
-      const t = timeOf(el) + P.underline.delayOffset;
-      S.tl.fromTo(el, { backgroundSize: "0% 6px" }, { backgroundSize: "100% 6px", duration: P.underline.dur, ease: S.ease(P.underline.ease), immediateRender: true }, t);
+      const t = timeOf(el) + 0.08;
+      S.tl.fromTo(el, { backgroundSize: "0% 6px" }, { backgroundSize: "100% 6px", duration: 0.5, ease: S.ease("power3"), immediateRender: true }, t);
+    });
+  };
+
+  /* ---------------------------------------------------------- Always-On Living Background Engine */
+  FX.livingStage = function (stage, slide) {
+    const ls = Object.assign(
+      { bgStyle: "studio-mix", intensity: "podcast", microMotion: true },
+      (slide && slide.livingStage) || {}
+    );
+    if (ls.intensity === "off") return;
+
+    const th = S.theme || {}, col = th.colors || {};
+    const isLight = col.isDark === false;
+    const accent = col.accent || "#F5B700";
+    const danger = col.danger || "#EF4444";
+    const style = ls.bgStyle || "studio-mix";
+    const mult = ls.intensity === "dynamic" ? 1.45 : ls.intensity === "subtle" ? 0.65 : 1.0;
+
+    const layer = document.createElement("div");
+    layer.className = "living-stage";
+    stage.appendChild(layer);
+
+    // 0. Editorial Blurred Backdrop (only when explicitly requested with a dedicated background image)
+    if (style === "editorial-blur" || (style === "dreamy-bokeh" && ls.bgImage)) {
+      const blurSrc = (ls && ls.bgImage) || (slide && slide.bg_image) || (style === "editorial-blur" ? "/assets/podcast-studio-mic.jpg" : "");
+      if (blurSrc) {
+        const bWrap = document.createElement("div");
+        bWrap.className = "living-editorial-blur";
+        const bImg = document.createElement("img");
+        bImg.src = blurSrc;
+        bImg.alt = "";
+        bImg.onerror = () => bWrap.remove();
+        bWrap.appendChild(bImg);
+        layer.appendChild(bWrap);
+        S._imgs.push(bImg);
+        const scrim = document.createElement("div");
+        scrim.className = "living-velvet-scrim";
+        layer.appendChild(scrim);
+      }
+    }
+
+    // 1. Aurora / Studio-Mix / Dreamy-Bokeh drifting luminous orbs (gradient-feathered, zero heavy CSS blur filter)
+    if (style === "aurora" || style === "studio-mix" || style === "dreamy-bokeh" || style === "editorial-blur") {
+      const aurora = document.createElement("div");
+      aurora.className = "living-aurora";
+      layer.appendChild(aurora);
+
+      const orb1 = document.createElement("div");
+      orb1.className = "living-aurora-orb";
+      Object.assign(orb1.style, {
+        width: "1120px", height: "1120px", left: "54%", top: "-22%",
+        background: `radial-gradient(circle, ${accent} 0%, transparent 64%)`,
+        opacity: (isLight ? 0.14 : (style === "dreamy-bokeh" ? 0.2 : 0.16) * mult).toFixed(2),
+      });
+      const orb2 = document.createElement("div");
+      orb2.className = "living-aurora-orb";
+      Object.assign(orb2.style, {
+        width: "920px", height: "920px", left: "-14%", top: "42%",
+        background: `radial-gradient(circle, ${style === "dreamy-bokeh" ? "#38bdf8" : danger} 0%, transparent 66%)`,
+        opacity: (isLight ? 0.09 : (style === "dreamy-bokeh" ? 0.14 : 0.11) * mult).toFixed(2),
+      });
+      aurora.append(orb1, orb2);
+
+      S.amb.fromTo(orb1, { x: -38 * mult, y: -22 * mult, scale: 0.95 }, {
+        x: 48 * mult, y: 32 * mult, scale: 1.06, duration: 19, ease: "sine.inOut", yoyo: true, repeat: 99, force3D: true,
+      }, 0);
+      S.amb.fromTo(orb2, { x: 34 * mult, y: 26 * mult, scale: 1.03 }, {
+        x: -44 * mult, y: -30 * mult, scale: 0.93, duration: 23, ease: "sine.inOut", yoyo: true, repeat: 99, force3D: true,
+      }, 0);
+    }
+
+    // 1b. Creamy Out-of-Focus Bokeh Discs for YouTuber Dreamy-Bokeh mode
+    if (style === "dreamy-bokeh") {
+      const bokehWash = document.createElement("div");
+      bokehWash.className = "living-bokeh-wash";
+      layer.appendChild(bokehWash);
+      const br = FX.rngFor((slide._seed || "live") + ":dreamy-bokeh");
+      const bokehColors = [accent, "#60a5fa", "#fff4d6", danger];
+      const bCount = Math.round(9 * Math.min(1.25, mult));
+      for (let i = 0; i < bCount; i += 1) {
+        const disc = document.createElement("div");
+        disc.className = "living-bokeh-disc";
+        const sz = 110 + br() * 190;
+        const cPick = bokehColors[i % bokehColors.length];
+        Object.assign(disc.style, {
+          left: (br() * (S.W - 80)).toFixed(1) + "px",
+          top: (br() * (S.H - 80)).toFixed(1) + "px",
+          width: sz.toFixed(0) + "px",
+          height: sz.toFixed(0) + "px",
+          background: `radial-gradient(circle, ${cPick} 0%, transparent 68%)`,
+          opacity: ((isLight ? 0.05 : 0.085) * (0.6 + br() * 0.6)).toFixed(2),
+        });
+        bokehWash.appendChild(disc);
+        S.amb.fromTo(disc, { x: 0, y: 0, scale: 0.94 }, {
+          x: (br() - 0.5) * 110 * mult,
+          y: (br() - 0.5) * 75 * mult,
+          scale: 1.08,
+          duration: 23 + br() * 14,
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: 99,
+          force3D: true,
+        }, 0);
+      }
+    }
+
+    // 2. Subtle Perspective Grid + Sweep
+    if (style === "grid") {
+      const grid = document.createElement("div");
+      grid.className = "living-grid";
+      layer.appendChild(grid);
+      S.amb.fromTo(grid, { backgroundPosition: "0px 0px" }, {
+        backgroundPosition: "96px 48px", duration: 14, ease: "none", repeat: 99,
+      }, 0);
+    }
+
+    // 3. Soft Bokeh Particles (larger blurred circles, slow organic drift — no 1px pixel flicker)
+    if (style === "particles" || style === "studio-mix") {
+      const dustBox = document.createElement("div");
+      dustBox.className = "dust";
+      layer.appendChild(dustBox);
+      const r = FX.rngFor((slide._seed || "live") + ":living-dust");
+      const count = Math.round(14 * Math.min(1.3, mult));
+      for (let i = 0; i < count; i += 1) {
+        const dot = document.createElement("i");
+        const sz = 4.5 + r() * 6.5;
+        Object.assign(dot.style, {
+          left: (r() * S.W).toFixed(1) + "px",
+          top: (r() * S.H).toFixed(1) + "px",
+          width: sz.toFixed(1) + "px",
+          height: sz.toFixed(1) + "px",
+          background: i % 4 === 0 ? accent : (isLight ? (col.muted || "#666") : "#fff8dc"),
+          opacity: ((isLight ? 0.05 : 0.11) * Math.min(1.25, mult) * (0.5 + r() * 0.6)).toFixed(2),
+          filter: "blur(1.8px)",
+        });
+        dustBox.appendChild(dot);
+        S.amb.fromTo(dot, { x: 0, y: 0 }, {
+          x: (r() - 0.5) * 90 * mult,
+          y: (-35 - r() * 75) * mult,
+          duration: 15 + r() * 11,
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: 99,
+          force3D: true,
+        }, 0);
+      }
+    }
+
+    // 4. Podcast Ambient Audio Wave Horizon (wave or studio-mix)
+    if (style === "wave" || style === "studio-mix") {
+      const waveWrap = document.createElement("div");
+      waveWrap.className = "living-wave";
+      const svgNS = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(svgNS, "svg");
+      svg.setAttribute("viewBox", "0 0 1920 210");
+      svg.setAttribute("preserveAspectRatio", "none");
+
+      const makeWavePath = (amp, phase, stroke, opacity, sw) => {
+        const path = document.createElementNS(svgNS, "path");
+        let d = "";
+        for (let x = 0; x <= 1920; x += 48) {
+          const y = 138 + Math.sin((x / 1920) * Math.PI * 4 + phase) * amp;
+          d += `${x === 0 ? "M" : " L"}${x},${y.toFixed(1)}`;
+        }
+        path.setAttribute("d", d);
+        path.setAttribute("fill", "none");
+        path.setAttribute("stroke", stroke);
+        path.setAttribute("stroke-opacity", String(opacity));
+        path.setAttribute("stroke-width", String(sw));
+        svg.appendChild(path);
+        return path;
+      };
+
+      const p1 = makeWavePath(16 * mult, 0, accent, 0.22, 3);
+      const p2 = makeWavePath(11 * mult, 1.8, col.muted || "#94a3b8", 0.14, 2);
+      waveWrap.appendChild(svg);
+      layer.appendChild(waveWrap);
+
+      S.amb.fromTo(p1, { y: -7 * mult }, { y: 8 * mult, duration: 4.8, ease: "sine.inOut", yoyo: true, repeat: 99, force3D: true }, 0);
+      S.amb.fromTo(p2, { y: 8 * mult }, { y: -8 * mult, duration: 5.9, ease: "sine.inOut", yoyo: true, repeat: 99, force3D: true }, 0);
+    }
+  };
+
+  /* ---------------------------------------------------------- Imperceptible Silk-Glide Motion (Foreground Images Only by Default) */
+  FX.applyMicroMotion = function (content, slide) {
+    const ls = Object.assign({
+      intensity: "podcast",
+      microMotion: true,
+      floatMode: "images-only",
+      floatStyle: "silk-glide",
+      floatAmplitude: 2,
+      floatSpeed: 0.45,
+      floatRatio: 0.75,
+      floatSeed: 0,
+    }, (slide && slide.livingStage) || {});
+
+    S._floats = [];
+    const disabled = ls.intensity === "off" || ls.microMotion === false || ls.floatMode === "off" || Number(ls.floatAmplitude) === 0;
+    const intensityMult = ls.intensity === "dynamic" ? 1.18 : ls.intensity === "subtle" ? 0.72 : 1.0;
+    const baseAmp = Math.max(0, Math.min(8, Number(ls.floatAmplitude ?? 2))) * intensityMult;
+    const speed = Math.max(0.15, Math.min(1.6, Number(ls.floatSpeed ?? 0.45)));
+    const ratio = Math.max(0.15, Math.min(1, Number(ls.floatRatio ?? 0.75)));
+    const mode = ls.floatMode || "images-only";
+    const floatStyle = ls.floatStyle || "silk-glide";
+
+    S._floatCfg = {
+      enabled: !disabled && baseAmp > 0,
+      mode,
+      floatStyle,
+      baseAmp,
+      speed,
+      ratio,
+    };
+
+    if (disabled) return;
+
+    // Foreground visuals on top of background ONLY (.frame, [data-float="true"]) in default images-only mode.
+    // NEVER move plain text, bullet lists, cards, chat bubbles, or chart axes unless explicitly switched to selective/all-items.
+    const frames = [
+      ...content.querySelectorAll(".frame"),
+      ...content.querySelectorAll('[data-float="true"]'),
+    ].filter((fr, idx, arr) => !fr.closest(".fullbleed") && arr.indexOf(fr) === idx);
+    const items = mode === "images-only"
+      ? []
+      : [...content.querySelectorAll(".card, .bubble, .stage-callout-box")];
+
+    const r = FX.rngFor(`${slide._seed || "live"}:silk-glide:${ls.floatSeed || 0}`);
+    const chosen = [];
+
+    frames.forEach((el, idx) => {
+      if (mode !== "selective" || frames.length <= 1 || r() < Math.max(0.8, ratio) || idx === 0) {
+        chosen.push({ el, kind: "image" });
+      }
     });
 
-    // 1. Auto number count-up on inline .auto-num tokens (YouTube-style tabular counter)
-    if (slide.count !== false) {
-      const styleKey = slide.count_style || "pop";
-      const AC = (MT.autoCount && MT.autoCount[styleKey]) || MT.autoCount.pop;
-      const fromMode = slide.count_from || "auto";
-      let numIdx = 0;
-
-      content.querySelectorAll(".auto-num").forEach((el) => {
-        if (isExcluded(el)) return;
-        const core = el.querySelector(".auto-num-core");
-        if (!core) return;
-        const to = Number(el.dataset.to);
-        if (!Number.isFinite(to)) return;
-        const dec = Number(el.dataset.dec || 0);
-        const th = el.dataset.th === "1";
-        const pre = el.dataset.pre || "";
-        const suf = el.dataset.suf || "";
-        const isYear = el.dataset.year === "1";
-
-        let from = 0;
-        if (fromMode === "near") {
-          from = +(to * 0.72).toFixed(dec);
-        } else if (fromMode === "auto" && isYear) {
-          from = to - Math.min(24, Math.max(8, Math.round(to * 0.015)));
+    items.forEach((el) => {
+      if (mode === "all-items") {
+        chosen.push({ el, kind: "item" });
+      } else if (mode === "selective") {
+        if (items.length === 1 && !frames.length) {
+          chosen.push({ el, kind: "item" });
+        } else if (r() < ratio) {
+          chosen.push({ el, kind: "item" });
         }
+      }
+    });
 
-        const rect = core.getBoundingClientRect ? core.getBoundingClientRect() : null;
-        if (rect && rect.width > 0) core.style.minWidth = Math.ceil(rect.width) + "px";
-
-        const renderVal = (v) => {
-          const prefix = v < 0 ? "" : pre;
-          return prefix + S.fmt(v, dec, th) + suf;
-        };
-        core.textContent = renderVal(from);
-
-        const baseT = Math.max(0.15, timeOf(el) + (AC.delayOffset ?? -0.18) + Math.min(numIdx, 4) * 0.06);
-        numIdx += 1;
-        const obj = { v: from };
-        S.tl.to(obj, {
-          v: to,
-          duration: AC.dur,
-          ease: S.ease(AC.ease),
-          onUpdate: () => { core.textContent = renderVal(obj.v); },
-        }, baseT);
-
-        if (AC.popScale && AC.popScale > 1.01) {
-          const popAt = baseT + AC.dur * 0.86;
-          S.tl.fromTo(el, { scale: 1 }, {
-            scale: AC.popScale,
-            duration: AC.popDur,
-            ease: S.ease("power2"),
-            yoyo: true,
-            repeat: 1,
-          }, popAt);
-        }
-      });
+    if (!chosen.length && (frames.length || items.length)) {
+      const pool = frames.length ? frames : items;
+      chosen.push({ el: pool[Math.floor(r() * pool.length) % pool.length], kind: frames.length ? "image" : "item" });
     }
 
-    // 2. Tasteful micro-details (emoji pops, accent bounces, badge settles)
-    if (slide.micro_fx !== false && MT.micro) {
-      const MI = MT.micro;
-      content.querySelectorAll(".emo-pop").forEach((el, idx) => {
-        if (isExcluded(el)) return;
-        const t = Math.max(0.12, timeOf(el) - 0.14 + Math.min(idx, 5) * 0.04);
-        S.tl.fromTo(el,
-          { opacity: 0, scale: MI.emojiFromScale, rotation: MI.emojiRot },
-          { opacity: 1, scale: MI.emojiPopScale, rotation: 0, duration: MI.emojiDur * 0.65, ease: S.ease("back"), immediateRender: true },
-          t);
-        S.tl.to(el, { scale: 1, duration: MI.emojiDur * 0.35, ease: S.ease("power2") }, t + MI.emojiDur * 0.65);
-      });
+    chosen.forEach(({ el, kind }, idx) => {
+      const ir = FX.rngFor(`${slide._seed || "live"}:silk-item:${ls.floatSeed || 0}:${idx}`);
+      const endAt = parseFloat(el.dataset && el.dataset.end) || 0.95;
+      el.style.willChange = "translate, transform";
+      el.style.transformOrigin = "50% 50%";
 
-      content.querySelectorAll(".acc, .dng").forEach((el) => {
-        if (isExcluded(el)) return;
-        if (el.querySelector(".auto-num")) return; // avoid double-scaling numbers
-        const t = Math.max(0.2, timeOf(el) + 0.04);
-        const words = (el.textContent || "").trim().split(/\s+/).filter(Boolean).length;
-        if (words > 0 && words <= 3) {
-          el.classList.add("micro-pop");
-          S.tl.fromTo(el, { scale: 1, y: 0 }, {
-            scale: MI.accentScale, y: -2, duration: MI.accentDur, ease: S.ease("power2"), yoyo: true, repeat: 1,
-          }, t);
-        }
-      });
+      const isImage = kind === "image";
+      const capAmp = isImage ? baseAmp : Math.min(2.2, baseAmp * 0.55);
+      const ampX = (0.72 + ir() * 0.28) * capAmp;
+      const ampY = (0.45 + ir() * 0.25) * capAmp;
+      const ampScale = (floatStyle === "optical-breathe" && isImage) ? 0.0022 : 0;
 
-      content.querySelectorAll(".badge.acc, .badge.dng").forEach((el) => {
-        if (isExcluded(el)) return;
-        const t = Math.max(0.25, timeOf(el) + 0.02);
-        S.tl.fromTo(el, { scale: 1 }, {
-          scale: MI.badgeScale, duration: MI.badgeDur, ease: S.ease("power2"), yoyo: true, repeat: 1,
-        }, t);
+      S._floats.push({
+        el,
+        kind,
+        startAt: Math.max(0.85, endAt + 0.3),
+        ampX,
+        ampY,
+        ampScale,
+        ampRot: 0,
+        w1: 0.14 + ir() * 0.07,
+        w2: 0.09 + ir() * 0.06,
+        w3: 0.11 + ir() * 0.05,
+        p1: ir() * Math.PI * 2,
+        p2: ir() * Math.PI * 2,
+        p3: ir() * Math.PI * 2,
       });
-    }
+    });
+
+    // Ultra-subtle specular light sweep on cards (never touches text)
+    content.querySelectorAll(".card").forEach((card, idx) => {
+      if (idx > 3) return;
+      const sheen = document.createElement("div");
+      sheen.className = "card-sheen";
+      card.appendChild(sheen);
+      S.amb.fromTo(sheen, { x: 240, opacity: 0 }, {
+        x: -2200,
+        opacity: 0.25,
+        duration: 11,
+        ease: "sine.inOut",
+        repeat: 99,
+        repeatDelay: 8,
+      }, 1.8 + idx * 1.1);
+    });
+  };
+
+  /* ---------------------------------------------------------- Viral YouTuber Annotations & Callouts */
+  FX.annotations = function (content, slide, A) {
+    const list = Array.isArray(slide && slide.annotations) ? slide.annotations : [];
+    if (!list.length) return;
+
+    const layer = document.createElement("div");
+    layer.className = "stage-annotations";
+    content.appendChild(layer);
+
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = A.svg(layer, 0, 0, A.W, A.H, `0 0 ${A.W} ${A.H}`);
+    const defs = document.createElementNS(svgNS, "defs");
+    svg.appendChild(defs);
+
+    list.forEach((ann, idx) => {
+      if (!ann || typeof ann !== "object") return;
+      const type = ann.type || "arrow-curved";
+      const color = S.color(ann.color || "accent");
+      const at = Number.isFinite(+ann.at) ? +ann.at : 0.75 + idx * 0.25;
+      const x1 = Number(ann.x1 ?? 1200);
+      const y1 = Number(ann.y1 ?? 420);
+      const x2 = Number(ann.x2 ?? 820);
+      const y2 = Number(ann.y2 ?? 280);
+      const sw = Number(ann.strokeWidth || 7);
+
+      if (type === "spotlight") {
+        const sp = document.createElement("div");
+        sp.className = "stage-spotlight-mask";
+        const r = Number(ann.radius || 260);
+        sp.style.background = `radial-gradient(circle ${r}px at ${x1}px ${y1}px, transparent 0%, transparent 72%, rgba(0,0,0,0.62) 100%)`;
+        layer.appendChild(sp);
+        S.tl.fromTo(sp, { opacity: 0 }, { opacity: 1, duration: 0.6, ease: S.ease("power3"), immediateRender: true }, at);
+        return;
+      }
+
+      if (type === "callout-box") {
+        const box = document.createElement("div");
+        box.className = "stage-callout-box";
+        Object.assign(box.style, {
+          left: x1 + "px",
+          top: y1 + "px",
+          background: "rgba(16, 21, 33, 0.88)",
+          border: `2.5px solid ${color}`,
+          color: "#FFFFFF",
+          transform: "translate(-50%, -50%)",
+        });
+        box.innerHTML = `<span style="color:${color}">✦</span><span>${S.rich(ann.label || "نکتهٔ مهم")}</span>`;
+        layer.appendChild(box);
+        S.tl.fromTo(box, { opacity: 0, scale: 0.75, y: 16 }, { opacity: 1, scale: 1, y: 0, duration: 0.48, ease: S.ease("back"), immediateRender: true }, at);
+        box.dataset.end = (at + 0.48).toFixed(3);
+        FX.cue(at, "pop", ann.label || "");
+        return;
+      }
+
+      if (type === "highlight-ring") {
+        const rx = Number(ann.rx || 140);
+        const ry = Number(ann.ry || 72);
+        const el = A.svgEl(svg, "ellipse", {
+          cx: x1, cy: y1, rx, ry,
+          fill: "none", stroke: color, "stroke-width": sw, "stroke-linecap": "round",
+        });
+        A.draw(el, at, 0.75, "power3");
+        FX.cue(at, "swish", ann.label || "");
+        return;
+      }
+
+      // arrow-curved | arrow-straight
+      S._annSeq = (S._annSeq || 0) + 1;
+      const markerId = `ann-arr-${idx}-${S._annSeq}`;
+      const marker = document.createElementNS(svgNS, "marker");
+      marker.setAttribute("id", markerId);
+      marker.setAttribute("markerWidth", "8");
+      marker.setAttribute("markerHeight", "8");
+      marker.setAttribute("refX", "6");
+      marker.setAttribute("refY", "4");
+      marker.setAttribute("orient", "auto");
+      const poly = document.createElementNS(svgNS, "path");
+      poly.setAttribute("d", "M 0 0.8 L 7 4 L 0 7.2 z");
+      poly.setAttribute("fill", color);
+      marker.appendChild(poly);
+      defs.appendChild(marker);
+
+      const cx = ann.cx != null ? Number(ann.cx) : (x1 + x2) / 2;
+      const cy = ann.cy != null ? Number(ann.cy) : Math.min(y1, y2) - 110;
+      const d = type === "arrow-straight"
+        ? `M ${x1} ${y1} L ${x2} ${y2}`
+        : `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
+
+      const path = A.svgEl(svg, "path", {
+        d,
+        fill: "none",
+        stroke: color,
+        "stroke-width": sw,
+        "stroke-linecap": "round",
+        "marker-end": `url(#${markerId})`,
+      });
+      A.draw(path, at, 0.7, "power3");
+      FX.cue(at, "swish", ann.label || "");
+
+      if (ann.label) {
+        const lbl = document.createElement("div");
+        lbl.className = "stage-callout-box";
+        Object.assign(lbl.style, {
+          left: (cx || (x1 + x2) / 2) + "px",
+          top: ((cy || (y1 + y2) / 2) - 34) + "px",
+          background: "rgba(16, 21, 33, 0.85)",
+          border: `2px solid ${color}`,
+          padding: "8px 18px",
+          fontSize: "24px",
+          color: "#fff",
+          transform: "translate(-50%, -50%)",
+        });
+        lbl.innerHTML = S.rich(ann.label);
+        layer.appendChild(lbl);
+        S.tl.fromTo(lbl, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.4, ease: S.ease("back"), immediateRender: true }, at + 0.2);
+      }
+    });
   };
 })();

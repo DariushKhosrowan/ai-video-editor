@@ -10,6 +10,8 @@
     [/^(مقایسه|compare)(?=\s|$)/, "compare"], [/^(جمله|نقل‌قول|quote)(?=\s|$)/, "quote"], [/^(فهرست|لیست|list)(?=\s|$)/, "bullet_list"],
     [/^(گفتگو|پیام|chat)(?=\s|$)/, "chat"], [/^(کارت‌ها|کارتها|cards)(?=\s|$)/, "three_cards"], [/^(اعداد|counter_grid)(?=\s|$)/, "counter_grid"],
     [/^(بخش|section)(?=\s|$)/, "section_break"], [/^(دوربین|cam)(?=\s|$)/, "cam"], [/^(خط زمان|timeline)(?=\s|$)/, "timeline"],
+    [/^(مقاله|زوم مقاله|سند|article_zoom|article)(?=\s|$)/, "article_zoom"],
+    [/^(عقاب|شخصیت|مسکات|ماسکوت|mascot_talk|mascot)(?=\s|$)/, "mascot_talk"],
   ];
   function marker(body) {
     const parts = body.split("|").map((p) => p.trim());
@@ -42,6 +44,12 @@
     else if (tpl === "three_cards") { if (free.length > 1) s.title = free[0]; s.cards = items(last || rest).map((x) => ({ label: x })); }
     else if (tpl === "section_break") { if (free[0]) s.title = free[0]; if (free[1]) s.subtitle = free[1]; }
     else if (tpl === "timeline") { if (free.length > 1) s.title = free[0]; s.events = items(last).map((it) => { const [d, ...t] = it.split(":"); return { date: d.trim(), text: t.join(":").trim() }; }); }
+    else if (tpl === "article_zoom") {
+      if (free[0]) s.article_title = free[0];
+      if (free[1]) s.focus_text = free[1];
+      if (free[2]) s.publication = free[2];
+      s.image = s.image || "/assets/archive-newspaper.jpg";
+    }
     else if (free[0]) s.title = free[0];
     Object.assign(s, kv);
     if (s.layout) s.layout = s.layout.toUpperCase();

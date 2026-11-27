@@ -1,0 +1,193 @@
+{
+  "name": "mascot_talk",
+  "label": "عقاب سخنگو (Mascot Talk)",
+  "description": "صحنهٔ گفتگو و روایت با شخصیت کارتونی عقاب قرمز همگام با صدا، حالت‌های چهره، پلک‌زدن طبیعی و کارت متن.",
+  "aliases": ["mascot-talk", "mascot", "عقاب", "شخصیت", "مسکات"],
+  "category": "شخصیت و پادکست",
+  "order": 28,
+  "version": 1,
+  "fields": [
+    { "key": "eyebrow", "label": "تیتر کوچک بالا (اختیاری)", "type": "text", "editable": true },
+    { "key": "title", "label": "تیتر اصلی کارت گفتگو (*زرد* ، ~قرمز~)", "type": "text", "required": true, "editable": true },
+    { "key": "text", "label": "متن توضیح یا نقل‌قول", "type": "textarea", "editable": true },
+    { "key": "image", "label": "تصویر کمکی یا سند در کارت (اختیاری)", "type": "image", "editable": true },
+    {
+      "key": "expression",
+      "label": "حالت چهرهٔ پایه",
+      "type": "select",
+      "options": [
+        ["neutral", "عادی / متمرکز (neutral)"],
+        ["happy", "خوشحال / پرانرژی (happy)"],
+        ["smug", "مغرور / مطمئن (smug)"],
+        ["shocked", "شوکه / متعجب (shocked)"],
+        ["annoyed", "کلافه / جدی (annoyed)"],
+        ["embarrassed", "معذب / خجالت‌زده (embarrassed)"],
+        ["thinking", "در حال فکر (thinking)"],
+        ["sad", "غمگین / دلسرد (sad)"],
+        ["angry", "عصبانی / تند (angry)"],
+        ["surprised", "غافلگیر / متعجب (surprised)"],
+        ["confused", "گیج / سردرگم (confused)"],
+        ["scared", "ترسیده / مضطرب (scared)"],
+        ["proud", "سربلند / افتخار (proud)"],
+        ["bored", "حوصله‌سربر / بی‌حوصله (bored)"],
+        ["sarcastic", "کنایه‌آمیز / طعنه (sarcastic)"]
+      ],
+      "default": "neutral",
+      "editable": false
+    },
+    {
+      "key": "character",
+      "label": "شخصیت (Character)",
+      "type": "select",
+      "options": [
+        ["red_eagle", "عقاب قرمز (Red Eagle)"],
+        ["vesper_owl", "جغد وسپر (Vesper Owl)"],
+        ["pip_pigeon", "کبوتر پیپ (Pip Pigeon)"],
+        ["midge_hummingbird", "مرغ مگس‌خوار میج (Midge Hummingbird)"],
+        ["barnaby_tortoise", "لاک‌پشت بارنابی (Barnaby Tortoise)"]
+      ],
+      "default": "red_eagle",
+      "editable": false
+    },
+    {
+      "key": "outfit",
+      "label": "لباس و اکسسوری (Outfit)",
+      "type": "select",
+      "options": [
+        ["default", "پیش‌فرض (Default)"],
+        ["formal", "رسمی (Formal)"],
+        ["podcast", "میز پادکست (Podcast)"],
+        ["royal", "سلطنتی (Royal)"],
+        ["street", "خیابانی (Street)"],
+        ["cozy", "دنج زمستانی (Cozy)"]
+      ],
+      "default": "default",
+      "editable": false
+    },
+    {
+      "key": "skin",
+      "label": "پوسته فصلی (Skin)",
+      "type": "select",
+      "options": [
+        ["classic", "کلاسیک (Classic)"],
+        ["nowruz", "نوروز (Nowruz)"],
+        ["yalda", "شب یلدا (Yalda)"],
+        ["winter", "زمستانی (Winter)"],
+        ["autumn", "پاییزی (Autumn)"],
+        ["neon_studio", "نئون استودیو (Neon Studio)"],
+        ["noir", "فیلم نوآر (Noir)"]
+      ],
+      "default": "classic",
+      "editable": false
+    },
+    {
+      "key": "side",
+      "label": "جایگاه عقاب در صحنه",
+      "type": "select",
+      "options": [
+        ["left", "چپ صحنه (پیشنهادی برای RTL)"],
+        ["right", "راست صحنه"]
+      ],
+      "default": "left",
+      "editable": false
+    },
+    { "key": "scale", "label": "اندازه شخصیت (مقیاس)", "type": "number", "default": 1.0, "editable": false },
+    { "key": "position_x", "label": "مختصات افقی X (اختیاری)", "type": "number", "editable": false },
+    { "key": "position_y", "label": "مختصات عمودی Y (اختیاری)", "type": "number", "editable": false },
+    {
+      "key": "look_at",
+      "label": "مسیر نگاه چشم‌ها",
+      "type": "select",
+      "options": [
+        ["auto", "خودکار (متناسب با احساس و اسلاید)"],
+        ["camera", "مستقیم به دوربین"],
+        ["slide", "به سمت کارت متن"],
+        ["other", "به سمت شخصیت مقابل"],
+        ["left", "به چپ"],
+        ["right", "به راست"],
+        ["up", "به بالا"],
+        ["down", "به پایین"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "enter",
+      "label": "انیمیشن ورود شخصیت",
+      "type": "select",
+      "options": [
+        ["slide-in", "ورود کشویی از لبه"],
+        ["pop", "جهش سریع (Pop)"],
+        ["fade", "محو آرام (Fade)"],
+        ["drop", "فرود از بالا (Drop)"],
+        ["none", "بدون ورود"]
+      ],
+      "default": "slide-in",
+      "editable": false
+    },
+    {
+      "key": "exit",
+      "label": "انیمیشن خروج شخصیت",
+      "type": "select",
+      "options": [
+        ["none", "ثابت تا پایان"],
+        ["slide-out", "خروج کشویی به لبه"],
+        ["pop", "کوچک شدن (Pop Out)"],
+        ["fade", "محو آرام (Fade Out)"]
+      ],
+      "default": "none",
+      "editable": false
+    },
+    { "key": "audio", "label": "مسیر فایل صوتی (WAV/MP3)", "type": "text", "editable": false },
+    { "key": "viseme_track", "label": "مسیر فایل ویزیم‌ها (JSON)", "type": "text", "editable": false },
+    { "key": "prosody_track", "label": "مسیر فایل لحن صدا / پروزودی (JSON)", "type": "text", "editable": false },
+    { "key": "accents", "label": "علامت‌های کارتونی احساس (؟ / عرق / جرقه)", "type": "boolean", "default": true, "editable": false },
+    {
+      "key": "format",
+      "label": "نسبت تصویر صحنه",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری (16:9 پیش‌فرض)"],
+        ["16:9", "افقی یوتیوب (16:9)"],
+        ["9:16", "عمودی ریلز / شورتس (9:16)"],
+        ["1:1", "مربعی پست (1:1)"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["editorial-host", "مجری تحریریه و کارت گفتگو"],
+        ["debate-card", "کارت مناظره و استدلال"],
+        ["reaction-pop", "واکنش سریع و پویا"],
+        ["podcast-desk", "میز پادکست تمام‌قاب"]
+      ],
+      "default": "auto",
+      "editable": false
+    }
+  ],
+  "example": {
+    "eyebrow": "نکتهٔ کلیدی اپیزود",
+    "title": "وقتی تنبیه پولی جای ==هنجار اجتماعی== را می‌گیرد",
+    "text": "اینجا دقیقاً نقطه‌ای است که جریمه کردنِ دیرکرد، معامله را جایگزین تعهد اخلاقی می‌کند.",
+    "expression": "smug",
+    "expression_timeline": [
+      { "t": 0.0, "expression": "neutral", "blend": 0.3 },
+      { "t": 1.4, "expression": "thinking", "blend": 0.35 },
+      { "t": 3.1, "expression": "smug", "blend": 0.35 }
+    ],
+    "side": "left",
+    "scale": 1.0,
+    "look_at": "slide",
+    "enter": "slide-in",
+    "exit": "none",
+    "accents": true,
+    "say": "سلام! ببینید چرا جریمه‌ی دیرکرد در مهدکودک‌ها نتیجه‌ی برعکس داد و تاخیر را بیشتر کرد.",
+    "layout": "SLIDE"
+  }
+}

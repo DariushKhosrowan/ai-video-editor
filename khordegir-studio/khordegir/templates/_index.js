@@ -399,6 +399,262 @@ window.TEMPLATE_INDEX = [
   "css": "../templates/big_number/template.css"
  },
  {
+  "name": "guest_intro",
+  "js": "../templates/guest_intro/template.js",
+  "schema": {
+   "name": "guest_intro",
+   "label": "معرفی مهمان / میزبان پادکست",
+   "description": "کارت معرفی مهمان یا میزبان پادکست با تصویر قاب‌دار، سمت/نقش، توضیح کوتاه و شبکه اجتماعی.",
+   "aliases": [
+    "guest-intro",
+    "guest",
+    "معرفی مهمان",
+    "مهمان"
+   ],
+   "category": "پادکست",
+   "fields": [
+    {
+     "key": "badge",
+     "label": "نشان نقش (مثل: مهمان ویژه / میزبان)",
+     "type": "text",
+     "editable": false
+    },
+    {
+     "key": "title",
+     "label": "نام و نام خانوادگی",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "subtitle",
+     "label": "عنوان شغلی یا تخصص",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "text",
+     "label": "معرفی کوتاه یا نکتهٔ کلیدی",
+     "type": "textarea",
+     "editable": true
+    },
+    {
+     "key": "handle",
+     "label": "آیدی شبکه‌ها (مثل @dariush)",
+     "type": "text",
+     "editable": false
+    },
+    {
+     "key": "image",
+     "label": "تصویر مهمان",
+     "type": "image",
+     "editable": true
+    },
+    {
+     "key": "preset",
+     "label": "سبک انیمیشن",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "کلاسیک / ارث‌بری"
+      ],
+      [
+       "random",
+       "🎲 تصادفی"
+      ],
+      [
+       "editorial-split",
+       "قاب دو تکه سردبیری"
+      ],
+      [
+       "card-float",
+       "کارت شناور"
+      ],
+      [
+       "spotlight",
+       "نورپردازی متمرکز"
+      ]
+     ],
+     "default": "auto",
+     "editable": false
+    }
+   ],
+   "example": {
+    "badge": "مهمان ویژهٔ قسمت ۱۲",
+    "title": "دکتر سارا *رادمنش*",
+    "subtitle": "پژوهشگر علوم اعصاب و تصمیم‌گیری",
+    "text": "بررسی علمی این‌که چرا پاداش‌های نامطمئن مغز ما را درگیرتر نگه می‌دارند.",
+    "handle": "@sarah.radmanesh",
+    "layout": "SCAM"
+   },
+   "order": 15,
+   "version": 1
+  }
+ },
+ {
+  "name": "podcast_question",
+  "js": "../templates/podcast_question/template.js",
+  "schema": {
+   "name": "podcast_question",
+   "label": "کارت سؤال / موضوع داغ پادکست",
+   "description": "نمایش پرسش مخاطب، موضوع بحث یا چالش اصلی اپیزود با هایلایت وکتور و نکات پاسخ.",
+   "aliases": [
+    "podcast-question",
+    "qa",
+    "سؤال مخاطب",
+    "پرسش"
+   ],
+   "category": "پادکست",
+   "fields": [
+    {
+     "key": "badge",
+     "label": "برچسب بالا (مثل: سؤال مخاطب / موضوع داغ)",
+     "type": "text",
+     "editable": false
+    },
+    {
+     "key": "author",
+     "label": "نام پرسش‌گر (اختیاری)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "متن پرسش (*زرد* ، ==هایلایت==)",
+     "type": "textarea",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "items",
+     "label": "نکته‌های پاسخ (هر خط یکی، اختیاری)",
+     "type": "list",
+     "editable": true
+    },
+    {
+     "key": "preset",
+     "label": "سبک انیمیشن",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "کلاسیک / ارث‌بری"
+      ],
+      [
+       "random",
+       "🎲 تصادفی"
+      ],
+      [
+       "kinetic-words",
+       "کلمه‌به‌کلمه زنده"
+      ],
+      [
+       "spotlight",
+       "نورپردازی متمرکز"
+      ],
+      [
+       "glitch-pop",
+       "پرش مدرن"
+      ]
+     ],
+     "default": "auto",
+     "editable": false
+    }
+   ],
+   "example": {
+    "badge": "پرسش کلیدی اپیزود",
+    "author": "ارسالی از شنوندگان پادکست",
+    "title": "چرا با وجود ==هوشمندتر شدن==، هنوز در دام باج‌گیری عاطفی می‌افتیم؟",
+    "items": [
+     "واکنش فوری مغز به تهدید کوتاه‌مدت",
+     "خطای هزینهٔ غرق‌شده در روابط کاری"
+    ],
+    "layout": "SCAM"
+   },
+   "order": 16,
+   "version": 1
+  }
+ },
+ {
+  "name": "podcast_end",
+  "js": "../templates/podcast_end/template.js",
+  "schema": {
+   "name": "podcast_end",
+   "label": "صفحهٔ پایان پادکست و سابسکرایب",
+   "description": "کارت پایانی یوتیوب با جایگاه دو ویدیوی پیشنهادی، دکمهٔ انیمیشنی سابسکرایب و آیدی کانال.",
+   "aliases": [
+    "podcast-end",
+    "outro",
+    "end-screen",
+    "پایان پادکست",
+    "پایان"
+   ],
+   "category": "پادکست",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "تیتر کوچک بالا",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "جملهٔ خداحافظی / دعوت",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "subtitle",
+     "label": "لینک یا آیدی کانال",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "cta",
+     "label": "متن دکمهٔ سابسکرایب",
+     "type": "text",
+     "editable": false
+    },
+    {
+     "key": "preset",
+     "label": "سبک انیمیشن",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "کلاسیک / ارث‌بری"
+      ],
+      [
+       "random",
+       "🎲 تصادفی"
+      ],
+      [
+       "spotlight",
+       "نورپردازی متمرکز"
+      ],
+      [
+       "kinetic-hero",
+       "تایپ کینتیک سینمایی"
+      ]
+     ],
+     "default": "auto",
+     "editable": false
+    }
+   ],
+   "example": {
+    "eyebrow": "ممنون که تا اینجا همراه بودید",
+    "title": "اگر این بحث برایتان مفید بود، *سابسکرایب* یادتان نرود",
+    "subtitle": "اپیزود بعدی هر پنج‌شنبه ساعت ۲۰ منتشر می‌شود",
+    "cta": "عضویت در کانال + زنگوله 🔔",
+    "layout": "SLIDE"
+   },
+   "order": 17,
+   "version": 1
+  }
+ },
+ {
   "name": "image_text",
   "js": "../templates/image_text/template.js",
   "schema": {
@@ -615,6 +871,643 @@ window.TEMPLATE_INDEX = [
    "version": 1
   },
   "css": "../templates/image_text/template.css"
+ },
+ {
+  "name": "article_zoom",
+  "js": "../templates/article_zoom/template.js",
+  "schema": {
+   "name": "article_zoom",
+   "label": "مقاله و زوم روی متن",
+   "description": "نمایش برگهٔ مقاله، پژوهش یا تصویر سند و زوم سینمایی روی جملهٔ کلیدی همراه با هایلایت ماژیکی (سبک یوتیوبرهای مستند).",
+   "aliases": [
+    "article-zoom",
+    "article",
+    "مقاله",
+    "زوم مقاله"
+   ],
+   "category": "مستند و پادکست",
+   "order": 25,
+   "version": 1,
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "تیتر کوچک بالای صحنه (اختیاری)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "تیتر توضیحی کنار یا بالای مقاله (اختیاری)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "publication",
+     "label": "نام نشریه یا منبع مقاله (مثل Nature یا روزنامه شرق)",
+     "type": "text",
+     "editable": false
+    },
+    {
+     "key": "article_title",
+     "label": "تیتر اصلی مقاله / پژوهش",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "author",
+     "label": "نویسنده و تاریخ انتشار",
+     "type": "text",
+     "editable": false
+    },
+    {
+     "key": "article_body",
+     "label": "متن زمینهٔ مقاله (پاراگراف‌ها با Enter جدا شوند؛ برای هایلایت بین ==...== بگذارید)",
+     "type": "textarea",
+     "editable": true
+    },
+    {
+     "key": "focus_text",
+     "label": "جملهٔ کانونی که دوربین روی آن زوم و هایلایت می‌کند",
+     "type": "textarea",
+     "editable": true
+    },
+    {
+     "key": "image",
+     "label": "تصویر مقاله یا پس‌زمینهٔ سند (اختیاری)",
+     "type": "image",
+     "editable": true
+    },
+    {
+     "key": "zoom_mode",
+     "label": "حالت نمایش",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "خودکار (متن مقاله + پس‌زمینه محو)"
+      ],
+      [
+       "article",
+       "برگهٔ مقاله و زوم روی جمله"
+      ],
+      [
+       "image",
+       "زوم مستقیم روی تصویر مقاله / سند"
+      ]
+     ],
+     "default": "auto",
+     "editable": false
+    },
+    {
+     "key": "paper_theme",
+     "label": "جنس و رنگ برگهٔ مقاله",
+     "type": "select",
+     "options": [
+      [
+       "warm-paper",
+       "کاغذ کرم پژوهشی (کلاسیک)"
+      ],
+      [
+       "newsprint",
+       "برش روزنامهٔ آرشیوی"
+      ],
+      [
+       "editorial-dark",
+       "کارت شیشه‌ای تیره (مدرن)"
+      ]
+     ],
+     "default": "warm-paper",
+     "editable": false
+    },
+    {
+     "key": "zoom_scale",
+     "label": "میزان بزرگنمایی زوم (مثلاً 1.38)",
+     "type": "number",
+     "default": 1.38,
+     "editable": false
+    },
+    {
+     "key": "zoom_x",
+     "label": "موقعیت افقی زوم روی تصویر (۰ تا ۱۰۰٪)",
+     "type": "number",
+     "default": 50,
+     "editable": false
+    },
+    {
+     "key": "zoom_y",
+     "label": "موقعیت عمودی زوم روی تصویر (۰ تا ۱۰۰٪)",
+     "type": "number",
+     "default": 48,
+     "editable": false
+    },
+    {
+     "key": "preset",
+     "label": "سبک انیمیشن زوم",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "ارث‌بری / خودکار"
+      ],
+      [
+       "random",
+       "🎲 تصادفی"
+      ],
+      [
+       "cinematic-push",
+       "زوم سینمایی روی جمله"
+      ],
+      [
+       "tilt-glide",
+       "نمای سه‌بعدی مورب و زوم"
+      ],
+      [
+       "marker-sweep",
+       "ماژیک هایلایت زنده + زوم نزدیک"
+      ],
+      [
+       "split-paper",
+       "برگهٔ مقاله + متن کناری"
+      ]
+     ],
+     "default": "auto",
+     "editable": false
+    }
+   ],
+   "example": {
+    "eyebrow": "بررسی پژوهش علمی",
+    "publication": "Journal of Behavioral Economics · 2024",
+    "article_title": "چرا پاداش‌های نامطمئن بیش از پاداش ثابت رفتار ما را شرطی می‌کنند؟",
+    "author": "تیم پژوهشی دانشگاه زوریخ · صفحهٔ ۱۴",
+    "article_body": "در آزمایش‌های متعدد طی دو دههٔ گذشته مشخص شد که وقتی سیستم تشویق کاملاً قابل پیش‌بینی است، مغز به سرعت به آن عادت می‌کند.\nاما به محض اینکه فاصلهٔ زمانی پاداش تغییر می‌کند، سطح دوپامین پیش‌بینی‌کننده جهش چشمگیری دارد.",
+    "focus_text": "پاداشِ گاه‌به‌گاه و غیرقابل‌پیش‌بینی تا ۳ برابر ماندگاری رفتار را افزایش می‌دهد.",
+    "image": "/assets/archive-newspaper.jpg",
+    "paper_theme": "warm-paper",
+    "zoom_scale": 1.36,
+    "layout": "SCAM",
+    "say": "اگر به متن این مقاله دقت کنید، نویسنده‌ها به یک نکتهٔ کلیدی اشاره می‌کنند: پاداشِ گاه‌به‌گاه تا سه برابر ماندگاری رفتار را بالا می‌برد."
+   }
+  }
+ },
+ {
+  "name": "mascot_talk",
+  "js": "../templates/mascot_talk/template.js",
+  "schema": {
+   "name": "mascot_talk",
+   "label": "عقاب سخنگو (Mascot Talk)",
+   "description": "صحنهٔ گفتگو و روایت با شخصیت کارتونی عقاب قرمز همگام با صدا، حالت‌های چهره، پلک‌زدن طبیعی و کارت متن.",
+   "aliases": [
+    "mascot-talk",
+    "mascot",
+    "عقاب",
+    "شخصیت",
+    "مسکات"
+   ],
+   "category": "شخصیت و پادکست",
+   "order": 28,
+   "version": 1,
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "تیتر کوچک بالا (اختیاری)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "تیتر اصلی کارت گفتگو (*زرد* ، ~قرمز~)",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "text",
+     "label": "متن توضیح یا نقل‌قول",
+     "type": "textarea",
+     "editable": true
+    },
+    {
+     "key": "image",
+     "label": "تصویر کمکی یا سند در کارت (اختیاری)",
+     "type": "image",
+     "editable": true
+    },
+    {
+     "key": "expression",
+     "label": "حالت چهرهٔ پایه",
+     "type": "select",
+     "options": [
+      [
+       "neutral",
+       "عادی / متمرکز (neutral)"
+      ],
+      [
+       "happy",
+       "خوشحال / پرانرژی (happy)"
+      ],
+      [
+       "smug",
+       "مغرور / مطمئن (smug)"
+      ],
+      [
+       "shocked",
+       "شوکه / متعجب (shocked)"
+      ],
+      [
+       "annoyed",
+       "کلافه / جدی (annoyed)"
+      ],
+      [
+       "embarrassed",
+       "معذب / خجالت‌زده (embarrassed)"
+      ],
+      [
+       "thinking",
+       "در حال فکر (thinking)"
+      ],
+      [
+       "sad",
+       "غمگین / دلسرد (sad)"
+      ],
+      [
+       "angry",
+       "عصبانی / تند (angry)"
+      ],
+      [
+       "surprised",
+       "غافلگیر / متعجب (surprised)"
+      ],
+      [
+       "confused",
+       "گیج / سردرگم (confused)"
+      ],
+      [
+       "scared",
+       "ترسیده / مضطرب (scared)"
+      ],
+      [
+       "proud",
+       "سربلند / افتخار (proud)"
+      ],
+      [
+       "bored",
+       "حوصله‌سربر / بی‌حوصله (bored)"
+      ],
+      [
+       "sarcastic",
+       "کنایه‌آمیز / طعنه (sarcastic)"
+      ]
+     ],
+     "default": "neutral",
+     "editable": false
+    },
+    {
+     "key": "character",
+     "label": "شخصیت (Character)",
+     "type": "select",
+     "options": [
+      [
+       "red_eagle",
+       "عقاب قرمز (Red Eagle)"
+      ],
+      [
+       "vesper_owl",
+       "جغد وسپر (Vesper Owl)"
+      ],
+      [
+       "pip_pigeon",
+       "کبوتر پیپ (Pip Pigeon)"
+      ],
+      [
+       "midge_hummingbird",
+       "مرغ مگس‌خوار میج (Midge Hummingbird)"
+      ],
+      [
+       "barnaby_tortoise",
+       "لاک‌پشت بارنابی (Barnaby Tortoise)"
+      ]
+     ],
+     "default": "red_eagle",
+     "editable": false
+    },
+    {
+     "key": "outfit",
+     "label": "لباس و اکسسوری (Outfit)",
+     "type": "select",
+     "options": [
+      [
+       "default",
+       "پیش‌فرض (Default)"
+      ],
+      [
+       "formal",
+       "رسمی (Formal)"
+      ],
+      [
+       "podcast",
+       "میز پادکست (Podcast)"
+      ],
+      [
+       "royal",
+       "سلطنتی (Royal)"
+      ],
+      [
+       "street",
+       "خیابانی (Street)"
+      ],
+      [
+       "cozy",
+       "دنج زمستانی (Cozy)"
+      ]
+     ],
+     "default": "default",
+     "editable": false
+    },
+    {
+     "key": "skin",
+     "label": "پوسته فصلی (Skin)",
+     "type": "select",
+     "options": [
+      [
+       "classic",
+       "کلاسیک (Classic)"
+      ],
+      [
+       "nowruz",
+       "نوروز (Nowruz)"
+      ],
+      [
+       "yalda",
+       "شب یلدا (Yalda)"
+      ],
+      [
+       "winter",
+       "زمستانی (Winter)"
+      ],
+      [
+       "autumn",
+       "پاییزی (Autumn)"
+      ],
+      [
+       "neon_studio",
+       "نئون استودیو (Neon Studio)"
+      ],
+      [
+       "noir",
+       "فیلم نوآر (Noir)"
+      ]
+     ],
+     "default": "classic",
+     "editable": false
+    },
+    {
+     "key": "side",
+     "label": "جایگاه عقاب در صحنه",
+     "type": "select",
+     "options": [
+      [
+       "left",
+       "چپ صحنه (پیشنهادی برای RTL)"
+      ],
+      [
+       "right",
+       "راست صحنه"
+      ]
+     ],
+     "default": "left",
+     "editable": false
+    },
+    {
+     "key": "scale",
+     "label": "اندازه شخصیت (مقیاس)",
+     "type": "number",
+     "default": 1.0,
+     "editable": false
+    },
+    {
+     "key": "position_x",
+     "label": "مختصات افقی X (اختیاری)",
+     "type": "number",
+     "editable": false
+    },
+    {
+     "key": "position_y",
+     "label": "مختصات عمودی Y (اختیاری)",
+     "type": "number",
+     "editable": false
+    },
+    {
+     "key": "look_at",
+     "label": "مسیر نگاه چشم‌ها",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "خودکار (متناسب با احساس و اسلاید)"
+      ],
+      [
+       "camera",
+       "مستقیم به دوربین"
+      ],
+      [
+       "slide",
+       "به سمت کارت متن"
+      ],
+      [
+       "other",
+       "به سمت شخصیت مقابل"
+      ],
+      [
+       "left",
+       "به چپ"
+      ],
+      [
+       "right",
+       "به راست"
+      ],
+      [
+       "up",
+       "به بالا"
+      ],
+      [
+       "down",
+       "به پایین"
+      ]
+     ],
+     "default": "auto",
+     "editable": false
+    },
+    {
+     "key": "enter",
+     "label": "انیمیشن ورود شخصیت",
+     "type": "select",
+     "options": [
+      [
+       "slide-in",
+       "ورود کشویی از لبه"
+      ],
+      [
+       "pop",
+       "جهش سریع (Pop)"
+      ],
+      [
+       "fade",
+       "محو آرام (Fade)"
+      ],
+      [
+       "drop",
+       "فرود از بالا (Drop)"
+      ],
+      [
+       "none",
+       "بدون ورود"
+      ]
+     ],
+     "default": "slide-in",
+     "editable": false
+    },
+    {
+     "key": "exit",
+     "label": "انیمیشن خروج شخصیت",
+     "type": "select",
+     "options": [
+      [
+       "none",
+       "ثابت تا پایان"
+      ],
+      [
+       "slide-out",
+       "خروج کشویی به لبه"
+      ],
+      [
+       "pop",
+       "کوچک شدن (Pop Out)"
+      ],
+      [
+       "fade",
+       "محو آرام (Fade Out)"
+      ]
+     ],
+     "default": "none",
+     "editable": false
+    },
+    {
+     "key": "audio",
+     "label": "مسیر فایل صوتی (WAV/MP3)",
+     "type": "text",
+     "editable": false
+    },
+    {
+     "key": "viseme_track",
+     "label": "مسیر فایل ویزیم‌ها (JSON)",
+     "type": "text",
+     "editable": false
+    },
+    {
+     "key": "prosody_track",
+     "label": "مسیر فایل لحن صدا / پروزودی (JSON)",
+     "type": "text",
+     "editable": false
+    },
+    {
+     "key": "accents",
+     "label": "علامت‌های کارتونی احساس (؟ / عرق / جرقه)",
+     "type": "boolean",
+     "default": true,
+     "editable": false
+    },
+    {
+     "key": "format",
+     "label": "نسبت تصویر صحنه",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "ارث‌بری (16:9 پیش‌فرض)"
+      ],
+      [
+       "16:9",
+       "افقی یوتیوب (16:9)"
+      ],
+      [
+       "9:16",
+       "عمودی ریلز / شورتس (9:16)"
+      ],
+      [
+       "1:1",
+       "مربعی پست (1:1)"
+      ]
+     ],
+     "default": "auto",
+     "editable": false
+    },
+    {
+     "key": "preset",
+     "label": "سبک انیمیشن",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "کلاسیک / ارث‌بری"
+      ],
+      [
+       "random",
+       "🎲 تصادفی"
+      ],
+      [
+       "editorial-host",
+       "مجری تحریریه و کارت گفتگو"
+      ],
+      [
+       "debate-card",
+       "کارت مناظره و استدلال"
+      ],
+      [
+       "reaction-pop",
+       "واکنش سریع و پویا"
+      ],
+      [
+       "podcast-desk",
+       "میز پادکست تمام‌قاب"
+      ]
+     ],
+     "default": "auto",
+     "editable": false
+    }
+   ],
+   "example": {
+    "eyebrow": "نکتهٔ کلیدی اپیزود",
+    "title": "وقتی تنبیه پولی جای ==هنجار اجتماعی== را می‌گیرد",
+    "text": "اینجا دقیقاً نقطه‌ای است که جریمه کردنِ دیرکرد، معامله را جایگزین تعهد اخلاقی می‌کند.",
+    "expression": "smug",
+    "expression_timeline": [
+     {
+      "t": 0.0,
+      "expression": "neutral",
+      "blend": 0.3
+     },
+     {
+      "t": 1.4,
+      "expression": "thinking",
+      "blend": 0.35
+     },
+     {
+      "t": 3.1,
+      "expression": "smug",
+      "blend": 0.35
+     }
+    ],
+    "side": "left",
+    "scale": 1.0,
+    "look_at": "slide",
+    "enter": "slide-in",
+    "exit": "none",
+    "accents": true,
+    "say": "سلام! ببینید چرا جریمه‌ی دیرکرد در مهدکودک‌ها نتیجه‌ی برعکس داد و تاخیر را بیشتر کرد.",
+    "layout": "SLIDE"
+   }
+  },
+  "css": "../templates/mascot_talk/template.css"
  },
  {
   "name": "bar_chart",
@@ -2571,292 +3464,6 @@ window.TEMPLATE_INDEX = [
    "order": 130,
    "version": 1
   }
- },
- {
-  "name": "map_talk",
-  "js": "../templates/map_talk/template.js",
-  "schema": {
-   "name": "map_talk",
-   "label": "نقشه و مسیر (Map Talk)",
-   "description": "نقشهٔ برداری آفلاین که دوربین با حرکت قطعی بین نقاط مرتب‌شده پرواز می‌کند، پین‌ها با نرمی نمایی e^(-x) فرود می‌آیند، خط مسیر کشیده می‌شود و برچسب‌ها ظاهر می‌شوند.",
-   "aliases": [
-    "map-talk",
-    "map",
-    "globe",
-    "نقشه"
-   ],
-   "category": "نمودار",
-   "fields": [
-    {
-     "key": "title",
-     "label": "عنوان (*زرد* ، ~قرمز~)",
-     "type": "text",
-     "editable": true
-    },
-    {
-     "key": "subtitle",
-     "label": "زیرعنوان (اختیاری)",
-     "type": "text",
-     "editable": true
-    },
-    {
-     "key": "items",
-     "label": "نقاط مسیر (به ترتیب پرواز دوربین)",
-     "type": "table",
-     "columns": [
-      [
-       "label",
-       "نام نقطه"
-      ],
-      [
-       "lat",
-       "عرض جغرافیایی (Lat)"
-      ],
-      [
-       "lng",
-       "طول جغرافیایی (Lng)"
-      ],
-      [
-       "zoom",
-       "زوم دوربین (مثلاً ۲.۸)"
-      ]
-     ],
-     "required": true,
-     "editable": true
-    },
-    {
-     "key": "projection",
-     "label": "طرح نقشه (Projection)",
-     "type": "select",
-     "options": [
-      [
-       "mercator",
-       "مرکاتور (Mercator — پیش‌فرض)"
-      ],
-      [
-       "equirectangular",
-       "مستطیلی متساوی‌الفاصله (Equirectangular)"
-      ]
-     ],
-     "default": "mercator",
-     "editable": false,
-     "advanced": true
-    },
-    {
-     "key": "route_style",
-     "label": "سبک خط مسیر",
-     "type": "select",
-     "options": [
-      [
-       "arc",
-       "کمان منحنی (پیش‌فرض)"
-      ],
-      [
-       "straight",
-       "خط مستقیم"
-      ],
-      [
-       "dashed",
-       "کمان خط‌چین"
-      ],
-      [
-       "none",
-       "بدون خط مسیر"
-      ]
-     ],
-     "default": "arc",
-     "editable": false,
-     "advanced": true
-    },
-    {
-     "key": "show_grid",
-     "label": "خطوط طول و عرض جغرافیایی",
-     "type": "select",
-     "options": [
-      [
-       "true",
-       "نمایش"
-      ],
-      [
-       "false",
-       "پنهان"
-      ]
-     ],
-     "default": "true",
-     "editable": false,
-     "advanced": true
-    },
-    {
-     "key": "show_coords",
-     "label": "نمایش مختصات دوربین (HUD)",
-     "type": "select",
-     "options": [
-      [
-       "false",
-       "خاموش (ساده)"
-      ],
-      [
-       "true",
-       "روشن"
-      ]
-     ],
-     "default": "false",
-     "editable": false,
-     "advanced": true
-    },
-    {
-     "key": "flight_dur",
-     "label": "مدت پرواز بین هر دو نقطه (ثانیه)",
-     "type": "number",
-     "default": 1.05,
-     "editable": false,
-     "advanced": true
-    },
-    {
-     "key": "pin_delay",
-     "label": "تأخیر برچسب بعد از فرود پین (ثانیه)",
-     "type": "number",
-     "default": 0.14,
-     "editable": false,
-     "advanced": true
-    },
-    {
-     "key": "preset",
-     "label": "سبک انیمیشن",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "کلاسیک / ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "vox-atlas",
-       "اطلس تحریریه (Vox)"
-      ],
-      [
-       "air-corridor",
-       "مسیر هوایی سینمایی"
-      ],
-      [
-       "editorial-focus",
-       "زوم تمرکز خبری"
-      ],
-      [
-       "radar-pulse",
-       "پین راداری"
-      ],
-      [
-       "route-tracer",
-       "رسم پیوسته مسیر"
-      ],
-      [
-       "minimal-map",
-       "نقشهٔ مینیمال"
-      ]
-     ],
-     "default": "auto",
-     "editable": false,
-     "advanced": true
-    },
-    {
-     "key": "transition",
-     "label": "ترنزیشن ورود",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "soft-fade",
-       "محو نرم"
-      ],
-      [
-       "curtain-rtl",
-       "پرده از راست به چپ"
-      ],
-      [
-       "accent-slash",
-       "نوار تأکید مورب"
-      ],
-      [
-       "iris-rise",
-       "باز شدن دایره‌ای"
-      ],
-      [
-       "split-curtain",
-       "پرده دوقسمتی"
-      ],
-      [
-       "diagonal-wipe",
-       "پاک‌شدن مورب"
-      ],
-      [
-       "zoom-iris",
-       "گشایش زوم"
-      ],
-      [
-       "shutter-bars",
-       "کرکره ستونی"
-      ]
-     ],
-     "default": "auto",
-     "editable": false,
-     "advanced": true
-    },
-    {
-     "key": "seed",
-     "label": "بذر تصادفی",
-     "type": "number",
-     "default": 0,
-     "editable": false,
-     "advanced": true
-    }
-   ],
-   "example": {
-    "title": "مسیر تاریخی *جادهٔ ابریشم*",
-    "subtitle": "چهار ایستگاه کلیدی از شرق آسیا تا مدیترانه",
-    "items": [
-     {
-      "label": "شی‌آن",
-      "lat": 34.26,
-      "lng": 108.94,
-      "zoom": 2.4
-     },
-     {
-      "label": "سمرقند",
-      "lat": 39.65,
-      "lng": 66.96,
-      "zoom": 3.1
-     },
-     {
-      "label": "تهران",
-      "lat": 35.69,
-      "lng": 51.39,
-      "zoom": 3.6
-     },
-     {
-      "label": "استانبول",
-      "lat": 41.01,
-      "lng": 28.98,
-      "zoom": 3.4
-     }
-    ],
-    "source": "Natural Earth-derived offline vector basemap (CC0 / Public Domain)",
-    "layout": "SLIDE"
-   },
-   "order": 135,
-   "version": 1
-  },
-  "css": "../templates/map_talk/template.css"
  },
  {
   "name": "chart",

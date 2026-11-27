@@ -1,0 +1,44 @@
+{
+  "name": "guest_intro",
+  "label": "معرفی مهمان / میزبان پادکست",
+  "description": "کارت معرفی مهمان یا میزبان پادکست با تصویر قاب‌دار، سمت/نقش، توضیح کوتاه و شبکه اجتماعی.",
+  "aliases": [
+    "guest-intro",
+    "guest",
+    "معرفی مهمان",
+    "مهمان"
+  ],
+  "category": "پادکست",
+  "fields": [
+    { "key": "badge", "label": "نشان نقش (مثل: مهمان ویژه / میزبان)", "type": "text", "editable": false },
+    { "key": "title", "label": "نام و نام خانوادگی", "type": "text", "required": true, "editable": true },
+    { "key": "subtitle", "label": "عنوان شغلی یا تخصص", "type": "text", "editable": true },
+    { "key": "text", "label": "معرفی کوتاه یا نکتهٔ کلیدی", "type": "textarea", "editable": true },
+    { "key": "handle", "label": "آیدی شبکه‌ها (مثل @dariush)", "type": "text", "editable": false },
+    { "key": "image", "label": "تصویر مهمان", "type": "image", "editable": true },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["editorial-split", "قاب دو تکه سردبیری"],
+        ["card-float", "کارت شناور"],
+        ["spotlight", "نورپردازی متمرکز"]
+      ],
+      "default": "auto",
+      "editable": false
+    }
+  ],
+  "example": {
+    "badge": "مهمان ویژهٔ قسمت ۱۲",
+    "title": "دکتر سارا *رادمنش*",
+    "subtitle": "پژوهشگر علوم اعصاب و تصمیم‌گیری",
+    "text": "بررسی علمی این‌که چرا پاداش‌های نامطمئن مغز ما را درگیرتر نگه می‌دارند.",
+    "handle": "@sarah.radmanesh",
+    "layout": "SCAM"
+  },
+  "order": 15,
+  "version": 1
+}

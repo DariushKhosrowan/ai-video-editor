@@ -72,12 +72,31 @@
     return String(v).split("\n").map((l) => l.trim()).filter(Boolean).map((l, i) => {
       const k = l.lastIndexOf(":");
       const name = k > 0 ? l.slice(0, k).trim() : "";
-      const nums = (k > 0 ? l.slice(k + 1) : l).split(/[,،\s]+/).filter(Boolean);
-      return { name, values: nums.map(S.toNum), color: cols[i % cols.length] };
+      const toks = (k > 0 ? l.slice(k + 1) : l).split(/[,،\s]+/).filter(Boolean);
+      const hasPairs = toks.some((tok) => tok.includes(";"));
+      if (hasPairs) {
+        const points = toks.map((tok, j) => {
+          const [px, py] = tok.split(";");
+          return [py != null ? S.toNum(px) : j + 1, py != null ? S.toNum(py) : S.toNum(px)];
+        });
+        return { name, points, color: cols[i % cols.length] };
+      }
+      return { name, values: toks.map(S.toNum), color: cols[i % cols.length] };
     });
   };
   S.T.lineSpec = function (s) {
-    const spec = { type: "line", series: S.T.series(s.series), suffix: s.suffix, smooth: s.smooth !== false, markers: !!s.markers, marks: s.marks, grid: s.grid };
+    const cc = s.chartCurve || {};
+    const spec = {
+      type: "line",
+      series: S.T.series(s.series),
+      suffix: s.suffix,
+      smooth: s.smooth !== false,
+      curveMode: s.curveMode || cc.mode || (s.smooth === false ? "linear" : "monotone"),
+      tension: s.tension ?? cc.tension ?? 0.5,
+      markers: !!(s.markers || cc.markers),
+      marks: s.marks,
+      grid: s.grid,
+    };
     spec.x = Object.assign({}, s.x || {});
     if (s.x_labels) spec.x.ticks = S.T.pairs(s.x_labels).map((p) => [S.toNum(p[0]), p[1]]);
     if (s.x_title) spec.x.title = s.x_title;

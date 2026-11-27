@@ -1,0 +1,60 @@
+.mt-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  padding: 46px 52px;
+  border-radius: calc(var(--radius, 16px) + 8px);
+  background: var(--c-card, rgba(18, 22, 34, 0.86));
+  border: 1.5px solid var(--c-cardBorder, rgba(255, 255, 255, 0.14));
+  box-shadow: 0 28px 72px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+}
+
+#stage[data-theme-mode="light"] .mt-card {
+  box-shadow: 0 22px 54px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.mt-card-accent-bar {
+  position: absolute;
+  top: 28px;
+  bottom: 28px;
+  right: 0;
+  width: 7px;
+  border-radius: 6px;
+  background: var(--c-accent, #f5b700);
+}
+
+.mt-card-tail-left::after {
+  content: "";
+  position: absolute;
+  left: -24px;
+  bottom: 92px;
+  width: 0;
+  height: 0;
+  border-top: 18px solid transparent;
+  border-bottom: 18px solid transparent;
+  border-right: 26px solid var(--c-cardBorder, rgba(255, 255, 255, 0.14));
+}
+
+.mt-card-tail-right::after {
+  content: "";
+  position: absolute;
+  right: -24px;
+  bottom: 92px;
+  width: 0;
+  height: 0;
+  border-top: 18px solid transparent;
+  border-bottom: 18px solid transparent;
+  border-left: 26px solid var(--c-cardBorder, rgba(255, 255, 255, 0.14));
+}
+
+.mt-media-slot {
+  margin-top: 8px;
+  position: relative;
+}
+
+.mascot-rig-wrap {
+  filter: drop-shadow(0 18px 34px rgba(0, 0, 0, 0.42));
+}

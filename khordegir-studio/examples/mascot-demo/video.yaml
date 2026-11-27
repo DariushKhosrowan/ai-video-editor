@@ -1,0 +1,174 @@
+title: نمایش شخصیت عقاب قرمز — Red Eagle Mascot Demo
+theme: khordegir-dark
+format: "16:9"
+seed: 7
+preset: auto
+puppet:
+  version: 2
+  preset: lively
+  paletteLock: true
+  secondary:
+    featherJiggle: 0.6
+    crestOverlap: 0.7
+    wingFollowThrough: 0.65
+    squashPreserveVolume: true
+
+slides:
+  - template: mascot_talk
+    eyebrow: فصل ۱ · معرفی شخصیت تحریریه
+    title: وقتی تنبیه پولی جای ==هنجار اجتماعی== را می‌گیرد
+    text: عقاب قرمز با درخت ۱۸ بخشی، ۱۰ پریست آماده، ۱۵ احساس، ۹ ژست، فیزیک فنر و حرکت ثانویه هم‌زمان با صدای راوی حرکت می‌کند.
+    side: left
+    scale: 1.0
+    expression: neutral
+    expression_timeline:
+      - t: 0.0
+        expression: neutral
+        blend: 0.25
+      - t: 0.9
+        expression: happy
+        blend: 0.3
+      - t: 1.8
+        expression: thinking
+        blend: 0.35
+      - t: 2.8
+        expression: smug
+        blend: 0.3
+      - t: 3.6
+        expression: shocked
+        blend: 0.25
+      - t: 4.5
+        expression: embarrassed
+        blend: 0.35
+    look_at: slide
+    enter: slide-in
+    exit: none
+    accents: true
+    audio: narration.wav
+    viseme_track: narration.visemes.json
+    prosody_track: narration.prosody.json
+    transcript: transcript.json
+    mascot:
+      tone:
+        preset: lively
+        mouthGain: 1.0
+        browGain: 1.05
+        headGain: 1.0
+        chestGain: 1.0
+        wingGain: 1.0
+        blinkRate: 1.0
+        idleSway: 1.0
+        springFreq: 14.5
+    puppet:
+      version: 2
+      preset: lively
+      paletteLock: true
+      spring:
+        stiffness: 210
+        damping: 26
+        mass: 1.0
+      emotionIntensity: 1.05
+      gaze:
+        target: slide
+        smoothPursuit: 11
+        saccadeScale: 1.0
+      keyframes:
+        - t: 0.0
+          gain: mouthGain
+          value: 0.95
+          ease: smooth
+        - t: 2.5
+          gain: mouthGain
+          value: 1.25
+          ease: smooth
+      gestures:
+        - t: 1.1
+          gesture: point
+          duration: 1.1
+          offset: 0.0
+        - t: 3.5
+          gesture: double-take
+          duration: 0.95
+          offset: 0.0
+      sentences:
+        - start: 0.0
+          end: 2.6
+          preset: lively
+          emotion: happy
+        - start: 2.6
+          end: 5.4
+          preset: dramatic
+          emotion: smug
+    say: "[point] وقتی جریمه جای هنجار را می‌گیرد رفتار عوض می‌شود؛ [smug] ببینید آمار واقعی دقیقاً چه می‌گوید!"
+    layout: SLIDE
+
+  - template: big_number
+    number: 80
+    suffix: "٪"
+    color: danger
+    caption: شرکت‌هایی که باج دادند دوباره هدف حمله قرار گرفتند
+    subcaption: نمونهٔ لایهٔ mascot روی هر قالب دیگر با حالت shocked و لحن dramatic
+    layout: SLIDE
+    duration: 5.4
+    audio: narration.wav
+    prosody_track: narration.prosody.json
+    mascot:
+      enabled: true
+      side: right
+      scale: 0.78
+      expression: shocked
+      look_at: camera
+      enter: pop
+      exit: none
+      accents: true
+      tone:
+        preset: dramatic
+    say: ۸۰ درصد شرکت‌هایی که باج پرداخت کردند دوباره هدف حمله قرار گرفتند.
+
+  - template: mascot_talk
+    format: "9:16"
+    eyebrow: نسخهٔ عمودی ریلز / شورتس
+    title: خروجی عمودی *۹:۱۶* بدون هم‌پوشانی
+    text: جایگذاری واکنش‌گرا برای Reels و Shorts با چیدمان کارت در بالا و شخصیت در پایین.
+    side: left
+    scale: 1.0
+    expression: happy
+    look_at: camera
+    enter: pop
+    exit: fade
+    accents: true
+    audio: narration.wav
+    viseme_track: narration.visemes.json
+    prosody_track: narration.prosody.json
+    mascot:
+      tone:
+        preset: lively
+    layout: SLIDE
+
+  - template: mascot_talk
+    format: "1:1"
+    eyebrow: نسخهٔ مربعی ۱:۱
+    title: کارت مناظره با ~حالت کلافه~ و مطمئن
+    text: مناسب پست‌های اینستاگرام و لینکدین با سوئیچ روان از annoyed به smug.
+    side: right
+    scale: 0.96
+    preset: debate-card
+    expression: annoyed
+    expression_timeline:
+      - t: 0.0
+        expression: annoyed
+        blend: 0.25
+      - t: 2.2
+        expression: smug
+        blend: 0.35
+    look_at: slide
+    enter: drop
+    exit: none
+    accents: true
+    audio: narration.wav
+    viseme_track: narration.visemes.json
+    prosody_track: narration.prosody.json
+    mascot:
+      tone:
+        preset: calm
+    layout: SLIDE

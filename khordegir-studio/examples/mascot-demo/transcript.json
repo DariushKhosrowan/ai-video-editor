@@ -1,0 +1,29 @@
+{
+  "language": "fa",
+  "segments": [
+    {
+      "start": 0.28,
+      "end": 2.08,
+      "text": "وقتی جریمه جای هنجار را می‌گیرد رفتار عوض می‌شود",
+      "words": [
+        { "start": 0.28, "end": 0.62, "word": "وقتی", "phonemes": ["V", "AE", "F"] },
+        { "start": 0.64, "end": 0.94, "word": "جریمه", "phonemes": ["J", "AA", "I"] },
+        { "start": 0.96, "end": 1.20, "word": "جای", "phonemes": ["O", "U"] },
+        { "start": 1.22, "end": 1.54, "word": "هنجار", "phonemes": ["AA", "R"] },
+        { "start": 1.56, "end": 1.82, "word": "را", "phonemes": ["IY", "E"] },
+        { "start": 1.84, "end": 2.08, "word": "عوض", "phonemes": ["A", "Z"] }
+      ]
+    },
+    {
+      "start": 2.72,
+      "end": 4.50,
+      "text": "ببینید آمار واقعی دقیقاً چه می‌گوید!",
+      "words": [
+        { "start": 2.72, "end": 2.92, "word": "ببینید", "phonemes": ["F", "I"] },
+        { "start": 2.94, "end": 3.50, "word": "آمار", "phonemes": ["AA", "M", "OW"] },
+        { "start": 3.52, "end": 3.84, "word": "واقعی", "phonemes": ["AA", "GH"] },
+        { "start": 3.86, "end": 4.50, "word": "می‌گوید", "phonemes": ["IY", "U", "D"] }
+      ]
+    }
+  ]
+}

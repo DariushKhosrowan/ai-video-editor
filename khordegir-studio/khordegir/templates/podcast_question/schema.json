@@ -1,0 +1,44 @@
+{
+  "name": "podcast_question",
+  "label": "کارت سؤال / موضوع داغ پادکست",
+  "description": "نمایش پرسش مخاطب، موضوع بحث یا چالش اصلی اپیزود با هایلایت وکتور و نکات پاسخ.",
+  "aliases": [
+    "podcast-question",
+    "qa",
+    "سؤال مخاطب",
+    "پرسش"
+  ],
+  "category": "پادکست",
+  "fields": [
+    { "key": "badge", "label": "برچسب بالا (مثل: سؤال مخاطب / موضوع داغ)", "type": "text", "editable": false },
+    { "key": "author", "label": "نام پرسش‌گر (اختیاری)", "type": "text", "editable": true },
+    { "key": "title", "label": "متن پرسش (*زرد* ، ==هایلایت==)", "type": "textarea", "required": true, "editable": true },
+    { "key": "items", "label": "نکته‌های پاسخ (هر خط یکی، اختیاری)", "type": "list", "editable": true },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["kinetic-words", "کلمه‌به‌کلمه زنده"],
+        ["spotlight", "نورپردازی متمرکز"],
+        ["glitch-pop", "پرش مدرن"]
+      ],
+      "default": "auto",
+      "editable": false
+    }
+  ],
+  "example": {
+    "badge": "پرسش کلیدی اپیزود",
+    "author": "ارسالی از شنوندگان پادکست",
+    "title": "چرا با وجود ==هوشمندتر شدن==، هنوز در دام باج‌گیری عاطفی می‌افتیم؟",
+    "items": [
+      "واکنش فوری مغز به تهدید کوتاه‌مدت",
+      "خطای هزینهٔ غرق‌شده در روابط کاری"
+    ],
+    "layout": "SCAM"
+  },
+  "order": 16,
+  "version": 1
+}

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>کنسول تله‌پرامپتر و OBS — خرده‌گیر استودیو</title>
+  <title>کنسول پخش زنده پادکست و OBS — خرده‌گیر استودیو</title>
   <link rel="stylesheet" href="./console.css">
 </head>
 <body>
@@ -13,7 +13,7 @@
       <div class="topbar-brand">
         <span class="brand-mark" aria-hidden="true">HS</span>
         <div>
-          <h1 class="brand-title">کنسول تله‌پرامپتر و OBS</h1>
+          <h1 class="brand-title">کنسول پخش زنده پادکست و OBS</h1>
           <div id="projectSubtitle" class="brand-sub">در حال بارگذاری پروژه...</div>
         </div>
       </div>
@@ -24,12 +24,14 @@
           <select id="projectSelect" class="select-input" aria-label="انتخاب پروژه"></select>
         </label>
 
+        <span id="liveHubBadge" class="ws-badge ws-wait" title="وضعیت اتصال زنده به OBS Browser Source">OBS زنده: در انتظار</span>
+
         <button id="btnReloadSteps" type="button" class="btn btn-ghost" title="بازخوانی مراحل از video.yaml">
           بازخوانی YAML
         </button>
 
-        <button id="btnToggleDock" type="button" class="btn btn-ghost" title="مخفی کردن سایدبار برای تمرکز روی پرامپتر و نمای کلی">
-          نمای تمام‌عرض پرامپتر
+        <button id="btnToggleDock" type="button" class="btn btn-ghost" title="مخفی کردن سایدبار برای تمرکز روی پرامپتر">
+          نمای تمام‌عرض
         </button>
 
         <button id="btnFocusMode" type="button" class="btn btn-amber-outline" aria-pressed="false" title="حالت تمرکز / حداکثر متن (F)">
@@ -37,10 +39,10 @@
         </button>
 
         <button id="btnOpenExport" type="button" class="btn btn-amber-outline">
-          خروجی بستهٔ OBS
+          خروجی بستهٔ آفلاین OBS
         </button>
 
-        <a href="/editor/" class="btn btn-ghost">بازگشت به ویرایشگر</a>
+        <a id="linkBackEditor" href="/editor/" class="btn btn-ghost">بازگشت به ویرایشگر</a>
       </div>
     </header>
 
@@ -81,19 +83,19 @@
               <span class="rec-dot"></span>
               <span>REC <span id="recTimer" class="mono-num">۰۰:۰۰</span></span>
             </span>
-            <span id="wsBadge" class="ws-badge ws-standalone">حالت مستقل (بدون OBS)</span>
+            <span id="wsBadge" class="ws-badge ws-standalone">حالت مستقل (بدون OBS WS)</span>
           </div>
         </div>
 
         <!-- Next Step Hint -->
         <div id="nextCueBar" class="next-cue-bar">در حال آماده‌سازی...</div>
 
-        <!-- Graceful Standalone Fallback Banner (shown only if WS fails/refused, dismissible) -->
+        <!-- Graceful Standalone Fallback Banner -->
         <div id="fallbackBanner" class="fallback-banner hidden" role="status">
           <div class="fallback-text">
             <strong>حالت مستقل فعال است:</strong>
             <span id="fallbackMessage">
-              اتصال OBS WebSocket در دسترس نیست یا رد شد؛ تله‌پرامپتر و نمای کلی بدون نیاز به OBS با کلیک، کیبورد و پدال کار می‌کنند.
+              اتصال OBS WebSocket (پورت ۴۴۵۵) در دسترس نیست؛ پخش زنده از طریق OBS Browser Source و کنترل پرامپتر همچنان فعال است.
             </span>
           </div>
           <div class="fallback-actions">
@@ -105,7 +107,6 @@
 
         <!-- Stage Body (Prompter + Script Overview) -->
         <div id="stageBody" class="stage-body mode-prompter">
-          <!-- Reading Viewport + Countdown Overlay -->
           <div id="prompterWrap" class="prompter-wrap" tabindex="0">
             <div class="reading-guide" aria-hidden="true">
               <span class="guide-dot"></span>
@@ -122,10 +123,9 @@
             </div>
           </div>
 
-          <!-- RTL Script Overview Pane -->
           <div id="overviewPane" class="overview-pane hidden" aria-label="نمای کلی اسکریپت">
             <div class="overview-head">
-              <strong>نمای کلی مراحل (کلیک روی هر مرحله = پرش فوری)</strong>
+              <strong>نمای کلی مراحل (کلیک روی هر مرحله = پرش فوری در پرامپتر و OBS زنده)</strong>
               <span id="overviewCount" class="overview-count"></span>
             </div>
             <div id="overviewList" class="overview-list"></div>
@@ -136,7 +136,7 @@
         <div class="action-bar">
           <div class="primary-actions">
             <button id="btnNext" type="button" class="btn-primary-next">
-              <span>مرحله بعد (پرامپتر + اسلاید)</span>
+              <span>مرحله بعد (پرامپتر + OBS زنده)</span>
               <span aria-hidden="true">◀</span>
             </button>
             <button id="btnPrev" type="button" class="btn btn-secondary">
@@ -154,9 +154,7 @@
           <!-- Teleprompter Controls -->
           <div class="secondary-actions">
             <div class="control-group">
-              <button id="btnAutoScroll" type="button" class="btn btn-sm">
-                ▶ اسکرول خودکار
-              </button>
+              <button id="btnAutoScroll" type="button" class="btn btn-sm">▶ اسکرول خودکار</button>
               <button id="btnSpeedDown" type="button" class="btn btn-sm" title="کاهش سرعت (↑)">سرعت −</button>
               <span id="speedReadout" class="readout mono-num" dir="ltr">1.2x</span>
               <button id="btnSpeedUp" type="button" class="btn btn-sm" title="افزایش سرعت (↓)">سرعت +</button>
@@ -192,25 +190,202 @@
           <div class="timeline-head">
             <span id="totalRecordedLabel">مجموع ضبط‌شده: ۰۰:۰۰</span>
             <span class="shortcuts-hint">
-              کلیدها و پدال: PageDown / ← جلو · PageUp / → عقب · Space اسکرول · ↑/↓ سرعت · M آینه · O نمای کلی · F تمرکز · F9 اول پرده
+              کلیدها: PageDown / ← جلو · PageUp / → عقب · Space اسکرول · ↑/↓ سرعت · M آینه · O نمای کلی · F تمرکز · F9 اول پرده
             </span>
           </div>
           <div id="actTimeline" class="act-timeline"></div>
         </div>
       </section>
 
-      <!-- Left Sidebar: Optional OBS Status, Scene/Slide Controls, Take Log -->
+      <!-- Left Sidebar: Live OBS Browser Source, Podcast Overlays, Soundboard & Optional OBS WS -->
       <aside id="sidebarPanel" class="sidebar">
-        <!-- OBS Connection & Status Panel -->
-        <section class="card panel-block" aria-label="اتصال اختیاری OBS">
+        <!-- 1. Live OBS Browser Source URL & Monitor -->
+        <section class="card panel-block" aria-label="لینک زنده OBS Browser Source">
           <div class="panel-header">
-            <h2>اتصال اختیاری OBS (WebSocket)</h2>
-            <span id="obsConnLabel" class="status-text">حالت مستقل</span>
+            <h2>لینک زندهٔ OBS (Browser Source)</h2>
+            <span id="obsViewerCountBadge" class="status-text mono-num">۰ بیننده</span>
           </div>
 
-          <p class="panel-note">
-            WebSocket اختیاری است؛ بدون OBS هم تمام امکانات تله‌پرامپتر، نمای کلی و ثبت برداشت‌ها کار می‌کنند.
-          </p>
+          <div class="live-monitor-wrap">
+            <iframe id="liveMonitorFrame" class="live-monitor-frame" title="مانیتور خروجی زنده OBS" src="about:blank"></iframe>
+            <div class="live-monitor-pill">مانیتور خروجی زنده</div>
+          </div>
+
+          <div class="mode-pills-row">
+            <button id="btnObsUrlFull" type="button" class="btn btn-sm btn-active">تمام‌صحنه (Full/SCAM)</button>
+            <button id="btnObsUrlTransparent" type="button" class="btn btn-sm">لایهٔ شفاف روی دوربین</button>
+          </div>
+
+          <div class="url-copy-row">
+            <input id="obsSourceUrlInput" type="text" dir="ltr" readonly class="text-input compact" value="">
+            <button id="btnCopyObsUrl" type="button" class="btn btn-sm btn-amber">کپی لینک</button>
+            <a id="btnOpenObsStageTab" href="/obs-stage/" target="_blank" rel="noopener" class="btn btn-sm btn-ghost">باز کردن</a>
+          </div>
+
+          <details class="obs-guide-details">
+            <summary>راهنمای افزودن در OBS Studio (۱۹۲۰×۱۰۸۰)</summary>
+            <ol class="obs-guide-list">
+              <li>در OBS روی <strong>Sources &gt; + &gt; Browser</strong> کلیک کنید.</li>
+              <li>لینک بالا را در فیلد <strong>URL</strong> قرار دهید.</li>
+              <li>عرض را <code dir="ltr">1920</code> و ارتفاع را <code dir="ltr">1080</code> بگذارید.</li>
+              <li>برای حالت شفاف روی وب‌کم، گزینهٔ «لایهٔ شفاف روی دوربین» را بزنید.</li>
+            </ol>
+          </details>
+
+          <!-- Instant Layout Switcher for Live OBS Stage -->
+          <div class="scene-buttons four-cols">
+            <button id="btnSceneSlide" type="button" class="btn btn-scene" data-layout="SLIDE">اسلاید</button>
+            <button id="btnSceneScam" type="button" class="btn btn-scene" data-layout="SCAM">اسلاید+من</button>
+            <button id="btnSceneCam" type="button" class="btn btn-scene" data-layout="CAM">فقط دوربین</button>
+            <button id="btnSceneOverlay" type="button" class="btn btn-scene" data-layout="OVERLAY">شفاف روی من</button>
+          </div>
+
+          <div class="living-quick-grid">
+            <label class="field-block">
+              <span>پس‌زمینه زنده (Living)</span>
+              <select id="liveBgStyleSelect" class="select-input compact">
+                <option value="dreamy-bokeh">بوکهٔ محو و رویایی یوتیوبری</option>
+                <option value="editorial-blur">پس‌زمینهٔ محو عمیق سافت</option>
+                <option value="studio-mix">ترکیبی استودیو</option>
+                <option value="aurora">شفق نوری</option>
+                <option value="particles">ذرات نوری</option>
+                <option value="grid">شبکه متحرک</option>
+                <option value="wave">موج صوتی</option>
+              </select>
+            </label>
+            <label class="field-block">
+              <span>شدت حرکت زنده</span>
+              <select id="liveIntensitySelect" class="select-input compact">
+                <option value="podcast">استاندارد پادکست</option>
+                <option value="subtle">ملایم</option>
+                <option value="dynamic">پرانرژی</option>
+                <option value="off">خاموش</option>
+              </select>
+            </label>
+          </div>
+
+          <label class="field-block" style="margin-top:6px;">
+            <span>لغزش ابریشمی اجزای روی پس‌زمینه (Silk Glide)</span>
+            <select id="liveFloatModeSelect" class="select-input compact">
+              <option value="images-only">فقط عکس‌ها و قاب‌های روی پس‌زمینه (پیشنهادی · بسیار نرم)</option>
+              <option value="selective">بعضی آیتم‌ها و عکس‌ها (انتخابی)</option>
+              <option value="all-items">همهٔ کارت‌ها و عکس‌ها</option>
+              <option value="off">خاموش (کاملاً ثابت)</option>
+            </select>
+          </label>
+
+          <div class="inline-checks">
+            <label class="check-inline">
+              <input id="chkShowLiveBadge" type="checkbox">
+              <span>نمایش نشان قرمز LIVE روی تصویر</span>
+            </label>
+            <label class="check-inline">
+              <input id="chkMicReactive" type="checkbox">
+              <span>واکنش موج پس‌زمینه به صدای میکروفون</span>
+            </label>
+          </div>
+        </section>
+
+        <!-- 2. Podcast Lower-Third & Chapter Bar Controls -->
+        <section class="card panel-block" aria-label="کنترل زیرنویس و فصل پادکست">
+          <div class="panel-header">
+            <h2>زیرنویس معرفی (Lower-Third) و فصل‌ها</h2>
+            <span id="ltActiveBadge" class="status-text">مخفی</span>
+          </div>
+
+          <div class="form-stack">
+            <div class="living-quick-grid">
+              <label class="field-block">
+                <span>نقش / برچسب</span>
+                <select id="ltRoleInput" class="select-input compact">
+                  <option value="میزبان">میزبان</option>
+                  <option value="مهمان ویژه">مهمان ویژه</option>
+                  <option value="موضوع گفتگو">موضوع گفتگو</option>
+                  <option value="نکته کلیدی">نکته کلیدی</option>
+                </select>
+              </label>
+              <label class="field-block">
+                <span>استایل و جایگاه</span>
+                <select id="ltStyleSelect" class="select-input compact">
+                  <option value="glass-amber">شیشه‌ای طلایی (راست)</option>
+                  <option value="broadcast-red">خبری قرمز (راست)</option>
+                  <option value="minimal-dark">تیره مینیمال (راست)</option>
+                  <option value="glass-amber|left">شیشه‌ای طلایی (چپ)</option>
+                </select>
+              </label>
+            </div>
+
+            <label class="field-block">
+              <span>نام یا تیتر اصلی Lower-Third</span>
+              <input id="ltTitleInput" type="text" class="text-input compact" placeholder="مثال: داریوش خسروان">
+            </label>
+
+            <label class="field-block">
+              <span>توضیح یا تخصص زیرین</span>
+              <input id="ltSubtitleInput" type="text" class="text-input compact" placeholder="مثال: میزبان پادکست خرده‌گیر">
+            </label>
+
+            <div class="btn-row">
+              <button id="btnToggleLowerThird" type="button" class="btn btn-amber">نمایش Lower-Third روی آنتن</button>
+              <button id="btnUpdateLowerThird" type="button" class="btn btn-sm btn-ghost">بروزرسانی متن</button>
+            </div>
+
+            <hr class="panel-sep">
+
+            <div class="panel-header compact-head">
+              <h2>نوار پیشرفت فصل (Chapter Pill)</h2>
+              <span id="chapterStatusText" class="status-text">مخفی</span>
+            </div>
+
+            <div class="living-quick-grid">
+              <label class="field-block">
+                <span>عنوان فصل جاری</span>
+                <input id="chapterTitleInput" type="text" class="text-input compact" placeholder="موضوع این بخش">
+              </label>
+              <label class="field-block">
+                <span>شماره / کل فصل‌ها</span>
+                <div style="display:flex;gap:4px">
+                  <input id="chapterIndexInput" type="number" dir="ltr" min="1" value="1" class="text-input compact" style="width:50%">
+                  <input id="chapterTotalInput" type="number" dir="ltr" min="1" value="3" class="text-input compact" style="width:50%">
+                </div>
+              </label>
+            </div>
+
+            <div class="inline-checks">
+              <label class="check-inline">
+                <input id="chkAutoChapterSync" type="checkbox" checked>
+                <span>بروزرسانی خودکار فصل با تغییر مرحله</span>
+              </label>
+            </div>
+
+            <div class="btn-row">
+              <button id="btnToggleChapter" type="button" class="btn btn-sm btn-secondary">نمایش / مخفی نوار فصل</button>
+              <button id="btnNextChapter" type="button" class="btn btn-sm btn-ghost">فصل بعد ◀</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. Built-in Live SFX Soundboard -->
+        <section class="card panel-block" aria-label="ساندبورد افکت صوتی">
+          <div class="panel-header">
+            <h2>افکت‌های صوتی زنده (Soundboard)</h2>
+            <button id="btnSoundMute" type="button" class="btn btn-sm btn-ghost">🔊 فعال</button>
+          </div>
+
+          <div id="soundboardGrid" class="soundboard-grid"></div>
+
+          <label class="field-inline compact" style="margin-top:8px;width:100%;justify-content:space-between">
+            <span>شدت صدا:</span>
+            <input id="sfxVolSlider" type="range" min="0" max="1" step="0.05" value="0.75" style="flex:1;accent-color:var(--amber)">
+          </label>
+        </section>
+
+        <!-- 4. Optional OBS WebSocket (Port 4455) -->
+        <section class="card panel-block" aria-label="اتصال اختیاری OBS">
+          <div class="panel-header">
+            <h2>اتصال اختیاری OBS WebSocket</h2>
+            <span id="obsConnLabel" class="status-text">حالت مستقل</span>
+          </div>
 
           <div class="status-grid">
             <div class="stat-item">
@@ -234,21 +409,21 @@
           <div class="form-stack">
             <label class="field-block">
               <span>آدرس WebSocket</span>
-              <input id="wsUrlInput" type="text" dir="ltr" class="text-input" placeholder="ws://127.0.0.1:4455">
+              <input id="wsUrlInput" type="text" dir="ltr" class="text-input compact" placeholder="ws://127.0.0.1:4455">
             </label>
             <label class="field-block">
               <span>رمز عبور WebSocket</span>
-              <input id="wsPassInput" type="password" dir="ltr" class="text-input" placeholder="اختیاری">
+              <input id="wsPassInput" type="password" dir="ltr" class="text-input compact" placeholder="اختیاری">
             </label>
             <label class="field-block">
-              <span>پوشهٔ اسلایدها در سیستم (برای Source اسلاید)</span>
-              <input id="slidesDirInput" type="text" dir="ltr" class="text-input" placeholder="اختیاری، مثلاً /path/to/slides">
+              <span>پوشهٔ اسلایدها در سیستم</span>
+              <input id="slidesDirInput" type="text" dir="ltr" class="text-input compact" placeholder="اختیاری">
             </label>
 
             <div class="inline-checks">
               <label class="check-inline">
                 <input id="chkAutoReconnect" type="checkbox" checked>
-                <span>تلاش مجدد هنگام قطع ارتباط زنده</span>
+                <span>تلاش مجدد هنگام قطع ارتباط</span>
               </label>
               <label class="check-inline">
                 <input id="chkSyncObsOnStep" type="checkbox" checked>
@@ -259,46 +434,21 @@
             <div id="obsNoticeBox" class="alert-info hidden" role="status"></div>
 
             <div class="btn-row">
-              <button id="btnConnectObs" type="button" class="btn btn-amber">اتصال به OBS</button>
-              <button id="btnDisconnectObs" type="button" class="btn btn-ghost hidden">قطع اتصال</button>
-              <button id="btnStudioSync" type="button" class="btn btn-secondary obs-only-btn">
-                پیش‌نمایش پرامپتر (Studio Mode)
-              </button>
+              <button id="btnConnectObs" type="button" class="btn btn-sm btn-amber">اتصال به OBS WS</button>
+              <button id="btnDisconnectObs" type="button" class="btn btn-sm btn-ghost hidden">قطع اتصال</button>
+              <button id="btnStudioSync" type="button" class="btn btn-sm btn-secondary obs-only-btn">Studio Mode</button>
             </div>
+            <div class="btn-row">
+              <button id="btnZoomToggle" type="button" class="btn btn-sm btn-secondary obs-only-btn">زوم (F5)</button>
+              <button id="btnZoomOut" type="button" class="btn btn-sm btn-ghost obs-only-btn">بازگشت زوم (F6)</button>
+              <button id="btnMotionToggle" type="button" class="btn btn-sm btn-ghost obs-only-btn">حرکت (F7)</button>
+              <button id="btnPushSlide" type="button" class="btn btn-sm btn-ghost obs-only-btn">ارسال PNG</button>
+            </div>
+            <span id="zoomStateLabel" class="hidden">عادی</span>
           </div>
         </section>
 
-        <!-- Scene, Slide & Zoom Controls -->
-        <section class="card panel-block" aria-label="کنترل صحنه و اسلاید">
-          <div class="panel-header">
-            <h2>کنترل صحنه، اسلاید و زوم</h2>
-            <span id="zoomStateLabel" class="status-text">عادی</span>
-          </div>
-
-          <div class="scene-buttons">
-            <button id="btnSceneSlide" type="button" class="btn btn-scene obs-only-btn" data-layout="SLIDE">
-              ۰۱ اسلاید
-            </button>
-            <button id="btnSceneScam" type="button" class="btn btn-scene obs-only-btn" data-layout="SCAM">
-              ۰۲ اسلاید + من
-            </button>
-            <button id="btnSceneCam" type="button" class="btn btn-scene obs-only-btn" data-layout="CAM">
-              ۰۳ فقط من
-            </button>
-          </div>
-
-          <div class="btn-row">
-            <button id="btnZoomToggle" type="button" class="btn btn-secondary obs-only-btn">زوم این / اوت (F5)</button>
-            <button id="btnZoomOut" type="button" class="btn btn-ghost obs-only-btn">بازگشت زوم (F6)</button>
-            <button id="btnMotionToggle" type="button" class="btn btn-ghost obs-only-btn">حرکت اسلاید (F7)</button>
-          </div>
-
-          <div class="btn-row">
-            <button id="btnPushSlide" type="button" class="btn btn-ghost obs-only-btn">ارسال تصویر اسلاید فعلی به OBS</button>
-          </div>
-        </section>
-
-        <!-- Take Log -->
+        <!-- 5. Take Log -->
         <section class="card panel-block takes-block" aria-label="ثبت برداشت‌ها">
           <div class="panel-header">
             <h2>گزارش برداشت‌ها (Takes)</h2>
@@ -328,13 +478,12 @@
     <div id="exportModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
       <div class="modal-card card">
         <div class="panel-header">
-          <h2 id="exportTitle">ساخت بستهٔ آمادهٔ OBS</h2>
+          <h2 id="exportTitle">ساخت بستهٔ آمادهٔ آفلاین OBS</h2>
           <button id="btnCloseExport" type="button" class="btn btn-sm">بستن</button>
         </div>
         <p class="modal-desc">
           تمام فایل‌های لازم برای OBS شامل <code>hark_studio_v8.lua</code>، <code>steps_data.lua</code>،
-          <code>prompter.html</code> (تله‌پرامپتر راست‌چین مستقل بدون نیاز به WebSocket برای Browser Source یا نمایشگر دوم)،
-          <code>prompter_dock.html</code> و اسکریپت نصب داخل پوشهٔ خروجی پروژه ساخته می‌شوند.
+          <code>prompter.html</code>، <code>prompter_dock.html</code> و اسکریپت نصب داخل پوشهٔ خروجی پروژه ساخته می‌شوند.
         </p>
 
         <div class="form-stack">
@@ -362,6 +511,7 @@
     </div>
   </div>
 
+  <script src="../stage/sfx.js"></script>
   <script type="module" src="./console.js"></script>
 </body>
 </html>

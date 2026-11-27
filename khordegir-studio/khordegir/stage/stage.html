@@ -5,11 +5,12 @@
 <title>Khordegir Stage</title>
 <link rel="stylesheet" href="stage.css">
 <script src="../vendor/gsap.min.js"></script>
+<script src="sfx.js"></script>
 <script src="motion-tokens.js"></script>
 <script src="core.js"></script>
 <script src="charts.js"></script>
 <script src="fx.js"></script>
-<script src="transitions.js"></script>
+<script src="mascot-rig.js"></script>
 <script src="../themes/_list.js"></script>
 <script src="template-lib.js"></script>
 <script src="../templates/_index.js"></script>
@@ -21,11 +22,12 @@
   const q = new URLSearchParams(location.search);
   window.addEventListener("load", async () => {
     Stage.useTheme(q.get("theme") || "khordegir-dark");
+    if (q.get("format")) Stage.setFormat(q.get("format"));
     if (q.get("demo")) {
       const t = Stage.templates[q.get("demo")];
       if (t) {
         const ex = Object.assign({ template: t.name }, t.example || {});
-        await Stage.load(ex, { camGuide: q.has("cam") });
+        await Stage.load(ex, { camGuide: q.has("cam"), format: q.get("format") || undefined });
         if (q.has("t")) Stage.seek(+q.get("t")); else Stage.play(0);
       }
     }
