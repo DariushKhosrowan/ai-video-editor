@@ -85,6 +85,9 @@ def cmd_build(a):
     from .project import Project, stage_payload
     from .outputs import write_steps, write_pdf
     from .index import build_index, template_hash
+    if getattr(a, "formats", None) is not None:
+        from .multiexport import cmd_build_formats
+        return cmd_build_formats(a)
     build_index()
     pr = Project(a.folder, force_format=getattr(a, "format", None))
     if getattr(a, "out", None):
@@ -441,6 +444,7 @@ def main(argv=None):
     b.add_argument("--format", choices=["landscape", "portrait", "square"],
                    help="قاب همه‌ی اسلایدها را برای این ساخت عوض کن (بدون تغییر video.yaml)")
     b.add_argument("--out", help="پوشه‌ی خروجی به جای out کنار video.yaml")
+    b.add_argument("--formats", help="فرمت‌های خروجی: all یا ترکیب landscape,portrait,square")
     b.add_argument("--no-video", action="store_true", help="فقط PNG و PDF (سریع)")
     b.add_argument("--force", action="store_true", help="همه را از نو بساز")
     b.add_argument("--jobs", type=int, default=max(1, min(4, (os.cpu_count() or 2))))
