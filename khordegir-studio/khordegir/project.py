@@ -35,6 +35,20 @@ FORMAT_ALIASES = {
     "عمودی": "portrait",
     "square": "square", "1:1": "square", "1x1": "square", "مربع": "square", "مربعی": "square",
 }
+SUPPORTED_LANGS = ("fa", "en")
+DEFAULT_LANG = "fa"
+
+
+def norm_lang(v, default=DEFAULT_LANG):
+    """Validate and normalize project/slide language ('fa' | 'en')."""
+    if v is None or (isinstance(v, str) and v.strip() == ""):
+        return default
+    if not isinstance(v, str):
+        raise ValueError(f"Invalid lang {v!r}; expected 'fa' or 'en'")
+    s = v.strip().lower()
+    if s not in SUPPORTED_LANGS:
+        raise ValueError(f"Unknown lang {v!r}; expected 'fa' or 'en'")
+    return s
 
 
 def norm_format(v, default=None):
@@ -93,6 +107,7 @@ class Project:
                                  "راهنما: هر اسلاید با «- template:» شروع می‌شود و فاصله‌های اول خط باید یکسان باشند.")
         d = self.data
         self.title = d.get("title", folder.name)
+        self.lang = norm_lang(d.get("lang"), DEFAULT_LANG)
         fmt = norm_format(d.get("format"), DEFAULT_FORMAT)
         if fmt is None:
             self.warnings.append(f"قاب «{d.get('format')}» ناشناخته است؛ یکی از landscape / portrait / square "
@@ -153,7 +168,10 @@ class Project:
     def _resolve_images(self, obj, where, extra=()):
         if isinstance(obj, dict):
             for k, v in obj.items():
-                if isinstance(v, str) and (k in IMAGE_KEYS or (v.lower().endswith(IMG_EXT) and k not in ("text", "title", "say"))):
+                if isinstance(v, str) and (k in IMAGE_KEYS or (v.lower().endswith(IMG_EXT) and k not in (
+                        "text", "text_fa", "text_en", "title", "title_fa", "title_en",
+                        "subtitle", "subtitle_fa", "subtitle_en", "caption", "caption_fa", "caption_en",
+                        "say", "say_fa", "say_en"))):
                     if not v.strip():
                         continue
                     r = self.find(v, extra)
@@ -208,6 +226,17 @@ class Project:
             s["template"] = t
             if t not in template_names():
                 self.warnings.append(f"اسلاید {i + 1}: قالب «{t}» وجود ندارد. قالب‌های موجود: {', '.join(template_names())}")
+            proj_lang = getattr(self, "lang", DEFAULT_LANG)
+            s_lang = norm_lang(s.get("lang"), proj_lang) if ("lang" in s and s.get("lang") is not None and str(s.get("lang")).strip() != "") else proj_lang
+            s["lang"] = s_lang
+            for base_key in ("text", "title", "subtitle", "eyebrow", "caption", "say"):
+                fa_key, en_key = f"{base_key}_fa", f"{base_key}_en"
+                for k_chk in (fa_key, en_key):
+                    if k_chk in s and s[k_chk] is not None and not isinstance(s[k_chk], str):
+                        raise TypeError(f"Slide override {k_chk!r} must be a string, got {type(s[k_chk]).__name__}")
+                ov_key = en_key if s_lang == "en" else fa_key
+                if ov_key in s and s[ov_key] is not None:
+                    s[base_key] = s[ov_key]
             act = int(s.get("act", act))
             s["act"] = act
             steps = []
