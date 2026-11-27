@@ -302,6 +302,122 @@
     return L;
   };
 
+  function getZoomCap() {
+    const tokens = (typeof window !== "undefined" && (window.MOTION_TOKENS || window.MotionTokens)) || null;
+    const cap = tokens && Number(tokens.STAGE_ZOOM_CAP);
+    return (Number.isFinite(cap) && cap >= 1) ? cap : 1.06;
+  }
+
+  function buildCameraTimeline(stage, slide, curW, curH) {
+    const rawPts = slide && Array.isArray(slide.zoom_points) ? slide.zoom_points : [];
+    const ZOOM_CAP = getZoomCap();
+    S._camState = { scale: 1, x: 0, y: 0 };
+    S._applyCamera = null;
+
+    if (!rawPts.length) {
+      if (stage && stage.style) {
+        stage.style.transform = "";
+        stage.style.transformOrigin = "";
+      }
+      S.camTl = null;
+      return 0;
+    }
+
+    const ordered = rawPts
+      .map((pt, idx) => {
+        if (!pt || typeof pt !== "object") return null;
+        const x = (pt.x != null && Number.isFinite(+pt.x)) ? Math.max(0, Math.min(1, +pt.x)) : 0.5;
+        const y = (pt.y != null && Number.isFinite(+pt.y)) ? Math.max(0, Math.min(1, +pt.y)) : 0.5;
+        const sc = (pt.scale != null && Number.isFinite(+pt.scale)) ? Math.max(1, Math.min(ZOOM_CAP, +pt.scale)) : Math.min(1.04, ZOOM_CAP);
+        const at = (pt.at != null && Number.isFinite(+pt.at)) ? Math.max(0, +pt.at) : 0;
+        const dur = (pt.dur != null && Number.isFinite(+pt.dur) && +pt.dur > 0) ? +pt.dur : 0.9;
+        const ease = typeof pt.ease === "string" && pt.ease.trim() ? pt.ease.trim() : "expOut(5)";
+        return { x, y, scale: sc, at, dur, ease, _idx: idx };
+      })
+      .filter(Boolean)
+      .sort((a, b) => (a.at - b.at) || (a._idx - b._idx));
+
+    if (!ordered.length) {
+      if (stage && stage.style) {
+        stage.style.transform = "";
+        stage.style.transformOrigin = "";
+      }
+      S.camTl = null;
+      return 0;
+    }
+
+    const poseFor = (pt) => {
+      const sc = Math.max(1, Math.min(ZOOM_CAP, pt.scale));
+      const maxTx = (curW * (sc - 1)) / 2;
+      const maxTy = (curH * (sc - 1)) / 2;
+      const idealX = -(pt.x - 0.5) * curW * sc;
+      const idealY = -(pt.y - 0.5) * curH * sc;
+      return {
+        scale: sc,
+        x: Math.max(-maxTx, Math.min(maxTx, idealX)),
+        y: Math.max(-maxTy, Math.min(maxTy, idealY)),
+      };
+    };
+
+    const cam = S._camState;
+    const applyCamera = () => {
+      const sc = Math.max(1, Math.min(ZOOM_CAP, Number(cam.scale) || 1));
+      const maxTx = (curW * (sc - 1)) / 2;
+      const maxTy = (curH * (sc - 1)) / 2;
+      const tx = Math.max(-maxTx, Math.min(maxTx, Number(cam.x) || 0));
+      const ty = Math.max(-maxTy, Math.min(maxTy, Number(cam.y) || 0));
+      cam._appliedScale = sc;
+      cam._appliedX = tx;
+      cam._appliedY = ty;
+      if (stage && stage.style) {
+        stage.style.transformOrigin = "50% 50%";
+        if (Math.abs(sc - 1) < 1e-6 && Math.abs(tx) < 1e-4 && Math.abs(ty) < 1e-4) {
+          stage.style.transform = "translate(0px, 0px) scale(1)";
+        } else {
+          stage.style.transform = `translate(${tx.toFixed(3)}px, ${ty.toFixed(3)}px) scale(${sc.toFixed(5)})`;
+        }
+      }
+    };
+    S._applyCamera = applyCamera;
+
+    const tl = S.camTl = gsap.timeline({ paused: true });
+    if (typeof tl.set === "function") {
+      tl.set(cam, { scale: 1, x: 0, y: 0, onUpdate: applyCamera }, 0);
+    }
+
+    let prev = { scale: 1, x: 0, y: 0 };
+    ordered.forEach((pt) => {
+      const next = poseFor(pt);
+      tl.fromTo(
+        cam,
+        { scale: prev.scale, x: prev.x, y: prev.y },
+        {
+          scale: next.scale,
+          x: next.x,
+          y: next.y,
+          duration: pt.dur,
+          ease: S.ease(pt.ease),
+          immediateRender: false,
+          onUpdate: applyCamera,
+        },
+        pt.at
+      );
+      prev = next;
+    });
+
+    applyCamera();
+    return ordered.length;
+  }
+
+  S.cameraState = function () {
+    const cam = S._camState || { scale: 1, x: 0, y: 0 };
+    return {
+      scale: cam._appliedScale != null ? cam._appliedScale : (Number(cam.scale) || 1),
+      x: cam._appliedX != null ? cam._appliedX : (Number(cam.x) || 0),
+      y: cam._appliedY != null ? cam._appliedY : (Number(cam.y) || 0),
+    };
+  };
+
   /* ---------------------------------------------------------------- themes */
   S.defineTheme = function (t) {
     S.themes[t.name] = t;
@@ -837,7 +953,7 @@
     const fo = slide.format_overrides && slide.format_overrides[fmtInfo.format];
     if (fo && typeof fo === "object") Object.assign(slide, fo);
     S.slide = slide;
-    if (S.tl) S.tl.kill(); if (S.amb) S.amb.kill();
+    if (S.tl) S.tl.kill(); if (S.amb) S.amb.kill(); if (S.camTl) S.camTl.kill(); S.camTl = null;
     S.tl = gsap.timeline({ paused: true, defaults: { ease: S.ease("textIn") } }); S.amb = gsap.timeline({ paused: true, defaults: { ease: S.ease("ambient") } });
     S._imgs = [];
     S._clipSeq = 0;
@@ -934,12 +1050,14 @@
     }
 
     await Promise.all(S._imgs.map((im) => im.decode().catch(() => {})));
+    const zoomCount = buildCameraTimeline(stage, slide, W, H);
+    const camDur = S.camTl ? S.camTl.duration() : 0;
     const ent = S.tl.duration();
     S._entrances = ent;
     const clip = th.clip || MT.clip;
     const sayDur = estimateSayDuration(slide);
     const baseMin = +slide.duration ? +slide.duration : Math.max(clip.min, sayDur || 0);
-    S._dur = Math.max(baseMin, ent + clip.hold);
+    S._dur = zoomCount > 0 ? Math.max(baseMin, ent + clip.hold, camDur) : Math.max(baseMin, ent + clip.hold);
     S.seek(0);
     S.ready = true;
     const fxi = S.fx ? {
@@ -963,11 +1081,16 @@
       frames: Math.round(S._dur * S.fps),
       fx: fxi,
       cues: (S.cues || []).sort((a, b) => a.t - b.t),
+      zoomPoints: zoomCount,
     };
   };
   S.seek = function (t) {
     if (S.tl) S.tl.time(Math.min(t, S.tl.duration()), false);
     if (S.amb) S.amb.time(t, false);
+    if (S.camTl) {
+      S.camTl.time(Math.min(t, S.camTl.duration()), false);
+      if (S._applyCamera) S._applyCamera();
+    }
     S._t = t;
   };
   S.duration = () => S._dur;
