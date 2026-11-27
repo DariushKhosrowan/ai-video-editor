@@ -49,6 +49,7 @@
     aiMode: "new",
     aiValidation: null,
     aiValidateTimer: null,
+    projZoomDraft: null,
   };
 
   const els = {
@@ -110,6 +111,10 @@
     projMicroFxSelect: document.getElementById("projMicroFxSelect"),
     btnStyleModalReroll: document.getElementById("btnStyleModalReroll"),
     btnApplyStyleModal: document.getElementById("btnApplyStyleModal"),
+    projZoomAdvanced: document.getElementById("projZoomAdvanced"),
+    projZoomCountChip: document.getElementById("projZoomCountChip"),
+    chkProjZoomPointsEnable: document.getElementById("chkProjZoomPointsEnable"),
+    projZoomPointsList: document.getElementById("projZoomPointsList"),
     scriptModal: document.getElementById("scriptModal"),
     btnCloseScriptModal: document.getElementById("btnCloseScriptModal"),
     scriptProjectRow: document.getElementById("scriptProjectRow"),
@@ -259,6 +264,7 @@
         "count_from",
         "micro_fx",
         "format",
+        "zoom_points",
       ].forEach((k) => {
         if (state.data[k] !== undefined && copy[k] === undefined) {
           copy[k] = JSON.parse(JSON.stringify(state.data[k]));
@@ -1457,6 +1463,365 @@
 
     advDetails.appendChild(advBody);
     els.inspectorBody.appendChild(advDetails);
+
+    // 6. Advanced Camera Zoom Points disclosure (collapsed by default, beginner default: OFF)
+    const ZOOM_CAP = getZoomCap();
+    const zoomUtils = window.KhordegirZoomEditor;
+
+    const zoomDetails = document.createElement("details");
+    zoomDetails.className = "zoom-advanced-disclosure advanced-details";
+
+    const zoomSummary = document.createElement("summary");
+    const zoomTitleSpan = document.createElement("span");
+    zoomTitleSpan.textContent = "🎥 تنظیمات پیشرفتهٔ دوربین و نقاط زوم (Advanced)";
+    const zoomCountChip = document.createElement("span");
+    zoomCountChip.className = "count-chip";
+    zoomSummary.appendChild(zoomTitleSpan);
+    zoomSummary.appendChild(zoomCountChip);
+    zoomDetails.appendChild(zoomSummary);
+
+    const zoomBody = document.createElement("div");
+    zoomBody.className = "advanced-details-body";
+
+    const enableLbl = document.createElement("label");
+    enableLbl.className = "toggle-chip";
+    const enableChk = document.createElement("input");
+    enableChk.type = "checkbox";
+    enableChk.id = "chkZoomPointsEnable";
+    enableLbl.appendChild(enableChk);
+    enableLbl.appendChild(document.createTextNode(`فعال‌سازی نقاط زوم دوربین (سقف بزرگ‌نمایی ${ZOOM_CAP}x)`));
+    zoomBody.appendChild(enableLbl);
+
+    const zoomListWrap = document.createElement("div");
+    zoomListWrap.className = "zoom-points-list";
+
+    const projHasZoom = !!(state.data && Array.isArray(state.data.zoom_points) && state.data.zoom_points.length > 0);
+
+    const commitSlideZoomPoints = (pts, explicitDisable = false) => {
+      if (!pts || !pts.length) {
+        if (explicitDisable && projHasZoom) {
+          slide.zoom_points = [];
+        } else {
+          delete slide.zoom_points;
+        }
+      } else {
+        slide.zoom_points = zoomUtils.sortZoomPoints(pts.map(zoomUtils.sanitizeZoomPoint));
+      }
+      setDirty(true);
+      scheduleReload(false);
+    };
+
+    renderZoomPointsEditor({
+      container: zoomListWrap,
+      checkbox: enableChk,
+      summaryChip: zoomCountChip,
+      getPoints: () => (Array.isArray(slide.zoom_points) ? slide.zoom_points : []),
+      isExplicitlyDisabled: () => Array.isArray(slide.zoom_points) && slide.zoom_points.length === 0,
+      hasProjectInheritance: projHasZoom,
+      onChange: (nextPts, explicitDisable = false) => {
+        commitSlideZoomPoints(nextPts, explicitDisable);
+      },
+    });
+
+    zoomBody.appendChild(zoomListWrap);
+    zoomDetails.appendChild(zoomBody);
+    els.inspectorBody.appendChild(zoomDetails);
+  }
+
+  /* ---------------------------------------------------------------- Zoom Points Editor Helpers (matches zoompoints.py) */
+  const ZOOM_EASE_RE = /^(?:exp(?:Out|In|InOut)\((\d+(?:\.\d+)?)\)|(?:power[1-4]|expo|sine|circ|quad|cubic|quart|quint)(?:\.(?:in|out|inOut))?|back(?:\.(?:in|out|inOut)(?:\(\d+(?:\.\d+)?\))?)?|power[1-4]|editorial|snappy|expo|back|spring|linear|none)$/;
+  const ZOOM_EASE_PRESETS = [
+    "expOut(5)",
+    "expOut(3)",
+    "expOut(6)",
+    "power3.out",
+    "power3.inOut",
+    "power4.out",
+    "expo.out",
+    "sine.inOut",
+    "back.out(1.2)",
+    "editorial",
+    "snappy",
+    "linear",
+  ];
+
+  function getZoomCap() {
+    const cap = window.MOTION_TOKENS && Number(window.MOTION_TOKENS.STAGE_ZOOM_CAP);
+    return (Number.isFinite(cap) && cap >= 1) ? cap : 1.06;
+  }
+
+  function isValidZoomEase(easeStr) {
+    if (typeof easeStr !== "string") return false;
+    const s = easeStr.trim();
+    if (!s) return false;
+    const expMatch = /^exp(?:Out|In|InOut)\((\d+(?:\.\d+)?)\)$/.exec(s);
+    if (expMatch) return parseFloat(expMatch[1]) > 0;
+    return ZOOM_EASE_RE.test(s);
+  }
+
+  function sanitizeZoomPoint(raw) {
+    const cap = getZoomCap();
+    const obj = (raw && typeof raw === "object") ? raw : {};
+    const clampNum = (v, min, max, defVal) => {
+      if (typeof v === "boolean") return defVal;
+      const n = Number(v);
+      if (v === undefined || v === null || v === "" || !Number.isFinite(n)) return defVal;
+      return +Math.max(min, Math.min(max, n)).toFixed(6);
+    };
+    const at = clampNum(obj.at, 0, 3600, 0.0);
+    const durRaw = (typeof obj.dur !== "boolean" && obj.dur !== undefined && obj.dur !== null && obj.dur !== "") ? Number(obj.dur) : 0.9;
+    const dur = (Number.isFinite(durRaw) && durRaw > 0) ? +Math.min(120, durRaw).toFixed(6) : 0.9;
+    const ease = isValidZoomEase(obj.ease) ? obj.ease.trim() : "expOut(5)";
+    return {
+      at,
+      x: clampNum(obj.x, 0, 1, 0.5),
+      y: clampNum(obj.y, 0, 1, 0.5),
+      scale: clampNum(obj.scale, 1.0, cap, Math.min(1.04, cap)),
+      dur,
+      ease,
+    };
+  }
+
+  function sortZoomPoints(pts) {
+    return (Array.isArray(pts) ? pts : [])
+      .map((pt, idx) => ({ pt: sanitizeZoomPoint(pt), idx }))
+      .sort((a, b) => (a.pt.at - b.pt.at) || (a.idx - b.idx))
+      .map((entry) => entry.pt);
+  }
+
+  function addZoomPoint(pts) {
+    const sorted = sortZoomPoints(pts);
+    const last = sorted[sorted.length - 1];
+    const nextAt = last ? +((last.at || 0) + (last.dur || 0.9) + 0.6).toFixed(2) : 0.8;
+    const nextPt = sanitizeZoomPoint({ at: nextAt, x: 0.5, y: 0.5, scale: 1.04, dur: 0.9, ease: "expOut(5)" });
+    return sortZoomPoints([...sorted, nextPt]);
+  }
+
+  function reorderZoomPoints(pts, index, direction) {
+    const list = (Array.isArray(pts) ? pts : []).map(sanitizeZoomPoint);
+    const target = index + direction;
+    if (index < 0 || index >= list.length || target < 0 || target >= list.length) {
+      return list;
+    }
+    const a = Object.assign({}, list[index]);
+    const b = Object.assign({}, list[target]);
+    // Swap chronological timestamps when reordering so ordered video.yaml persists the new order
+    const tmpAt = a.at;
+    a.at = b.at;
+    b.at = tmpAt;
+    list[index] = b;
+    list[target] = a;
+    return sortZoomPoints(list);
+  }
+
+  function deleteZoomPoint(pts, index) {
+    const list = (Array.isArray(pts) ? pts : []).map(sanitizeZoomPoint);
+    if (index < 0 || index >= list.length) return list;
+    list.splice(index, 1);
+    return list;
+  }
+
+  window.KhordegirZoomEditor = {
+    getZoomCap,
+    isValidZoomEase,
+    sanitizeZoomPoint,
+    sortZoomPoints,
+    addZoomPoint,
+    reorderZoomPoints,
+    deleteZoomPoint,
+  };
+
+  function renderZoomPointsEditor(opts) {
+    const {
+      container,
+      checkbox,
+      summaryChip,
+      getPoints,
+      isExplicitlyDisabled,
+      hasProjectInheritance,
+      onChange,
+    } = opts;
+    const cap = getZoomCap();
+
+    const updateUI = () => {
+      const pts = sortZoomPoints(getPoints());
+      const explicitlyOff = typeof isExplicitlyDisabled === "function" && isExplicitlyDisabled();
+
+      if (checkbox) {
+        checkbox.checked = pts.length > 0;
+      }
+      if (summaryChip) {
+        if (pts.length > 0) {
+          summaryChip.textContent = `${fa(pts.length)} نقطه`;
+        } else if (hasProjectInheritance && !explicitlyOff) {
+          summaryChip.textContent = "ارث‌بری از پروژه";
+        } else {
+          summaryChip.textContent = "خاموش";
+        }
+      }
+
+      container.innerHTML = "";
+      if (!pts.length) {
+        const hint = document.createElement("div");
+        hint.className = "zoom-empty-hint";
+        if (hasProjectInheritance && !explicitlyOff) {
+          hint.textContent = "نقاط زوم از تنظیمات کل پروژه ارث‌بری می‌شوند. برای تغییر یا خاموش‌کردن در این اسلاید فعال کنید.";
+        } else {
+          hint.textContent = "حالت پیش‌فرض مبتدی: خاموش (دوربین ثابت است و کلید zoom_points در video.yaml نوشته نمی‌شود).";
+        }
+        container.appendChild(hint);
+        return;
+      }
+
+      pts.forEach((pt, pIdx) => {
+        const card = document.createElement("div");
+        card.className = "override-card zoom-point-card";
+
+        const head = document.createElement("div");
+        head.className = "override-head";
+
+        const headTitle = document.createElement("span");
+        headTitle.textContent = `نقطه ${fa(pIdx + 1)} • ثانیه ${fa(pt.at.toFixed(1))}`;
+        head.appendChild(headTitle);
+
+        const actions = document.createElement("div");
+        actions.className = "zoom-point-actions";
+
+        const upBtn = document.createElement("button");
+        upBtn.type = "button";
+        upBtn.className = "icon-btn";
+        upBtn.dataset.zoomAct = "up";
+        upBtn.disabled = pIdx === 0;
+        upBtn.title = "جابجایی به بالا";
+        upBtn.textContent = "▲";
+        upBtn.addEventListener("click", () => {
+          const next = reorderZoomPoints(sortZoomPoints(getPoints()), pIdx, -1);
+          onChange(next, false);
+          updateUI();
+        });
+
+        const downBtn = document.createElement("button");
+        downBtn.type = "button";
+        downBtn.className = "icon-btn";
+        downBtn.dataset.zoomAct = "down";
+        downBtn.disabled = pIdx === pts.length - 1;
+        downBtn.title = "جابجایی به پایین";
+        downBtn.textContent = "▼";
+        downBtn.addEventListener("click", () => {
+          const next = reorderZoomPoints(sortZoomPoints(getPoints()), pIdx, 1);
+          onChange(next, false);
+          updateUI();
+        });
+
+        const delBtn = document.createElement("button");
+        delBtn.type = "button";
+        delBtn.className = "icon-btn danger";
+        delBtn.dataset.zoomAct = "del";
+        delBtn.title = "حذف نقطه زوم";
+        delBtn.textContent = "حذف";
+        delBtn.addEventListener("click", () => {
+          const next = deleteZoomPoint(sortZoomPoints(getPoints()), pIdx);
+          onChange(next, next.length === 0);
+          updateUI();
+        });
+
+        actions.appendChild(upBtn);
+        actions.appendChild(downBtn);
+        actions.appendChild(delBtn);
+        head.appendChild(actions);
+        card.appendChild(head);
+
+        const grid = document.createElement("div");
+        grid.className = "override-grid";
+
+        const mkField = (lbl, key, step, min, max, defVal) => {
+          const w = document.createElement("label");
+          w.textContent = lbl;
+          const inp = document.createElement("input");
+          inp.type = "number";
+          inp.dir = "ltr";
+          inp.dataset.zoomField = key;
+          inp.step = String(step);
+          inp.min = String(min);
+          inp.max = String(max);
+          inp.value = String(pt[key] != null ? pt[key] : defVal);
+          inp.addEventListener("change", () => {
+            let v = parseFloat(inp.value);
+            if (!Number.isFinite(v)) v = defVal;
+            v = Math.max(min, Math.min(max, v));
+            inp.value = String(v);
+            const cur = sortZoomPoints(getPoints());
+            const updated = cur.map((item, idx) => (idx === pIdx ? Object.assign({}, item, { [key]: v }) : item));
+            const normalized = sortZoomPoints(updated);
+            onChange(normalized, false);
+            updateUI();
+          });
+          w.appendChild(inp);
+          return w;
+        };
+
+        grid.appendChild(mkField("شروع (at / s)", "at", 0.1, 0, 3600, 0.8));
+        grid.appendChild(mkField("محور X (۰..۱)", "x", 0.05, 0, 1, 0.5));
+        grid.appendChild(mkField("محور Y (۰..۱)", "y", 0.05, 0, 1, 0.5));
+        grid.appendChild(mkField(`مقیاس (۱..${cap})`, "scale", 0.01, 1.0, cap, 1.04));
+        grid.appendChild(mkField("مدت (dur / s)", "dur", 0.1, 0.1, 120, 0.9));
+
+        const easeWrap = document.createElement("label");
+        easeWrap.textContent = "نرمی (Ease)";
+        const easeSel = document.createElement("select");
+        easeSel.className = "select-ctrl";
+        easeSel.dataset.zoomField = "ease";
+        const curEase = isValidZoomEase(pt.ease) ? pt.ease.trim() : "expOut(5)";
+        const options = ZOOM_EASE_PRESETS.includes(curEase) ? ZOOM_EASE_PRESETS : [curEase, ...ZOOM_EASE_PRESETS];
+        options.forEach((ez) => {
+          const o = document.createElement("option");
+          o.value = ez;
+          o.textContent = ez;
+          easeSel.appendChild(o);
+        });
+        easeSel.value = curEase;
+        easeSel.addEventListener("change", () => {
+          const nextEase = isValidZoomEase(easeSel.value) ? easeSel.value : "expOut(5)";
+          const cur = sortZoomPoints(getPoints());
+          const updated = cur.map((item, idx) => (idx === pIdx ? Object.assign({}, item, { ease: nextEase }) : item));
+          onChange(sortZoomPoints(updated), false);
+          updateUI();
+        });
+        easeWrap.appendChild(easeSel);
+        grid.appendChild(easeWrap);
+
+        card.appendChild(grid);
+        container.appendChild(card);
+      });
+
+      const addPtBtn = document.createElement("button");
+      addPtBtn.type = "button";
+      addPtBtn.className = "btn btn-sm btn-ghost";
+      addPtBtn.dataset.zoomAct = "add";
+      addPtBtn.textContent = "+ افزودن نقطه زوم";
+      addPtBtn.addEventListener("click", () => {
+        const next = addZoomPoint(sortZoomPoints(getPoints()));
+        onChange(next, false);
+        updateUI();
+      });
+      container.appendChild(addPtBtn);
+    };
+
+    if (checkbox) {
+      checkbox.onchange = () => {
+        if (checkbox.checked) {
+          const current = getPoints();
+          const next = current.length ? sortZoomPoints(current) : addZoomPoint([]);
+          onChange(next, false);
+        } else {
+          onChange([], true);
+        }
+        updateUI();
+      };
+    }
+
+    updateUI();
+    return updateUI;
   }
 
   /* ---------------------------------------------------------------- Style & Logo Modal */
@@ -1498,6 +1863,27 @@
     if (els.projCountStyleSelect) els.projCountStyleSelect.value = state.data.count_style || "pop";
     if (els.projCountFromSelect) els.projCountFromSelect.value = state.data.count_from || "auto";
     if (els.projMicroFxSelect) els.projMicroFxSelect.value = state.data.micro_fx === false ? "off" : "on";
+
+    state.projZoomDraft = Array.isArray(state.data.zoom_points) && state.data.zoom_points.length
+      ? sortZoomPoints(state.data.zoom_points)
+      : [];
+    if (els.projZoomAdvanced) {
+      els.projZoomAdvanced.open = false;
+    }
+    if (els.projZoomPointsList) {
+      renderZoomPointsEditor({
+        container: els.projZoomPointsList,
+        checkbox: els.chkProjZoomPointsEnable,
+        summaryChip: els.projZoomCountChip,
+        getPoints: () => state.projZoomDraft || [],
+        isExplicitlyDisabled: () => false,
+        hasProjectInheritance: false,
+        onChange: (nextPts) => {
+          state.projZoomDraft = nextPts;
+        },
+      });
+    }
+
     els.styleModal.classList.remove("hidden");
   }
 
@@ -1535,6 +1921,12 @@
     if (els.projMicroFxSelect) {
       if (els.projMicroFxSelect.value === "off") state.data.micro_fx = false;
       else delete state.data.micro_fx;
+    }
+
+    if (Array.isArray(state.projZoomDraft) && state.projZoomDraft.length > 0) {
+      state.data.zoom_points = sortZoomPoints(state.projZoomDraft);
+    } else {
+      delete state.data.zoom_points;
     }
 
     const imgVal = els.projLogoImageSelect.value;

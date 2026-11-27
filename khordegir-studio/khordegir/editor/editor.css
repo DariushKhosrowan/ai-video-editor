@@ -711,7 +711,8 @@ html, body {
   color: var(--muted);
 }
 
-.override-grid input {
+.override-grid input,
+.override-grid select {
   width: 100%;
   background: var(--panel);
   color: var(--text);
@@ -720,6 +721,24 @@ html, body {
   padding: 5px 6px;
   font-size: 12px;
   font-family: inherit;
+}
+
+.zoom-points-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.zoom-point-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.zoom-empty-hint {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
 }
 
 .upload-row {
@@ -807,6 +826,8 @@ html, body {
 
 .modal-wide {
   max-width: 680px;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .style-grid {
