@@ -7,6 +7,8 @@ try:
 except ImportError:  # pragma: no cover
     raise SystemExit("خطا: کتابخانه‌ی pyyaml نصب نیست. بزن:  pip install pyyaml")
 
+from . import scene as scene_mod
+
 PKG = Path(__file__).resolve().parent
 IMAGE_KEYS = {"image", "src", "bg_image", "icon_image", "logo"}
 IMG_EXT = (".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".avif")
@@ -100,6 +102,8 @@ class Project:
                 raise SystemExit(f"خطا: در پوشه‌ی {folder} فایل video.yaml پیدا نشد.")
         else:
             txt = self.yaml_path.read_text(encoding="utf-8")
+            if self.yaml_path.suffix != ".json":
+                self._yaml_text = txt
             try:
                 self.data = (json.loads(txt) if self.yaml_path.suffix == ".json" else yaml.safe_load(txt)) or {}
             except Exception as e:
@@ -108,6 +112,10 @@ class Project:
         d = self.data
         self.title = d.get("title", folder.name)
         self.lang = norm_lang(d.get("lang"), DEFAULT_LANG)
+        try:
+            self.scene = scene_mod.parse_scene(d, yaml_text=getattr(self, "_yaml_text", None))
+        except (ValueError, TypeError) as e:
+            raise SystemExit(str(e))
         fmt = norm_format(d.get("format"), DEFAULT_FORMAT)
         if fmt is None:
             self.warnings.append(f"قاب «{d.get('format')}» ناشناخته است؛ یکی از landscape / portrait / square "
@@ -262,6 +270,16 @@ class Project:
                 proj_val = getattr(self, attr, None)
                 if proj_val is not None and attr not in s:
                     s[attr] = copy.deepcopy(proj_val)
+            proj_scene = getattr(self, "scene", scene_mod.DEFAULT_SCENE)
+            try:
+                s_scene = scene_mod.validate_scene(s["scene"], yaml_text=getattr(self, "_yaml_text", None)) if "scene" in s else proj_scene
+            except (ValueError, TypeError) as e:
+                self.warnings.append(f"اسلاید {i + 1}: {e}")
+                s_scene = proj_scene
+            if s_scene == scene_mod.DEFAULT_SCENE:
+                s.pop("scene", None)
+            else:
+                s["scene"] = s_scene
             proj_fmt = getattr(self, "format", DEFAULT_FORMAT)
             sf = norm_format(s.get("format"), proj_fmt)
             if sf is None:

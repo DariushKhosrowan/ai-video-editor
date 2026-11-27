@@ -99,6 +99,7 @@
     projPresetSelect: document.getElementById("projPresetSelect"),
     projTransitionSelect: document.getElementById("projTransitionSelect"),
     projLogoMotionSelect: document.getElementById("projLogoMotionSelect"),
+    projSceneSelect: document.getElementById("projSceneSelect"),
     projLogoPosSelect: document.getElementById("projLogoPosSelect"),
     projSeedInput: document.getElementById("projSeedInput"),
     projLangSelect: document.getElementById("projLangSelect"),
@@ -265,6 +266,7 @@
         "micro_fx",
         "format",
         "zoom_points",
+        "scene",
       ].forEach((k) => {
         if (state.data[k] !== undefined && copy[k] === undefined) {
           copy[k] = JSON.parse(JSON.stringify(state.data[k]));
@@ -1856,6 +1858,7 @@
     els.projTransitionSelect.value = state.data.transition || "random";
     els.projLogoMotionSelect.value = state.data.logo_motion || "random";
     els.projLogoPosSelect.value = state.data.logo_position || "top-left";
+    if (els.projSceneSelect) els.projSceneSelect.value = state.data.scene || "none";
     els.projSeedInput.value = String(Number(state.data.seed) || 0);
     if (els.projLangSelect) els.projLangSelect.value = state.data.lang || "fa";
     els.projLogoTextInput.value = state.data.logo_text || "";
@@ -1894,6 +1897,11 @@
     state.data.transition = els.projTransitionSelect.value;
     state.data.logo_motion = els.projLogoMotionSelect.value;
     state.data.logo_position = els.projLogoPosSelect.value;
+    if (els.projSceneSelect) {
+      const scVal = String(els.projSceneSelect.value || "none").trim().toLowerCase();
+      if (scVal && scVal !== "none") state.data.scene = scVal;
+      else delete state.data.scene;
+    }
     state.data.seed = Number(els.projSeedInput.value) || 0;
     if (els.projLangSelect) {
       if (els.projLangSelect.value === "en") state.data.lang = "en";

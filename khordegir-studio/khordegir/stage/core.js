@@ -968,6 +968,10 @@
     stage.setAttribute("data-lang", lang);
     stage.setAttribute("data-format", S.format);
     stage.setAttribute("data-theme-mode", (th.colors && th.colors.isDark === false) ? "light" : "dark");
+    // scene surface (none | corkboard | paper | dark-grid): pure-CSS texture under the content
+    const _sc = String(slide.scene || "none").trim().toLowerCase();
+    S.scene = (_sc === "corkboard" || _sc === "paper" || _sc === "dark-grid") ? _sc : "none";
+    stage.setAttribute("data-scene", S.scene);
 
     // background
     const bg = document.createElement("div"); bg.className = "bg"; stage.appendChild(bg);
@@ -1072,6 +1076,7 @@
     } : {};
     return {
       format: S.format,
+      scene: S.scene || "none",
       width: W,
       height: H,
       duration: S._dur,

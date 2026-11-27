@@ -99,3 +99,75 @@ body.measuring #stage .content *{transform:none!important}
 .auto-num-core{display:inline-block;text-align:center;direction:ltr;unicode-bidi:isolate;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
 .emo-pop{display:inline-block;transform-origin:50% 60%;will-change:transform,opacity}
 .micro-pop{display:inline-block;transform-origin:50% 60%;will-change:transform}
+
+/* ----------------------------------------------------------------
+   Scene surfaces: #stage[data-scene="corkboard"|"paper"|"dark-grid"]
+   Pure CSS gradients (original patterns, MIT/CC0-compatible); no images,
+   fonts or network. Only the .bg layer changes, so it always sits below
+   the slide content; the ::after grain layer is kept. Default 'none' = unchanged.
+   ---------------------------------------------------------------- */
+#stage[data-scene="corkboard"] .bg{
+  background-color:#20160d;
+  background-image:
+    radial-gradient(ellipse 92% 84% at 50% 44%, rgba(255,214,162,.06) 0%, transparent 64%),
+    radial-gradient(ellipse 116% 104% at 50% 50%, transparent 48%, rgba(7,4,2,.56) 100%),
+    radial-gradient(2.2px 1.6px at 14px 18px, rgba(168,120,76,.22) 0 48%, transparent 56%),
+    radial-gradient(1.8px 2.4px at 38px 11px, rgba(10,6,2,.38) 0 48%, transparent 56%),
+    radial-gradient(2.6px 1.8px at 26px 42px, rgba(138,94,56,.18) 0 48%, transparent 56%),
+    radial-gradient(1.6px 1.6px at 51px 33px, rgba(214,166,118,.13) 0 48%, transparent 56%),
+    linear-gradient(148deg, #271b11 0%, #1c130c 54%, #150e08 100%);
+  background-size:100% 100%, 100% 100%, 64px 56px, 52px 48px, 76px 68px, 44px 40px, 100% 100%;
+}
+#stage[data-theme-mode="light"][data-scene="corkboard"] .bg{
+  background-color:#ebdec7;
+  background-image:
+    radial-gradient(ellipse 92% 84% at 50% 44%, rgba(255,250,240,.28) 0%, transparent 66%),
+    radial-gradient(ellipse 116% 104% at 50% 50%, transparent 52%, rgba(92,62,32,.14) 100%),
+    radial-gradient(2.2px 1.6px at 14px 18px, rgba(162,126,78,.22) 0 48%, transparent 56%),
+    radial-gradient(1.8px 2.4px at 38px 11px, rgba(124,90,48,.18) 0 48%, transparent 56%),
+    radial-gradient(2.6px 1.8px at 26px 42px, rgba(255,248,236,.32) 0 48%, transparent 56%),
+    linear-gradient(148deg, #efe3cd 0%, #e7d7bc 54%, #dfd0b2 100%);
+  background-size:100% 100%, 100% 100%, 64px 56px, 52px 48px, 76px 68px, 100% 100%;
+}
+#stage[data-scene="paper"] .bg{
+  background-color:#1a1713;
+  background-image:
+    radial-gradient(ellipse 84% 76% at 62% 24%, rgba(255,236,204,.045) 0%, transparent 64%),
+    radial-gradient(ellipse 118% 102% at 50% 50%, transparent 54%, rgba(0,0,0,.44) 100%),
+    repeating-linear-gradient(0deg, rgba(255,244,224,.018) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, rgba(255,244,224,.015) 0 1px, transparent 1px 6px),
+    linear-gradient(155deg, #1e1b16 0%, #171410 56%, #12100d 100%);
+}
+#stage[data-theme-mode="light"][data-scene="paper"] .bg{
+  background-color:#f5efe2;
+  background-image:
+    radial-gradient(ellipse 84% 76% at 62% 24%, rgba(255,255,255,.4) 0%, transparent 64%),
+    radial-gradient(ellipse 118% 102% at 50% 50%, transparent 58%, rgba(110,84,48,.10) 100%),
+    repeating-linear-gradient(0deg, rgba(120,90,50,.022) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, rgba(120,90,50,.018) 0 1px, transparent 1px 6px),
+    linear-gradient(155deg, #f8f3e8 0%, #f2ebdb 56%, #ebe3d0 100%);
+}
+#stage[data-scene="dark-grid"] .bg{
+  background-color:#071222;
+  background-image:
+    radial-gradient(ellipse 78% 68% at 68% 22%, rgba(56,189,248,.075) 0%, transparent 66%),
+    radial-gradient(ellipse 118% 102% at 50% 50%, transparent 52%, rgba(2,6,14,.56) 100%),
+    linear-gradient(to right, rgba(125,200,255,.12) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(125,200,255,.12) 1px, transparent 1px),
+    linear-gradient(to right, rgba(96,178,255,.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(96,178,255,.055) 1px, transparent 1px),
+    linear-gradient(160deg, #0b192e 0%, #071121 55%, #050b16 100%);
+  background-size:100% 100%, 100% 100%, 160px 160px, 160px 160px, 32px 32px, 32px 32px, 100% 100%;
+}
+#stage[data-theme-mode="light"][data-scene="dark-grid"] .bg{
+  background-color:#eef4fb;
+  background-image:
+    radial-gradient(ellipse 78% 68% at 68% 22%, rgba(255,255,255,.5) 0%, transparent 66%),
+    radial-gradient(ellipse 118% 102% at 50% 50%, transparent 58%, rgba(30,70,120,.08) 100%),
+    linear-gradient(to right, rgba(40,90,150,.13) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(40,90,150,.13) 1px, transparent 1px),
+    linear-gradient(to right, rgba(40,90,150,.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(40,90,150,.06) 1px, transparent 1px),
+    linear-gradient(160deg, #f3f8fd 0%, #e9f1fa 100%);
+  background-size:100% 100%, 100% 100%, 160px 160px, 160px 160px, 32px 32px, 32px 32px, 100% 100%;
+}
