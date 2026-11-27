@@ -8,6 +8,7 @@ except ImportError:  # pragma: no cover
     raise SystemExit("خطا: کتابخانه‌ی pyyaml نصب نیست. بزن:  pip install pyyaml")
 
 from . import scene as scene_mod
+from . import anim_presets
 
 PKG = Path(__file__).resolve().parent
 IMAGE_KEYS = {"image", "src", "bg_image", "icon_image", "logo"}
@@ -116,6 +117,23 @@ class Project:
             self.scene = scene_mod.parse_scene(d, yaml_text=getattr(self, "_yaml_text", None))
         except (ValueError, TypeError) as e:
             raise SystemExit(str(e))
+        _yt = getattr(self, "_yaml_text", None)
+        raw_anim = d.get("anim")
+        if raw_anim is not None and str(raw_anim).strip().lower() not in ("none", ""):
+            anim_presets.validate_anim_with_line(raw_anim, yaml_text=_yt, key="anim")
+            self.anim = raw_anim
+        else:
+            self.anim = None
+        raw_objs = d.get("anim_objects")
+        if raw_objs is not None:
+            if not isinstance(raw_objs, dict):
+                ln = anim_presets.find_line_number(_yt, "anim_objects")
+                raise SystemExit(f"خطای خط {ln} در video.yaml: مقدار anim_objects باید یک دیکشنری باشد.")
+            for ok, ov in raw_objs.items():
+                anim_presets.validate_anim_with_line(ov, yaml_text=_yt, key=f"anim_objects['{ok}']")
+            self.anim_objects = raw_objs
+        else:
+            self.anim_objects = None
         fmt = norm_format(d.get("format"), DEFAULT_FORMAT)
         if fmt is None:
             self.warnings.append(f"قاب «{d.get('format')}» ناشناخته است؛ یکی از landscape / portrait / square "
@@ -280,6 +298,36 @@ class Project:
                 s.pop("scene", None)
             else:
                 s["scene"] = s_scene
+            yt = getattr(self, "_yaml_text", None)
+            if "anim" in s:
+                s_raw_anim = s["anim"]
+                if s_raw_anim is None or str(s_raw_anim).strip().lower() in ("none", ""):
+                    s.pop("anim", None)
+                else:
+                    anim_presets.validate_anim_with_line(s_raw_anim, yaml_text=yt, key="anim", where=f"اسلاید {i + 1}")
+                    s["anim"] = anim_presets.resolve_animation(s_raw_anim)
+            elif getattr(self, "anim", None) is not None:
+                s["anim"] = anim_presets.resolve_animation(self.anim)
+            if "anim_objects" in s:
+                s_raw_objs = s["anim_objects"]
+                if not isinstance(s_raw_objs, dict):
+                    ln = anim_presets.find_line_number(yt, "anim_objects")
+                    raise SystemExit(f"خطای خط {ln} در video.yaml: مقدار anim_objects در اسلاید {i + 1} باید یک دیکشنری باشد.")
+                resolved_objs = {}
+                for k, v in (getattr(self, "anim_objects", None) or {}).items():
+                    resolved_objs[k] = anim_presets.resolve_animation(v)
+                for k, v in s_raw_objs.items():
+                    if v is None or str(v).strip().lower() in ("none", ""):
+                        resolved_objs.pop(k, None)
+                        continue
+                    anim_presets.validate_anim_with_line(v, yaml_text=yt, key=f"anim_objects['{k}']", where=f"اسلاید {i + 1}")
+                    resolved_objs[k] = anim_presets.resolve_animation(v)
+                if resolved_objs:
+                    s["anim_objects"] = resolved_objs
+                else:
+                    s.pop("anim_objects", None)
+            elif getattr(self, "anim_objects", None):
+                s["anim_objects"] = {k: anim_presets.resolve_animation(v) for k, v in self.anim_objects.items()}
             proj_fmt = getattr(self, "format", DEFAULT_FORMAT)
             sf = norm_format(s.get("format"), proj_fmt)
             if sf is None:

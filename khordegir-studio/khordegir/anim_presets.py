@@ -96,13 +96,19 @@ def validate_animation_config(raw) -> dict:
     Returns normalized configuration dict.
     """
     if raw is None:
-        return copy.deepcopy(PRESETS["fade-up"])
+        cfg = copy.deepcopy(PRESETS["fade-up"])
+        cfg["preset"] = "fade-up"
+        return cfg
 
     if isinstance(raw, str):
         key = raw.strip().lower()
         if not key:
-            return copy.deepcopy(PRESETS["fade-up"])
-        return get_preset(key)
+            cfg = copy.deepcopy(PRESETS["fade-up"])
+            cfg["preset"] = "fade-up"
+            return cfg
+        cfg = get_preset(key)
+        cfg["preset"] = key
+        return cfg
 
     if isinstance(raw, list):
         # List of keyframes
@@ -232,6 +238,8 @@ def resolve_animation(raw) -> dict:
         "delay": cfg.get("delay", 0.0),
         "ease": cfg.get("ease", "expOut(5)"),
     }
+    if "preset" in cfg:
+        resolved["preset"] = cfg["preset"]
     if "from" in cfg:
         resolved["from"] = dict(cfg["from"])
     if "to" in cfg:
@@ -243,3 +251,34 @@ def resolve_animation(raw) -> dict:
     if "mode" in cfg:
         resolved["mode"] = cfg["mode"]
     return resolved
+
+
+def find_line_number(yaml_text, key: str = "anim", value=None, start_line: int = 1) -> int:
+    """Find the 1-indexed line of key/value in the YAML text (1 when unknown)."""
+    if not yaml_text or not isinstance(yaml_text, str):
+        return 1
+    lines = yaml_text.splitlines()
+    val_str = str(value).strip().lower() if value is not None and not isinstance(value, (dict, list)) else None
+    if val_str:
+        for idx in range(max(0, start_line - 1), len(lines)):
+            low = lines[idx].lower()
+            if key.lower() in low and val_str in low:
+                return idx + 1
+        for idx in range(max(0, start_line - 1), len(lines)):
+            if val_str in lines[idx].lower():
+                return idx + 1
+    for idx in range(max(0, start_line - 1), len(lines)):
+        stripped = lines[idx].strip()
+        if stripped.startswith(f"{key}:") or stripped.startswith(f"- {key}:") or stripped == f"{key}:":
+            return idx + 1
+    return max(1, start_line)
+
+
+def validate_anim_with_line(raw, yaml_text=None, line_no=None, key: str = "anim", where: str = "") -> dict:
+    """Validate an animation block; raise SystemExit with a Persian line-aware error."""
+    try:
+        return validate_animation_config(raw)
+    except (ValueError, TypeError) as exc:
+        ln = line_no or find_line_number(yaml_text, key=key.split("[")[0], value=raw) or 1
+        where_str = f" در {where}" if where else ""
+        raise SystemExit(f"خطای خط {ln} در video.yaml: مقدار {key}{where_str} نامعتبر است ('{raw}'). {exc}")

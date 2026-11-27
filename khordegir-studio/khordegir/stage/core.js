@@ -511,6 +511,70 @@
     }).join("<br>");
   }
 
+
+  /* ---- per-object animation presets (video.yaml anim / anim_objects, resolved by anim_presets.py) ---- */
+  const ANIM_TEXT_ROLES = ["eyebrow", "title", "body", "note", "bubble", "badge"];
+  function animCfgFor(slide, e, role) {
+    if (!slide) return null;
+    const objs = slide.anim_objects;
+    const fieldKey = e && ((e.dataset && e.dataset.field) ||
+      (e.parentElement && e.parentElement.dataset && e.parentElement.dataset.fieldWrap));
+    return (objs && ((fieldKey && objs[fieldKey]) || objs[role])) || slide.anim || null;
+  }
+  /* returns the end time, or null when the config has nothing to say (role defaults then apply) */
+  function animEnter(e, role, t, cfg, over, m) {
+    const scl = (o) => { if (o && o.scale != null) o.scale = MT.clampScale(o.scale); return o; };
+    const cue = () => {
+      if (!S.fx) return;
+      if (role === "title") S.fx.cue(t, "whoosh", e.textContent.slice(0, 30));
+      else if (role === "bubble" || role === "badge") S.fx.cue(t, "pop", e.textContent.slice(0, 30));
+    };
+    const kfs = Array.isArray(cfg.keyframes) ? cfg.keyframes : null;
+    if (kfs && kfs.length) {   /* Advanced: sequential tweens at keyframe times (e^-x ease per step) */
+      const first = Object.assign({}, kfs[0]); delete first.t; delete first.ease; scl(first);
+      S.tl.set(e, Object.assign({ opacity: 0 }, first), 0);
+      const kfTl = gsap.timeline();
+      for (let j = 1; j < kfs.length; j++) {
+        const props = Object.assign({}, kfs[j]);
+        const ez = props.ease || cfg.ease || "expOut(5)";
+        const dt = Math.max(0, kfs[j].t - kfs[j - 1].t);
+        delete props.t; delete props.ease; scl(props);
+        kfTl.to(e, Object.assign(props, { duration: dt, ease: S.ease(ez) }), kfs[j - 1].t - kfs[0].t);
+      }
+      S.tl.add(kfTl, t);
+      const total = kfs[kfs.length - 1].t - kfs[0].t;
+      e.dataset.end = (t + total).toFixed(3);
+      cue();
+      return t + total;
+    }
+    const dur = cfg.duration != null ? cfg.duration : (m.dur || 0.5);
+    const ease = S.ease(cfg.ease || m.ease || "expOut(5)");
+    const from = scl(Object.assign({ opacity: 0 }, cfg.from || {}));
+    const to = scl(Object.assign({ opacity: 1, x: 0, y: 0, scale: 1 }, cfg.to || {}));
+    if (over) {
+      if (over.x != null) from.x = over.x;
+      if (over.y != null) from.y = over.y;
+      if (over.scale != null) from.scale = MT.clampScale(over.scale);
+    }
+    if (cfg.mode && ANIM_TEXT_ROLES.indexOf(role) >= 0 && !e.querySelector("img,svg,canvas,video")) {
+      const mode = cfg.mode === "line" ? "line" : "word";   /* whole words only: Persian joins + ZWNJ stay intact */
+      if (!e.querySelector(".k-word, .k-line")) e.innerHTML = wrapHtmlWords(e.innerHTML, mode);
+      const units = [...e.querySelectorAll(mode === "line" ? ".k-line" : ".k-word")];
+      if (units.length) {
+        const st = cfg.stagger != null ? cfg.stagger : 0.045;
+        units.forEach((u, idx) => S.tl.fromTo(u, from, Object.assign({}, to, { duration: dur, ease, immediateRender: true }), t + idx * st));
+        const end = t + Math.max(0, units.length - 1) * st + dur;
+        e.dataset.end = end.toFixed(3);
+        cue();
+        return end;
+      }
+    }
+    S.tl.fromTo(e, from, Object.assign(to, { duration: dur, ease, immediateRender: true }), t);
+    e.dataset.end = (t + dur).toFixed(3);
+    cue();
+    return t + dur;
+  }
+
   function makeAPI(slide, root) {
     const th = S.theme, fmt = S.format, L = S.layoutFor(th, fmt), M = th.motion || MT.themeMotion();
     const scam = (slide.layout || "SLIDE").toUpperCase() === "SCAM";
@@ -682,7 +746,8 @@
       },
       at(role, i = 0, extra = 0) {
         const m = M[role] || M.body || MT.text.body;
-        return base + (m.delay || 0) + i * (m.stagger || 0) + extra;
+        const ac = animCfgFor(slide, null, role);
+        return base + (m.delay || 0) + (ac && ac.delay ? ac.delay : 0) + i * (m.stagger || 0) + extra;
       },
       /* entrance by role: eyebrow | title | body | card | bubble | badge | image | imageFull | note */
       enter(e, role, i = 0, extra = 0, over) {
@@ -690,6 +755,11 @@
         if (e.dataset && e.dataset.fieldWrap && e.firstElementChild) e = e.firstElementChild;
         const baseRole = M[role] || MT.ui[role] || M.body || MT.text.body;
         const m = Object.assign({}, baseRole, over || {});
+        const animCfg = animCfgFor(slide, e, role);
+        if (animCfg) {   /* A.at already adds the preset delay on top of the role delay (keeps title/body order) */
+          const at0 = (over && over.at != null) ? over.at : A.at(role, i, extra);
+          return animEnter(e, role, at0, animCfg, over, m);
+        }
         const explicit = over && (over.x != null || over.y != null || over.scale != null);
         let from;
         if (explicit || !S.fx) {
