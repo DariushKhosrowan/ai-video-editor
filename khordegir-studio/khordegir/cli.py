@@ -128,9 +128,26 @@ def cmd_build(a):
     report = [f"{Path(r['file']).name}\t{r.get('duration', 0):.2f}s\t{'OK' if r.get('ok') else 'ERROR ' + r.get('error', '')}"
               + (f"\tCAM-OVERLAP {r['cam_overlap']}" if r.get("cam_overlap") else "") for r in results]
     (out / "build-report.txt").write_text("\n".join(report + ["", "هشدارها:"] + pr.warnings) + "\n", encoding="utf-8")
+    extras = []
+    try:
+        from .captions import write_captions
+        cap_res = write_captions(pr, out)
+        if cap_res:
+            for w in cap_res.get("warnings", []):
+                print("  ⚠ " + w)
+            extras.append("زیرنویس: captions.srt / captions.vtt")
+    except Exception as e:
+        print(f"  ⚠ زیرنویس ساخته نشد: {e}")
+    try:
+        from .sfx import build_sfx_plan
+        sfx_plan = build_sfx_plan(pr, out)
+        if sfx_plan and sfx_plan.get("wavs"):
+            extras.append(f"افکت صوتی: {fa(len(sfx_plan['wavs']))} فایل WAV")
+    except Exception as e:
+        print(f"  ⚠ افکت صوتی ساخته نشد: {e}")
     bad = [r for r in results if not r.get("ok")]
     print(f"تمام شد در {fa(round(time.time() - t0))} ثانیه → {out}")
-    print(f"  {fa(len(steps))} مرحله در steps_data.lua، فایل PDF: slides.pdf، تله‌پرامپتر: prompter.html")
+    print(f"  {fa(len(steps))} مرحله در steps_data.lua، فایل PDF: slides.pdf، تله‌پرامپتر: prompter.html" + (("، " + "، ".join(extras)) if extras else ""))
     target = a.copy_to or (str(pr.studio) if pr.studio and not a.no_copy else None)
     if target:
         copy_out(pr, out, Path(target), a.copy.split(",") if a.copy else pr.copy)
