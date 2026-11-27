@@ -132,6 +132,8 @@ class Project:
         self.copy = d.get("copy") or ["mp4", "png", "steps", "prompter"]
         self.default_duration = d.get("duration")
         self.slides = self._normalise(d.get("slides") or [])
+        from .zoompoints import validate_zoom_points
+        self.zoom_points = validate_zoom_points(d.get("zoom_points"), where="Project")
 
     # ------------------------------------------------------------ paths
     def find(self, p, extra=()):
