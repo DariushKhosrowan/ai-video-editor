@@ -1,0 +1,348 @@
+# English Convey · Video #1 — generated from script-final.md [SLIDE n] cues by make_yaml.py (one slide per cue; say = teleprompter text)
+# build: python3 -m khordegir build videos/english-convey-video1 --no-copy
+title: Why Quietly Saying "No" Makes Everyone Uncomfortable
+theme: english-convey
+copy:
+- mp4
+- png
+- prompter
+duration: 6
+slides:
+- template: kinetic_text
+  eyebrow: FOUR FRIENDS · ONE TABLE
+  text: 'Three lean into the shot.
+
+    One says *"I''m good, thanks."*'
+  align: center
+  layout: SCAM
+  say: Picture four friends at a café table. Someone lifts a phone to film the table for social media. Three friends lean
+    into the shot. The fourth smiles and quietly says, "I'm good, thanks." No explanation. No apology. No anger. Just that
+    calm refusal. (pause) For a moment, the conversation stops. Someone looks down at their phone. Another friend looks away.
+    Why can two quiet words make a room freeze?
+  act: 1
+- template: title_card
+  eyebrow: ENGLISH CONVEY · PSYCHOLOGY
+  title: Why Quietly Saying *"No"* Makes Everyone Uncomfortable
+  subtitle: Three forces behind a five-second silence
+  layout: SCAM
+  say: Of course, a quiet "no" doesn't literally make everyone uncomfortable. Sometimes the heaviest tension lives inside
+    your own head. Other times, the room really does tighten up.
+  act: 1
+- template: timeline
+  title: Three forces behind the pause
+  events:
+  - date: '1'
+    text: Fear in your head
+  - date: '2'
+    text: Silent judgment
+  - date: '3'
+    text: Group pressure
+  layout: SCAM
+  say: Three forces explain that pause. Fear in your head, silent judgment, and group pressure. Let's start with the person
+    thinking about saying "no." Before anyone else reacts, you feel the discomfort first.
+  act: 1
+- template: chapter_card
+  prefix: 'FORCE '
+  number: '1'
+  title: Fear *Inside* Your Own Head
+  subtitle: Before anyone reacts, you feel it first.
+  layout: SCAM
+  say: Look first from the asker's side. In one Columbia study, students asked strangers to walk them to the gym. Before starting,
+    they guessed they would ask 7.2 people for one yes.
+  act: 2
+- template: study_card
+  eyebrow: STUDY · 2008
+  sample: Columbia students
+  authors: Flynn & Lake (2008)
+  journal: Journal of Personality and Social Psychology
+  finding: Find *one* stranger who will walk you to the gym. How many people will you have to ask?
+  stats: 'Predicted asks: 7.2 | danger
+
+    Actual asks: 2.3 | accent'
+  caveat: Study 2 · averages per participant
+  source: Flynn & Lake (2008), JPSP 95(1), 128–143
+  layout: SCAM
+  say: 'In reality, they needed an average of 2.3 people for one yes. They expected to ask roughly three times as many people
+    as needed. Why were their guesses so far off? Askers focus on the favor. They underestimate how uncomfortable it feels
+    to refuse a face-to-face request. That social pressure helps explain why people sometimes agree. That was the asker''s
+    side. Now flip the camera: what happens when you turn down an invitation? That''s what Givi and Kirk studied.'
+  act: 2
+- template: split_compare
+  eyebrow: FLIP THE CAMERA
+  title: Two sides of a *no*
+  a_icon: 🙋
+  a_title: The person asking
+  a_body: 'Flynn & Lake (2008)
+
+    Underestimate how hard refusing feels'
+  a_tone: muted
+  b_icon: 🙅
+  b_title: The person saying no
+  b_body: 'Givi & Kirk (2024)
+
+    Overestimate how badly the no will land'
+  b_tone: accent
+  layout: SCAM
+  say: In a small pilot survey of 51 people, 77 percent said they had accepted an unwanted invitation. They feared what declining
+    would cause. Then in 2024, they reported five studies with over 2,000 participants. One study even used real couples.
+    One partner wrote a real invitation. The other was instructed to decline it. Both partners then reported their reactions.
+  act: 2
+- template: study_card
+  eyebrow: STUDY · 2024
+  sample: 5 studies · 2,000+ people
+  authors: Givi & Kirk (2024)
+  journal: Journal of Personality and Social Psychology
+  finding: 'Pilot survey: most had said yes to an invitation they *didn''t want*, out of fear of declining.'
+  stats: 'Pilot (51 people): 77% | accent'
+  caveat: Plus five main studies — one with real couples.
+  source: Givi & Kirk (2024), JPSP 126(6), 1103–1115
+  layout: SCAM
+  say: The pattern was consistent. People saying no overestimated how upset the person inviting would feel. They also overestimated
+    how likely they were to lose future invitations. Why did they misread the reaction? People saying no think the focus stays
+    on the bare "no." But people inviting reported thinking more about the thoughts behind the decision.
+  act: 2
+- template: split_compare
+  eyebrow: THE MIND GAP
+  title: What decliners *expect* vs what inviters *report*
+  a_icon: 🔴
+  a_title: You expect
+  a_body: 'They focus on the bare "NO"
+
+    They''ll be upset
+
+    Fewer invites later'
+  a_tone: danger
+  b_icon: 💭
+  b_title: Inviters report
+  b_body: 'They think about the thoughts behind your decision
+
+    Less upset than you fear'
+  b_tone: accent
+  verdict: Everyday invitations · scenario studies + one couples study
+  layout: SCAM
+  say: Keep their scope in mind. These were mostly everyday, low-stakes invitations. Many were scenario studies, plus one
+    study with real couples. They did not track long-term relationship damage. Big life events or different cultures may also
+    work differently. Still, with everyday invitations, we often overestimate how negatively the other person will react.
+    So why do some rooms still freeze? That brings us to the second force. None of these studies tested our exact café scene.
+    Together, they help explain why two quiet refusals land so differently.
+  act: 2
+- template: split_compare
+  eyebrow: A SIMPLE PUZZLE
+  title: Why vanilla doesn't start an *argument*
+  a_icon: 🍦
+  a_title: Vanilla
+  a_body: Your personal taste
+  a_tone: accent
+  b_icon: 🍫
+  b_title: Chocolate
+  b_body: No verdict on theirs
+  b_tone: muted
+  layout: SCAM
+  say: You pick vanilla. Your friends pick chocolate. Nobody feels judged, because your taste doesn't question theirs. Now
+    compare that with our central idea. A personal boundary tells people what you won't do. A principled refusal can make
+    people question what they're doing.
+  act: 3
+- template: quote_card
+  eyebrow: THE CORE IDEA
+  quote: A personal boundary tells people what *you* won't do. A principled refusal can make people question what *they're*
+    doing.
+  author: English Convey
+  role: The thesis of this video
+  tone: accent
+  layout: SCAM
+  say: Compare two real moments. At a café, you say, "I'm skipping coffee so I sleep tonight." That simply explains your limit.
+    Now imagine a group chat where coworkers mock a colleague. One person refuses to join. Someone replies, "Come on, it's
+    just a joke." Without lecturing anyone, that quiet refusal makes others question what they're doing.
+  act: 3
+- template: split_compare
+  eyebrow: TWO REAL MOMENTS
+  title: Boundary or *principle*?
+  a_icon: ☕
+  a_title: Personal limit
+  a_body: '"I''m skipping coffee so I sleep tonight."'
+  a_tone: accent
+  b_icon: 💬
+  b_title: Principled stand
+  b_body: Refusing to join a group chat that mocks a colleague
+  b_tone: danger
+  layout: SCAM
+  say: Sociologist Erving Goffman offers a useful lens here. Applying his 1959 theory is our interpretation, not a lab finding.
+  act: 3
+- template: split_compare
+  eyebrow: GOFFMAN'S LENS (1959)
+  title: Social life as *theater*
+  a_icon: 🎭
+  a_title: Front stage
+  a_body: 'Before an audience
+
+    We manage how we appear'
+  a_tone: accent
+  b_icon: 🚪
+  b_title: Back stage
+  b_body: 'Away from the audience
+
+    We relax parts of the act'
+  b_tone: muted
+  verdict: Our interpretation — not a lab finding
+  source: Goffman (1959), The Presentation of Self in Everyday Life
+  layout: SCAM
+  say: Goffman compared social life to theater. On the front stage, before an audience, we manage how we appear. Away from
+    that audience, people can relax parts of their public performance. To keep a gathering smooth, people often cooperate
+    on the surface. They protect a shared "definition of the situation," as Goffman put it. When one person steps off-script,
+    the room pauses for a beat. When does a brief pause turn into real resentment? In 2008, Monin and his team studied people
+    who refuse on principle. They called that person a "moral rebel."
+  act: 3
+- template: lower_third
+  name: Monin, Sawyer & Marquez (2008)
+  role: 4 studies · US undergraduates · "The Rejection of Moral Rebels"
+  tag: MORAL REBELS
+  layout: SCAM
+  say: In one study, students recorded a speech against their own view. Those who went along disliked a peer who refused.
+    Meanwhile, outside observers preferred that refuser.
+  act: 3
+- template: split_compare
+  eyebrow: TWO STUDIES
+  title: How *outsiders* saw the refuser
+  a_icon: 🎤
+  a_title: Speech study
+  a_body: 'Those who went along: disliked him
+
+    Observers: preferred him'
+  a_tone: accent
+  b_icon: 🔎
+  b_title: Biased suspect task
+  b_body: 'Those who went along: tended to like him less
+
+    Observers: rated him more moral, but did not significantly prefer him'
+  b_tone: danger
+  source: Monin, Sawyer & Marquez (2008), JPSP 95(1), 76–93
+  layout: SCAM
+  say: In another study, students chose the likely burglary suspect out of three. It was a racially biased suspect-choice
+    task. Information was set up to point at the only Black suspect. The rebel refused, calling it biased. People who went
+    along tended to like the refuser less. Still, the gap was smaller this time. Outside observers rated him as more moral,
+    yet did not significantly prefer him. Why did going along spark dislike? A third test pointed to an explanation. People
+    who went along expected the rebel to look down on them. That expected rejection helped explain their dislike.
+  act: 3
+- template: bullet_list
+  title: Why rebels spark dislike
+  items:
+  - text: Expected judgment threatens self-image
+    tone: accent
+  - text: Writing about a personal value first removed the gap (Study 4)
+  - text: A later online replication did not repeat it — disputed
+    tone: danger
+  source: Holubar (2015) OSF a4fmg · Monin (2015) OSF 3s2zd
+  layout: SCAM
+  say: In the original study, writing first about a personal value removed that gap in liking. Still, keep two limits in mind.
+    These were morally charged tasks, not dinner plans. Also, a later online replication of that last study did not repeat
+    the result. However, it was disputed. The original author argued key details changed—both the writing task and the setting.
+    So treat that finding with caution. In Force 2, people feel judged by your refusal. In Force 3, nobody needs to judge
+    you. Standing alone feels heavy by itself.
+  act: 3
+- template: chapter_card
+  prefix: 'FORCE '
+  number: '3'
+  title: Standing *Alone*
+  subtitle: Nobody needs to judge you. It still feels heavy.
+  layout: SCAM
+  say: Even without moral judgment, matching the group pulls hard on us. Think back to Solomon Asch's classic line tests.
+    They ran in the early 1950s and were reported in 1955. People matched line lengths on simple cards.
+  act: 4
+- template: study_card
+  eyebrow: ASCH · 1955
+  sample: 123 people
+  authors: Solomon Asch (1955)
+  journal: Scientific American · "Opinions and Social Pressure"
+  finding: Match a line on a card. Alone it's easy. Then everyone else gives the *same wrong answer*.
+  stats: 'Alone: <1% | muted
+
+    With the group: 36.8% | accent'
+  caveat: 36.8% of answers — not of people. ~1/4 never went along; ~3/4 went along at least sometimes.
+  source: Asch (1955), Scientific American 193(5), 31–35
+  layout: SCAM
+  say: Under ordinary conditions, people got less than 1 percent wrong. The task was obvious. Then Asch placed one real participant
+    with actors working for him. Everyone else gave the same wrong answer. Suddenly, 36.8 percent of those test answers turned
+    wrong. Notice what that number means. That is 36.8 percent of answers, not people. About one quarter of participants never
+    went along. Roughly three quarters went along at least sometimes. (pause) Watch the pattern as the group grows. With one
+    wrong opponent, errors sat at 3.6 percent. With two, they jumped to 13.6 percent. With three, they hit 31.8 percent. After
+    three voices, bigger majorities added very little.
+  act: 4
+- template: stat_bars
+  eyebrow: ASCH (1955)
+  title: Errors by size of the wrong *majority*
+  items: '1 opponent: 3.6
+
+    2 opponents: 13.6
+
+    *3 opponents*: 31.8'
+  highlight: 3 opponents
+  max: 40
+  suffix: '%'
+  decimals: 1
+  unit: Bigger majorities added very little.
+  layout: SCAM
+  say: Of course, matching lines in a lab isn't real life. Still, look back at our four friends. Three agree, and you are
+    the fourth. Through this lens, just three people can start to feel like everyone. Yet Asch found one hopeful twist. With
+    one truthful partner, people answered wrongly only one fourth as often.
+  act: 4
+- template: punch_in
+  eyebrow: THE ALLY EFFECT
+  text: '*ONE* TRUTHFUL PARTNER'
+  caption: Wrong answers only one fourth as often (Asch, 1955)
+  tone: accent
+  layout: SCAM
+  say: In our view, that holds a quiet lesson. Even one person breaking a unanimous majority can make it easier to disagree.
+  act: 4
+- template: three_cards
+  title: Not every silence comes from strength
+  cards:
+  - icon: 🙈
+    label: Silence from fear
+    text: Hiding · going along
+  - icon: 🧭
+    label: Calm boundary
+    text: A clear personal limit
+  - icon: ⚖️
+    label: Principled stand
+    text: Acting on values
+  layout: SCAM
+  say: Before we wrap up, let's check ourselves honestly. Not every silence comes from strength. Sometimes we stay quiet out
+    of fear, bending to three loud voices. Other times, a sharp refusal tries to make people feel small. The real skill is
+    telling fear apart from a limit or a principle. How do you say "no" calmly, without turning coffee into a debate? Here
+    are three practical ideas inspired by the research. These habits were not tested in the studies—just simple tools to try.
+  act: 4
+- template: bullet_list
+  title: Three ideas to try *(not tested in the studies)*
+  items:
+  - Pair a limit with a warm phrase
+  - State your limit, not their flaw
+  - Let the pause settle calmly
+  layout: SCAM
+  say: First, pair an everyday boundary with a short, warm phrase. Remember Givi and Kirk didn't test what exact words you
+    say. Still, a warm line keeps the tone friendly. Try, "I'm good, thanks—you all go ahead." Or, "I'm sitting this one out
+    tonight." Second, state your limit, not their flaw. Say, "I'm taking a break from posting," not "I don't waste time online."
+    Keep vanilla as vanilla—unless a real moral principle is at stake. Also remember stakes and culture. Saying "no" to a
+    boss differs from friends, and directness varies across cultures. Third, let the quiet seconds pass without rushing to
+    fill them. Through Goffman's lens, that brief pause just means the script shifted. Keep your voice calm and steady, and
+    let the room reset. You don't have to make everyone agree with your choice. You just make your limit clear without disrespecting
+    theirs.
+  act: 5
+- template: kinetic_text
+  eyebrow: BACK AT THE TABLE
+  text: '*"I''m good, thanks —*
+
+    *no coffee after noon."*'
+  align: center
+  layout: SCAM
+  say: 'Picture that café table one last time. You smile and say, "I''m good, thanks—no coffee after noon." Five quiet seconds
+    pass. Someone laughs, the talk moves on, and maybe one friend orders tea too. Human groups pressure us through agreement.
+    Next time, we test a different pressure: AI confidence. AI doesn''t feel social awkwardness. Yet its smooth confidence
+    can still make us agree too easily. So how do you stay independent when the voice isn''t human?'
+  act: 5
+- template: title_card
+  eyebrow: NEXT ON ENGLISH CONVEY
+  title: AI Confidence vs. *Independent Thinking*
+  subtitle: 'Comment: when did you last say "yes" just to avoid five awkward seconds?'
+  layout: SCAM
+  say: Tell me in the comments below. When did you last say "yes" just to avoid five awkward seconds?
+  act: 5
