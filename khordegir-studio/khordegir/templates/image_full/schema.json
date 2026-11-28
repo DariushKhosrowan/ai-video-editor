@@ -1,128 +1,222 @@
 {
-  "name": "image_full",
-  "label": "عکس تمام‌صفحه",
-  "description": "عکس بزرگ با زیرنویس پررنگ؛ در حالت SCAM عکس در قاب بزرگ بالا-راست می‌نشیند تا جای دوربین خالی بماند. می‌شود روی عکس نقطه گذاشت (مثل نقشه).",
-  "aliases": [
-    "image-full",
-    "full-image",
-    "عکس کامل"
-  ],
-  "category": "تصویر",
-  "fields": [
-    {
-      "key": "image",
-      "label": "عکس",
-      "type": "image",
-      "required": true,
-      "editable": true
-    },
-    {
-      "key": "title",
-      "label": "زیرنویس / عنوان (*زرد*)",
-      "type": "text",
-      "editable": true
-    },
-    {
-      "key": "text",
-      "label": "متن کوچک",
-      "type": "text",
-      "editable": true
-    },
-    {
-      "key": "dim",
-      "label": "تیرگی عکس (۰ تا ۱)",
-      "type": "number",
-      "default": 0.25,
-      "editable": false
-    },
-    {
-      "key": "dots",
-      "label": "نقطه‌ها روی عکس: x,y,رنگ (درصد) هر خط یکی",
-      "type": "list",
-      "editable": false
-    },
-    {
-      "key": "motion",
-      "label": "حرکت عکس",
-      "type": "select",
-      "options": [
-        ["breathe", "نفس‌کشیدن"],
-        ["zoom-out", "زوم به بیرون"],
-        ["pan-left", "حرکت به چپ"],
-        ["pan-right", "حرکت به راست"],
-        ["none", "ثابت"]
-      ],
-      "default": "breathe",
-      "editable": false
-    },
-    {
-      "key": "title_position",
-      "label": "جای عنوان",
-      "type": "select",
-      "options": [
-        ["bottom", "پایین"],
-        ["top", "بالا"]
-      ],
-      "default": "bottom",
-      "editable": false
-    },
-    {
-      "key": "preset",
-      "label": "سبک انیمیشن",
-      "type": "select",
-      "options": [
-        ["auto", "کلاسیک / ارث‌بری"],
-        ["random", "🎲 تصادفی"],
-        ["cinema-zoom", "زوم سینمایی"],
-        ["curtain-reveal", "پرده تصویر"],
-        ["radar-dots", "نقاط راداری"],
-        ["parallax-caption", "زیرنویس پارالاکس"],
-        ["noir-vignette", "کنتراست تیره"],
-        ["minimal-frame", "قاب مینیمال"]
-      ],
-      "default": "auto",
-      "editable": false
-    },
-    {
-      "key": "transition",
-      "label": "ترنزیشن ورود",
-      "type": "select",
-      "options": [
-        ["auto", "ارث‌بری"],
-        ["random", "🎲 تصادفی"],
-        ["soft-fade", "محو نرم"],
-        ["curtain-rtl", "پرده از راست به چپ"],
-        ["accent-slash", "نوار تأکید مورب"],
-        ["iris-rise", "باز شدن دایره‌ای"],
-        ["split-curtain", "پرده دوقسمتی"],
-        ["diagonal-wipe", "پاک‌شدن مورب"],
-        ["zoom-iris", "گشایش زوم"],
-        ["shutter-bars", "کرکره ستونی"]
-      ],
-      "default": "auto",
-      "editable": false
-    },
-    {
-      "key": "seed",
-      "label": "بذر تصادفی",
-      "type": "number",
-      "default": 0,
-      "editable": false
-    }
-  ],
-  "example": {
-    "image": "",
-    "title": "*تنبیه ضداجتماعی* در ۱۶ شهر دنیا",
-    "text": "ضعیف‌تر بودن اعتماد و قانون ← حمله‌ی مفت‌خور به آدمِ درستکار",
-    "dots": [
-      "20,40",
-      "26,36",
-      "48,32,danger",
-      "52,30",
-      "60,45,danger"
-    ],
-    "layout": "SLIDE"
+ "name": "image_full",
+ "label": "عکس تمام‌صفحه",
+ "description": "عکس بزرگ با زیرنویس پررنگ؛ در حالت SCAM عکس در قاب بزرگ بالا-راست می‌نشیند تا جای دوربین خالی بماند. می‌شود روی عکس نقطه گذاشت (مثل نقشه).",
+ "aliases": [
+  "image-full",
+  "full-image",
+  "عکس کامل"
+ ],
+ "category": "تصویر",
+ "fields": [
+  {
+   "key": "image",
+   "label": "عکس",
+   "type": "image",
+   "required": true,
+   "editable": true
   },
-  "order": 100,
-  "version": 1
+  {
+   "key": "title",
+   "label": "زیرنویس / عنوان (*زرد*)",
+   "type": "text",
+   "editable": true
+  },
+  {
+   "key": "text",
+   "label": "متن کوچک",
+   "type": "text",
+   "editable": true
+  },
+  {
+   "key": "dim",
+   "label": "تیرگی عکس (۰ تا ۱)",
+   "type": "number",
+   "default": 0.25,
+   "editable": false
+  },
+  {
+   "key": "dots",
+   "label": "نقطه‌ها روی عکس: x,y,رنگ (درصد) هر خط یکی",
+   "type": "list",
+   "editable": false
+  },
+  {
+   "key": "motion",
+   "label": "حرکت عکس",
+   "type": "select",
+   "options": [
+    [
+     "breathe",
+     "نفس‌کشیدن"
+    ],
+    [
+     "zoom-out",
+     "زوم به بیرون"
+    ],
+    [
+     "pan-left",
+     "حرکت به چپ"
+    ],
+    [
+     "pan-right",
+     "حرکت به راست"
+    ],
+    [
+     "none",
+     "ثابت"
+    ]
+   ],
+   "default": "breathe",
+   "editable": false
+  },
+  {
+   "key": "title_position",
+   "label": "جای عنوان",
+   "type": "select",
+   "options": [
+    [
+     "bottom",
+     "پایین"
+    ],
+    [
+     "top",
+     "بالا"
+    ]
+   ],
+   "default": "bottom",
+   "editable": false
+  },
+  {
+   "key": "preset",
+   "label": "سبک انیمیشن",
+   "type": "select",
+   "options": [
+    [
+     "auto",
+     "کلاسیک / ارث‌بری"
+    ],
+    [
+     "random",
+     "🎲 تصادفی"
+    ],
+    [
+     "cinema-zoom",
+     "زوم سینمایی"
+    ],
+    [
+     "curtain-reveal",
+     "پرده تصویر"
+    ],
+    [
+     "radar-dots",
+     "نقاط راداری"
+    ],
+    [
+     "parallax-caption",
+     "زیرنویس پارالاکس"
+    ],
+    [
+     "noir-vignette",
+     "کنتراست تیره"
+    ],
+    [
+     "minimal-frame",
+     "قاب مینیمال"
+    ]
+   ],
+   "default": "auto",
+   "editable": false
+  },
+  {
+   "key": "transition",
+   "label": "ترنزیشن ورود",
+   "type": "select",
+   "options": [
+    [
+     "auto",
+     "ارث‌بری"
+    ],
+    [
+     "random",
+     "🎲 تصادفی"
+    ],
+    [
+     "soft-fade",
+     "محو نرم"
+    ],
+    [
+     "curtain-rtl",
+     "پرده از راست به چپ"
+    ],
+    [
+     "accent-slash",
+     "نوار تأکید مورب"
+    ],
+    [
+     "iris-rise",
+     "باز شدن دایره‌ای"
+    ],
+    [
+     "split-curtain",
+     "پرده دوقسمتی"
+    ],
+    [
+     "diagonal-wipe",
+     "پاک‌شدن مورب"
+    ],
+    [
+     "zoom-iris",
+     "گشایش زوم"
+    ],
+    [
+     "shutter-bars",
+     "کرکره ستونی"
+    ]
+   ],
+   "default": "auto",
+   "editable": false
+  },
+  {
+   "key": "seed",
+   "label": "بذر تصادفی",
+   "type": "number",
+   "default": 0,
+   "editable": false
+  }
+ ],
+ "example": {
+  "image": "",
+  "title": "*تنبیه ضداجتماعی* در ۱۶ شهر دنیا",
+  "text": "ضعیف‌تر بودن اعتماد و قانون ← حمله‌ی مفت‌خور به آدمِ درستکار",
+  "dots": [
+   "20,40",
+   "26,36",
+   "48,32,danger",
+   "52,30",
+   "60,45,danger"
+  ],
+  "layout": "SLIDE"
+ },
+ "order": 100,
+ "version": 1,
+ "example_fa": {
+  "image": "",
+  "title": "*تنبیه ضداجتماعی* در ۱۶ شهر دنیا",
+  "text": "ضعیف‌تر بودن اعتماد و قانون ← حمله‌ی مفت‌خور به آدمِ درستکار",
+  "dots": [
+   "20,40",
+   "26,36",
+   "48,32,danger",
+   "52,30",
+   "60,45,danger"
+  ],
+  "layout": "SLIDE"
+ },
+ "example_en": {
+  "image": "/assets/world-map-dark.jpg",
+  "title": "A *full-bleed* image with a title",
+  "text": "Short caption line in plain English",
+  "layout": "SLIDE"
+ }
 }
