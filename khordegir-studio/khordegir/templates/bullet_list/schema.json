@@ -1,120 +1,192 @@
 {
-  "name": "bullet_list",
-  "label": "فهرست / کارت‌ها",
-  "description": "چند مورد که یکی‌یکی وارد می‌شوند؛ با شماره یا بدون آن، یک یا دو ستون.",
-  "aliases": [
-    "list",
-    "bullets",
-    "فهرست"
-  ],
-  "category": "متن",
-  "fields": [
-    {
-      "key": "eyebrow",
-      "label": "تیتر کوچک",
-      "type": "text",
-      "editable": true
-    },
-    {
-      "key": "title",
-      "label": "عنوان",
-      "type": "text",
-      "editable": true
-    },
-    {
-      "key": "items",
-      "label": "موردها (هر خط یکی؛ *زرد* ~قرمز~)",
-      "type": "list",
-      "required": true,
-      "editable": true
-    },
-    {
-      "key": "numbered",
-      "label": "شماره‌دار",
-      "type": "select",
-      "options": [
-        [
-          "true",
-          "بله"
-        ],
-        [
-          "false",
-          "نه"
-        ]
-      ],
-      "default": "true",
-      "editable": false
-    },
-    {
-      "key": "columns",
-      "label": "تعداد ستون",
-      "type": "select",
-      "options": [
-        [
-          "1",
-          "۱"
-        ],
-        [
-          "2",
-          "۲"
-        ]
-      ],
-      "default": "1",
-      "editable": false
-    },
-    {
-      "key": "preset",
-      "label": "سبک انیمیشن",
-      "type": "select",
-      "options": [
-        ["auto", "کلاسیک / ارث‌بری"],
-        ["random", "🎲 تصادفی"],
-        ["stagger-cards", "ورود پلکانی کارت‌ها"],
-        ["cascade-rows", "آبشاری از راست"],
-        ["timeline-rail", "خط راهنمای عمودی"],
-        ["pill-grid", "شبکه مدرن"],
-        ["spotlight-focus", "تأکید نوری روی مورد"],
-        ["minimal-clean", "ورود نرم و تمیز"]
-      ],
-      "default": "auto",
-      "editable": false
-    },
-    {
-      "key": "transition",
-      "label": "ترنزیشن ورود",
-      "type": "select",
-      "options": [
-        ["auto", "ارث‌بری"],
-        ["random", "🎲 تصادفی"],
-        ["soft-fade", "محو نرم"],
-        ["curtain-rtl", "پرده از راست به چپ"],
-        ["accent-slash", "نوار تأکید مورب"],
-        ["iris-rise", "باز شدن دایره‌ای"],
-        ["split-curtain", "پرده دوقسمتی"],
-        ["diagonal-wipe", "پاک‌شدن مورب"],
-        ["zoom-iris", "گشایش زوم"],
-        ["shutter-bars", "کرکره ستونی"]
-      ],
-      "default": "auto",
-      "editable": false
-    },
-    {
-      "key": "seed",
-      "label": "بذر تصادفی",
-      "type": "number",
-      "default": 0,
-      "editable": false
-    }
-  ],
-  "example": {
-    "title": "سه سؤالِ قبل از کوتاه اومدن",
-    "items": [
-      "کی زیر فشاره و کی داره از بقیه خرج می‌کنه؟",
-      "اولین بارشه یا تبدیل به عادت شده؟",
-      "پناه و اهرم داری یا واقعاً ~گروگانِ بقایی؟~"
-    ],
-    "layout": "SLIDE"
+ "name": "bullet_list",
+ "label": "فهرست / کارت‌ها",
+ "description": "چند مورد که یکی‌یکی وارد می‌شوند؛ با شماره یا بدون آن، یک یا دو ستون.",
+ "aliases": [
+  "list",
+  "bullets",
+  "فهرست"
+ ],
+ "category": "متن",
+ "fields": [
+  {
+   "key": "eyebrow",
+   "label": "تیتر کوچک",
+   "type": "text",
+   "editable": true
   },
-  "order": 40,
-  "version": 1
+  {
+   "key": "title",
+   "label": "عنوان",
+   "type": "text",
+   "editable": true
+  },
+  {
+   "key": "items",
+   "label": "موردها (هر خط یکی؛ *زرد* ~قرمز~)",
+   "type": "list",
+   "required": true,
+   "editable": true
+  },
+  {
+   "key": "numbered",
+   "label": "شماره‌دار",
+   "type": "select",
+   "options": [
+    [
+     "true",
+     "بله"
+    ],
+    [
+     "false",
+     "نه"
+    ]
+   ],
+   "default": "true",
+   "editable": false
+  },
+  {
+   "key": "columns",
+   "label": "تعداد ستون",
+   "type": "select",
+   "options": [
+    [
+     "1",
+     "۱"
+    ],
+    [
+     "2",
+     "۲"
+    ]
+   ],
+   "default": "1",
+   "editable": false
+  },
+  {
+   "key": "preset",
+   "label": "سبک انیمیشن",
+   "type": "select",
+   "options": [
+    [
+     "auto",
+     "کلاسیک / ارث‌بری"
+    ],
+    [
+     "random",
+     "🎲 تصادفی"
+    ],
+    [
+     "stagger-cards",
+     "ورود پلکانی کارت‌ها"
+    ],
+    [
+     "cascade-rows",
+     "آبشاری از راست"
+    ],
+    [
+     "timeline-rail",
+     "خط راهنمای عمودی"
+    ],
+    [
+     "pill-grid",
+     "شبکه مدرن"
+    ],
+    [
+     "spotlight-focus",
+     "تأکید نوری روی مورد"
+    ],
+    [
+     "minimal-clean",
+     "ورود نرم و تمیز"
+    ]
+   ],
+   "default": "auto",
+   "editable": false
+  },
+  {
+   "key": "transition",
+   "label": "ترنزیشن ورود",
+   "type": "select",
+   "options": [
+    [
+     "auto",
+     "ارث‌بری"
+    ],
+    [
+     "random",
+     "🎲 تصادفی"
+    ],
+    [
+     "soft-fade",
+     "محو نرم"
+    ],
+    [
+     "curtain-rtl",
+     "پرده از راست به چپ"
+    ],
+    [
+     "accent-slash",
+     "نوار تأکید مورب"
+    ],
+    [
+     "iris-rise",
+     "باز شدن دایره‌ای"
+    ],
+    [
+     "split-curtain",
+     "پرده دوقسمتی"
+    ],
+    [
+     "diagonal-wipe",
+     "پاک‌شدن مورب"
+    ],
+    [
+     "zoom-iris",
+     "گشایش زوم"
+    ],
+    [
+     "shutter-bars",
+     "کرکره ستونی"
+    ]
+   ],
+   "default": "auto",
+   "editable": false
+  },
+  {
+   "key": "seed",
+   "label": "بذر تصادفی",
+   "type": "number",
+   "default": 0,
+   "editable": false
+  }
+ ],
+ "example": {
+  "title": "سه سؤالِ قبل از کوتاه اومدن",
+  "items": [
+   "کی زیر فشاره و کی داره از بقیه خرج می‌کنه؟",
+   "اولین بارشه یا تبدیل به عادت شده؟",
+   "پناه و اهرم داری یا واقعاً ~گروگانِ بقایی؟~"
+  ],
+  "layout": "SLIDE"
+ },
+ "order": 40,
+ "version": 1,
+ "example_fa": {
+  "title": "سه سؤالِ قبل از کوتاه اومدن",
+  "items": [
+   "کی زیر فشاره و کی داره از بقیه خرج می‌کنه؟",
+   "اولین بارشه یا تبدیل به عادت شده؟",
+   "پناه و اهرم داری یا واقعاً ~گروگانِ بقایی؟~"
+  ],
+  "layout": "SLIDE"
+ },
+ "example_en": {
+  "title": "Three questions before you give in",
+  "items": [
+   "Who is under pressure here?",
+   "Is this the first time, or a habit?",
+   "What do you actually want to say?"
+  ],
+  "layout": "SCAM"
+ }
 }
