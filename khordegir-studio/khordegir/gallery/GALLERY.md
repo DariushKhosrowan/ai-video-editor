@@ -11,7 +11,7 @@
 
 یک عنوان بزرگ با تیتر کوچک و زیرعنوان؛ می‌تواند روی یک عکس تمام‌صفحه‌ی تیره باشد. برای شروع ویدیو یا شروع هر بخش.
 
-![title_card](previews/title_card.png)
+![title_card](../templates/title_card/preview.png)
 
 | فیلد | توضیح |
 |---|---|
@@ -38,7 +38,7 @@
 
 یک عدد خیلی بزرگ که از صفر می‌شمارد (مثل ۸۰٪) با یک جمله زیرش؛ اختیاری با عکس کنارش.
 
-![big_number](previews/big_number.png)
+![big_number](../templates/big_number/preview.png)
 
 | فیلد | توضیح |
 |---|---|
@@ -72,7 +72,7 @@
 
 یک عکس در قاب گرد (آرام نفس می‌کشد) و کنارش تیتر کوچک، عنوان، متن و چند نکته.
 
-![image_text](previews/image_text.png)
+![image_text](../templates/image_text/preview.png)
 
 | فیلد | توضیح |
 |---|---|
@@ -96,13 +96,41 @@
   layout: SCAM
 ```
 
+## Kinetic Text — `template: kinetic_text`
+
+دسته: text
+
+Word-by-word kinetic typography with rise and blur-in; *emphasis* words punch in accent colour with an underline sweep.
+
+![kinetic_text](../templates/kinetic_text/preview.png)
+
+| فیلد | توضیح |
+|---|---|
+| `eyebrow` | Eyebrow (optional) |
+| `text` | Sentence (*accent* ~danger~ _muted_ ==highlight==) (لازم) |
+| `align` | Alignment |
+| `size` | Text Size |
+
+نمونه:
+
+```yaml
+- template: kinetic_text
+  eyebrow: THE CORE IDEA
+  text: 'A boundary says what *you* won''t do.
+  
+    A principle makes others ~question~ what they''re doing.'
+  align: center
+  size: auto
+  layout: SCAM
+```
+
 ## نمودار میله‌ای — `template: bar_chart`
 
 دسته: نمودار
 
 میله‌ها از پایین رشد می‌کنند و عددها روی‌شان می‌شمارند. افقی هم می‌شود (برای برچسب‌های بلند).
 
-![bar_chart](previews/bar_chart.png)
+![bar_chart](../templates/bar_chart/preview.png)
 
 | فیلد | توضیح |
 |---|---|
@@ -132,13 +160,69 @@
   layout: SLIDE
 ```
 
+## Quote Card — `template: quote_card`
+
+دسته: text
+
+Editorial pull-quote card with oversized animated quotation mark, drawing accent rule, author attribution, and optional portrait on the end side.
+
+![quote_card](../templates/quote_card/preview.png)
+
+| فیلد | توضیح |
+|---|---|
+| `eyebrow` | Eyebrow (optional) |
+| `quote` | Quote (لازم) |
+| `author` | Author (لازم) |
+| `role` | Role / Publication / Year |
+| `image` | Portrait Image (optional) |
+| `tone` | Accent Colour |
+| `motion` | Portrait Motion |
+
+نمونه:
+
+```yaml
+- template: quote_card
+  eyebrow: MORAL REBELS
+  quote: Rebels are resented when their *implicit reproach* threatens the positive self-image of individuals who did
+    not rebel.
+  author: Monin, Sawyer & Marquez
+  role: Journal of Personality and Social Psychology, 2008
+  tone: accent
+  layout: SCAM
+```
+
+## جمله‌ی کلیدی — `template: quote`
+
+دسته: متن
+
+یک جمله‌ی بزرگ و پررنگ (با کلمه‌ی زرد/قرمز) و یک خط توضیح کوچک‌تر. برای قانون‌ها و جمع‌بندی‌ها.
+
+![quote](../templates/quote/preview.png)
+
+| فیلد | توضیح |
+|---|---|
+| `text` | جمله (*زرد* ، ~قرمز~) (لازم) |
+| `highlight` | خط دوم بزرگ‌تر (اختیاری) |
+| `highlight_color` | رنگ خط دوم |
+| `caption` | توضیح کوچک |
+| `author` | گوینده (اختیاری) |
+
+نمونه:
+
+```yaml
+- template: quote
+  text: هر رفتاری که پاداشش بدی،
+  highlight: بیشتر می‌شه
+  layout: SCAM
+```
+
 ## فهرست / کارت‌ها — `template: bullet_list`
 
 دسته: متن
 
 چند مورد که یکی‌یکی وارد می‌شوند؛ با شماره یا بدون آن، یک یا دو ستون.
 
-![bullet_list](previews/bullet_list.png)
+![bullet_list](../templates/bullet_list/preview.png)
 
 | فیلد | توضیح |
 |---|---|
@@ -160,13 +244,48 @@
   layout: SLIDE
 ```
 
+## Study Card — `template: study_card`
+
+دسته: data
+
+Research citation card with study eyebrow, authors, journal, sample-size badge, one-sentence finding, 1–3 count-up numbers, and optional caveat.
+
+![study_card](../templates/study_card/preview.png)
+
+| فیلد | توضیح |
+|---|---|
+| `eyebrow` | Eyebrow (e.g. STUDY · 2008) |
+| `sample` | Sample Size Badge (e.g. n = 51) |
+| `authors` | Authors & Year (لازم) |
+| `journal` | Journal / Institution |
+| `finding` | Key Finding (1 sentence) (لازم) |
+| `stats` | 1–3 Numbers (Label: Value | tone per line) (لازم) |
+| `caveat` | Caveat / Limitation (optional) |
+
+نمونه:
+
+```yaml
+- template: study_card
+  eyebrow: STUDY · 2008
+  sample: Columbia students
+  authors: Flynn & Lake (2008)
+  journal: Journal of Personality and Social Psychology
+  finding: Asked to find one stranger who would walk them to the gym, people *overestimated* how many they'd need
+    to ask.
+  stats: 'Predicted asks: 7.2 | danger
+  
+    Actual asks: 2.3 | accent'
+  caveat: Study 2 · most students already knew where the gym was.
+  layout: SCAM
+```
+
 ## نمودار خطی — `template: line_chart`
 
 دسته: نمودار
 
 یک یا چند خط که از چپ به راست کشیده می‌شوند، با برچسب در انتهای هر خط و خط‌چین‌های رویداد.
 
-![line_chart](previews/line_chart.png)
+![line_chart](../templates/line_chart/preview.png)
 
 | فیلد | توضیح |
 |---|---|
@@ -192,13 +311,65 @@
   layout: SLIDE
 ```
 
+## Split Compare — `template: split_compare`
+
+دسته: compare
+
+Two side-by-side panels following reading direction with tone, optional icon/emoji, headline, body, drawing center divider, popping VS badge, and optional verdict.
+
+![split_compare](../templates/split_compare/preview.png)
+
+| فیلد | توضیح |
+|---|---|
+| `eyebrow` | Eyebrow (optional) |
+| `title` | Header Title (optional) |
+| `a_icon` | Side A — Icon / Emoji (optional) |
+| `a_title` | Side A — Headline (لازم) |
+| `a_body` | Side A — Body (lines or paragraph) |
+| `a_tone` | Side A — Tone |
+| `b_icon` | Side B — Icon / Emoji (optional) |
+| `b_title` | Side B — Headline (لازم) |
+| `b_body` | Side B — Body (lines or paragraph) |
+| `b_tone` | Side B — Tone |
+| `vs_label` | Center Badge Label |
+| `verdict` | Verdict Line (optional) |
+| `verdict_tone` | Verdict Tone |
+
+نمونه:
+
+```yaml
+- template: split_compare
+  eyebrow: TWO KINDS OF NO
+  title: Same word, *different* weight
+  a_icon: 🍦
+  a_title: Personal boundary
+  a_body: '"I''m skipping coffee tonight."
+  
+    Says what you won''t do
+  
+    No verdict on anyone else'
+  a_tone: accent
+  b_icon: ⚖️
+  b_title: Principled refusal
+  b_body: '"I won''t join this."
+  
+    Can feel like a verdict
+  
+    May make others question themselves'
+  b_tone: danger
+  vs_label: VS
+  verdict: Most everyday refusals land *softer* than we fear.
+  verdict_tone: accent
+  layout: SCAM
+```
+
 ## قبل ← بعد — `template: compare`
 
 دسته: عدد
 
 دو یا سه عدد بزرگ با فلش بینشان (مثل ۸ ← ۱۶ ← ۱۹). از راست به چپ خوانده می‌شود.
 
-![compare](previews/compare.png)
+![compare](../templates/compare/preview.png)
 
 | فیلد | توضیح |
 |---|---|
@@ -227,13 +398,53 @@
   layout: SLIDE
 ```
 
+## Stat Bars — `template: stat_bars`
+
+دسته: data
+
+Horizontal comparison bars (2–7 rows) with start-aligned labels, bars growing from start, count-up values at bar ends, one highlighted bar, optional suffix and max.
+
+![stat_bars](../templates/stat_bars/preview.png)
+
+| فیلد | توضیح |
+|---|---|
+| `eyebrow` | Eyebrow (optional) |
+| `title` | Title |
+| `subtitle` | Subtitle (optional) |
+| `items` | Rows (Label: Value per line; wrap *Label* to highlight) (لازم) |
+| `highlight` | Highlighted Row (label or 1-based #; blank = *marked* or max) |
+| `max` | Max Scale Value (optional) |
+| `prefix` | Value Prefix (optional) |
+| `suffix` | Value Suffix (e.g. %) |
+| `decimals` | Decimal Places |
+| `unit` | Unit / Footnote Caption (optional) |
+
+نمونه:
+
+```yaml
+- template: stat_bars
+  eyebrow: ASCH (1955)
+  title: Wrong answers grow with the *size* of the majority
+  items: '1 opponent: 3.6
+  
+    2 opponents: 13.6
+  
+    *3 opponents*: 31.8'
+  highlight: 3 opponents
+  max: 40
+  suffix: '%'
+  decimals: 1
+  unit: Share of critical answers that followed the wrong majority. Larger majorities added little.
+  layout: SCAM
+```
+
 ## کارت‌های عددی — `template: counter_grid`
 
 دسته: عدد
 
 دو تا چهار کارت، هر کدام یک عدد که می‌شمارد و توضیح زیرش (مثل مقایسه‌ی دو گروه).
 
-![counter_grid](previews/counter_grid.png)
+![counter_grid](../templates/counter_grid/preview.png)
 
 | فیلد | توضیح |
 |---|---|
@@ -262,28 +473,55 @@
   layout: SLIDE
 ```
 
-## جمله‌ی کلیدی — `template: quote`
+## Lower Third — `template: lower_third`
 
-دسته: متن
+دسته: people
 
-یک جمله‌ی بزرگ و پررنگ (با کلمه‌ی زرد/قرمز) و یک خط توضیح کوچک‌تر. برای قانون‌ها و جمع‌بندی‌ها.
+Broadcast-style name and role strip with an animated accent bar wipe; safely avoids the bottom-left camera box in SCAM layout.
 
-![quote](previews/quote.png)
+![lower_third](../templates/lower_third/preview.png)
 
 | فیلد | توضیح |
 |---|---|
-| `text` | جمله (*زرد* ، ~قرمز~) (لازم) |
-| `highlight` | خط دوم بزرگ‌تر (اختیاری) |
-| `highlight_color` | رنگ خط دوم |
-| `caption` | توضیح کوچک |
-| `author` | گوینده (اختیاری) |
+| `name` | Name (لازم) |
+| `role` | Role / Title |
+| `tag` | Small Uppercase Tag (optional) |
+| `position` | Position |
 
 نمونه:
 
 ```yaml
-- template: quote
-  text: هر رفتاری که پاداشش بدی،
-  highlight: بیشتر می‌شه
+- template: lower_third
+  name: Solomon Asch
+  role: Social psychologist · "Opinions and Social Pressure", 1955
+  tag: RESEARCHER
+  position: auto
+  layout: SCAM
+```
+
+## Punch In — `template: punch_in`
+
+دسته: text
+
+One giant word or short phrase slamming in from 1.25× to 1× with slight blur-in, an accent impact flash behind it, and an optional caption.
+
+![punch_in](../templates/punch_in/preview.png)
+
+| فیلد | توضیح |
+|---|---|
+| `eyebrow` | Small Eyebrow (optional) |
+| `text` | Giant Word / Short Phrase (لازم) |
+| `caption` | Caption Below (optional) |
+| `tone` | Accent Flash Colour |
+
+نمونه:
+
+```yaml
+- template: punch_in
+  eyebrow: THE ALLY EFFECT
+  text: '*ONE* VOICE'
+  caption: 'One truthful partner: wrong answers only one fourth as often.'
+  tone: accent
   layout: SCAM
 ```
 
@@ -293,7 +531,7 @@
 
 صفحه‌ی ساده بین دو بخش: شماره/اسم بخش و یک عنوان کوتاه. برای لحظه‌هایی که بیشتر خودت حرف می‌زنی.
 
-![section_break](previews/section_break.png)
+![section_break](../templates/section_break/preview.png)
 
 | فیلد | توضیح |
 |---|---|
@@ -310,13 +548,41 @@
   layout: SCAM
 ```
 
+## Chapter Card — `template: chapter_card`
+
+دسته: transition
+
+Section transition card with a full-width wiping accent band, big part number, title, and subtitle; stays clear of the camera box in SCAM.
+
+![chapter_card](../templates/chapter_card/preview.png)
+
+| فیلد | توضیح |
+|---|---|
+| `prefix` | Number Prefix (e.g. PART ) |
+| `number` | Part Number (e.g. 2 or PART 2) (لازم) |
+| `title` | Chapter Title (لازم) |
+| `subtitle` | Subtitle (optional) |
+| `tone` | Band Accent Tone |
+
+نمونه:
+
+```yaml
+- template: chapter_card
+  prefix: 'PART '
+  number: '2'
+  title: The Discomfort *Inside* Your Own Head
+  subtitle: Why saying no feels heavier than it is.
+  tone: accent
+  layout: SCAM
+```
+
 ## عکس تمام‌صفحه — `template: image_full`
 
 دسته: تصویر
 
 عکس بزرگ با زیرنویس پررنگ؛ در حالت SCAM عکس در قاب بزرگ بالا-راست می‌نشیند تا جای دوربین خالی بماند. می‌شود روی عکس نقطه گذاشت (مثل نقشه).
 
-![image_full](previews/image_full.png)
+![image_full](../templates/image_full/preview.png)
 
 | فیلد | توضیح |
 |---|---|
@@ -343,13 +609,44 @@
   layout: SLIDE
 ```
 
+## Doc Highlight — `template: doc_highlight`
+
+دسته: text
+
+Paper or abstract excerpt on a document card where ==marked phrases== sweep in with a marker highlight one after another; optional link line.
+
+![doc_highlight](../templates/doc_highlight/preview.png)
+
+| فیلد | توضیح |
+|---|---|
+| `journal` | Journal / Publication |
+| `year` | Year |
+| `title` | Paper / Article Title (لازم) |
+| `excerpt` | Excerpt (wrap key phrases in ==like this==) (لازم) |
+| `link` | Source Link / DOI (optional) |
+| `tone` | Marker Highlight Colour |
+
+نمونه:
+
+```yaml
+- template: doc_highlight
+  journal: JOURNAL OF PERSONALITY AND SOCIAL PSYCHOLOGY
+  year: '2024'
+  title: 'Saying no: The negative ramifications from invitation declines are less severe than we think'
+  excerpt: We demonstrate that ==invitees overestimate the negative ramifications== that arise in the eyes of inviters
+    following an invitation decline.
+  link: doi.org/10.1037/pspi0000443
+  tone: accent
+  layout: SCAM
+```
+
 ## سه کارت — `template: three_cards`
 
 دسته: تصویر
 
 سه (یا دو تا پنج) کارت کنار هم، هر کدام با عکس یا نماد و یک برچسب. اختیاری: یک عکس مشترک بالای کارت‌ها.
 
-![three_cards](previews/three_cards.png)
+![three_cards](../templates/three_cards/preview.png)
 
 | فیلد | توضیح |
 |---|---|
@@ -377,7 +674,7 @@
 
 حباب‌های پیام یکی‌یکی ظاهر می‌شوند. «او» سمت راست (خاکستری)، «من» سمت چپ (سبز تیره)، لحن بد = قرمز.
 
-![chat](previews/chat.png)
+![chat](../templates/chat/preview.png)
 
 | فیلد | توضیح |
 |---|---|
@@ -409,7 +706,7 @@
 
 یک خط افقی که از راست به چپ کشیده می‌شود و نقطه‌های تاریخ با توضیح، یکی‌یکی روی آن ظاهر می‌شوند.
 
-![timeline](previews/timeline.png)
+![timeline](../templates/timeline/preview.png)
 
 | فیلد | توضیح |
 |---|---|
@@ -438,7 +735,7 @@
 
 نمودار از روی یک فایل JSON (spec) با فیلدهای type/title/data/series؛ برای نمودارهای پیچیده‌تر.
 
-![chart](previews/chart.png)
+![chart](../templates/chart/preview.png)
 
 | فیلد | توضیح |
 |---|---|
@@ -466,7 +763,7 @@
 
 اسلایدی که از فایل لایه‌ای JSON می‌آید: هر المان با مختصات دقیق. برای طرح‌های خاص.
 
-![layers](previews/layers.png)
+![layers](../templates/layers/preview.png)
 
 | فیلد | توضیح |
 |---|---|
@@ -505,7 +802,7 @@
 
 این قدم اسلاید ندارد؛ فقط تصویر خودت تمام‌صفحه. در خروجی OBS به‌صورت CAM ثبت می‌شود و فایل ویدیویی ساخته نمی‌شود.
 
-![cam](previews/cam.png)
+![cam](../templates/cam/preview.png)
 
 | فیلد | توضیح |
 |---|---|
