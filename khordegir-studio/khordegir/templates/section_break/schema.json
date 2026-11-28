@@ -1,82 +1,146 @@
 {
-  "name": "section_break",
-  "label": "جداکننده‌ی بخش",
-  "description": "صفحه‌ی ساده بین دو بخش: شماره/اسم بخش و یک عنوان کوتاه. برای لحظه‌هایی که بیشتر خودت حرف می‌زنی.",
-  "aliases": [
-    "section-break",
-    "section",
-    "بخش"
-  ],
-  "category": "متن",
-  "fields": [
-    {
-      "key": "eyebrow",
-      "label": "بالای عنوان (مثل: بخش ۲)",
-      "type": "text",
-      "editable": true
-    },
-    {
-      "key": "title",
-      "label": "عنوان",
-      "type": "text",
-      "required": true,
-      "editable": true
-    },
-    {
-      "key": "subtitle",
-      "label": "زیرعنوان",
-      "type": "text",
-      "editable": true
-    },
-    {
-      "key": "preset",
-      "label": "سبک انیمیشن",
-      "type": "select",
-      "options": [
-        ["auto", "کلاسیک / ارث‌بری"],
-        ["random", "🎲 تصادفی"],
-        ["chapter-banner", "بنر فصل سینمایی"],
-        ["curtain-drop", "فرود پردهٔ فصل"],
-        ["numeral-watermark", "واترمارک عدد بزرگ"],
-        ["axis-sweep", "خط محور کشیده"],
-        ["split-headline", "تیتر دوپاره"],
-        ["minimal-divider", "جداکنندهٔ مینیمال"]
-      ],
-      "default": "auto",
-      "editable": false
-    },
-    {
-      "key": "transition",
-      "label": "ترنزیشن ورود",
-      "type": "select",
-      "options": [
-        ["auto", "ارث‌بری"],
-        ["random", "🎲 تصادفی"],
-        ["soft-fade", "محو نرم"],
-        ["curtain-rtl", "پرده از راست به چپ"],
-        ["accent-slash", "نوار تأکید مورب"],
-        ["iris-rise", "باز شدن دایره‌ای"],
-        ["split-curtain", "پرده دوقسمتی"],
-        ["diagonal-wipe", "پاک‌شدن مورب"],
-        ["zoom-iris", "گشایش زوم"],
-        ["shutter-bars", "کرکره ستونی"]
-      ],
-      "default": "auto",
-      "editable": false
-    },
-    {
-      "key": "seed",
-      "label": "بذر تصادفی",
-      "type": "number",
-      "default": 0,
-      "editable": false
-    }
-  ],
-  "example": {
-    "eyebrow": "بخش سوم",
-    "title": "«خودش طلبکار می‌شه!»",
-    "layout": "SCAM"
+ "name": "section_break",
+ "label": "جداکننده‌ی بخش",
+ "description": "صفحه‌ی ساده بین دو بخش: شماره/اسم بخش و یک عنوان کوتاه. برای لحظه‌هایی که بیشتر خودت حرف می‌زنی.",
+ "aliases": [
+  "section-break",
+  "section",
+  "بخش"
+ ],
+ "category": "متن",
+ "fields": [
+  {
+   "key": "eyebrow",
+   "label": "بالای عنوان (مثل: بخش ۲)",
+   "type": "text",
+   "editable": true
   },
-  "order": 90,
-  "version": 1
+  {
+   "key": "title",
+   "label": "عنوان",
+   "type": "text",
+   "required": true,
+   "editable": true
+  },
+  {
+   "key": "subtitle",
+   "label": "زیرعنوان",
+   "type": "text",
+   "editable": true
+  },
+  {
+   "key": "preset",
+   "label": "سبک انیمیشن",
+   "type": "select",
+   "options": [
+    [
+     "auto",
+     "کلاسیک / ارث‌بری"
+    ],
+    [
+     "random",
+     "🎲 تصادفی"
+    ],
+    [
+     "chapter-banner",
+     "بنر فصل سینمایی"
+    ],
+    [
+     "curtain-drop",
+     "فرود پردهٔ فصل"
+    ],
+    [
+     "numeral-watermark",
+     "واترمارک عدد بزرگ"
+    ],
+    [
+     "axis-sweep",
+     "خط محور کشیده"
+    ],
+    [
+     "split-headline",
+     "تیتر دوپاره"
+    ],
+    [
+     "minimal-divider",
+     "جداکنندهٔ مینیمال"
+    ]
+   ],
+   "default": "auto",
+   "editable": false
+  },
+  {
+   "key": "transition",
+   "label": "ترنزیشن ورود",
+   "type": "select",
+   "options": [
+    [
+     "auto",
+     "ارث‌بری"
+    ],
+    [
+     "random",
+     "🎲 تصادفی"
+    ],
+    [
+     "soft-fade",
+     "محو نرم"
+    ],
+    [
+     "curtain-rtl",
+     "پرده از راست به چپ"
+    ],
+    [
+     "accent-slash",
+     "نوار تأکید مورب"
+    ],
+    [
+     "iris-rise",
+     "باز شدن دایره‌ای"
+    ],
+    [
+     "split-curtain",
+     "پرده دوقسمتی"
+    ],
+    [
+     "diagonal-wipe",
+     "پاک‌شدن مورب"
+    ],
+    [
+     "zoom-iris",
+     "گشایش زوم"
+    ],
+    [
+     "shutter-bars",
+     "کرکره ستونی"
+    ]
+   ],
+   "default": "auto",
+   "editable": false
+  },
+  {
+   "key": "seed",
+   "label": "بذر تصادفی",
+   "type": "number",
+   "default": 0,
+   "editable": false
+  }
+ ],
+ "example": {
+  "eyebrow": "بخش سوم",
+  "title": "«خودش طلبکار می‌شه!»",
+  "layout": "SCAM"
+ },
+ "order": 90,
+ "version": 1,
+ "example_fa": {
+  "eyebrow": "بخش سوم",
+  "title": "«خودش طلبکار می‌شه!»",
+  "layout": "SCAM"
+ },
+ "example_en": {
+  "eyebrow": "PART THREE",
+  "title": "\"Now *they're* upset?\"",
+  "layout": "SCAM"
+ }
 }
