@@ -41,7 +41,7 @@ Stage.template({
       const tEl = A.text(c, s.title, "hero", "", { fontSize: (String(s.title).length > 28 ? 60 : 76) + "px" });
       A.field("title", tEl);
       if (lively && preset === "editorial-split") {
-        A.kinetic(tEl, { at: A.at("title"), mode: "glide-rtl", role: "title", stagger: 0.045, ease: "vox" });
+        A.kinetic(tEl, { at: A.at("title"), mode: "glide", role: "title", stagger: 0.045, ease: "vox" });
       } else if (lively && (preset === "frame-mask" || preset === "cinema-wide")) {
         A.kinetic(tEl, { at: A.at("title"), mode: "rise-mask", role: "title", stagger: 0.045, ease: "vox" });
       } else {
@@ -49,7 +49,7 @@ Stage.template({
       }
     }
     if (lively && preset === "accent-bar") {
-      A.sweepLine(c, { width: 150, height: 6, origin: "100% 50%", at: A.at("body") });
+      A.sweepLine(c, { width: 150, height: 6, origin: A.originStart, at: A.at("body") });
     }
     const bodyText = s.text ?? s.body;
     if (bodyText) {

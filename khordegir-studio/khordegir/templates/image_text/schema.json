@@ -1,213 +1,228 @@
 {
-  "name": "image_text",
-  "label": "عکس + متن",
-  "description": "یک عکس در قاب گرد (آرام نفس می‌کشد) و کنارش تیتر کوچک، عنوان، متن و چند نکته.",
-  "aliases": [
-    "image-text",
-    "تصویر"
-  ],
-  "category": "تصویر",
-  "fields": [
-    {
-      "key": "image",
-      "label": "عکس",
-      "type": "image",
-      "required": true,
-      "editable": true
-    },
-    {
-      "key": "eyebrow",
-      "label": "تیتر کوچک (زرد)",
-      "type": "text",
-      "editable": true
-    },
-    {
-      "key": "title",
-      "label": "عنوان",
-      "type": "text",
-      "editable": true
-    },
-    {
-      "key": "text",
-      "label": "متن",
-      "type": "textarea",
-      "editable": true
-    },
-    {
-      "key": "points",
-      "label": "نکته‌ها / کارت‌ها (هر خط یکی)",
-      "type": "list",
-      "editable": true
-    },
-    {
-      "key": "motion",
-      "label": "حرکت عکس",
-      "type": "select",
-      "options": [
-        [
-          "breathe",
-          "نفس‌کشیدن"
-        ],
-        [
-          "zoom-out",
-          "زوم به بیرون"
-        ],
-        [
-          "pan-left",
-          "حرکت به چپ"
-        ],
-        [
-          "pan-right",
-          "حرکت به راست"
-        ],
-        [
-          "none",
-          "ثابت"
-        ]
-      ],
-      "default": "breathe",
-      "editable": false
-    },
-    {
-      "key": "fit",
-      "label": "جای‌گیری عکس",
-      "type": "select",
-      "options": [
-        [
-          "cover",
-          "پر کردن قاب"
-        ],
-        [
-          "contain",
-          "کامل دیده شود"
-        ]
-      ],
-      "default": "cover",
-      "editable": false
-    },
-    {
-      "key": "shape",
-      "label": "شکل قاب",
-      "type": "select",
-      "options": [
-        [
-          "portrait",
-          "عمودی"
-        ],
-        [
-          "landscape",
-          "افقی (بالا)"
-        ]
-      ],
-      "default": "portrait",
-      "editable": false
-    },
-    {
-      "key": "preset",
-      "label": "سبک انیمیشن",
-      "type": "select",
-      "options": [
-        [
-          "auto",
-          "کلاسیک / ارث‌بری از پروژه"
-        ],
-        [
-          "random",
-          "🎲 تصادفی (با بذر قطعی)"
-        ],
-        [
-          "editorial-split",
-          "قاب دو تکه سردبیری"
-        ],
-        [
-          "kenburns-drift",
-          "حرکت سینمایی تصویر"
-        ],
-        [
-          "card-float",
-          "کارت شناور"
-        ],
-        [
-          "frame-mask",
-          "پردهٔ ماسک تصویر"
-        ],
-        [
-          "accent-bar",
-          "خط تأکید پویا"
-        ],
-        [
-          "cinema-wide",
-          "کادر عریض سینمایی"
-        ]
-      ],
-      "default": "auto",
-      "editable": false
-    },
-    {
-      "key": "transition",
-      "label": "ترنزیشن ورود",
-      "type": "select",
-      "options": [
-        [
-          "auto",
-          "پیش‌فرض / ارث‌بری"
-        ],
-        [
-          "random",
-          "🎲 تصادفی"
-        ],
-        [
-          "soft-fade",
-          "محو نرم (کلاسیک)"
-        ],
-        [
-          "curtain-rtl",
-          "پرده از راست به چپ"
-        ],
-        [
-          "accent-slash",
-          "نوار تأکید مورب"
-        ],
-        [
-          "iris-rise",
-          "باز شدن دایره‌ای"
-        ],
-        [
-          "split-curtain",
-          "پرده دوقسمتی"
-        ],
-        [
-          "diagonal-wipe",
-          "پاک‌شدن مورب"
-        ],
-        [
-          "zoom-iris",
-          "گشایش زوم"
-        ],
-        [
-          "shutter-bars",
-          "کرکره ستونی"
-        ]
-      ],
-      "default": "auto",
-      "editable": false
-    },
-    {
-      "key": "seed",
-      "label": "بذر تصادفی",
-      "type": "number",
-      "default": 0,
-      "editable": false
-    }
-  ],
-  "example": {
-    "image": "",
-    "eyebrow": "بی. اف. اسکینر، ۱۹۵۷",
-    "title": "پاداشِ گاه‌به‌گاه",
-    "text": "سرسخت‌ترین رفتار وقتی ساخته می‌شه که *فقط گاهی* جواب بگیره",
-    "source": "Ferster & Skinner, 1957",
-    "layout": "SCAM"
+ "name": "image_text",
+ "label": "عکس + متن",
+ "description": "یک عکس در قاب گرد (آرام نفس می‌کشد) و کنارش تیتر کوچک، عنوان، متن و چند نکته.",
+ "aliases": [
+  "image-text",
+  "تصویر"
+ ],
+ "category": "تصویر",
+ "fields": [
+  {
+   "key": "image",
+   "label": "عکس",
+   "type": "image",
+   "required": true,
+   "editable": true
   },
-  "order": 20,
-  "version": 1
+  {
+   "key": "eyebrow",
+   "label": "تیتر کوچک (زرد)",
+   "type": "text",
+   "editable": true
+  },
+  {
+   "key": "title",
+   "label": "عنوان",
+   "type": "text",
+   "editable": true
+  },
+  {
+   "key": "text",
+   "label": "متن",
+   "type": "textarea",
+   "editable": true
+  },
+  {
+   "key": "points",
+   "label": "نکته‌ها / کارت‌ها (هر خط یکی)",
+   "type": "list",
+   "editable": true
+  },
+  {
+   "key": "motion",
+   "label": "حرکت عکس",
+   "type": "select",
+   "options": [
+    [
+     "breathe",
+     "نفس‌کشیدن"
+    ],
+    [
+     "zoom-out",
+     "زوم به بیرون"
+    ],
+    [
+     "pan-left",
+     "حرکت به چپ"
+    ],
+    [
+     "pan-right",
+     "حرکت به راست"
+    ],
+    [
+     "none",
+     "ثابت"
+    ]
+   ],
+   "default": "breathe",
+   "editable": false
+  },
+  {
+   "key": "fit",
+   "label": "جای‌گیری عکس",
+   "type": "select",
+   "options": [
+    [
+     "cover",
+     "پر کردن قاب"
+    ],
+    [
+     "contain",
+     "کامل دیده شود"
+    ]
+   ],
+   "default": "cover",
+   "editable": false
+  },
+  {
+   "key": "shape",
+   "label": "شکل قاب",
+   "type": "select",
+   "options": [
+    [
+     "portrait",
+     "عمودی"
+    ],
+    [
+     "landscape",
+     "افقی (بالا)"
+    ]
+   ],
+   "default": "portrait",
+   "editable": false
+  },
+  {
+   "key": "preset",
+   "label": "سبک انیمیشن",
+   "type": "select",
+   "options": [
+    [
+     "auto",
+     "کلاسیک / ارث‌بری از پروژه"
+    ],
+    [
+     "random",
+     "🎲 تصادفی (با بذر قطعی)"
+    ],
+    [
+     "editorial-split",
+     "قاب دو تکه سردبیری"
+    ],
+    [
+     "kenburns-drift",
+     "حرکت سینمایی تصویر"
+    ],
+    [
+     "card-float",
+     "کارت شناور"
+    ],
+    [
+     "frame-mask",
+     "پردهٔ ماسک تصویر"
+    ],
+    [
+     "accent-bar",
+     "خط تأکید پویا"
+    ],
+    [
+     "cinema-wide",
+     "کادر عریض سینمایی"
+    ]
+   ],
+   "default": "auto",
+   "editable": false
+  },
+  {
+   "key": "transition",
+   "label": "ترنزیشن ورود",
+   "type": "select",
+   "options": [
+    [
+     "auto",
+     "پیش‌فرض / ارث‌بری"
+    ],
+    [
+     "random",
+     "🎲 تصادفی"
+    ],
+    [
+     "soft-fade",
+     "محو نرم (کلاسیک)"
+    ],
+    [
+     "curtain-rtl",
+     "پرده از راست به چپ"
+    ],
+    [
+     "accent-slash",
+     "نوار تأکید مورب"
+    ],
+    [
+     "iris-rise",
+     "باز شدن دایره‌ای"
+    ],
+    [
+     "split-curtain",
+     "پرده دوقسمتی"
+    ],
+    [
+     "diagonal-wipe",
+     "پاک‌شدن مورب"
+    ],
+    [
+     "zoom-iris",
+     "گشایش زوم"
+    ],
+    [
+     "shutter-bars",
+     "کرکره ستونی"
+    ]
+   ],
+   "default": "auto",
+   "editable": false
+  },
+  {
+   "key": "seed",
+   "label": "بذر تصادفی",
+   "type": "number",
+   "default": 0,
+   "editable": false
+  }
+ ],
+ "example": {
+  "image": "",
+  "eyebrow": "بی. اف. اسکینر، ۱۹۵۷",
+  "title": "پاداشِ گاه‌به‌گاه",
+  "text": "سرسخت‌ترین رفتار وقتی ساخته می‌شه که *فقط گاهی* جواب بگیره",
+  "source": "Ferster & Skinner, 1957",
+  "layout": "SCAM"
+ },
+ "order": 20,
+ "version": 1,
+ "example_fa": {
+  "image": "",
+  "eyebrow": "بی. اف. اسکینر، ۱۹۵۷",
+  "title": "پاداشِ گاه‌به‌گاه",
+  "text": "سرسخت‌ترین رفتار وقتی ساخته می‌شه که *فقط گاهی* جواب بگیره",
+  "source": "Ferster & Skinner, 1957",
+  "layout": "SCAM"
+ },
+ "example_en": {
+  "image": "/assets/psychology-lab.jpg",
+  "eyebrow": "B. F. SKINNER, 1957",
+  "title": "Intermittent reward",
+  "text": "Behaviour rewarded *only sometimes* is the hardest to stop.",
+  "layout": "SCAM"
+ }
 }
