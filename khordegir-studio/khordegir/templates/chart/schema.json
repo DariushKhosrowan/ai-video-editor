@@ -1,189 +1,92 @@
 {
- "name": "chart",
- "label": "نمودار از فایل spec",
- "description": "نمودار از روی یک فایل JSON (spec) با فیلدهای type/title/data/series؛ برای نمودارهای پیچیده‌تر.",
- "aliases": [
-  "spec"
- ],
- "category": "نمودار",
- "fields": [
-  {
-   "key": "spec",
-   "label": "مسیر فایل spec (JSON)",
-   "type": "text",
-   "editable": true
-  },
-  {
-   "key": "title",
-   "label": "عنوان",
-   "type": "text",
-   "editable": true
-  },
-  {
-   "key": "subtitle",
-   "label": "زیرعنوان",
-   "type": "text",
-   "editable": true
-  },
-  {
-   "key": "preset",
-   "label": "سبک انیمیشن",
-   "type": "select",
-   "options": [
-    [
-     "auto",
-     "کلاسیک / ارث‌بری"
-    ],
-    [
-     "random",
-     "🎲 تصادفی"
-    ],
-    [
-     "sweep-chart",
-     "ورود پویا"
-    ],
-    [
-     "editorial-spec",
-     "نمودار تحریریه"
-    ],
-    [
-     "elastic-spec",
-     "نمودار فنری"
-    ],
-    [
-     "spotlight-spec",
-     "تمرکز داده‌ها"
-    ],
-    [
-     "cascade-spec",
-     "رسم آبشاری"
-    ],
-    [
-     "minimal-spec",
-     "نمودار مینیمال"
-    ]
-   ],
-   "default": "auto",
-   "editable": false
-  },
-  {
-   "key": "transition",
-   "label": "ترنزیشن ورود",
-   "type": "select",
-   "options": [
-    [
-     "auto",
-     "ارث‌بری"
-    ],
-    [
-     "random",
-     "🎲 تصادفی"
-    ],
-    [
-     "soft-fade",
-     "محو نرم"
-    ],
-    [
-     "curtain-rtl",
-     "پرده از راست به چپ"
-    ],
-    [
-     "accent-slash",
-     "نوار تأکید مورب"
-    ],
-    [
-     "iris-rise",
-     "باز شدن دایره‌ای"
-    ],
-    [
-     "split-curtain",
-     "پرده دوقسمتی"
-    ],
-    [
-     "diagonal-wipe",
-     "پاک‌شدن مورب"
-    ],
-    [
-     "zoom-iris",
-     "گشایش زوم"
-    ],
-    [
-     "shutter-bars",
-     "کرکره ستونی"
-    ]
-   ],
-   "default": "auto",
-   "editable": false
-  },
-  {
-   "key": "seed",
-   "label": "بذر تصادفی",
-   "type": "number",
-   "default": 0,
-   "editable": false
-  }
- ],
- "example": {
-  "chart": {
-   "type": "bar",
-   "data": [
+  "name": "chart",
+  "label": "نمودار از فایل spec",
+  "description": "نمودار از روی یک فایل JSON (spec) با فیلدهای type/title/data/series؛ برای نمودارهای پیچیده‌تر.",
+  "aliases": [
+    "spec"
+  ],
+  "category": "نمودار",
+  "fields": [
     {
-     "label": "الف",
-     "value": 10
+      "key": "spec",
+      "label": "مسیر فایل spec (JSON)",
+      "type": "text",
+      "editable": true
     },
     {
-     "label": "ب",
-     "value": 25,
-     "color": "accent"
+      "key": "title",
+      "label": "عنوان",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "subtitle",
+      "label": "زیرعنوان",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["sweep-chart", "ورود پویا"],
+        ["editorial-spec", "نمودار تحریریه"],
+        ["elastic-spec", "نمودار فنری"],
+        ["spotlight-spec", "تمرکز داده‌ها"],
+        ["cascade-spec", "رسم آبشاری"],
+        ["minimal-spec", "نمودار مینیمال"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["soft-fade", "محو نرم"],
+        ["curtain-rtl", "پرده از راست به چپ"],
+        ["accent-slash", "نوار تأکید مورب"],
+        ["iris-rise", "باز شدن دایره‌ای"],
+        ["split-curtain", "پرده دوقسمتی"],
+        ["diagonal-wipe", "پاک‌شدن مورب"],
+        ["zoom-iris", "گشایش زوم"],
+        ["shutter-bars", "کرکره ستونی"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
     }
-   ]
-  },
-  "title": "نمونه",
-  "layout": "SLIDE"
- },
- "order": 140,
- "version": 1,
- "example_fa": {
-  "chart": {
-   "type": "bar",
-   "data": [
-    {
-     "label": "الف",
-     "value": 10
+  ],
+  "example": {
+    "chart": {
+      "type": "bar",
+      "data": [
+        {
+          "label": "الف",
+          "value": 10
+        },
+        {
+          "label": "ب",
+          "value": 25,
+          "color": "accent"
+        }
+      ]
     },
-    {
-     "label": "ب",
-     "value": 25,
-     "color": "accent"
-    }
-   ]
+    "title": "نمونه",
+    "layout": "SLIDE"
   },
-  "title": "نمونه",
-  "layout": "SLIDE"
- },
- "example_en": {
-  "chart": {
-   "type": "bar",
-   "orientation": "h",
-   "data": [
-    {
-     "label": "Alone",
-     "value": 3.6
-    },
-    {
-     "label": "With one ally",
-     "value": 5.5,
-     "color": "accent"
-    },
-    {
-     "label": "Group of 3",
-     "value": 32,
-     "color": "danger"
-    }
-   ],
-   "suffix": "%"
-  },
-  "title": "Horizontal bars (sample)",
-  "layout": "SLIDE"
- }
+  "order": 140,
+  "version": 1
 }

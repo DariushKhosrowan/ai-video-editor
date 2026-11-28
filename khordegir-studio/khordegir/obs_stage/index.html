@@ -8,9 +8,11 @@
   <link rel="stylesheet" href="./obs-stage.css">
   <script src="../vendor/gsap.min.js"></script>
   <script src="../stage/sfx.js"></script>
+  <script src="../stage/motion-tokens.js"></script>
   <script src="../stage/core.js"></script>
   <script src="../stage/charts.js"></script>
   <script src="../stage/fx.js"></script>
+  <script src="../stage/mascot-rig.js"></script>
   <script src="../themes/_list.js"></script>
   <script src="../stage/template-lib.js"></script>
   <script src="../templates/_index.js"></script>
@@ -51,6 +53,36 @@
         <div id="ltSubtitle" class="lt-subtitle">توضیح کوتاه یا عنوان برنامه</div>
       </div>
       <div class="lt-sheen" aria-hidden="true"></div>
+    </aside>
+
+    <!-- Live Puppet Operator HUD (hidden on air by default; toggle with H or ?hud=1) -->
+    <aside id="obsLiveHud" class="obs-live-hud hidden" aria-label="کنترل زنده عروسک OBS">
+      <div class="hud-head">
+        <span class="hud-title">کنترل زنده عروسک · Live Puppet</span>
+        <span id="hudLatency" class="hud-badge mono-num" dir="ltr">0.0 ms</span>
+      </div>
+      <div class="hud-row">
+        <button id="hudMicBtn" type="button" class="hud-btn">میکروفن: خاموش</button>
+        <button id="hudNsBtn" type="button" class="hud-btn active">حذف نویز: روشن</button>
+        <button id="hudPttBtn" type="button" class="hud-btn">PTT (Space): خاموش</button>
+      </div>
+      <div class="hud-row">
+        <span id="hudEmoChip" class="hud-chip">احساس: neutral</span>
+        <span id="hudGestChip" class="hud-chip">ژست: —</span>
+        <span id="hudMidiChip" class="hud-chip">MIDI: آماده</span>
+      </div>
+      <div class="hud-row hud-keys" dir="ltr">
+        <span>1-0: Emotions</span>
+        <span>Q-O: Gestures</span>
+        <span>Space: PTT</span>
+        <span>D: Debug</span>
+        <span>H: Hide HUD</span>
+      </div>
+      <div class="hud-row">
+        <button id="hudDebugBtn" type="button" class="hud-btn">دیباگ: خاموش</button>
+        <button id="hudLangBtn" type="button" class="hud-btn">EN / LTR</button>
+        <button id="hudExportMapBtn" type="button" class="hud-btn">خروجی پروفایل MIDI / Stream Deck</button>
+      </div>
     </aside>
   </div>
 

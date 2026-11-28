@@ -19,7 +19,7 @@ Stage.template({
 
     const col = A.el("div", "col", A.root, {
       left, right, top: A.area.y, bottom: A.scam ? 380 : 100, gap: "16px",
-      alignItems: A.scam ? "flex-start" : "center", textAlign: A.scam ? "start" : "center",
+      alignItems: A.scam ? "flex-start" : "center", textAlign: A.scam ? "right" : "center",
     });
 
     if (s.eyebrow) {
@@ -31,12 +31,15 @@ Stage.template({
 
     const tEl = A.text(col, s.title, "hero", "", { fontSize: "88px" });
     A.field("title", tEl);
-    if (lively && preset === "split-headline") {
+    const explicitTextMotion = s.textMotion || s.text_motion || null;
+    if (explicitTextMotion) {
+      A.kinetic(tEl, { at: A.at("title"), mode: explicitTextMotion, role: "title" });
+    } else if (lively && preset === "split-headline") {
       A.kinetic(tEl, { at: A.at("title"), mode: "cascade-3d", role: "title", stagger: 0.048, ease: "vox" });
     } else if (lively && (preset === "curtain-drop" || preset === "chapter-banner")) {
       A.kinetic(tEl, { at: A.at("title"), mode: "rise-mask", role: "title", stagger: 0.048, ease: "vox" });
     } else if (lively && preset === "axis-sweep") {
-      A.kinetic(tEl, { at: A.at("title"), mode: "glide", role: "title", stagger: 0.042, ease: "vox" });
+      A.kinetic(tEl, { at: A.at("title"), mode: "glide-rtl", role: "title", stagger: 0.042, ease: "vox" });
     } else if (lively && preset === "minimal-divider") {
       A.kinetic(tEl, { at: A.at("title"), mode: "editorial-blur", role: "title", stagger: 0.036, ease: "fluid" });
     } else {
@@ -44,8 +47,8 @@ Stage.template({
     }
 
     const ruleW = lively ? (preset === "axis-sweep" ? "360px" : preset === "curtain-drop" ? "240px" : "180px") : "160px";
-    const r = A.el("div", "rule", col, { width: ruleW, transformOrigin: A.scam ? A.originStart : "50% 50%" });
-    Stage.tl.from(r, { scaleX: 0, duration: 0.62, ease: Stage.ease("vox"), immediateRender: true }, A.at("body"));
+    const r = A.el("div", "rule", col, { width: ruleW, transformOrigin: A.scam ? "100% 50%" : "50% 50%" });
+    Stage.tl.from(r, { scaleX: 0, duration: A.dur("expressive"), ease: Stage.ease("vox"), immediateRender: true }, A.at("body"));
 
     if (s.subtitle) {
       const subEl = A.text(col, s.subtitle, "body", "", { color: A.th.colors.muted });

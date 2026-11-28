@@ -1,102 +1,85 @@
-"""Template & theme registry.
+"""Template & theme manifest generator for Khordegir Studio.
 
-A template is a folder  templates/<name>/  containing
-    schema.json    name, label, description, category, aliases, fields, example   (required)
-    template.js    Stage.template({ name, build(slide, A) { ... } })            (required)
-    template.css   optional styles for this template
-    preview.png    optional thumbnail (made by `python3 -m khordegir gallery`)
-Browsers opened from file:// cannot list folders, so the stage and the editor read a generated
-manifest, templates/_index.js. It is rebuilt automatically by every build / gallery / editor command,
-or by hand with `python3 -m khordegir index`.  Extra template folders can live outside the package:
-set KHORDEGIR_TEMPLATES=/path/a:/path/b  (their files are referenced by absolute file:// URLs).
+Scans `templates/*/schema.json` (+ optional `KHORDEGIR_TEMPLATES`) and `themes/*.js`
+and writes `templates/_index.js` and `themes/_list.js`.
 """
-import json, os, sys
+
+from __future__ import annotations
+
+import json
+import os
 from pathlib import Path
+from typing import Any, Dict, List
 
-PKG = Path(__file__).resolve().parent
-TPL = PKG / "templates"
-THEMES = PKG / "themes"
+STUDIO_PKG_DIR = Path(__file__).resolve().parent
 
 
-def template_dirs():
-    roots = [TPL] + [Path(p) for p in os.environ.get("KHORDEGIR_TEMPLATES", "").split(os.pathsep) if p]
-    seen = {}
-    for root in roots:
-        if not root.is_dir():
+def find_templates_dirs(pkg_dir: Path = STUDIO_PKG_DIR) -> List[Path]:
+    dirs = [pkg_dir / "templates"]
+    extra = os.environ.get("KHORDEGIR_TEMPLATES", "")
+    for part in extra.split(os.pathsep):
+        p = part.strip()
+        if p and Path(p).is_dir():
+            dirs.append(Path(p))
+    return dirs
+
+
+def load_template_entries(pkg_dir: Path = STUDIO_PKG_DIR) -> List[Dict[str, Any]]:
+    entries: List[Dict[str, Any]] = []
+    seen = set()
+    for tdir in find_templates_dirs(pkg_dir):
+        if not tdir.is_dir():
             continue
-        for d in sorted(root.iterdir()):
-            if d.is_dir() and not d.name.startswith(("_", ".")) and (d / "schema.json").exists():
-                seen[d.name] = d          # later roots override built-ins with the same name
-    return seen
+        for child in sorted(tdir.iterdir()):
+            if not child.is_dir() or child.name.startswith("_"):
+                continue
+            schema_file = child / "schema.json"
+            tpl_js = child / "template.js"
+            if not schema_file.is_file() or not tpl_js.is_file():
+                continue
+            schema = json.loads(schema_file.read_text(encoding="utf-8"))
+            name = schema.get("name") or child.name
+            if name in seen:
+                continue
+            seen.add(name)
+            entry: Dict[str, Any] = {
+                "name": name,
+                "js": f"../templates/{child.name}/template.js",
+                "schema": schema,
+            }
+            if (child / "template.css").is_file():
+                entry["css"] = f"../templates/{child.name}/template.css"
+            entries.append(entry)
+
+    entries.sort(key=lambda e: (int(e["schema"].get("order", 999)), e["name"]))
+    return entries
 
 
-def load_schemas():
-    out = []
-    for name, d in template_dirs().items():
-        try:
-            s = json.loads((d / "schema.json").read_text(encoding="utf-8"))
-        except Exception as e:
-            print(f"⚠ قالب «{name}»: فایل schema.json خراب است ({e})", file=sys.stderr)
-            continue
-        s.setdefault("name", name)
-        if s["name"] != name:
-            print(f"⚠ قالب «{name}»: name در schema.json باید «{name}» باشد", file=sys.stderr)
-            s["name"] = name
-        if not (d / "template.js").exists():
-            print(f"⚠ قالب «{name}»: template.js ندارد؛ رد شد", file=sys.stderr)
-            continue
-        s["_dir"] = d
-        out.append(s)
-    out.sort(key=lambda s: (s.get("order", 999), s["name"]))
-    return out
+def load_theme_files(pkg_dir: Path = STUDIO_PKG_DIR) -> List[str]:
+    th_dir = pkg_dir / "themes"
+    if not th_dir.is_dir():
+        return []
+    files = [
+        p.name
+        for p in sorted(th_dir.iterdir())
+        if p.is_file() and p.suffix == ".js" and not p.name.startswith("_")
+    ]
+    return files
 
 
-def _rel(d, f):
-    p = d / f
-    try:
-        return "../templates/" + str(p.relative_to(TPL)).replace(os.sep, "/")
-    except ValueError:
-        return p.resolve().as_uri()
+def rebuild_index(pkg_dir: Path = STUDIO_PKG_DIR) -> Dict[str, Any]:
+    entries = load_template_entries(pkg_dir)
+    themes = load_theme_files(pkg_dir)
 
+    idx_path = pkg_dir / "templates" / "_index.js"
+    idx_js = (
+        "/* خودکار ساخته می‌شود — دستی ویرایش نکن (python3 -m khordegir index) */\n"
+        f"window.TEMPLATE_INDEX = {json.dumps(entries, ensure_ascii=False, indent=1)};\n"
+    )
+    idx_path.write_text(idx_js, encoding="utf-8")
 
-def build_index():
-    schemas = load_schemas()
-    idx = []
-    for s in schemas:
-        d = s.pop("_dir")
-        e = {"name": s["name"], "js": _rel(d, "template.js"), "schema": s}
-        if (d / "template.css").exists():
-            e["css"] = _rel(d, "template.css")
-        if (d / "preview.png").exists():
-            e["preview"] = _rel(d, "preview.png")
-        idx.append(e)
-    js = "/* خودکار ساخته می‌شود — دستی ویرایش نکن (python3 -m khordegir index) */\nwindow.TEMPLATE_INDEX = " + \
-         json.dumps(idx, ensure_ascii=False, indent=1) + ";\n"
-    f = TPL / "_index.js"
-    if not f.exists() or f.read_text(encoding="utf-8") != js:
-        f.write_text(js, encoding="utf-8")
-    themes = sorted(p.name for p in THEMES.glob("*.js") if not p.name.startswith("_"))
-    tj = "window.THEME_FILES = " + json.dumps(themes) + ";\n"
-    tf = THEMES / "_list.js"
-    if not tf.exists() or tf.read_text() != tj:
-        tf.write_text(tj)
-    return idx
+    th_path = pkg_dir / "themes" / "_list.js"
+    th_js = f"window.THEME_FILES = {json.dumps(themes, ensure_ascii=False)};\n"
+    th_path.write_text(th_js, encoding="utf-8")
 
-
-def aliases():
-    m = {}
-    for s in load_schemas():
-        for a in s.get("aliases") or []:
-            m[a] = s["name"]
-    return m
-
-
-def template_hash(name):
-    import hashlib
-    d = template_dirs().get(name)
-    h = hashlib.sha1()
-    if d:
-        for p in sorted(d.glob("*")):
-            if p.suffix in (".js", ".css", ".json"):
-                h.update(p.read_bytes())
-    return h.hexdigest()[:12]
+    return {"templates": [e["name"] for e in entries], "themes": themes}

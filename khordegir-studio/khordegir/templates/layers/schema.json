@@ -1,200 +1,90 @@
 {
- "name": "layers",
- "label": "لایه‌ای (JSON)",
- "description": "اسلایدی که از فایل لایه‌ای JSON می‌آید: هر المان با مختصات دقیق. برای طرح‌های خاص.",
- "aliases": [
-  "layer"
- ],
- "category": "ویژه",
- "fields": [
-  {
-   "key": "file",
-   "label": "مسیر فایل لایه‌ای JSON",
-   "type": "text",
-   "editable": true
-  },
-  {
-   "key": "preset",
-   "label": "سبک انیمیشن",
-   "type": "select",
-   "options": [
-    [
-     "auto",
-     "کلاسیک / ارث‌بری"
-    ],
-    [
-     "random",
-     "🎲 تصادفی"
-    ],
-    [
-     "layered-depth",
-     "عمق چندلایه"
-    ],
-    [
-     "kinetic-stage",
-     "صحنه کینتیک"
-    ],
-    [
-     "sweep-compose",
-     "ترکیب کشیده"
-    ],
-    [
-     "elastic-nodes",
-     "نقاط فنری"
-    ],
-    [
-     "cinematic-pass",
-     "گذر سینمایی"
-    ],
-    [
-     "minimal-layers",
-     "لایه‌های مینیمال"
-    ]
-   ],
-   "default": "auto",
-   "editable": false
-  },
-  {
-   "key": "transition",
-   "label": "ترنزیشن ورود",
-   "type": "select",
-   "options": [
-    [
-     "auto",
-     "ارث‌بری"
-    ],
-    [
-     "random",
-     "🎲 تصادفی"
-    ],
-    [
-     "soft-fade",
-     "محو نرم"
-    ],
-    [
-     "curtain-rtl",
-     "پرده از راست به چپ"
-    ],
-    [
-     "accent-slash",
-     "نوار تأکید مورب"
-    ],
-    [
-     "iris-rise",
-     "باز شدن دایره‌ای"
-    ],
-    [
-     "split-curtain",
-     "پرده دوقسمتی"
-    ],
-    [
-     "diagonal-wipe",
-     "پاک‌شدن مورب"
-    ],
-    [
-     "zoom-iris",
-     "گشایش زوم"
-    ],
-    [
-     "shutter-bars",
-     "کرکره ستونی"
-    ]
-   ],
-   "default": "auto",
-   "editable": false
-  },
-  {
-   "key": "seed",
-   "label": "بذر تصادفی",
-   "type": "number",
-   "default": 0,
-   "editable": false
-  }
- ],
- "example": {
-  "elements": [
-   {
-    "type": "text",
-    "text": "نمونه‌ی لایه‌ای",
-    "font": "Black",
-    "size": 90,
-    "color": "#FFFFFF",
-    "x": 1840,
-    "y": 300,
-    "anchor": "rs"
-   },
-   {
-    "type": "counter",
-    "from": 0,
-    "to": 79,
-    "suffix": "٪",
-    "font": "Black",
-    "size": 220,
-    "color": "#FFD600",
-    "x": 1840,
-    "y": 640,
-    "anchor": "rs",
-    "delay": 0.2
-   }
+  "name": "layers",
+  "label": "لایه‌ای (JSON)",
+  "description": "اسلایدی که از فایل لایه‌ای JSON می‌آید: هر المان با مختصات دقیق. برای طرح‌های خاص.",
+  "aliases": [
+    "layer"
   ],
-  "layout": "SLIDE"
- },
- "order": 150,
- "version": 1,
- "example_fa": {
-  "elements": [
-   {
-    "type": "text",
-    "text": "نمونه‌ی لایه‌ای",
-    "font": "Black",
-    "size": 90,
-    "color": "#FFFFFF",
-    "x": 1840,
-    "y": 300,
-    "anchor": "rs"
-   },
-   {
-    "type": "counter",
-    "from": 0,
-    "to": 79,
-    "suffix": "٪",
-    "font": "Black",
-    "size": 220,
-    "color": "#FFD600",
-    "x": 1840,
-    "y": 640,
-    "anchor": "rs",
-    "delay": 0.2
-   }
+  "category": "ویژه",
+  "fields": [
+    {
+      "key": "file",
+      "label": "مسیر فایل لایه‌ای JSON",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["layered-depth", "عمق چندلایه"],
+        ["kinetic-stage", "صحنه کینتیک"],
+        ["sweep-compose", "ترکیب کشیده"],
+        ["elastic-nodes", "نقاط فنری"],
+        ["cinematic-pass", "گذر سینمایی"],
+        ["minimal-layers", "لایه‌های مینیمال"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["soft-fade", "محو نرم"],
+        ["curtain-rtl", "پرده از راست به چپ"],
+        ["accent-slash", "نوار تأکید مورب"],
+        ["iris-rise", "باز شدن دایره‌ای"],
+        ["split-curtain", "پرده دوقسمتی"],
+        ["diagonal-wipe", "پاک‌شدن مورب"],
+        ["zoom-iris", "گشایش زوم"],
+        ["shutter-bars", "کرکره ستونی"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
+    }
   ],
-  "layout": "SLIDE"
- },
- "example_en": {
-  "elements": [
-   {
-    "type": "text",
-    "text": "Layered sample",
-    "font": "Black",
-    "size": 90,
-    "color": "#FFFFFF",
-    "x": 700,
-    "y": 300,
-    "anchor": "ls"
-   },
-   {
-    "type": "counter",
-    "from": 0,
-    "to": 79,
-    "suffix": "%",
-    "font": "Black",
-    "size": 220,
-    "color": "#F2333B",
-    "x": 700,
-    "y": 640,
-    "anchor": "ls",
-    "delay": 0.2
-   }
-  ],
-  "layout": "SLIDE"
- }
+  "example": {
+    "elements": [
+      {
+        "type": "text",
+        "text": "نمونه‌ی لایه‌ای",
+        "font": "Black",
+        "size": 90,
+        "color": "#FFFFFF",
+        "x": 1840,
+        "y": 300,
+        "anchor": "rs"
+      },
+      {
+        "type": "counter",
+        "from": 0,
+        "to": 79,
+        "suffix": "٪",
+        "font": "Black",
+        "size": 220,
+        "color": "#FFD600",
+        "x": 1840,
+        "y": 640,
+        "anchor": "rs",
+        "delay": 0.2
+      }
+    ],
+    "layout": "SLIDE"
+  },
+  "order": 150,
+  "version": 1
 }

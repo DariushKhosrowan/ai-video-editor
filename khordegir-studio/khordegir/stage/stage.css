@@ -32,8 +32,13 @@ body{width:1920px;height:1080px}
 .t-hero,.t-h1,.t-quote{text-wrap:balance}
 .t-body,.t-caption{color:var(--c-body)}
 .t-eyebrow{color:var(--c-accent)}
-.k-line{display:inline}
+.k-line-mask{display:inline-block;overflow:hidden;vertical-align:top}
+.k-line{display:inline-block;will-change:transform,opacity}
 .k-word{display:inline-block;will-change:transform,opacity}
+.k-word-group{display:inline-block;white-space:nowrap}
+.k-char{display:inline-block;will-change:transform,opacity}
+.k-cursor{display:inline-block;color:var(--c-accent);font-weight:900;margin-inline-start:2px;will-change:opacity}
+.k-count-num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;display:inline-block}
 [data-field-wrap]{will-change:transform}
 .num{white-space:nowrap;display:inline-flex;align-items:baseline;gap:.12em;direction:rtl}
 .num-core{display:inline-block;text-align:right;direction:ltr;unicode-bidi:isolate;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;letter-spacing:-0.025em}
@@ -56,7 +61,7 @@ body{width:1920px;height:1080px}
 .badge{display:inline-block;border-radius:var(--badge-radius);padding:.15em .55em;font-weight:700}
 .badge.dng{background:var(--c-dangerBadge);color:var(--c-dangerText)}
 .badge.acc{background:var(--c-accentBadge);color:var(--c-accent)}
-#stage .source{position:absolute;bottom:var(--safe-y,26px);right:var(--safe-x,80px);left:auto;color:#8a8a8a;font-size:22px;direction:ltr;text-align:right;max-width:1100px}
+.source{position:absolute;bottom:26px;right:80px;color:#8a8a8a;font-size:22px;direction:ltr;text-align:right;max-width:1100px}
 .note{position:absolute;bottom:26px;left:80px;max-width:900px;color:var(--c-muted)!important}
 .note-scam{left:auto;right:80px;bottom:62px;max-width:1100px}
 .camguide{position:absolute;border:3px dashed rgba(255,214,0,.7);border-radius:24px;align-items:center;justify-content:center;
@@ -74,11 +79,13 @@ body.measuring #stage .content *{transform:none!important}
 .grain{position:absolute;inset:-2px;pointer-events:none;opacity:.045;mix-blend-mode:overlay;background-repeat:repeat;z-index:40}
 .depth{position:absolute;inset:-60px;overflow:hidden;opacity:.22;filter:blur(44px) saturate(.95)}
 .depth img{width:100%;height:100%;object-fit:cover}
-.hl{background-image:linear-gradient(transparent,transparent);background-image:linear-gradient(rgba(255,214,0,.38),rgba(255,214,0,.38));
+.hl{background-image:linear-gradient(rgba(255,214,0,.38),rgba(255,214,0,.38));
   background-repeat:no-repeat;background-position:100% 88%;background-size:100% 42%;padding:0 .08em;border-radius:3px}
 .ul,.ul-on{background-image:linear-gradient(var(--c-accent),var(--c-accent));background-repeat:no-repeat;background-position:100% 100%;background-size:100% 6px;padding-bottom:4px}
-/* cards nested in flex/grid layouts flow (templates may still set position explicitly) */
-.col .card,.card .card,.flow>.card{position:relative}
+.strike{background-image:linear-gradient(var(--c-dangerText,#EF4444),var(--c-dangerText,#EF4444));
+  background-repeat:no-repeat;background-position:100% 54%;background-size:100% 5px;padding:0 .08em}
+.tnum{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+.paper-grain{background-image:radial-gradient(rgba(0,0,0,.04) 1px,transparent 0);background-size:18px 18px}
 
 /* Always-On Living Ambient Stage & Dreamy Blurred YouTuber Depth */
 #stage.stage-transparent,
@@ -139,21 +146,10 @@ html.stage-transparent{background:transparent!important}
 .az-paper-rig,.az-camera-rig{will-change:transform}
 .az-dim-para{will-change:opacity,filter}
 .az-marker-hl{box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.stage-caption-bar{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);max-width:86%;z-index:65;pointer-events:none;
+  padding:14px 28px;border-radius:14px;background:rgba(9,11,18,.84);border:1.5px solid rgba(255,255,255,.16);
+  color:#FFF;font-size:34px;font-weight:700;line-height:1.45;text-align:center;
+  box-shadow:0 14px 36px rgba(0,0,0,.55);backdrop-filter:blur(10px);transition:none}
+.stage-caption-text{white-space:pre-line}
 
 
-/* transitions, hand-drawn annotations, drift wrapper, calm backgrounds (AI Studio Build draft, merged 2026-11-28) */
-#stage.has-tr .fadein{display:none}
-.tr-layer{position:absolute;inset:0;pointer-events:none;z-index:45;overflow:hidden}
-.tr-panel,.tr-flash,.tr-streak,.tr-shutter,.tr-cinema{position:absolute;inset:0;pointer-events:none}
-.tr-glitch-copy{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen}
-.ann-svg{position:absolute;pointer-events:none;overflow:visible;z-index:5}
-.ul.ul-svg{background-image:none;padding-bottom:0}
-.drift-wrap{position:absolute;inset:0;transform-origin:50% 50%}
-#stage.bg-calm .bg{background:var(--c-bg)}
-#stage.bg-calm .bg::after{display:none}
-.bg-mesh,.bg-vignette,.bg-grain-static,.bg-shapes{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.bg-blob{position:absolute;border-radius:50%;pointer-events:none;will-change:transform}
-.bg-vignette{background:radial-gradient(ellipse 115% 95% at 50% 50%,transparent 52%,rgba(0,0,0,.52) 100%)}
-.bg-grain-static{opacity:.025;mix-blend-mode:overlay;background-repeat:repeat;z-index:2}
-.bg-shape{position:absolute;pointer-events:none;overflow:visible;will-change:transform}
-.ann-circle,.ann-box{white-space:nowrap;position:relative}

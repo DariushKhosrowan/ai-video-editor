@@ -24,7 +24,7 @@ Stage.template({
     const col = A.el("div", "col", A.root, {
       left: colBox.left, right: colBox.right, top: A.area.y, bottom: A.scam ? 120 : 110,
       alignItems: centered ? "center" : "flex-start",
-      textAlign: centered ? "center" : "start",
+      textAlign: centered ? "center" : "right",
       gap: "6px",
     });
 
@@ -63,7 +63,7 @@ Stage.template({
       A.sweepLine(col, {
         width: hasImg ? 320 : 420,
         height: 8,
-        origin: centered ? "50% 50%" : A.originStart,
+        origin: centered ? "50% 50%" : "100% 50%",
         style: { marginTop: "8px", marginBottom: "8px", background: A.color(s.color || "accent") },
         at: A.at("number") + 0.25,
       });
@@ -73,10 +73,13 @@ Stage.template({
     if (capText) {
       const capEl = A.text(col, capText, "h1", "", { maxWidth: "1100px" });
       A.field("caption", capEl);
-      if (lively && preset === "kinetic-stat") {
+      const explicitTextMotion = s.textMotion || s.text_motion || null;
+      if (explicitTextMotion) {
+        A.kinetic(capEl, { at: A.at("title") + 0.22, mode: explicitTextMotion, role: "title" });
+      } else if (lively && preset === "kinetic-stat") {
         A.kinetic(capEl, { at: A.at("title") + 0.22, mode: "rise-mask", role: "title", stagger: 0.045, ease: "vox" });
       } else if (lively && preset === "dual-split") {
-        A.kinetic(capEl, { at: A.at("title") + 0.22, mode: "glide", role: "title", stagger: 0.04, ease: "vox" });
+        A.kinetic(capEl, { at: A.at("title") + 0.22, mode: "glide-rtl", role: "title", stagger: 0.04, ease: "vox" });
       } else {
         A.enter(capEl, "title", 0, 0.25, lively ? { ease: "vox" } : {});
       }

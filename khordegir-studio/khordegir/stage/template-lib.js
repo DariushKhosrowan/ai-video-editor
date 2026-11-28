@@ -3,6 +3,16 @@
   "use strict";
   const S = window.Stage;
   S.T = {
+    /* Responsive aspect helper for 16:9, 9:16, and 1:1 multi-format layouts */
+    aspect(A) {
+      const isPortrait = A.H > A.W + 40;
+      const isSquare = !isPortrait && Math.abs(A.W - A.H) <= 40;
+      const isWide = A.W > A.H + 40;
+      const padX = isPortrait ? 64 : (isSquare ? 68 : A.L.margin);
+      const padTop = isPortrait ? 96 : (isSquare ? 64 : A.area.y);
+      const padBot = A.scam ? 110 : (isPortrait ? 120 : 84);
+      return { isPortrait, isSquare, isWide, padX, padTop, padBot };
+    },
     /* eyebrow + title + subtitle block anchored top-right. returns {el, bottom} */
     header(A, s, o = {}) {
       if (!s.title && !s.eyebrow && !s.kicker && !s.subtitle) return { bottom: A.area.y };
@@ -10,6 +20,7 @@
       const h = A.el("div", "col", A.root, { right, left, top: A.area.y, gap: "8px", justifyContent: "flex-start", height: o.maxH || 260 });
       const ey = s.eyebrow || s.kicker;
       const lively = !!(S.fx && S.fx.cur && S.fx.cur.preset && S.fx.cur.preset !== "classic");
+      const explicitTextMotion = s.textMotion || s.text_motion || null;
       if (ey) {
         const elEy = A.text(h, ey, "eyebrow");
         if (o.fieldEyebrow) A.field("eyebrow", elEy);
@@ -18,7 +29,8 @@
       if (s.title) {
         const elT = A.text(h, s.title, o.titleRole || "h1");
         if (o.fieldTitle) A.field("title", elT);
-        if (lively && o.kineticTitle) A.kinetic(elT, { at: A.at("title"), role: "title" });
+        if (explicitTextMotion) A.kinetic(elT, { at: A.at("title"), role: "title", mode: explicitTextMotion });
+        else if (lively && o.kineticTitle) A.kinetic(elT, { at: A.at("title"), role: "title" });
         else A.enter(elT, "title");
       }
       if (s.subtitle) {

@@ -1,0 +1,31 @@
+{
+  "name": "by_the_numbers",
+  "aliases": ["by-the-numbers", "به-زبان-آمار", "آمار-سه-گانه"],
+  "order": 35,
+  "category": "خبری و تحلیلی (News & Explainer)",
+  "label": "به زبان آمار (By the Numbers)",
+  "description": "نمایش سه‌تایی آمارهای کلیدی خبری با شمارشگر عدد و جداکنندهٔ خطی رسم‌شونده در سه فرمت",
+  "fields": [
+    { "key": "eyebrow", "label": "روتیتر (Eyebrow)", "type": "text", "editable": true },
+    { "key": "title", "label": "تیتر اصلی (Title)", "type": "text", "editable": true },
+    { "key": "summary", "label": "جمع‌بندی کوتاه (Summary)", "type": "textarea", "editable": true },
+    {
+      "key": "items",
+      "label": "آمارها (عدد، پسوند، توضیح)",
+      "type": "table",
+      "columns": [["value", "عدد"], ["suffix", "پسوند"], ["label", "عنوان"], ["color", "رنگ"]]
+    },
+    { "key": "source", "label": "منبع (Source)", "type": "text" }
+  ],
+  "example": {
+    "eyebrow": "گزارش به زبان آمار",
+    "title": "سه عدد که *کل ماجرا* را توضیح می‌دهد",
+    "summary": "داده‌های رسمی سال گذشته نشان می‌دهد تغییر رفتار مخاطبان بسیار سریع‌تر از پیش‌بینی‌ها بوده است.",
+    "items": [
+      { "value": 74, "suffix": "٪", "label": "رشد تماشای ویدیوهای کوتاه عمودی", "color": "accent" },
+      { "value": 3.4, "suffix": " برابر", "label": "افزایش ماندگاری با موشن‌گرافیک دقیق", "color": "good" },
+      { "value": 18, "suffix": " ثانیه", "label": "میانگین زمان تصمیم مخاطب در شروع ویدیو", "color": "danger" }
+    ],
+    "source": "مرکز پژوهش رسانه‌های دیجیتال · ۱۴۰۴"
+  }
+}

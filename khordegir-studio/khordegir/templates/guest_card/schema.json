@@ -1,0 +1,27 @@
+{
+  "name": "guest_card",
+  "aliases": ["guest-card", "معرفی-مهمان-کارت", "کارت-مهمان"],
+  "order": 40,
+  "category": "پادکست و گفتگو (Podcast & Talk)",
+  "label": "کارت معرفی مهمان (Guest Card)",
+  "description": "کارت معرفی مهمان پادکست یا گفتگوی زنده با عکس/آواتار، سمت، سوابق و نوار تأکید متحرک",
+  "fields": [
+    { "key": "eyebrow", "label": "برچسب قسمت (Episode Tag)", "type": "text", "editable": true },
+    { "key": "name", "label": "نام مهمان (Guest Name)", "type": "text", "editable": true },
+    { "key": "role", "label": "سمت / تخصص (Role)", "type": "text", "editable": true },
+    { "key": "bio", "label": "معرفی کوتاه (Bio)", "type": "textarea", "editable": true },
+    { "key": "credentials", "label": "سوابق کلیدی (هر خط یک مورد)", "type": "list" },
+    { "key": "avatar", "label": "تصویر مهمان (اختیاری)", "type": "image" }
+  ],
+  "example": {
+    "eyebrow": "مهمان قسمت ۴۲",
+    "name": "دکتر *آرش کاظمی*",
+    "role": "پژوهشگر اقتصاد رفتاری و طراحی سیاست عمومی",
+    "bio": "نویسندهٔ سه کتاب دربارهٔ تصمیم‌گیری جمعی و مدرس تحلیل داده در رسانه‌های مستقل.",
+    "credentials": [
+      "دکتری اقتصاد رفتاری و نظریه بازی‌ها",
+      "مدیر آزمایشگاه تحلیل رسانه‌های دیجیتال",
+      "مشاور ارشد مستندهای داده‌محور"
+    ]
+  }
+}

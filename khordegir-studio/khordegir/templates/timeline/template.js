@@ -7,13 +7,13 @@ Stage.template({
     const ev = Array.isArray(s.events) ? s.events : Stage.T.pairs(s.events).map((p) => ({ date: p[0], text: p[1] }));
     const left = A.area.left + 40, right = A.area.x + 40, W = A.W - left - right;
     const y = Math.max(h.bottom + 160, A.H * (A.scam ? 0.38 : 0.5));
-    const line = A.el("div", "abs", A.root, { left, width: W, top: y - 3, height: 6, borderRadius: "3px", background: A.th.colors.axis, transformOrigin: A.originStart });
+    const line = A.el("div", "abs", A.root, { left, width: W, top: y - 3, height: 6, borderRadius: "3px", background: A.th.colors.axis, transformOrigin: "100% 50%" });
     A.field("events", line);
-    Stage.tl.from(line, { scaleX: 0, duration: lively ? 0.95 : 0.9, ease: Stage.ease(lively ? "vox" : "power3"), immediateRender: true }, A.at("body"));
+    Stage.tl.from(line, { scaleX: 0, duration: A.dur("dramatic"), ease: Stage.ease(lively ? "vox" : "power3"), immediateRender: true }, A.at("body"));
     const n = ev.length, step = W / n;
-    const stagger = (lively && preset === "stagger-eras") ? 0.28 : 0.22;
+    const stagger = A.staggerStep((lively && preset === "stagger-eras") ? 0.28 : 0.22);
     ev.forEach((e, i) => {
-      const cx = A.ltr ? left + step * (i + 0.5) : A.W - right - step * (i + 0.5);
+      const cx = A.W - right - step * (i + 0.5);
       const tone = Stage.T.tone(e.tone);
       const dot = A.el("div", "abs", A.root, {
         left: cx - 18, top: y - 18, width: 36, height: 36, borderRadius: "50%",

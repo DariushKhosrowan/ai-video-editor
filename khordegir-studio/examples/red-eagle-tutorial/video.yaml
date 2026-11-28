@@ -1,0 +1,154 @@
+title: آموزش کامل عروسک عقاب قرمز (Red Eagle Puppet Tutorial)
+theme: khordegir-dark
+format: 16:9
+fps: 60
+seed: 2026
+
+puppet:
+  version: 2
+  character: red_eagle
+  preset: lively
+  outfit: journalist
+  skin: classic
+  paletteLock: true
+  scene:
+    shot: wide
+    pushIn: 0.04
+    background: studio-desk
+    parallax: 1.0
+    lighting: rim-light
+    lightingIntensity: 0.85
+  performance:
+    fps: 60
+    frameCache: true
+  plugins:
+    emotions:
+      eureka:
+        label: ایده ناگهانی (Eureka)
+        labelEn: Eureka
+        browL: -12
+        browR: 12
+        browY: -13
+        upperLid: 0.0
+        lowerLid: 0.14
+        pupilScale: 1.14
+        headTilt: 6
+        accent: sparkle
+    gestures:
+      victory-flap:
+        label: بال‌زدن پیروزی (Victory Flap)
+        labelEn: Victory Flap
+        defaultDuration: 1.1
+        wingLRot: -28
+        wingRRot: 28
+        headNod: -5
+        bodyY: -12
+        accent: sparkle
+
+slides:
+  - template: mascot_talk
+    id: intro-shot-system
+    title: نمای سینمایی، پارالاکس و نورپردازی
+    subtitle: Wide → Medium → Close-Up (سقف زوم ۱.۰۶) + زیرنویس SRT
+    layout: SLIDE
+    duration: 4.0
+    audio: narration.wav
+    srt: captions.srt
+    say: "[eureka] سلام! به آموزش کامل عروسک عقاب قرمز خوش آمدید. [gesture:victory-flap] با سیستم نمای دوربین و نور لبه‌ای، همه چیز کاملاً قطعی و آفلاین است."
+    puppet:
+      character: red_eagle
+      preset: lively
+      outfit: journalist
+      skin: classic
+      emotion: eureka
+      gestures:
+        - t: 1.7
+          type: victory-flap
+          duration: 1.1
+          intensity: 1.0
+      scene:
+        shot: wide
+        background: studio-desk
+        parallax: 1.0
+        lighting: rim-light
+        lightingIntensity: 0.85
+        shotTimeline:
+          - t: 0.0
+            shot: wide
+            pushIn: 0.03
+            blend: 0.5
+          - t: 1.6
+            shot: medium
+            pushIn: 0.025
+            blend: 0.55
+          - t: 2.8
+            shot: close-up
+            pushIn: 0.0
+            blend: 0.55
+      performance:
+        fps: 60
+        frameCache: true
+
+  - template: mascot_talk
+    id: two-shot-dialogue
+    title: گفتگوی دو‌شخصیتی در نمای Two-Shot
+    subtitle: عقاب قرمز و جغد وسپر با پس‌زمینه شهر شبانه و نور سرد
+    layout: SLIDE
+    duration: 4.0
+    audio: narration.wav
+    srt: captions.srt
+    dialogue:
+      enabled: true
+      turns:
+        - t: 0.0
+          speaker: left
+          emotion: smug
+          listenerReaction: nod
+        - t: 1.8
+          speaker: right
+          emotion: thinking
+          listenerReaction: lean_in
+      partner:
+        character: vesper_owl
+        outfit: scholar
+        skin: winter
+        preset: calm
+    puppet:
+      character: red_eagle
+      outfit: podcast
+      skin: classic
+      scene:
+        shot: two-shot
+        pushIn: 0.03
+        background: night-city
+        parallax: 1.25
+        lighting: cool
+        lightingIntensity: 0.8
+
+  - template: mascot_talk
+    id: alpha-debug-showcase
+    title: خروجی شفاف (Alpha) و لایه دیباگ
+    subtitle: آماده برای ترکیب در OBS / Premiere + نمودار فنر و ۱۸ نقطه پیوت
+    layout: SLIDE
+    duration: 4.0
+    audio: narration.wav
+    transparent: true
+    puppet:
+      character: red_eagle
+      preset: dramatic
+      outfit: superhero
+      skin: neon
+      scene:
+        shot: medium
+        pushIn: 0.02
+        background: transparent
+        parallax: 0.0
+        lighting: sunset-gold
+        lightingIntensity: 0.75
+      debug:
+        enabled: true
+        showPivots: true
+        showGraphs: true
+      performance:
+        fps: 60
+        frameCache: true

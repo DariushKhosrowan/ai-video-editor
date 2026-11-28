@@ -1,73 +1,66 @@
 Stage.template({
   name: "chapter_card",
   build(s, A) {
-    const tone = s.tone === "good" || s.tone === "info" ? s.tone : (Stage.T.tone(s.tone) || "accent");
-    const col = A.color(tone);
-    const alpha = (c, a) => {
-      const m = /^#([0-9a-f]{6})$/i.exec(String(c || "").trim());
-      if (!m) return `color-mix(in srgb, ${c} ${Math.round(a * 100)}%, transparent)`;
-      const n = parseInt(m[1], 16);
-      return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
-    };
+    const asp = Stage.T.aspect(A);
+    const col = A.th.colors || {};
+    const padX = asp.isPortrait ? 56 : A.area.x + 24;
+    const leftEdge = asp.isPortrait ? 56 : A.area.left;
 
-    const cam = A.L.cam || [24, 740, 584, 1055];
-    const safeCamTop = Math.min(A.area.camTop || (cam[1] - 20), cam[1] - 20);
-    // In SCAM, keep entire full-width band strictly above the bottom-left camera box
-    const bandH = A.scam ? Math.min(480, safeCamTop - 130) : 520;
-    const bandTop = A.scam ? Math.round((safeCamTop - bandH) / 2) + 20 : Math.round((A.H - bandH) / 2);
-
-    const band = A.el("div", "abs", A.root, {
-      left: "0px", right: "0px", top: bandTop, height: bandH,
-      background: alpha(col, 0.14),
-      transformOrigin: A.originStart
+    // Large architectural watermark numeral with parallax depth
+    const wm = A.el("div", "abs tnum", A.root, {
+      left: asp.isPortrait ? "50%" : (leftEdge + 24) + "px",
+      top: asp.isPortrait ? "18%" : "50%",
+      transform: asp.isPortrait ? "translate(-50%, 0)" : "translate(0, -52%)",
+      fontSize: asp.isPortrait ? "260px" : "360px",
+      fontWeight: 900, lineHeight: 1,
+      color: A.color("accent"), opacity: 0.14, pointerEvents: "none",
     });
-    const topLine = A.el("div", "abs", A.root, { left: "0px", right: "0px", top: bandTop, height: "5px", background: col, transformOrigin: A.originStart });
-    const botLine = A.el("div", "abs", A.root, { left: "0px", right: "0px", top: bandTop + bandH - 5, height: "5px", background: col, transformOrigin: A.originStart });
+    wm.dataset.depth = "-1";
+    wm.textContent = Stage.fa(String(s.number || "۰۱"));
+    Stage.tl.fromTo(wm, { opacity: 0, scale: 0.92 }, { opacity: 0.14, scale: 1, duration: A.dur("dramatic"), ease: Stage.ease("cinematic"), immediateRender: true }, 0.08);
 
-    const inner = A.el("div", "abs", A.root, {
-      left: A.L.margin, right: A.L.margin, top: bandTop + 36, height: bandH - 72,
-      display: "flex", alignItems: "center", gap: "44px"
+    // Center editorial content block
+    const box = A.el("div", "abs", A.root, {
+      left: leftEdge, right: padX, top: "50%", transform: "translateY(-50%)",
+      display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "24px",
     });
 
-    const numRaw = String(s.number ?? "").trim();
-    const latNum = numRaw.replace(/[۰-۹]/g, (d) => "۰۱۲۳۴۵۶۷۸۹".indexOf(d)).replace(/[٠-٩]/g, (d) => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
-    const isNumeric = /^\d+$/.test(latNum);
+    const headRow = A.el("div", "", box, { display: "flex", alignItems: "center", gap: "18px", flexWrap: "wrap" });
+    const numPill = A.text(headRow, `فصل ${Stage.fa(String(s.number || "۰۱"))}`, "caption", "", {
+      padding: "8px 22px", borderRadius: "10px",
+      background: A.color("accent"), color: "#111111", fontWeight: 900, fontSize: "26px",
+    });
+    A.field("number", numPill);
+    A.enter(numPill, "badge", 0, 0);
 
-    if (numRaw || s.prefix) {
-      const numWrap = A.el("div", "", inner, {
-        flexShrink: 0, display: "flex", alignItems: "center",
-        maxWidth: "460px", height: "100%"
+    if (s.timestamp) {
+      const tsEl = A.text(headRow, s.timestamp, "caption", "tnum", {
+        fontSize: "26px", fontWeight: 700, color: col.muted,
       });
-      if (isNumeric) {
-        const numEl = A.el("div", "t-number", numWrap, {
-          fontSize: (A.scam ? 116 : 136) + "px", color: col,
-          lineHeight: 1.0, whiteSpace: "nowrap"
-        });
-        A.count(numEl, { to: +latNum, from: 0, prefix: s.prefix || "", decimals: 0, at: 0.24, dur: 0.85 });
-      } else {
-        A.text(numWrap, (s.prefix || "") + numRaw, "number", "", {
-          fontSize: (A.scam ? 84 : 98) + "px", color: col,
-          lineHeight: 1.05, whiteSpace: "nowrap"
-        });
-      }
-      A.fit(numWrap, 0.55);
-      Stage.tl.fromTo(numWrap, { opacity: 0, x: A.sign * 36 }, { opacity: 1, x: 0, duration: 0.48, ease: Stage.ease("power4"), immediateRender: true }, 0.20);
-
-      const sep = A.el("div", "", inner, { width: "2px", height: "62%", background: alpha(col, 0.42), flexShrink: 0, transformOrigin: "top center" });
-      Stage.tl.fromTo(sep, { scaleY: 0 }, { scaleY: 1, duration: 0.42, ease: Stage.ease("power3"), immediateRender: true }, 0.28);
+      A.field("timestamp", tsEl);
+      A.enter(tsEl, "eyebrow", 0, 0.08);
     }
 
-    const textCol = A.el("div", "", inner, {
-      flex: 1, minWidth: "0px", height: "100%",
-      display: "flex", flexDirection: "column", justifyContent: "center", gap: "14px"
+    const title = A.text(box, s.title || "", "hero", "", {
+      fontSize: asp.isPortrait ? "64px" : "80px", lineHeight: 1.24, maxWidth: "96%",
     });
-    A.enter(A.text(textCol, s.title || "", "hero", "", { fontSize: A.scam ? "64px" : "76px", lineHeight: 1.12, textAlign: "start" }), "title", 0, 0.12);
-    if (s.subtitle) {
-      A.enter(A.text(textCol, s.subtitle, "body", "", { fontSize: A.scam ? "30px" : "34px", color: A.color("muted"), lineHeight: 1.38, textAlign: "start" }), "body", 0, 0.16);
-    }
-    A.fit(textCol, 0.5);
+    A.field("title", title);
+    A.kinetic(title, { at: A.at("title"), mode: s.textMotion || s.text_motion || "line-curtain", role: "title" });
 
-    Stage.tl.fromTo(band, { scaleX: 0 }, { scaleX: 1, duration: 0.52, ease: Stage.ease("expo"), immediateRender: true }, 0.04);
-    Stage.tl.fromTo([topLine, botLine], { scaleX: 0 }, { scaleX: 1, duration: 0.58, ease: Stage.ease("power4"), immediateRender: true }, 0.08);
-  }
+    // A3 Geometric SVG line-art divider
+    const lineW = asp.isPortrait ? 460 : 620;
+    const svg = A.svg(box, 0, 0, lineW, 18, `0 0 ${lineW} 18`);
+    svg.style.position = "relative";
+    A.svgEl(svg, "line", { x1: lineW, y1: 9, x2: 48, y2: 9, stroke: A.color("accent"), "stroke-width": 4, "stroke-linecap": "round" });
+    A.svgEl(svg, "polygon", { points: "24,2 34,9 24,16 14,9", fill: "none", stroke: A.color("accent"), "stroke-width": 3 });
+    A.lineArtReveal(svg, { at: A.at("title") + 0.16, dur: "base" });
+
+    if (s.subtitle) {
+      const sub = A.text(box, s.subtitle, "body", "", {
+        fontSize: asp.isPortrait ? "34px" : "36px", color: col.muted, lineHeight: 1.55, maxWidth: "88%",
+      });
+      A.field("subtitle", sub);
+      A.enter(sub, "body", 0, 0.25);
+    }
+  },
 });

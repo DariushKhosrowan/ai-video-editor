@@ -1,214 +1,103 @@
 {
- "name": "chat",
- "label": "گفتگوی پیام‌رسان",
- "description": "حباب‌های پیام یکی‌یکی ظاهر می‌شوند. «او» سمت راست (خاکستری)، «من» سمت چپ (سبز تیره)، لحن بد = قرمز.",
- "aliases": [
-  "messages",
-  "گفتگو",
-  "پیام"
- ],
- "category": "ماکت",
- "fields": [
-  {
-   "key": "title",
-   "label": "عنوان بالای گفتگو",
-   "type": "text",
-   "editable": true
-  },
-  {
-   "key": "messages",
-   "label": "پیام‌ها",
-   "type": "table",
-   "columns": [
-    [
-     "from",
-     "فرستنده (او/من)"
-    ],
-    [
-     "text",
-     "متن"
-    ],
-    [
-     "tone",
-     "لحن (bad/good)"
-    ],
-    [
-     "tag",
-     "برچسب کوچک"
-    ]
-   ],
-   "editable": true
-  },
-  {
-   "key": "preset",
-   "label": "سبک انیمیشن",
-   "type": "select",
-   "options": [
-    [
-     "auto",
-     "کلاسیک / ارث‌بری"
-    ],
-    [
-     "random",
-     "🎲 تصادفی"
-    ],
-    [
-     "pop-bubbles",
-     "پرش حباب‌ها"
-    ],
-    [
-     "rapid-thread",
-     "رشته گفتگوی سریع"
-    ],
-    [
-     "editorial-dialog",
-     "گفتگوی تحریریه"
-    ],
-    [
-     "slide-thread",
-     "ورود از طرفین"
-    ],
-    [
-     "focus-alert",
-     "تأکید پیام مهم"
-    ],
-    [
-     "minimal-chat",
-     "گفتگوی آرام"
-    ]
-   ],
-   "default": "auto",
-   "editable": false
-  },
-  {
-   "key": "transition",
-   "label": "ترنزیشن ورود",
-   "type": "select",
-   "options": [
-    [
-     "auto",
-     "ارث‌بری"
-    ],
-    [
-     "random",
-     "🎲 تصادفی"
-    ],
-    [
-     "soft-fade",
-     "محو نرم"
-    ],
-    [
-     "curtain-rtl",
-     "پرده از راست به چپ"
-    ],
-    [
-     "accent-slash",
-     "نوار تأکید مورب"
-    ],
-    [
-     "iris-rise",
-     "باز شدن دایره‌ای"
-    ],
-    [
-     "split-curtain",
-     "پرده دوقسمتی"
-    ],
-    [
-     "diagonal-wipe",
-     "پاک‌شدن مورب"
-    ],
-    [
-     "zoom-iris",
-     "گشایش زوم"
-    ],
-    [
-     "shutter-bars",
-     "کرکره ستونی"
-    ]
-   ],
-   "default": "auto",
-   "editable": false
-  },
-  {
-   "key": "seed",
-   "label": "بذر تصادفی",
-   "type": "number",
-   "default": 0,
-   "editable": false
-  }
- ],
- "example": {
-  "title": "",
-  "messages": [
-   {
-    "from": "او",
-    "text": "این دو تا بخش جدیدم اضافه کن؛ *کار پنج دقیقه‌ست!*"
-   },
-   {
-    "from": "من",
-    "text": "توی قرارمون نبوده"
-   },
-   {
-    "from": "من",
-    "text": "باز هم نه، زمان می‌بره"
-   },
-   {
-    "from": "او",
-    "text": "ای بابا، روت حساب کرده بودیم رفیق!"
-   },
-   {
-    "from": "من",
-    "text": "باشه... می‌زنم",
-    "tone": "bad"
-   }
+  "name": "chat",
+  "label": "گفتگوی پیام‌رسان",
+  "description": "حباب‌های پیام یکی‌یکی ظاهر می‌شوند. «او» سمت راست (خاکستری)، «من» سمت چپ (سبز تیره)، لحن بد = قرمز.",
+  "aliases": [
+    "messages",
+    "گفتگو",
+    "پیام"
   ],
-  "layout": "SCAM"
- },
- "order": 120,
- "version": 1,
- "example_fa": {
-  "title": "",
-  "messages": [
-   {
-    "from": "او",
-    "text": "این دو تا بخش جدیدم اضافه کن؛ *کار پنج دقیقه‌ست!*"
-   },
-   {
-    "from": "من",
-    "text": "توی قرارمون نبوده"
-   },
-   {
-    "from": "من",
-    "text": "باز هم نه، زمان می‌بره"
-   },
-   {
-    "from": "او",
-    "text": "ای بابا، روت حساب کرده بودیم رفیق!"
-   },
-   {
-    "from": "من",
-    "text": "باشه... می‌زنم",
-    "tone": "bad"
-   }
+  "category": "ماکت",
+  "fields": [
+    {
+      "key": "title",
+      "label": "عنوان بالای گفتگو",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "messages",
+      "label": "پیام‌ها",
+      "type": "table",
+      "columns": [
+        ["from", "فرستنده (او/من)"],
+        ["text", "متن"],
+        ["tone", "لحن (bad/good)"],
+        ["tag", "برچسب کوچک"]
+      ],
+      "editable": true
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["pop-bubbles", "پرش حباب‌ها"],
+        ["rapid-thread", "رشته گفتگوی سریع"],
+        ["editorial-dialog", "گفتگوی تحریریه"],
+        ["slide-thread", "ورود از طرفین"],
+        ["focus-alert", "تأکید پیام مهم"],
+        ["minimal-chat", "گفتگوی آرام"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["soft-fade", "محو نرم"],
+        ["curtain-rtl", "پرده از راست به چپ"],
+        ["accent-slash", "نوار تأکید مورب"],
+        ["iris-rise", "باز شدن دایره‌ای"],
+        ["split-curtain", "پرده دوقسمتی"],
+        ["diagonal-wipe", "پاک‌شدن مورب"],
+        ["zoom-iris", "گشایش زوم"],
+        ["shutter-bars", "کرکره ستونی"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
+    }
   ],
-  "layout": "SCAM"
- },
- "example_en": {
-  "title": "",
-  "messages": [
-   {
-    "from": "Alex",
-    "text": "Coming to the party tonight? *Everyone's going!*"
-   },
-   {
-    "from": "Me",
-    "text": "I'm good, thanks."
-   },
-   {
-    "from": "Alex",
-    "text": "Oh… okay."
-   }
-  ],
-  "layout": "SCAM"
- }
+  "example": {
+    "title": "",
+    "messages": [
+      {
+        "from": "او",
+        "text": "این دو تا بخش جدیدم اضافه کن؛ *کار پنج دقیقه‌ست!*"
+      },
+      {
+        "from": "من",
+        "text": "توی قرارمون نبوده"
+      },
+      {
+        "from": "من",
+        "text": "باز هم نه، زمان می‌بره"
+      },
+      {
+        "from": "او",
+        "text": "ای بابا، روت حساب کرده بودیم رفیق!"
+      },
+      {
+        "from": "من",
+        "text": "باشه... می‌زنم",
+        "tone": "bad"
+      }
+    ],
+    "layout": "SCAM"
+  },
+  "order": 120,
+  "version": 1
 }

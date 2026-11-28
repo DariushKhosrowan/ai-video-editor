@@ -1,194 +1,93 @@
 {
- "name": "timeline",
- "label": "خط زمان",
- "description": "یک خط افقی که از راست به چپ کشیده می‌شود و نقطه‌های تاریخ با توضیح، یکی‌یکی روی آن ظاهر می‌شوند.",
- "aliases": [
-  "خط زمان"
- ],
- "category": "نمودار",
- "fields": [
-  {
-   "key": "title",
-   "label": "عنوان",
-   "type": "text",
-   "editable": true
-  },
-  {
-   "key": "events",
-   "label": "رویدادها",
-   "type": "table",
-   "columns": [
-    [
-     "date",
-     "تاریخ"
-    ],
-    [
-     "text",
-     "توضیح"
-    ],
-    [
-     "tone",
-     "لحن (bad/good)"
-    ]
-   ],
-   "editable": true
-  },
-  {
-   "key": "preset",
-   "label": "سبک انیمیشن",
-   "type": "select",
-   "options": [
-    [
-     "auto",
-     "کلاسیک / ارث‌بری"
-    ],
-    [
-     "random",
-     "🎲 تصادفی"
-    ],
-    [
-     "track-sweep",
-     "کشش خط زمان"
-    ],
-    [
-     "milestone-pop",
-     "پرش رویدادها"
-    ],
-    [
-     "editorial-arc",
-     "قوس تحریریه"
-    ],
-    [
-     "elastic-nodes",
-     "نقاط فنری"
-    ],
-    [
-     "stagger-eras",
-     "دوره‌های پلکانی"
-    ],
-    [
-     "minimal-rail",
-     "ریل مینیمال"
-    ]
-   ],
-   "default": "auto",
-   "editable": false
-  },
-  {
-   "key": "transition",
-   "label": "ترنزیشن ورود",
-   "type": "select",
-   "options": [
-    [
-     "auto",
-     "ارث‌بری"
-    ],
-    [
-     "random",
-     "🎲 تصادفی"
-    ],
-    [
-     "soft-fade",
-     "محو نرم"
-    ],
-    [
-     "curtain-rtl",
-     "پرده از راست به چپ"
-    ],
-    [
-     "accent-slash",
-     "نوار تأکید مورب"
-    ],
-    [
-     "iris-rise",
-     "باز شدن دایره‌ای"
-    ],
-    [
-     "split-curtain",
-     "پرده دوقسمتی"
-    ],
-    [
-     "diagonal-wipe",
-     "پاک‌شدن مورب"
-    ],
-    [
-     "zoom-iris",
-     "گشایش زوم"
-    ],
-    [
-     "shutter-bars",
-     "کرکره ستونی"
-    ]
-   ],
-   "default": "auto",
-   "editable": false
-  },
-  {
-   "key": "seed",
-   "label": "بذر تصادفی",
-   "type": "number",
-   "default": 0,
-   "editable": false
-  }
- ],
- "example": {
-  "title": "ایتالیا و آدم‌ربایی",
-  "events": [
-   {
-    "date": "۱۹۶۹",
-    "text": "شروع موج آدم‌ربایی"
-   },
-   {
-    "date": "۱۹۹۱",
-    "text": "قانون مسدود کردن حساب خانواده",
-    "tone": "good"
-   },
-   {
-    "date": "۱۹۹۸",
-    "text": "فقط ۳۸ مورد در ۷ سال"
-   }
+  "name": "timeline",
+  "label": "خط زمان",
+  "description": "یک خط افقی که از راست به چپ کشیده می‌شود و نقطه‌های تاریخ با توضیح، یکی‌یکی روی آن ظاهر می‌شوند.",
+  "aliases": [
+    "خط زمان"
   ],
-  "source": "Bohlen / NYT, 1998; Avraham & Porat, 2023",
-  "layout": "SLIDE"
- },
- "order": 130,
- "version": 1,
- "example_fa": {
-  "title": "ایتالیا و آدم‌ربایی",
-  "events": [
-   {
-    "date": "۱۹۶۹",
-    "text": "شروع موج آدم‌ربایی"
-   },
-   {
-    "date": "۱۹۹۱",
-    "text": "قانون مسدود کردن حساب خانواده",
-    "tone": "good"
-   },
-   {
-    "date": "۱۹۹۸",
-    "text": "فقط ۳۸ مورد در ۷ سال"
-   }
+  "category": "نمودار",
+  "fields": [
+    {
+      "key": "title",
+      "label": "عنوان",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "events",
+      "label": "رویدادها",
+      "type": "table",
+      "columns": [
+        ["date", "تاریخ"],
+        ["text", "توضیح"],
+        ["tone", "لحن (bad/good)"]
+      ],
+      "editable": true
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["track-sweep", "کشش خط زمان"],
+        ["milestone-pop", "پرش رویدادها"],
+        ["editorial-arc", "قوس تحریریه"],
+        ["elastic-nodes", "نقاط فنری"],
+        ["stagger-eras", "دوره‌های پلکانی"],
+        ["minimal-rail", "ریل مینیمال"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["soft-fade", "محو نرم"],
+        ["curtain-rtl", "پرده از راست به چپ"],
+        ["accent-slash", "نوار تأکید مورب"],
+        ["iris-rise", "باز شدن دایره‌ای"],
+        ["split-curtain", "پرده دوقسمتی"],
+        ["diagonal-wipe", "پاک‌شدن مورب"],
+        ["zoom-iris", "گشایش زوم"],
+        ["shutter-bars", "کرکره ستونی"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
+    }
   ],
-  "source": "Bohlen / NYT, 1998; Avraham & Porat, 2023",
-  "layout": "SLIDE"
- },
- "example_en": {
-  "title": "Sample timeline",
-  "events": [
-   {
-    "date": "1951",
-    "text": "First study"
-   },
-   {
-    "date": "1955",
-    "text": "Published"
-   },
-   {
-    "date": "2024",
-    "text": "New replication"
-   }
-  ],
-  "layout": "SCAM"
- }
+  "example": {
+    "title": "ایتالیا و آدم‌ربایی",
+    "events": [
+      {
+        "date": "۱۹۶۹",
+        "text": "شروع موج آدم‌ربایی"
+      },
+      {
+        "date": "۱۹۹۱",
+        "text": "قانون مسدود کردن حساب خانواده",
+        "tone": "good"
+      },
+      {
+        "date": "۱۹۹۸",
+        "text": "فقط ۳۸ مورد در ۷ سال"
+      }
+    ],
+    "source": "Bohlen / NYT, 1998; Avraham & Porat, 2023",
+    "layout": "SLIDE"
+  },
+  "order": 130,
+  "version": 1
 }

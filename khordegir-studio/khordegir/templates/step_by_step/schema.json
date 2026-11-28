@@ -1,0 +1,85 @@
+{
+  "name": "step_by_step",
+  "label": "مراحل گام‌به‌گام (Step-by-Step)",
+  "description": "نمایش فرآیند یا آموزش ۳ تا ۵ مرحله‌ای با خط پیشرفت متحرک؛ در حالت ۱۶:۹ افقی و در ۹:۱۶ و ۱:۱ عمودی چیده می‌شود.",
+  "aliases": [
+    "step-by-step",
+    "گام-به-گام",
+    "مراحل"
+  ],
+  "category": "آموزش",
+  "fields": [
+    {
+      "key": "eyebrow",
+      "label": "برچسب بالا",
+      "type": "text",
+      "default": "راهنمای اجرایی",
+      "editable": true
+    },
+    {
+      "key": "title",
+      "label": "عنوان فرآیند",
+      "type": "text",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "steps",
+      "label": "مراحل (هر خط «عنوان: توضیح» یا جدول title/detail)",
+      "type": "textarea",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "active_step",
+      "label": "شماره مرحله برجسته (اختیاری، ۰ = همه یکسان)",
+      "type": "number",
+      "default": 0,
+      "editable": false
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["rail-progress", "خط پیشرفت مرحله‌ای"],
+        ["card-ladder", "نردبان کارت‌ها"],
+        ["editorial-steps", "مراحل تحریریه"],
+        ["minimal-steps", "گام‌های تمیز"]
+      ],
+      "default": "rail-progress",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["curtain-rtl", "پرده از راست به چپ"],
+        ["push-left", "هل دادن به چپ"],
+        ["soft-fade", "محو نرم"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
+    }
+  ],
+  "example": {
+    "eyebrow": "روش ۴ مرحله‌ای",
+    "title": "چطور یک ویدیوی تحلیلی در ۶۰ دقیقه بسازیم؟",
+    "steps": "تعیین زاویه دید: فقط یک پرسش مشخص را انتخاب کنید\nجمع‌آوری ۲ سند: آمار معتبر و منبع دست‌اول بیاورید\nتدوین اسلایدها: هر ایده را در یک قاب ساده بچینید\nضبط و انتشار: با ریتم آرام و مکث‌های حساب‌شده بخوانید",
+    "active_step": 0,
+    "layout": "SLIDE"
+  },
+  "order": 280,
+  "version": 1
+}

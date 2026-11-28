@@ -1,0 +1,26 @@
+{
+  "name": "bar_race",
+  "aliases": ["bar-race", "مسابقه-میله", "نمودار-مسابقه‌ای"],
+  "order": 42,
+  "category": "داده و نمودار (Data & Charts)",
+  "label": "نمودار مسابقه میله‌ای (Bar Race)",
+  "description": "رقابت پویا و کاملاً قطعی میله‌ها در طول زمان با جابه‌جایی روان رتبه و شمارشگر دوره",
+  "fields": [
+    { "key": "eyebrow", "label": "برچسب بالا (Eyebrow)", "type": "text", "editable": true },
+    { "key": "title", "label": "عنوان نمودار (Title)", "type": "text", "editable": true },
+    { "key": "suffix", "label": "واحد / پسوند (Unit)", "type": "text", "editable": true },
+    { "key": "frames", "label": "دوره‌های زمانی (JSON)", "type": "series" },
+    { "key": "source", "label": "منبع (Source)", "type": "text" }
+  ],
+  "example": {
+    "eyebrow": "روند پنج‌ساله",
+    "title": "مسابقه رشد *سهم پلتفرم‌های ویدیویی*",
+    "suffix": " میلیون",
+    "frames": [
+      { "period": "۱۳۹۹", "values": { "یوتیوب": 48, "اینستاگرام": 42, "آپارات": 28, "تیک‌تاک": 18, "تلگرام": 34 } },
+      { "period": "۱۴۰۱", "values": { "یوتیوب": 68, "اینستاگرام": 64, "آپارات": 39, "تیک‌تاک": 54, "تلگرام": 45 } },
+      { "period": "۱۴۰۳", "values": { "یوتیوب": 92, "اینستاگرام": 81, "آپارات": 48, "تیک‌تاک": 88, "تلگرام": 58 } }
+    ],
+    "source": "گزارش تحلیلی استودیو · ۱۴۰۴"
+  }
+}

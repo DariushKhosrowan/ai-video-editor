@@ -153,44 +153,42 @@
   };
 
   /* ------------------------------------------------------------ bar (horizontal, RTL) */
-  /* horizontal bars, direction-aware (layout adapted from an AI Studio Build draft, 2026-11-28):
-     RTL: labels right, axis right, bars grow right->left.  LTR: labels left, axis left, bars grow left->right.
-     RTL geometry is unchanged from the original Persian version. */
   C.hbar = function (A, box, spec, t0 = 0) {
     const M = S.theme.motion, its = items(spec), n = its.length || 1;
     const preset = activePreset(spec);
     const lively = preset !== "classic";
-    const ltr = S.isLTR(), start = ltr ? "left" : "right", end = ltr ? "right" : "left";
     const W = box.clientWidth || 1200, H = box.clientHeight || 640;
     const pre = spec.prefix || "", suf = spec.suffix || "";
     const labs = its.map((d) => A.text(box, d.label, "label", "abs", { whiteSpace: "nowrap" }));
     const labW = Math.min(W * 0.36, Math.max(...labs.map((l) => l.offsetWidth)) + 30);
     const vsize = spec.value_size || 52;
-    /* distances measured from the reading-start edge of the box */
-    const axD = labW, maxLen = Math.max(40, W - labW - vsize * 3.4);
+    const px1 = W - labW, px0 = vsize * 3.4;
     const vmax = spec.ymax != null ? S.toNum(spec.ymax) : Math.max(...its.map((d) => d.v), 1e-9);
     const row = H / n, bh = Math.min(spec.bar_width || 90, row * 0.58);
     const axM = M.axes || { delay: 0, dur: 0.34 };
     const barM = M.bar || { delay: 0.25, dur: 0.68, stagger: 0.08, ease: "vox" };
     const barEase = preset === "elastic-rise" ? "spring" : (lively ? "vox" : barM.ease);
-    const ax = A.el("div", "abs", box, { [start]: axD - 3, top: 0, width: 3, height: H, background: S.theme.colors.axis, transformOrigin: "50% 0%" });
+    const ax = A.el("div", "abs", box, {
+      left: px1, top: 0, width: 3, height: H, background: S.theme.colors.axis, transformOrigin: "50% 0%",
+    });
     S.tl.from(ax, { opacity: 0, scaleY: lively ? 0 : 1, duration: axM.dur + 0.1, ease: S.ease("vox"), immediateRender: true }, t0);
     its.forEach((d, i) => {
       const cy = row * (i + 0.5), t = t0 + barM.delay + i * barM.stagger;
-      const bw = Math.max(3, d.v / (vmax || 1) * maxLen);
+      const bw = Math.max(3, d.v / (vmax || 1) * (px1 - px0));
       const baseCol = S.color(d.color);
       const bar = A.el("div", "abs bar", box, {
-        [start]: axD, top: cy - bh / 2, width: bw, height: bh,
-        background: lively ? `linear-gradient(${ltr ? 90 : 270}deg, ${baseCol} 0%, color-mix(in srgb, ${baseCol} 80%, #000 20%) 100%)` : baseCol,
-        borderRadius: ltr ? "0 10px 10px 0" : "10px 0 0 10px", transformOrigin: ltr ? "0% 50%" : "100% 50%",
+        left: px1 - bw, top: cy - bh / 2, width: bw, height: bh,
+        background: lively ? `linear-gradient(270deg, ${baseCol} 0%, color-mix(in srgb, ${baseCol} 80%, #000 20%) 100%)` : baseCol,
+        borderRadius: "10px 0 0 10px", transformOrigin: "100% 50%",
       });
       S.tl.from(bar, { scaleX: 0, duration: barM.dur, ease: S.ease(barEase), immediateRender: true }, t);
-      const v = A.el("div", "abs t-value", box, { fontSize: vsize, color: S.color(d.color === "#5A5A5A" ? "muted" : d.color) });
+      const v = A.el("div", "abs t-value", box, {
+        fontSize: vsize, color: S.color(d.color === "#5A5A5A" ? "muted" : d.color),
+      });
       A.count(v, { to: d.v, decimals: d.dec, prefix: d.prefix ?? pre, suffix: d.suffix ?? suf, at: t, dur: Math.max(0.55, barM.dur * 0.95), enter: false });
-      v.style[start] = (axD + bw + 16) + "px"; v.style.top = (cy - v.offsetHeight / 2) + "px";
-      S.tl.from(v, { opacity: 0, x: 10 * (ltr ? -1 : 1), duration: 0.42, ease: S.ease("vox"), immediateRender: true }, t + 0.06);
-      const l = labs[i]; l.style[start] = "0px"; l.style[end] = "auto"; l.style.top = (cy - l.offsetHeight / 2) + "px";
-      l.style.maxWidth = (labW - 24) + "px";
+      v.style.right = (W - (px1 - bw) + 16) + "px"; v.style.top = (cy - v.offsetHeight / 2) + "px";
+      S.tl.from(v, { opacity: 0, x: 10, duration: 0.42, ease: S.ease("vox"), immediateRender: true }, t + 0.06);
+      const l = labs[i]; l.style.right = "0px"; l.style.top = (cy - l.offsetHeight / 2) + "px";
       A.enter(l, "body", 0, 0, { at: t });
     });
   };
@@ -488,7 +486,7 @@
     if (spec.caption) A.enter(A.text(col, spec.caption, "h1"), "title", 0, 0.25);
   };
 
-  /* ------------------------------------------------------------ compare: before -> after, in reading order (RTL: first on the right, arrow points left; LTR: first on the left, arrow points right) */
+  /* ------------------------------------------------------------ compare: before -> after (RTL: first on the right, arrow points left) */
   C.compare = function (A, box, spec, t0 = 0) {
     const steps = spec.steps || [spec.before || {}, spec.after || {}];
     const preset = activePreset(spec);
@@ -500,15 +498,14 @@
     const svgNS = "http://www.w3.org/2000/svg";
 
     steps.forEach((s, i) => {
-      const ltr = S.isLTR(), start = ltr ? "left" : "right";
-      const off = i * (colW + arrowW);                       // distance from the reading-start edge
-      const c = A.el("div", "col", box, { [start]: off, width: colW, top: 0, height: H, alignItems: "center", textAlign: "center", gap: "6px" });
+      const right = i * (colW + arrowW);
+      const c = A.el("div", "col", box, { right, width: colW, top: 0, height: H, alignItems: "center", textAlign: "center", gap: "6px" });
       const num = A.el("div", "t-number", c, { color: S.color(s.color || defs[i % defs.length]), fontSize: size + "px" });
       const t = t0 + 0.18 + i * (preset === "versus-clash" ? 0.34 : 0.5);
       A.count(num, { to: s.value, prefix: s.prefix ?? spec.prefix, suffix: s.suffix ?? spec.suffix, decimals: s.decimals, at: t, dur: 0.88 });
       if (lively) {
         const fromVars = preset === "versus-clash"
-          ? { x: (i === 0 ? 44 : -44) * (ltr ? -1 : 1), scale: 0.92, opacity: 0 }
+          ? { x: i === 0 ? 44 : -44, scale: 0.92, opacity: 0 }
           : preset === "mirror-flip"
             ? { scaleX: 0.78, opacity: 0 }
             : { y: 18, scale: 0.95, opacity: 0 };
@@ -521,19 +518,329 @@
       }
       if (s.label) A.enter(A.text(c, s.label, "label", "", { maxWidth: colW * 0.95 + "px" }), "body", 0, 0, { at: t + 0.15 });
       if (i < n - 1) {
-        const ar = A.el("div", "abs", box, { [start]: off + colW + 14, width: arrowW - 28, top: H / 2 - 40, height: 40 });
+        const ar = A.el("div", "abs", box, { right: right + colW + 14, width: arrowW - 28, top: H / 2 - 40, height: 40 });
         const arSvg = document.createElementNS(svgNS, "svg");
         arSvg.setAttribute("viewBox", "0 0 100 40");
         arSvg.setAttribute("width", "100%");
         arSvg.setAttribute("height", "40");
         arSvg.setAttribute("preserveAspectRatio", "none");
         const arrColor = S.color(spec.arrow_color || (lively ? "accent" : "muted"));
-        const shaft = A.svgEl(arSvg, "path", { d: ltr ? "M0 20 H88" : "M100 20 H12", fill: "none", stroke: arrColor, "stroke-width": 7, "stroke-linecap": "round" });
-        const head = A.svgEl(arSvg, "path", { d: ltr ? "M74 4 L94 20 L74 36" : "M26 4 L6 20 L26 36", fill: "none", stroke: arrColor, "stroke-width": 7, "stroke-linecap": "round", "stroke-linejoin": "round" });
+        const shaft = A.svgEl(arSvg, "path", { d: "M100 20 H12", fill: "none", stroke: arrColor, "stroke-width": 7, "stroke-linecap": "round" });
+        const head = A.svgEl(arSvg, "path", { d: "M26 4 L6 20 L26 36", fill: "none", stroke: arrColor, "stroke-width": 7, "stroke-linecap": "round", "stroke-linejoin": "round" });
         ar.appendChild(arSvg);
         const arrowAt = t + 0.35;
         A.draw(shaft, arrowAt, preset === "sweep-compare" ? 0.5 : 0.42, "vox");
         A.draw(head, arrowAt + 0.22, 0.28, "vox");
+      }
+    });
+  };
+
+  /* ------------------------------------------------------------ A7: Bar Race (seek-driven rank & value interpolation) */
+  C.barRace = function (A, box, spec, t0 = 0) {
+    const W = box.clientWidth || 1200, H = box.clientHeight || 620;
+    const col = S.theme.colors || {};
+    const serCols = col.series || [col.accent || "#FFD600", col.danger || "#E53935", "#38BDF8", "#22C55E", "#A78BFA", "#FB923C"];
+    const frames = Array.isArray(spec.frames) && spec.frames.length ? spec.frames : [
+      { period: "۱۴۰۰", values: { "ایران": 42, "ترکیه": 55, "امارات": 48, "عربستان": 50 } },
+      { period: "۱۴۰۲", values: { "ایران": 64, "ترکیه": 68, "امارات": 74, "عربستان": 66 } },
+      { period: "۱۴۰۴", values: { "ایران": 88, "ترکیه": 79, "امارات": 92, "عربستان": 84 } },
+    ];
+    const topN = Math.max(3, Math.min(8, Number(spec.top_n || spec.topN) || 6));
+    const pre = spec.prefix || "", suf = spec.suffix || "";
+    const dur = Number(spec.race_duration) || Math.max(2.6, frames.length * 1.15);
+    const allNames = [];
+    frames.forEach((fr) => {
+      const vals = fr.values || fr.items || {};
+      Object.keys(vals).forEach((k) => { if (!allNames.includes(k)) allNames.push(k); });
+    });
+    const colorMap = {};
+    allNames.forEach((n, idx) => { colorMap[n] = (spec.colors && spec.colors[n]) || serCols[idx % serCols.length]; });
+
+    // Period badge in corner
+    const periodEl = A.el("div", "abs tnum", box, {
+      left: 16, bottom: 10, fontSize: Math.min(92, Math.round(H * 0.16)) + "px",
+      fontWeight: 900, color: col.accent || "#FFD600", opacity: 0.24, pointerEvents: "none", lineHeight: 1,
+    });
+    periodEl.textContent = String(frames[0].period || "");
+
+    const rowH = Math.floor((H - 28) / topN);
+    const barH = Math.max(26, Math.min(66, Math.round(rowH * 0.62)));
+    const labW = Math.min(240, Math.round(W * 0.24));
+    const valW = Math.min(150, Math.round(W * 0.14));
+    const trackW = Math.max(140, W - labW - valW - 28);
+
+    const rows = {};
+    allNames.forEach((name) => {
+      const row = A.el("div", "abs", box, {
+        left: 0, right: 0, top: 0, height: rowH + "px",
+        display: "flex", alignItems: "center", gap: "16px",
+      });
+      const lbl = A.el("div", "", row, {
+        width: labW + "px", textAlign: "right", fontSize: Math.max(22, Math.min(30, Math.round(barH * 0.56))) + "px",
+        fontWeight: 800, color: col.text || "#FFFFFF", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+      });
+      lbl.textContent = name;
+      const track = A.el("div", "", row, {
+        position: "relative", flex: "1", height: barH + "px",
+        background: col.isDark === false ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.06)",
+        borderRadius: "10px", overflow: "hidden",
+      });
+      const fill = A.el("div", "bar", track, {
+        position: "absolute", right: 0, top: 0, bottom: 0, width: "10%",
+        background: S.color(colorMap[name]), borderRadius: "10px",
+      });
+      const val = A.el("div", "tnum", row, {
+        width: valW + "px", textAlign: "left", fontSize: Math.max(22, Math.min(30, Math.round(barH * 0.56))) + "px",
+        fontWeight: 800, color: S.color(colorMap[name]), direction: "ltr",
+      });
+      rows[name] = { row, fill, val };
+    });
+
+    const evalAt = (t) => {
+      const u = dur > 0 ? Math.max(0, Math.min(1, (t - t0) / dur)) : 1;
+      const fPos = u * Math.max(0, frames.length - 1);
+      const i0 = Math.min(frames.length - 1, Math.floor(fPos));
+      const i1 = Math.min(frames.length - 1, i0 + 1);
+      const frac = fPos - i0;
+      const smooth = frac * frac * (3 - 2 * frac);
+      periodEl.textContent = String(frames[Math.round(fPos)].period || "");
+
+      const ranked = allNames.map((name) => {
+        const v0 = S.toNum((frames[i0].values || {})[name] ?? 0);
+        const v1 = S.toNum((frames[i1].values || {})[name] ?? v0);
+        return { name, v: v0 + (v1 - v0) * smooth };
+      }).sort((a, b) => (b.v - a.v) || a.name.localeCompare(b.name));
+
+      const vmax = Math.max(1e-6, ranked[0] ? ranked[0].v : 1);
+      ranked.forEach((item, rankIdx) => {
+        const r = rows[item.name];
+        const visible = rankIdx < topN;
+        r.row.style.opacity = visible ? "1" : "0";
+        r.row.style.transform = `translate3d(0, ${Math.min(topN, rankIdx) * rowH}px, 0)`;
+        const pct = Math.max(2, (item.v / vmax) * 100);
+        r.fill.style.width = pct.toFixed(2) + "%";
+        r.val.textContent = pre + S.fmt(item.v, spec.decimals ?? 0) + suf;
+      });
+    };
+
+    evalAt(0);
+    S.onSeek(evalAt);
+    S.tl.to({ _r: 0 }, { _r: 1, duration: dur, ease: "none" }, t0);
+  };
+
+  /* ------------------------------------------------------------ A7: Pie / Donut Chart with stroke-dashoffset draw-on */
+  C.donut = function (A, box, spec, t0 = 0) {
+    const its = items(spec);
+    if (!its.length) return;
+    const W = box.clientWidth || 1200, H = box.clientHeight || 620;
+    const col = S.theme.colors || {};
+    const total = its.reduce((s, d) => s + Math.max(0, d.v), 0) || 1;
+    const isPie = spec.pie === true || spec.thickness === 1;
+    const vertical = W < H * 1.05;
+    const chartSize = Math.min(vertical ? W * 0.72 : W * 0.48, vertical ? H * 0.52 : H * 0.88);
+    const cx = chartSize / 2, cy = chartSize / 2;
+    const strokeW = isPie ? chartSize * 0.44 : Math.max(28, chartSize * (Number(spec.thickness) || 0.19));
+    const r = (chartSize - strokeW) / 2 - 8;
+    const circ = 2 * Math.PI * r;
+
+    const wrap = A.el("div", "abs", box, {
+      inset: 0, display: "flex",
+      flexDirection: vertical ? "column" : "row",
+      alignItems: "center", justifyContent: "space-around", gap: "28px",
+    });
+
+    const ringBox = A.el("div", "", wrap, { position: "relative", width: chartSize + "px", height: chartSize + "px", flexShrink: 0 });
+    const svg = A.svg(ringBox, 0, 0, chartSize, chartSize, `0 0 ${chartSize} ${chartSize}`);
+    A.svgEl(svg, "circle", {
+      cx, cy, r, fill: "none",
+      stroke: col.isDark === false ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.08)",
+      "stroke-width": strokeW,
+    });
+
+    let accDeg = -90;
+    const step = A.staggerStep ? A.staggerStep("editorial") : 0.08;
+    its.forEach((d, idx) => {
+      const share = Math.max(0, d.v) / total;
+      const segLen = Math.max(2, share * circ - (its.length > 1 ? 5 : 0));
+      const arc = A.svgEl(svg, "circle", {
+        cx, cy, r, fill: "none",
+        stroke: S.color(d.color),
+        "stroke-width": strokeW,
+        "stroke-linecap": "butt",
+        "stroke-dasharray": `${segLen.toFixed(2)} ${circ.toFixed(2)}`,
+        transform: `rotate(${accDeg.toFixed(2)} ${cx} ${cy})`,
+      });
+      accDeg += share * 360;
+      const at = t0 + 0.15 + idx * step;
+      S.tl.fromTo(arc, { strokeDashoffset: segLen }, { strokeDashoffset: 0, duration: A.dur ? A.dur("expressive") : 0.68, ease: S.ease("vox"), immediateRender: true }, at);
+    });
+
+    if (!isPie) {
+      const center = A.el("div", "abs", ringBox, {
+        inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "24px",
+      });
+      const bigVal = A.el("div", "tnum", center, {
+        fontSize: Math.max(38, Math.round(chartSize * 0.16)) + "px", fontWeight: 900, color: col.text || "#FFF", lineHeight: 1.05,
+      });
+      A.count(bigVal, { to: spec.center_value != null ? spec.center_value : total, prefix: spec.prefix || "", suffix: spec.suffix || "", at: t0 + 0.25, dur: 0.9 });
+      if (spec.center_label) {
+        A.text(center, spec.center_label, "caption", "", { color: col.muted, marginTop: "6px", fontSize: "24px" });
+      }
+    }
+
+    // Legend
+    const leg = A.el("div", "", wrap, {
+      display: "flex", flexDirection: "column", gap: "16px", minWidth: vertical ? "82%" : "36%", maxWidth: vertical ? "92%" : "44%",
+    });
+    its.forEach((d, idx) => {
+      const sharePct = (Math.max(0, d.v) / total) * 100;
+      const item = A.el("div", "card", leg, {
+        display: "flex", alignItems: "center", justifyContent: "space-between", gap: "14px",
+        padding: "14px 20px",
+      });
+      const left = A.el("div", "", item, { display: "flex", alignItems: "center", gap: "12px" });
+      A.el("div", "", left, { width: "16px", height: "16px", borderRadius: "5px", background: S.color(d.color), flexShrink: 0 });
+      A.text(left, d.label, "body", "", { fontSize: "26px", fontWeight: 700 });
+      const pctEl = A.el("div", "tnum", item, { fontSize: "26px", fontWeight: 800, color: S.color(d.color), direction: "ltr" });
+      pctEl.textContent = S.fmt(sharePct, 1) + "٪";
+      A.enter(item, "card", idx, 0.12);
+    });
+  };
+  C.pie = function (A, box, spec, t0 = 0) {
+    return C.donut(A, box, Object.assign({}, spec, { pie: true }), t0);
+  };
+
+  /* ------------------------------------------------------------ A7: Area Chart (line draw + smooth gradient area fill) */
+  C.area = function (A, box, spec, t0 = 0) {
+    return C.line(A, box, Object.assign({ fill: true, markers: true }, spec), t0);
+  };
+
+  /* ------------------------------------------------------------ A7: Scatter / Bubble Plot with optional trendline */
+  C.scatter = function (A, box, spec, t0 = 0) {
+    const W = box.clientWidth || 1200, H = box.clientHeight || 620;
+    const col = S.theme.colors || {};
+    const serCols = col.series || [col.accent || "#FFD600", col.danger || "#E53935", "#38BDF8", "#22C55E"];
+    const pts = (spec.points || spec.data || []).map((p, i) => ({
+      x: S.toNum(p.x ?? p[0] ?? i),
+      y: S.toNum(p.y ?? p[1] ?? 0),
+      r: Math.max(8, Math.min(34, Number(p.r || p.size) || 14)),
+      label: p.label || "",
+      color: p.color || serCols[i % serCols.length],
+    }));
+    if (!pts.length) return;
+    const padL = 86, padR = 40, padT = 32, padB = 64;
+    const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y);
+    const xmin = spec.xmin != null ? S.toNum(spec.xmin) : Math.min(...xs) * 0.9;
+    const xmax = spec.xmax != null ? S.toNum(spec.xmax) : Math.max(...xs) * 1.1 || 10;
+    const ymin = spec.ymin != null ? S.toNum(spec.ymin) : Math.min(0, Math.min(...ys));
+    const ymax = spec.ymax != null ? S.toNum(spec.ymax) : niceMax(Math.max(...ys, 1));
+    const PX = (v) => padL + ((v - xmin) / ((xmax - xmin) || 1)) * (W - padL - padR);
+    const PY = (v) => (H - padB) - ((v - ymin) / ((ymax - ymin) || 1)) * (H - padT - padB);
+
+    const svg = A.svg(box, 0, 0, W, H, `0 0 ${W} ${H}`);
+    // Grid & axes
+    for (let g = 0; g <= 4; g += 1) {
+      const gy = padT + (g / 4) * (H - padT - padB);
+      A.svgEl(svg, "line", { x1: padL, y1: gy, x2: W - padR, y2: gy, stroke: col.grid || "rgba(255,255,255,0.12)", "stroke-dasharray": "6 6", "stroke-width": 1.5 });
+    }
+    const xAx = A.svgEl(svg, "line", { x1: padL, y1: H - padB, x2: W - padR, y2: H - padB, stroke: col.axis || "#888", "stroke-width": 2.5 });
+    const yAx = A.svgEl(svg, "line", { x1: padL, y1: H - padB, x2: padL, y2: padT, stroke: col.axis || "#888", "stroke-width": 2.5 });
+    A.drawPath(xAx, { at: t0, dur: "snappy", cue: false });
+    A.drawPath(yAx, { at: t0 + 0.06, dur: "snappy", cue: false });
+
+    // Optional linear regression trend line
+    if (spec.trendline !== false && pts.length >= 2) {
+      const mx = xs.reduce((a, b) => a + b, 0) / pts.length;
+      const my = ys.reduce((a, b) => a + b, 0) / pts.length;
+      let num = 0, den = 0;
+      pts.forEach((p) => { num += (p.x - mx) * (p.y - my); den += (p.x - mx) * (p.x - mx); });
+      const slope = den ? num / den : 0;
+      const icpt = my - slope * mx;
+      const trend = A.svgEl(svg, "line", {
+        x1: PX(xmin).toFixed(1), y1: PY(slope * xmin + icpt).toFixed(1),
+        x2: PX(xmax).toFixed(1), y2: PY(slope * xmax + icpt).toFixed(1),
+        stroke: S.color("accent"), "stroke-width": 3, "stroke-dasharray": "10 8", opacity: 0.72,
+      });
+      A.drawPath(trend, { at: t0 + 0.45, dur: "expressive", cue: false });
+    }
+
+    const st = A.staggerStep ? A.staggerStep("grid") : 0.06;
+    pts.forEach((p, idx) => {
+      const cx = PX(p.x), cy = PY(p.y);
+      const c = A.svgEl(svg, "circle", {
+        cx: cx.toFixed(1), cy: cy.toFixed(1), r: p.r,
+        fill: S.color(p.color), "fill-opacity": 0.84, stroke: col.bg || "#111", "stroke-width": 3,
+      });
+      S.tl.fromTo(c, { opacity: 0, scale: 0.2 }, { opacity: 1, scale: 1, duration: 0.42, ease: S.ease("spring"), immediateRender: true }, t0 + 0.22 + idx * st);
+      if (p.label) {
+        const lb = A.text(box, p.label, "caption", "abs", {
+          left: (cx - 60) + "px", top: (cy - p.r - 32) + "px", width: "120px", textAlign: "center", fontSize: "20px", color: col.text,
+        });
+        A.enter(lb, "note", idx, 0.25);
+      }
+    });
+  };
+
+  /* ------------------------------------------------------------ A7: Offline Vector World/Region Choropleth Map */
+  const CHOROPLETH_REGIONS = {
+    north_america: { label: "آمریکای شمالی", cx: 215, cy: 195, d: "M85 110 L235 90 L330 145 L300 225 L235 280 L175 265 L125 215 Z" },
+    south_america: { label: "آمریکای جنوبی", cx: 295, cy: 385, d: "M245 295 L325 305 L360 375 L315 475 L268 460 L248 365 Z" },
+    europe:        { label: "اروپا",         cx: 520, cy: 160, d: "M455 115 L575 100 L600 175 L545 205 L465 195 L445 155 Z" },
+    middle_east:   { label: "خاورمیانه",     cx: 600, cy: 245, d: "M550 205 L645 200 L665 265 L610 295 L555 270 Z" },
+    africa:        { label: "آفریقا",        cx: 525, cy: 335, d: "M455 215 L560 220 L605 315 L555 445 L495 435 L445 315 Z" },
+    asia:          { label: "آسیا",          cx: 745, cy: 195, d: "M615 100 L860 115 L895 215 L820 290 L670 275 L645 195 Z" },
+    oceania:       { label: "اقیانوسیه",     cx: 825, cy: 390, d: "M755 340 L875 345 L895 425 L805 440 L750 400 Z" },
+  };
+
+  C.choropleth = function (A, box, spec, t0 = 0) {
+    const W = box.clientWidth || 1200, H = box.clientHeight || 620;
+    const col = S.theme.colors || {};
+    const values = spec.regions || spec.values || { middle_east: 88, europe: 72, asia: 95, north_america: 64 };
+    const nums = Object.values(values).map((v) => S.toNum(typeof v === "object" ? v.value : v));
+    const vmax = Math.max(1, ...nums);
+    const accent = S.color(spec.color || "accent");
+    const baseFill = col.isDark === false ? "#D8DEE9" : "#252936";
+
+    const svg = A.svg(box, 0, 0, W, H, "0 0 1000 540");
+    svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+    // Subtle longitude/latitude grid
+    for (let x = 100; x <= 900; x += 100) {
+      A.svgEl(svg, "line", { x1: x, y1: 40, x2: x, y2: 500, stroke: col.grid || "rgba(255,255,255,0.06)", "stroke-width": 1 });
+    }
+    for (let y = 90; y <= 450; y += 90) {
+      A.svgEl(svg, "line", { x1: 40, y1: y, x2: 960, y2: y, stroke: col.grid || "rgba(255,255,255,0.06)", "stroke-width": 1 });
+    }
+
+    const keys = Object.keys(CHOROPLETH_REGIONS);
+    const step = A.staggerStep ? A.staggerStep("grid") : 0.06;
+    keys.forEach((rk, idx) => {
+      const reg = CHOROPLETH_REGIONS[rk];
+      const entry = values[rk];
+      const hasVal = entry !== undefined && entry !== null;
+      const valNum = hasVal ? S.toNum(typeof entry === "object" ? entry.value : entry) : 0;
+      const ratio = hasVal ? Math.max(0.22, Math.min(1, valNum / vmax)) : 0;
+      const poly = A.svgEl(svg, "path", {
+        d: reg.d,
+        fill: hasVal ? accent : baseFill,
+        "fill-opacity": hasVal ? (0.28 + ratio * 0.68).toFixed(2) : "0.55",
+        stroke: col.bg || "#121212",
+        "stroke-width": 3,
+        "stroke-linejoin": "round",
+        "data-region": rk,
+      });
+      S.tl.fromTo(poly, { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.52, ease: S.ease("vox"), immediateRender: true }, t0 + 0.1 + idx * step);
+
+      if (hasVal) {
+        const pin = A.svgEl(svg, "circle", { cx: reg.cx, cy: reg.cy, r: 9, fill: "#FFFFFF", stroke: accent, "stroke-width": 4 });
+        S.tl.fromTo(pin, { opacity: 0, scale: 0.2 }, { opacity: 1, scale: 1, duration: 0.4, ease: S.ease("spring"), immediateRender: true }, t0 + 0.35 + idx * step);
+        const tag = A.svgEl(svg, "text", {
+          x: reg.cx, y: reg.cy - 18, "text-anchor": "middle", fill: col.text || "#FFFFFF",
+          "font-size": "21", "font-weight": "800",
+        });
+        const labelTxt = (typeof entry === "object" && entry.label) ? entry.label : reg.label;
+        tag.textContent = `${labelTxt}: ${S.fmt(valNum, spec.decimals ?? 0)}${spec.suffix || ""}`;
+        S.tl.fromTo(tag, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.4, ease: S.ease("vox"), immediateRender: true }, t0 + 0.42 + idx * step);
       }
     });
   };
@@ -544,3 +851,4 @@
     f(A, box, spec, t0);
   };
 })();
+

@@ -1,0 +1,29 @@
+{
+  "name": "map_choropleth",
+  "aliases": ["choropleth", "نقشه-آماری", "نقشه-پراکندگی"],
+  "order": 44,
+  "category": "داده و نمودار (Data & Charts)",
+  "label": "نقشه آماری آفلاین (Map Choropleth)",
+  "description": "نقشهٔ برداری کاملاً آفلاین با رنگ‌بندی شدت داده‌ها بر اساس مناطق، پین‌های متحرک و پشتیبانی از دوربین نقشه",
+  "fields": [
+    { "key": "eyebrow", "label": "برچسب بالا (Eyebrow)", "type": "text", "editable": true },
+    { "key": "title", "label": "تیتر نقشه (Title)", "type": "text", "editable": true },
+    { "key": "caption", "label": "توضیح پایین نقشه (Caption)", "type": "text", "editable": true },
+    { "key": "suffix", "label": "پسوند اعداد (Suffix)", "type": "text", "editable": true },
+    { "key": "regions", "label": "مقادیر مناطق (JSON)", "type": "series" },
+    { "key": "color", "label": "رنگ شاخص", "type": "select", "options": ["accent", "danger", "good", "#38BDF8"] }
+  ],
+  "example": {
+    "eyebrow": "نمای جغرافیایی داده",
+    "title": "شاخص *رشد تولید محتوای مستقل* در مناطق جهان",
+    "caption": "مناطق پررنگ‌تر سهم رشد بالاتری در سال گذشته ثبت کرده‌اند.",
+    "suffix": "٪",
+    "color": "accent",
+    "regions": {
+      "middle_east": { "label": "خاورمیانه", "value": 84 },
+      "europe": { "label": "اروپا", "value": 68 },
+      "asia": { "label": "آسیا", "value": 92 },
+      "north_america": { "label": "آمریکای شمالی", "value": 76 }
+    }
+  }
+}

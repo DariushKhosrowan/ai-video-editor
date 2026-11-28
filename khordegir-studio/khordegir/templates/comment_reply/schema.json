@@ -1,0 +1,22 @@
+{
+  "name": "comment_reply",
+  "aliases": ["comment-reply", "پاسخ-کامنت", "دیدگاه-مخاطب"],
+  "order": 39,
+  "category": "شبکه‌های اجتماعی و شورتس (Social & Shorts)",
+  "label": "کارت پاسخ به کامنت (Comment Reply)",
+  "description": "نمایش دیدگاه مخاطب و پاسخ کانال برای ویدیوهای کوتاه و شورتس با شمارشگر لایک",
+  "fields": [
+    { "key": "username", "label": "نام کاربر (Username)", "type": "text", "editable": true },
+    { "key": "comment", "label": "متن دیدگاه مخاطب (Comment)", "type": "textarea", "editable": true },
+    { "key": "reply_author", "label": "نام پاسخ‌دهنده (Channel)", "type": "text", "editable": true },
+    { "key": "reply", "label": "پاسخ شما (Reply)", "type": "textarea", "editable": true },
+    { "key": "likes", "label": "تعداد لایک (Likes)", "type": "number", "default": 420 }
+  ],
+  "example": {
+    "username": "@sara_media",
+    "comment": "آیا برای ساخت انیمیشن‌های دقیق فارسی حتماً باید از افترافکت استفاده کنیم؟",
+    "reply_author": "خرده‌گیر استودیو",
+    "reply": "خیر! با ==موتور حرکت آفلاین== و تایپوگرافی ایمن فارسی، همه‌چیز با یک فایل `video.yaml` ساخته می‌شود.",
+    "likes": 1280
+  }
+}

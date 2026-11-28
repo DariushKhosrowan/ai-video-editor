@@ -1,180 +1,167 @@
 {
- "name": "title_card",
- "label": "کارت عنوان",
- "description": "یک عنوان بزرگ با تیتر کوچک و زیرعنوان؛ می‌تواند روی یک عکس تمام‌صفحه‌ی تیره باشد. برای شروع ویدیو یا شروع هر بخش.",
- "aliases": [
-  "title-card",
-  "عنوان"
- ],
- "category": "متن",
- "fields": [
-  {
-   "key": "eyebrow",
-   "label": "تیتر کوچک بالا",
-   "type": "text",
-   "editable": true
+  "name": "title_card",
+  "label": "کارت عنوان",
+  "description": "یک عنوان بزرگ با تیتر کوچک و زیرعنوان؛ می‌تواند روی یک عکس تمام‌صفحه‌ی تیره باشد. برای شروع ویدیو یا شروع هر بخش.",
+  "aliases": [
+    "title-card",
+    "عنوان"
+  ],
+  "category": "متن",
+  "fields": [
+    {
+      "key": "eyebrow",
+      "label": "تیتر کوچک بالا",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "title",
+      "label": "عنوان اصلی (*زرد* ، ~قرمز~)",
+      "type": "text",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "subtitle",
+      "label": "زیرعنوان",
+      "type": "textarea",
+      "editable": true
+    },
+    {
+      "key": "image",
+      "label": "عکس پس‌زمینه (اختیاری)",
+      "type": "image",
+      "editable": true
+    },
+    {
+      "key": "dim",
+      "label": "تیرگی عکس (۰ تا ۱)",
+      "type": "number",
+      "default": 0.55,
+      "editable": false
+    },
+    {
+      "key": "align",
+      "label": "جای متن",
+      "type": "select",
+      "options": [
+        [
+          "bottom",
+          "پایین"
+        ],
+        [
+          "center",
+          "وسط"
+        ]
+      ],
+      "default": "bottom",
+      "editable": false
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        [
+          "auto",
+          "کلاسیک / ارث‌بری از پروژه"
+        ],
+        [
+          "random",
+          "🎲 تصادفی (با بذر قطعی)"
+        ],
+        [
+          "kinetic-hero",
+          "تایپ کینتیک سینمایی"
+        ],
+        [
+          "spotlight",
+          "نورپردازی متمرکز"
+        ],
+        [
+          "curtain-editorial",
+          "پرده سردبیری"
+        ],
+        [
+          "split-contrast",
+          "کنتراست دوگانه"
+        ],
+        [
+          "minimal-type",
+          "تایپوگرافی مینیمال"
+        ],
+        [
+          "glitch-pop",
+          "پرش مدرن"
+        ]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        [
+          "auto",
+          "پیش‌فرض / ارث‌بری"
+        ],
+        [
+          "random",
+          "🎲 تصادفی"
+        ],
+        [
+          "soft-fade",
+          "محو نرم (کلاسیک)"
+        ],
+        [
+          "curtain-rtl",
+          "پرده از راست به چپ"
+        ],
+        [
+          "accent-slash",
+          "نوار تأکید مورب"
+        ],
+        [
+          "iris-rise",
+          "باز شدن دایره‌ای"
+        ],
+        [
+          "split-curtain",
+          "پرده دوقسمتی"
+        ],
+        [
+          "diagonal-wipe",
+          "پاک‌شدن مورب"
+        ],
+        [
+          "zoom-iris",
+          "گشایش زوم"
+        ],
+        [
+          "shutter-bars",
+          "کرکره ستونی"
+        ]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
+    }
+  ],
+  "example": {
+    "eyebrow": "یک سؤال ساده",
+    "title": "پول می‌دی یا به *پلیس* زنگ می‌زنی؟",
+    "subtitle": "قانونی که پشت همه‌ی باج‌گیری‌ها هست",
+    "image": "",
+    "layout": "SLIDE"
   },
-  {
-   "key": "title",
-   "label": "عنوان اصلی (*زرد* ، ~قرمز~)",
-   "type": "text",
-   "required": true,
-   "editable": true
-  },
-  {
-   "key": "subtitle",
-   "label": "زیرعنوان",
-   "type": "textarea",
-   "editable": true
-  },
-  {
-   "key": "image",
-   "label": "عکس پس‌زمینه (اختیاری)",
-   "type": "image",
-   "editable": true
-  },
-  {
-   "key": "dim",
-   "label": "تیرگی عکس (۰ تا ۱)",
-   "type": "number",
-   "default": 0.55,
-   "editable": false
-  },
-  {
-   "key": "align",
-   "label": "جای متن",
-   "type": "select",
-   "options": [
-    [
-     "bottom",
-     "پایین"
-    ],
-    [
-     "center",
-     "وسط"
-    ]
-   ],
-   "default": "bottom",
-   "editable": false
-  },
-  {
-   "key": "preset",
-   "label": "سبک انیمیشن",
-   "type": "select",
-   "options": [
-    [
-     "auto",
-     "کلاسیک / ارث‌بری از پروژه"
-    ],
-    [
-     "random",
-     "🎲 تصادفی (با بذر قطعی)"
-    ],
-    [
-     "kinetic-hero",
-     "تایپ کینتیک سینمایی"
-    ],
-    [
-     "spotlight",
-     "نورپردازی متمرکز"
-    ],
-    [
-     "curtain-editorial",
-     "پرده سردبیری"
-    ],
-    [
-     "split-contrast",
-     "کنتراست دوگانه"
-    ],
-    [
-     "minimal-type",
-     "تایپوگرافی مینیمال"
-    ],
-    [
-     "glitch-pop",
-     "پرش مدرن"
-    ]
-   ],
-   "default": "auto",
-   "editable": false
-  },
-  {
-   "key": "transition",
-   "label": "ترنزیشن ورود",
-   "type": "select",
-   "options": [
-    [
-     "auto",
-     "پیش‌فرض / ارث‌بری"
-    ],
-    [
-     "random",
-     "🎲 تصادفی"
-    ],
-    [
-     "soft-fade",
-     "محو نرم (کلاسیک)"
-    ],
-    [
-     "curtain-rtl",
-     "پرده از راست به چپ"
-    ],
-    [
-     "accent-slash",
-     "نوار تأکید مورب"
-    ],
-    [
-     "iris-rise",
-     "باز شدن دایره‌ای"
-    ],
-    [
-     "split-curtain",
-     "پرده دوقسمتی"
-    ],
-    [
-     "diagonal-wipe",
-     "پاک‌شدن مورب"
-    ],
-    [
-     "zoom-iris",
-     "گشایش زوم"
-    ],
-    [
-     "shutter-bars",
-     "کرکره ستونی"
-    ]
-   ],
-   "default": "auto",
-   "editable": false
-  },
-  {
-   "key": "seed",
-   "label": "بذر تصادفی",
-   "type": "number",
-   "default": 0,
-   "editable": false
-  }
- ],
- "example": {
-  "eyebrow": "یک سؤال ساده",
-  "title": "پول می‌دی یا به *پلیس* زنگ می‌زنی؟",
-  "subtitle": "قانونی که پشت همه‌ی باج‌گیری‌ها هست",
-  "image": "",
-  "layout": "SLIDE"
- },
- "order": 0,
- "version": 1,
- "example_fa": {
-  "eyebrow": "یک سؤال ساده",
-  "title": "پول می‌دی یا به *پلیس* زنگ می‌زنی؟",
-  "subtitle": "قانونی که پشت همه‌ی باج‌گیری‌ها هست",
-  "image": "",
-  "layout": "SLIDE"
- },
- "example_en": {
-  "eyebrow": "A SIMPLE QUESTION",
-  "title": "Why does a quiet *no* feel so loud?",
-  "subtitle": "Three forces behind a five-second silence",
-  "layout": "SCAM"
- }
+  "order": 0,
+  "version": 1
 }

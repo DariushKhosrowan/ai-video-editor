@@ -80,16 +80,3 @@ flowchart LR
 * **Reroll:** `slides[i].seed` integer; the editor's «انیمیشن دیگر» increments it.
 * **Build jobs:** `POST /api/projects/<n>/build` → `{job}`; `GET /api/jobs/<id>` → `{state, progress 0..1, outputs[]}`.
 * **Safety:** server binds 127.0.0.1 only, rejects path traversal, writes YAML via temp file + `os.replace`, returns 400 on invalid YAML without touching the file.
-
-## Direction & locale (added 2026-11-28)
-One stage serves Persian (RTL) and English (LTR) videos. Direction is a property of the **theme**, not of templates:
-
-| theme key | effect |
-|---|---|
-| `dir: "rtl" \| "ltr"` | `#stage` direction, `<html dir>`, `A.ltr/A.start/A.end/A.originStart/A.sign/A.mx`, fx entrance side |
-| `digits: "persian" \| "latin"` | `Stage.fa`, `Stage.fmt` (thousands/decimal separators), counters |
-| `font: {family, body, faces}` | `@font-face` rules generated from `fonts/*.woff2`; headings vs body family |
-| `lang` | `<html lang>` (hyphenation, quotes) |
-
-Templates stay direction-agnostic by using `textAlign: "start"`, flex `flex-start`, `A.start` instead of `"right"`, and `A.originStart` for
-grow-in animations. Template schemas carry `example` (English) and `example_fa` (Persian) so the gallery can preview both.

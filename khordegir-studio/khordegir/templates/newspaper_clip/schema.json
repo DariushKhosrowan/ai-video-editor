@@ -1,0 +1,93 @@
+{
+  "name": "newspaper_clip",
+  "label": "بریده روزنامه آرشیوی (Newspaper Clip)",
+  "description": "بریده روزنامه یا مجله تحریریه با بافت کاغذ، نام نشریه، تاریخ، تیتر، متن گزارش و هایلایت ماژیک متحرک روی جمله کلیدی.",
+  "aliases": [
+    "newspaper-clip",
+    "بریده-روزنامه",
+    "روزنامه"
+  ],
+  "category": "داستان",
+  "fields": [
+    {
+      "key": "publication",
+      "label": "نام روزنامه یا نشریه (Publication)",
+      "type": "text",
+      "required": true,
+      "default": "روزنامه تحلیلی اقتصاد",
+      "editable": true
+    },
+    {
+      "key": "date",
+      "label": "تاریخ و شماره نسخه (Date)",
+      "type": "text",
+      "default": "۱۴ آبان ۱۴۰۳ · شماره ۴۸۱۲",
+      "editable": true
+    },
+    {
+      "key": "headline",
+      "label": "تیتر خبر در روزنامه",
+      "type": "text",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "excerpt",
+      "label": "پاراگراف خبر (برای هایلایت ماژیک از ==متن== استفاده کنید)",
+      "type": "textarea",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "caption",
+      "label": "توضیح تحریریه پایین بریده (اختیاری)",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["press-zoom", "زوم روزنامه آرشیوی"],
+        ["marker-clip", "بریده با هایلایت ماژیک"],
+        ["archival-paper", "بافت کاغذ تاریخی"],
+        ["minimal-clip", "بریده روزنامه تمیز"]
+      ],
+      "default": "marker-clip",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["paper-tear", "پاره‌شدن کاغذ تحریریه"],
+        ["page-turn", "ورق زدن صفحه"],
+        ["soft-fade", "محو نرم"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
+    }
+  ],
+  "example": {
+    "publication": "آرشیو روزنامه اطلاعات اقتصادی",
+    "date": "۲۳ مهر ۱۳۸۷ · صفحه ۴",
+    "headline": "افزایش بی‌سابقه تقاضا برای انرژی‌های تجدیدپذیر در شهرهای بزرگ",
+    "excerpt": "بر اساس گزارش منتشرشده، ==هزینه تولید برق خورشیدی در کمتر از یک دهه بیش از ۸۰ درصد کاهش یافته== و این روند نقشه سرمایه‌گذاری دهه آینده را تغییر خواهد داد.",
+    "caption": "سندی که پیش‌بینی آن امروز به واقعیت تبدیل شده است.",
+    "layout": "SLIDE"
+  },
+  "order": 330,
+  "version": 1
+}

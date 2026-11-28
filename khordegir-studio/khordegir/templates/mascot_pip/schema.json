@@ -1,0 +1,30 @@
+{
+  "name": "mascot_pip",
+  "aliases": ["mascot-pip", "عروسک-تصویر-در-تصویر", "مجری-گوشه"],
+  "order": 46,
+  "category": "عروسک و مجری (Puppet & Mascot)",
+  "label": "اسلاید + عروسک تصویر در تصویر (Mascot PiP)",
+  "description": "اسلاید تحلیلی کامل همراه با قاب تصویر در تصویر عروسک عقاب قرمز (یا ۵ شخصیت) همگام با صدا و لحن",
+  "fields": [
+    { "key": "eyebrow", "label": "برچسب بالا (Eyebrow)", "type": "text", "editable": true },
+    { "key": "title", "label": "تیتر اسلاید (Title)", "type": "text", "editable": true },
+    { "key": "body", "label": "توضیح اصلی (Body)", "type": "textarea", "editable": true },
+    { "key": "bullets", "label": "نکات کلیدی (هر خط یک مورد)", "type": "list" },
+    { "key": "pip_corner", "label": "گوشهٔ قاب عروسک", "type": "select", "options": ["bottom-left", "bottom-right", "top-left", "top-right"] },
+    { "key": "expression", "label": "حالت چهره عروسک", "type": "select", "options": ["neutral", "happy", "smug", "shocked", "annoyed", "thinking", "excited"] },
+    { "key": "say", "label": "متن گفتار عروسک (Say)", "type": "textarea", "editable": true }
+  ],
+  "example": {
+    "eyebrow": "توضیح زنده با مجری",
+    "title": "چگونه *طراحی حرکت* پیام ویدیو را شفاف می‌کند؟",
+    "body": "وقتی عروسک در گوشهٔ تصویر با ریتم صدای شما واکنش نشان می‌دهد، مخاطب هم اسلاید را می‌خواند و هم ارتباط عاطفی می‌گیرد.",
+    "bullets": [
+      "واکنش زندهٔ ابرو، سر و منقار به لحن صدا",
+      "قاب تصویر در تصویر قابل جابه‌جایی در ۴ گوشه",
+      "سازگار با سه فرمت افقی، عمودی و مربعی"
+    ],
+    "pip_corner": "bottom-left",
+    "expression": "happy",
+    "say": "وقتی عروسک کنار اسلاید توضیح می‌دهد، مخاطب تا آخر ویدیو همراه می‌ماند."
+  }
+}

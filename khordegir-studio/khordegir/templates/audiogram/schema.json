@@ -1,0 +1,97 @@
+{
+  "name": "audiogram",
+  "label": "آدیوگرام پادکست (Audiogram)",
+  "description": "کارت صوتی پادکست و گفتگو با موج صوتی زنده و قطعی، عکس یا کاور اپیزود، نام گوینده و نقل‌قول کینتیک.",
+  "aliases": [
+    "podcast-audiogram",
+    "آدیوگرام",
+    "موج-صوت"
+  ],
+  "category": "پادکست",
+  "fields": [
+    {
+      "key": "show",
+      "label": "نام پادکست یا برنامه (Show)",
+      "type": "text",
+      "default": "پادکست خرده‌گیر",
+      "editable": true
+    },
+    {
+      "key": "speaker",
+      "label": "نام گوینده / مهمان (Speaker)",
+      "type": "text",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "role",
+      "label": "سمت یا عنوان اپیزود",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "quote",
+      "label": "جمله شاخص گفتار (Quote / Caption)",
+      "type": "textarea",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "avatar",
+      "label": "تصویر گوینده یا کاور اپیزود (اختیاری)",
+      "type": "image",
+      "editable": true
+    },
+    {
+      "key": "episode",
+      "label": "شماره اپیزود / زمان (مثلاً EP 42 · 18:24)",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["studio-wave", "موج صوتی استودیو"],
+        ["podcast-quote", "نقل‌قول پادکست"],
+        ["caption-pulse", "نبض زیرنویس"],
+        ["minimal-audio", "آدیوگرام مینیمال"]
+      ],
+      "default": "studio-wave",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["soft-fade", "محو نرم"],
+        ["zoom-iris", "گشایش زوم نرم"],
+        ["curtain-rtl", "پرده از راست به چپ"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
+    }
+  ],
+  "example": {
+    "show": "پادکست خرده‌گیر",
+    "speaker": "دکتر مریم رضایی",
+    "role": "پژوهشگر اقتصاد رفتاری",
+    "quote": "بخش بزرگی از تصمیم‌های مالی ما نه روی *ماشین‌حساب*، بلکه بر اساس داستانی که به خودمان می‌گوییم گرفته می‌شود.",
+    "episode": "اپیزود ۴۲ · ۱۸:۲۴",
+    "layout": "SLIDE"
+  },
+  "order": 310,
+  "version": 1
+}

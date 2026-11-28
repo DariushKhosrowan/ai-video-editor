@@ -19,10 +19,10 @@ Stage.template({
 
     if (lively && preset === "timeline-rail" && cols === 1) {
       const rail = A.el("div", "abs", A.root, {
-        [A.start]: (A.ltr ? left : right) - 18, top: top + 16, bottom: bottom + 16, width: "5px",
+        right: right - 18, top: top + 16, bottom: bottom + 16, width: "5px",
         borderRadius: "4px", background: A.color("accent"), transformOrigin: "50% 0%",
       });
-      Stage.tl.from(rail, { scaleY: 0, opacity: 0, duration: 0.72, ease: Stage.ease("vox"), immediateRender: true }, A.at("card", 0));
+      Stage.tl.from(rail, { scaleY: 0, opacity: 0, duration: A.dur("expressive"), ease: Stage.ease("vox"), immediateRender: true }, A.at("card", 0));
     }
 
     items.forEach((it, i) => {
@@ -51,7 +51,7 @@ Stage.template({
       if (o.kicker) A.text(tc, o.kicker, "eyebrow", "", { fontSize: "26px", color: A.color(tone || "accent") });
       const itemTextEl = A.text(tc, o.text, "h1", "", { fontSize: (cols > 1 ? 44 : 46) + "px" });
       if (lively && preset === "cascade-rows") {
-        A.kinetic(itemTextEl, { at: A.at("card", i) + 0.04, mode: "glide", role: "body", stagger: 0.032, ease: "vox" });
+        A.kinetic(itemTextEl, { at: A.at("card", i) + 0.04, mode: "glide-rtl", role: "body", stagger: 0.032, ease: "vox" });
       }
       const enterOpts = !lively ? {} : (preset === "minimal-clean"
         ? { ease: "fluid", y: 12 }

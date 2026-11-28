@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "khordegir-studio"
+version = "0.2.0"
+description = "Offline RTL Persian motion graphics & talking mascot studio"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+render = ["PyYAML>=6.0", "playwright>=1.45.0"]
+
+[project.scripts]
+khordegir = "khordegir.cli:main"

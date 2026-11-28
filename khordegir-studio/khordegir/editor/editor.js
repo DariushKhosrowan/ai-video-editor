@@ -5,6 +5,14 @@
    Template Gallery, Script Importer, Undo/Redo, SFX Mute, and Send Live to OBS. */
 import { renderCurvesTab } from "./curve-studio.js";
 import { renderAnnotationsTab } from "./annotations-ui.js";
+import { analyzeAudioWithProsodyOffline, renderMascotControls, updateVoiceToneMeter } from "./mascot-ui.js";
+import { renderPuppetInspector, updatePuppetMeter } from "./puppet-inspector.js";
+
+const FORMAT_DIMS = {
+  "16:9": { w: 1920, h: 1080 },
+  "9:16": { w: 1080, h: 1920 },
+  "1:1":  { w: 1080, h: 1080 },
+};
 
 const FA = "۰۱۲۳۴۵۶۷۸۹";
 const fa = (v) => String(v ?? "").replace(/[0-9]/g, (d) => FA[+d]);
@@ -32,6 +40,7 @@ const state = {
   starterAssets: [],
   activeIndex: 0,
   activeTab: "content",
+  format: "16:9",
   dirty: false,
   playing: false,
   livingLoop: true,
@@ -50,6 +59,11 @@ const state = {
   lastSnapshot: null,
   pickCallback: null,
   galleryCategory: "همه",
+  lang: (typeof localStorage !== "undefined" && localStorage.getItem("khordegir_ui_lang")) || "fa",
+  fps: 30,
+  puppetDebug: false,
+  previewAudio: typeof Audio !== "undefined" ? new Audio() : null,
+  slideAudioMap: new WeakMap(),
 };
 
 const els = {
@@ -60,6 +74,7 @@ const els = {
   btnProjectStyle: document.getElementById("btnProjectStyle"),
   btnOpenImporter: document.getElementById("btnOpenImporter"),
   btnRandomAll: document.getElementById("btnRandomAll"),
+  btnLangToggle: document.getElementById("btnLangToggle"),
   btnUndo: document.getElementById("btnUndo"),
   btnRedo: document.getElementById("btnRedo"),
   btnSave: document.getElementById("btnSave"),
@@ -76,6 +91,8 @@ const els = {
   stageFrame: document.getElementById("stageFrame"),
   stageCanvasPicker: document.getElementById("stageCanvasPicker"),
   camOnlyOverlay: document.getElementById("camOnlyOverlay"),
+  btnFpsToggle: document.getElementById("btnFpsToggle"),
+  chkPuppetDebug: document.getElementById("chkPuppetDebug"),
   chkLivingLoop: document.getElementById("chkLivingLoop"),
   chkCamGuide: document.getElementById("chkCamGuide"),
   camStatusChip: document.getElementById("camStatusChip"),
@@ -247,16 +264,21 @@ function buildStagePayload(slide, idx) {
   copy._num = idx + 1;
 
   if (state.data) {
-    ["preset", "transition", "logo", "logo_motion", "logo_position", "logo_text", "livingStage", "motionCurve"].forEach((k) => {
+    [
+      "preset", "transition", "transitionTiming", "transition_timing",
+      "motionPersonality", "motion_personality", "textMotion", "text_motion",
+      "camera", "cameraConfig", "ambience", "particles", "weather",
+      "logo", "logo_motion", "logo_position", "logo_text", "livingStage", "motionCurve", "puppet",
+    ].forEach((k) => {
       if (state.data[k] !== undefined && copy[k] === undefined) {
         copy[k] = JSON.parse(JSON.stringify(state.data[k]));
       }
     });
   }
 
-  if (copy.image) copy.image = resolveImageUrl(copy.image);
-  if (copy.src) copy.src = resolveImageUrl(copy.src);
-  if (copy.bg_image) copy.bg_image = resolveImageUrl(copy.bg_image);
+  ["image", "src", "bg_image", "before_image", "after_image", "avatar", "photo1", "photo2", "photo3"].forEach((ik) => {
+    if (copy[ik]) copy[ik] = resolveImageUrl(copy[ik]);
+  });
   if (copy.livingStage && typeof copy.livingStage === "object" && copy.livingStage.bgImage) {
     copy.livingStage.bgImage = resolveImageUrl(copy.livingStage.bgImage);
   }
@@ -264,19 +286,42 @@ function buildStagePayload(slide, idx) {
   else if (copy.logo && typeof copy.logo === "object" && copy.logo.image) {
     copy.logo.image = resolveImageUrl(copy.logo.image);
   }
+  const audInfo = state.slideAudioMap.get(slide);
+  if (audInfo && audInfo.track) {
+    copy.visemeTrack = audInfo.track;
+    if (copy.mascot && typeof copy.mascot === "object") copy.mascot.visemeTrack = audInfo.track;
+  }
+  if (audInfo && audInfo.prosody) {
+    copy.prosodyTrack = audInfo.prosody;
+    if (copy.mascot && typeof copy.mascot === "object") copy.mascot.prosodyTrack = audInfo.prosody;
+  }
   return copy;
+}
+
+function activeFormat() {
+  const slide = activeSlide();
+  const cand = (slide && slide.format && FORMAT_DIMS[slide.format])
+    ? slide.format
+    : (state.format && FORMAT_DIMS[state.format])
+      ? state.format
+      : (state.data && state.data.format && FORMAT_DIMS[state.data.format]) || "16:9";
+  return cand;
 }
 
 /* ---------------------------------------------------------------- stage viewport scaling & bridge */
 function resizeStage() {
+  const fmt = activeFormat();
+  const dims = FORMAT_DIMS[fmt] || FORMAT_DIMS["16:9"];
   const vp = els.stageViewport;
   const vw = Math.max(240, vp.clientWidth - 32);
   const vh = Math.max(160, vp.clientHeight - 32);
-  const scale = Math.min(vw / 1920, vh / 1080);
-  const w = Math.floor(1920 * scale);
-  const h = Math.floor(1080 * scale);
+  const scale = Math.min(vw / dims.w, vh / dims.h);
+  const w = Math.floor(dims.w * scale);
+  const h = Math.floor(dims.h * scale);
   els.stageFrameBox.style.width = w + "px";
   els.stageFrameBox.style.height = h + "px";
+  els.stageFrame.style.width = dims.w + "px";
+  els.stageFrame.style.height = dims.h + "px";
   els.stageFrame.style.transform = `scale(${scale})`;
 }
 
@@ -284,6 +329,9 @@ function stopClock() {
   state.playing = false;
   clearInterval(state.playTimer);
   state.playTimer = null;
+  if (state.previewAudio) {
+    try { state.previewAudio.pause(); } catch (_) {}
+  }
   els.btnPlayPause.textContent = "▶ پخش";
   if (els.stageFrame.contentWindow) {
     els.stageFrame.contentWindow.postMessage({ cmd: "seek", t: state.currentTime, fireSfx: false }, "*");
@@ -298,25 +346,54 @@ function startClock(fromSec, syncFrame = true) {
   state.playStartedAt = performance.now();
   els.btnPlayPause.textContent = "⏸ توقف";
 
-  if (syncFrame && els.stageFrame.contentWindow) {
+  const slide = activeSlide();
+  const audInfo = slide ? state.slideAudioMap.get(slide) : null;
+  const hasAudio = Boolean(audInfo && audInfo.url && state.previewAudio);
+
+  if (hasAudio) {
+    if (state.previewAudio.src !== audInfo.url) state.previewAudio.src = audInfo.url;
+    state.previewAudio.currentTime = Math.min(state.playFrom, Math.max(0, state.previewAudio.duration || state.duration));
+    state.previewAudio.muted = Boolean(state.sfxMuted);
+    state.previewAudio.play().catch(() => {});
+  } else if (state.previewAudio) {
+    try { state.previewAudio.pause(); } catch (_) {}
+  }
+
+  if (!hasAudio && syncFrame && els.stageFrame.contentWindow) {
     els.stageFrame.contentWindow.postMessage({ cmd: "play", from: state.playFrom, liveLoop: state.livingLoop }, "*");
   }
 
   state.playTimer = setInterval(() => {
-    const elapsed = (performance.now() - state.playStartedAt) / 1000;
-    const rawT = state.playFrom + elapsed;
+    const rawT = (hasAudio && !state.previewAudio.paused)
+      ? state.previewAudio.currentTime
+      : (state.playFrom + (performance.now() - state.playStartedAt) / 1000);
+
+    if (hasAudio && els.stageFrame.contentWindow) {
+      // Lock stage frame strictly to audio playback clock for dead-on lip-sync
+      els.stageFrame.contentWindow.postMessage({ cmd: "seek", t: rawT, fireSfx: false }, "*");
+    }
+
     if (!state.livingLoop && rawT >= state.duration) {
       state.currentTime = state.duration;
       updateTimeUI();
       stopClock();
       return;
     }
+    if (hasAudio && state.previewAudio.ended) {
+      state.currentTime = Math.min(state.duration, rawT);
+      updateTimeUI();
+      if (!state.livingLoop) stopClock();
+      return;
+    }
     state.currentTime = Math.min(state.duration, rawT);
     updateTimeUI();
-  }, 60);
+  }, hasAudio ? 30 : 60);
 }
 
 function postSeek(t) {
+  if (state.previewAudio && state.previewAudio.src) {
+    try { state.previewAudio.currentTime = Math.max(0, t); } catch (_) {}
+  }
   if (!els.stageFrame.contentWindow) return;
   els.stageFrame.contentWindow.postMessage({ cmd: "seek", t, fireSfx: false }, "*");
 }
@@ -331,10 +408,17 @@ function reloadStage(autoPlay = true, atSec = null) {
   const slide = activeSlide();
   if (!slide) return;
   const layout = String(slide.layout || "SLIDE").toUpperCase();
+  const fmt = activeFormat();
+  state.format = fmt;
+  resizeStage();
+
   els.camOnlyOverlay.classList.toggle("hidden", layout !== "CAM");
 
   document.querySelectorAll(".seg-btn").forEach((b) => {
     b.classList.toggle("active", b.dataset.layout === layout);
+  });
+  document.querySelectorAll(".fmt-btn").forEach((b) => {
+    b.classList.toggle("active", b.dataset.format === fmt);
   });
 
   const sayEst = estimateSay(slide);
@@ -346,10 +430,19 @@ function reloadStage(autoPlay = true, atSec = null) {
   }
   state.pendingAutoPlay = Boolean(autoPlay);
   const payload = buildStagePayload(slide, state.activeIndex);
+  const slideFps = (payload.puppet && payload.puppet.performance && payload.puppet.performance.fps) || state.fps || 30;
+  const effectiveFps = slideFps === 60 ? 60 : state.fps;
+  if (state.puppetDebug && payload.puppet) {
+    payload.puppet = Object.assign({}, payload.puppet, {
+      debug: Object.assign({ enabled: true, showPivots: true, showGraphs: true }, payload.puppet.debug || {}, { enabled: true }),
+    });
+  }
   els.stageFrame.contentWindow.postMessage({
     cmd: "load",
     slide: payload,
     theme: resolvedThemeName(),
+    format: fmt,
+    fps: effectiveFps,
     camGuide: els.chkCamGuide.checked,
     liveLoop: state.livingLoop,
     sfxMuted: state.sfxMuted,
@@ -391,6 +484,9 @@ window.addEventListener("message", (ev) => {
       state.currentTime = Math.min(state.currentTime, state.duration);
       updateTimeUI();
     }
+  } else if (d.cmd === "mascotTelemetry" && d.state) {
+    updateVoiceToneMeter(d.state);
+    updatePuppetMeter(d.state);
   }
 });
 
@@ -436,12 +532,13 @@ function stopPickTarget() {
 
 els.stageCanvasPicker.addEventListener("click", (ev) => {
   if (!state.pickCallback) return;
+  const dims = FORMAT_DIMS[activeFormat()] || FORMAT_DIMS["16:9"];
   const rect = els.stageCanvasPicker.getBoundingClientRect();
-  const x = Math.round(((ev.clientX - rect.left) / rect.width) * 1920);
-  const y = Math.round(((ev.clientY - rect.top) / rect.height) * 1080);
+  const x = Math.round(((ev.clientX - rect.left) / rect.width) * dims.w);
+  const y = Math.round(((ev.clientY - rect.top) / rect.height) * dims.h);
   const fn = state.pickCallback;
   stopPickTarget();
-  fn(Math.max(0, Math.min(1920, x)), Math.max(0, Math.min(1080, y)));
+  fn(Math.max(0, Math.min(dims.w, x)), Math.max(0, Math.min(dims.h, y)));
   setDirty(true);
 });
 
@@ -1294,10 +1391,14 @@ function renderContentTab(container, slide) {
       inp.type = "number";
       inp.className = "text-input";
       inp.dir = "ltr";
-      inp.step = f.key === "zoom_scale" ? "0.05" : "1";
-      inp.value = slide[f.key] ?? f.default ?? 0;
+      inp.step = (f.key === "zoom_scale" || f.key === "scale") ? "0.05" : "1";
+      inp.value = slide[f.key] ?? f.default ?? "";
       inp.addEventListener("change", () => {
-        slide[f.key] = Number(inp.value) || 0;
+        if (inp.value === "" && f.default === undefined) {
+          delete slide[f.key];
+        } else {
+          slide[f.key] = Number(inp.value) || 0;
+        }
         setDirty(true);
         reloadStage(true);
       });
@@ -1310,9 +1411,10 @@ function renderContentTab(container, slide) {
         pickZoomBtn.textContent = "🎯 انتخاب نقطهٔ زوم روی بوم (برای حالت تصویر)";
         pickZoomBtn.addEventListener("click", () => {
           startPickTarget((px, py) => {
+            const dims = FORMAT_DIMS[activeFormat()] || FORMAT_DIMS["16:9"];
             slide.zoom_mode = "image";
-            slide.zoom_x = Math.max(8, Math.min(92, Math.round((px / 1920) * 100)));
-            slide.zoom_y = Math.max(8, Math.min(92, Math.round((py / 1080) * 100)));
+            slide.zoom_x = Math.max(8, Math.min(92, Math.round((px / dims.w) * 100)));
+            slide.zoom_y = Math.max(8, Math.min(92, Math.round((py / dims.h) * 100)));
             renderInspector();
             reloadStage(true);
             setStatus(`نقطهٔ زوم تصویر روی (${fa(slide.zoom_x)}٪، ${fa(slide.zoom_y)}٪) تنظیم شد ✓`);
@@ -1358,21 +1460,100 @@ function renderContentTab(container, slide) {
   sayGroup.appendChild(sayTa);
   secNar.appendChild(sayGroup);
 
+  // Beginner one-click Motion Personality (5 presets, A1)
+  const mpGroup = document.createElement("div");
+  mpGroup.className = "field-group";
+  mpGroup.innerHTML = `<div class="field-label-row"><strong>شخصیت حرکتی (Motion Personality)</strong></div>`;
+  const mpSel = document.createElement("select");
+  mpSel.className = "select-ctrl";
+  const mpMap = FX_CAT.motionPersonalities || {};
+  [
+    { value: "", label: "ارث‌بری از پروژه (پیش‌فرض تحریریه)" },
+    ...Object.keys(mpMap).map((k) => ({ value: k, label: mpMap[k].label || k })),
+  ].forEach((opt) => {
+    const o = document.createElement("option");
+    o.value = opt.value;
+    o.textContent = opt.label;
+    mpSel.appendChild(o);
+  });
+  mpSel.value = slide.motionPersonality || slide.motion_personality || "";
+  mpSel.addEventListener("change", () => {
+    delete slide.motion_personality;
+    if (!mpSel.value) delete slide.motionPersonality;
+    else slide.motionPersonality = mpSel.value;
+    setDirty(true);
+    reloadStage(true);
+  });
+  mpGroup.appendChild(mpSel);
+  secNar.appendChild(mpGroup);
+
+  // Beginner one-click Text Animation Suite (14 RTL-safe presets, A2)
+  const tmGroup = document.createElement("div");
+  tmGroup.className = "field-group";
+  tmGroup.innerHTML = `<div class="field-label-row"><strong>انیمیشن متن (Text Animation)</strong></div>`;
+  const tmSel = document.createElement("select");
+  tmSel.className = "select-ctrl";
+  const tmMap = FX_CAT.textAnimations || {};
+  [
+    { value: "", label: "خودکار بر اساس قالب (Auto)" },
+    ...Object.keys(tmMap).map((k) => ({ value: k, label: tmMap[k].label || k })),
+  ].forEach((opt) => {
+    const o = document.createElement("option");
+    o.value = opt.value;
+    o.textContent = opt.label;
+    tmSel.appendChild(o);
+  });
+  tmSel.value = slide.textMotion || slide.text_motion || "";
+  tmSel.addEventListener("change", () => {
+    delete slide.text_motion;
+    if (!tmSel.value) delete slide.textMotion;
+    else slide.textMotion = tmSel.value;
+    setDirty(true);
+    reloadStage(true);
+  });
+  tmGroup.appendChild(tmSel);
+  secNar.appendChild(tmGroup);
+
+  // Transition Library 2.0 (32 categorized broadcast transitions, A4)
   const trGroup = document.createElement("div");
   trGroup.className = "field-group";
-  trGroup.innerHTML = `<div class="field-label-row"><strong>ترنزیشن ورود اسلاید</strong></div>`;
+  trGroup.innerHTML = `<div class="field-label-row"><strong>ترنزیشن ورود اسلاید (Transition · 32)</strong></div>`;
   const trSel = document.createElement("select");
   trSel.className = "select-ctrl";
   [
-    { value: "", label: "ارث‌بری از سبک پروژه" },
+    { value: "", label: "ارث‌بری از سبک پروژه (Inherit)" },
     { value: "random", label: "🎲 تصادفی (با بذر قطعی)" },
-    ...(FX_CAT.transitions || []).map((v) => ({ value: v, label: FX_CAT.transitionLabels[v] || v })),
   ].forEach((tr) => {
     const o = document.createElement("option");
     o.value = tr.value;
     o.textContent = tr.label;
     trSel.appendChild(o);
   });
+  const trLib = FX_CAT.transitionLibrary || {};
+  const trCats = FX_CAT.transitionCategories || {};
+  const catOrder = Object.keys(trCats);
+  if (catOrder.length && Object.keys(trLib).length) {
+    catOrder.forEach((ck) => {
+      const members = (FX_CAT.transitions || []).filter((k) => trLib[k] && trLib[k].cat === ck);
+      if (!members.length) return;
+      const og = document.createElement("optgroup");
+      og.label = `${trCats[ck].label} (${trCats[ck].labelEn})`;
+      members.forEach((v) => {
+        const o = document.createElement("option");
+        o.value = v;
+        o.textContent = FX_CAT.transitionLabels[v] || v;
+        og.appendChild(o);
+      });
+      trSel.appendChild(og);
+    });
+  } else {
+    (FX_CAT.transitions || []).forEach((v) => {
+      const o = document.createElement("option");
+      o.value = v;
+      o.textContent = FX_CAT.transitionLabels[v] || v;
+      trSel.appendChild(o);
+    });
+  }
   trSel.value = slide.transition || "";
   trSel.addEventListener("change", () => {
     if (!trSel.value) delete slide.transition;
@@ -1381,7 +1562,229 @@ function renderContentTab(container, slide) {
     reloadStage(true);
   });
   trGroup.appendChild(trSel);
+
+  // Collapsible Advanced Transition Timing (duration, delay, ease, intensity)
+  const trAdv = document.createElement("details");
+  trAdv.className = "advanced-block";
+  trAdv.style.marginTop = "8px";
+  const trAdvSum = document.createElement("summary");
+  trAdvSum.textContent = "پیشرفته: زمان‌بندی ترنزیشن (Advanced Timing)";
+  trAdvSum.style.cursor = "pointer";
+  trAdvSum.style.fontSize = "12px";
+  trAdvSum.style.opacity = "0.85";
+  trAdv.appendChild(trAdvSum);
+
+  const curTT = slide.transitionTiming || slide.transition_timing || {};
+  const ensureTT = () => {
+    if (!slide.transitionTiming || typeof slide.transitionTiming !== "object") {
+      slide.transitionTiming = Object.assign({}, slide.transition_timing || {});
+      delete slide.transition_timing;
+    }
+    return slide.transitionTiming;
+  };
+  const ttGrid = document.createElement("div");
+  ttGrid.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;";
+
+  const mkNumCtrl = (labelFa, key, placeholder, min, max, step) => {
+    const wrap = document.createElement("label");
+    wrap.style.cssText = "display:flex;flex-direction:column;gap:4px;font-size:11px;";
+    const sp = document.createElement("span");
+    sp.textContent = labelFa;
+    const inp = document.createElement("input");
+    inp.type = "number";
+    inp.className = "text-input";
+    inp.min = String(min);
+    inp.max = String(max);
+    inp.step = String(step);
+    inp.placeholder = placeholder;
+    if (curTT[key] != null) inp.value = String(curTT[key]);
+    inp.addEventListener("change", () => {
+      const tt = ensureTT();
+      if (inp.value === "") delete tt[key];
+      else tt[key] = Number(inp.value);
+      if (!Object.keys(tt).length) delete slide.transitionTiming;
+      setDirty(true);
+      reloadStage(true);
+    });
+    wrap.append(sp, inp);
+    return wrap;
+  };
+
+  ttGrid.appendChild(mkNumCtrl("مدت (Duration s)", "duration", "0.52", 0.14, 1.8, 0.04));
+  ttGrid.appendChild(mkNumCtrl("تأخیر (Delay s)", "delay", "0.0", 0, 1.0, 0.05));
+  ttGrid.appendChild(mkNumCtrl("شدت (Intensity)", "intensity", "1.0", 0.25, 1.6, 0.1));
+
+  const easeWrap = document.createElement("label");
+  easeWrap.style.cssText = "display:flex;flex-direction:column;gap:4px;font-size:11px;";
+  const easeLbl = document.createElement("span");
+  easeLbl.textContent = "منحنی شتاب (Ease)";
+  const easeSel = document.createElement("select");
+  easeSel.className = "select-ctrl";
+  [
+    { value: "", label: "پیش‌فرض (Auto)" },
+    ...(FX_CAT.easingFamilies || ["vox", "fluid", "snappy", "silk", "sharp", "cinematic", "spring"]).map((k) => ({ value: k, label: k })),
+  ].forEach((opt) => {
+    const o = document.createElement("option");
+    o.value = opt.value;
+    o.textContent = opt.label;
+    easeSel.appendChild(o);
+  });
+  easeSel.value = curTT.ease || "";
+  easeSel.addEventListener("change", () => {
+    const tt = ensureTT();
+    if (!easeSel.value) delete tt.ease;
+    else tt.ease = easeSel.value;
+    if (!Object.keys(tt).length) delete slide.transitionTiming;
+    setDirty(true);
+    reloadStage(true);
+  });
+  easeWrap.append(easeLbl, easeSel);
+  ttGrid.appendChild(easeWrap);
+
+  trAdv.appendChild(ttGrid);
+  trGroup.appendChild(trAdv);
   secNar.appendChild(trGroup);
+
+  // Beginner one-click Virtual Camera (8 presets, A5) + Collapsible Advanced
+  const camGroup = document.createElement("div");
+  camGroup.className = "field-group";
+  camGroup.innerHTML = `<div class="field-label-row"><strong>دوربین مجازی (Virtual Camera · A5)</strong></div>`;
+  const camSel = document.createElement("select");
+  camSel.className = "select-ctrl";
+  const camMap = FX_CAT.cameraPresets || {};
+  const curCamObj = (slide.camera && typeof slide.camera === "object") ? slide.camera : null;
+  const curCamPreset = typeof slide.camera === "string" ? slide.camera : (curCamObj ? (curCamObj.preset || "none") : "");
+  [
+    { value: "", label: "ارث‌بری / ثابت (Inherit · Static)" },
+    ...Object.keys(camMap).map((k) => ({ value: k, label: camMap[k].label || k })),
+  ].forEach((opt) => {
+    const o = document.createElement("option");
+    o.value = opt.value;
+    o.textContent = opt.label;
+    camSel.appendChild(o);
+  });
+  camSel.value = curCamPreset;
+  camSel.addEventListener("change", () => {
+    if (!camSel.value || camSel.value === "none") delete slide.camera;
+    else if (curCamObj) slide.camera = Object.assign({}, curCamObj, { preset: camSel.value });
+    else slide.camera = camSel.value;
+    setDirty(true);
+    reloadStage(true);
+  });
+  camGroup.appendChild(camSel);
+
+  const camAdv = document.createElement("details");
+  camAdv.className = "advanced-block";
+  camAdv.style.marginTop = "6px";
+  const camAdvSum = document.createElement("summary");
+  camAdvSum.textContent = "پیشرفته: شدت، پارالاکس و فوکوس دوربین (Advanced Camera)";
+  camAdvSum.style.cssText = "cursor:pointer;font-size:12px;opacity:0.85;";
+  camAdv.appendChild(camAdvSum);
+  const camGrid = document.createElement("div");
+  camGrid.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;";
+  const ensureCamObj = () => {
+    if (!slide.camera || typeof slide.camera !== "object") {
+      slide.camera = { preset: typeof slide.camera === "string" ? slide.camera : "gentle-dolly-in" };
+    }
+    return slide.camera;
+  };
+  const mkCamNum = (lbl, key, ph, min, max, step) => {
+    const w = document.createElement("label");
+    w.style.cssText = "display:flex;flex-direction:column;gap:4px;font-size:11px;";
+    const sp = document.createElement("span");
+    sp.textContent = lbl;
+    const inp = document.createElement("input");
+    inp.type = "number";
+    inp.className = "text-input";
+    inp.min = String(min); inp.max = String(max); inp.step = String(step); inp.placeholder = ph;
+    if (curCamObj && curCamObj[key] != null) inp.value = String(curCamObj[key]);
+    inp.addEventListener("change", () => {
+      const c = ensureCamObj();
+      if (inp.value === "") delete c[key];
+      else c[key] = Number(inp.value);
+      setDirty(true);
+      reloadStage(true);
+    });
+    w.append(sp, inp);
+    return w;
+  };
+  camGrid.appendChild(mkCamNum("شدت (Intensity)", "intensity", "1.0", 0.2, 1.5, 0.1));
+  camGrid.appendChild(mkCamNum("پارالاکس (Parallax px)", "parallax", "14", 0, 42, 2));
+  camGrid.appendChild(mkCamNum("فوکوس (Focus Blur)", "focusBlur", "0", 0, 12, 0.5));
+  camGrid.appendChild(mkCamNum("لرزش ظریف (Shake)", "shakeAmp", "0", 0, 10, 0.5));
+  camAdv.appendChild(camGrid);
+  camGroup.appendChild(camAdv);
+  secNar.appendChild(camGroup);
+
+  // Beginner one-click Particles & Weather Ambience (8 presets, A6) + Collapsible Advanced
+  const ambGroup = document.createElement("div");
+  ambGroup.className = "field-group";
+  ambGroup.innerHTML = `<div class="field-label-row"><strong>ذرات و اتمسفر قطعی (Particles & Weather · A6)</strong></div>`;
+  const ambSel = document.createElement("select");
+  ambSel.className = "select-ctrl";
+  const ambMap = FX_CAT.ambiencePresets || {};
+  const curAmbObj = (slide.ambience && typeof slide.ambience === "object") ? slide.ambience : null;
+  const curAmbPreset = typeof slide.ambience === "string" ? slide.ambience : (curAmbObj ? (curAmbObj.preset || "none") : "");
+  [
+    { value: "", label: "ارث‌بری / خاموش (Inherit · Off)" },
+    ...Object.keys(ambMap).map((k) => ({ value: k, label: ambMap[k].label || k })),
+  ].forEach((opt) => {
+    const o = document.createElement("option");
+    o.value = opt.value;
+    o.textContent = opt.label;
+    ambSel.appendChild(o);
+  });
+  ambSel.value = curAmbPreset;
+  ambSel.addEventListener("change", () => {
+    if (!ambSel.value || ambSel.value === "none") delete slide.ambience;
+    else if (curAmbObj) slide.ambience = Object.assign({}, curAmbObj, { preset: ambSel.value });
+    else slide.ambience = ambSel.value;
+    setDirty(true);
+    reloadStage(true);
+  });
+  ambGroup.appendChild(ambSel);
+
+  const ambAdv = document.createElement("details");
+  ambAdv.className = "advanced-block";
+  ambAdv.style.marginTop = "6px";
+  const ambAdvSum = document.createElement("summary");
+  ambAdvSum.textContent = "پیشرفته: تراکم، سرعت و شفافیت ذرات (Advanced Particles)";
+  ambAdvSum.style.cssText = "cursor:pointer;font-size:12px;opacity:0.85;";
+  ambAdv.appendChild(ambAdvSum);
+  const ambGrid = document.createElement("div");
+  ambGrid.style.cssText = "display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px;";
+  const ensureAmbObj = () => {
+    if (!slide.ambience || typeof slide.ambience !== "object") {
+      slide.ambience = { preset: typeof slide.ambience === "string" ? slide.ambience : "studio-dust" };
+    }
+    return slide.ambience;
+  };
+  const mkAmbNum = (lbl, key, ph, min, max, step) => {
+    const w = document.createElement("label");
+    w.style.cssText = "display:flex;flex-direction:column;gap:4px;font-size:11px;";
+    const sp = document.createElement("span");
+    sp.textContent = lbl;
+    const inp = document.createElement("input");
+    inp.type = "number";
+    inp.className = "text-input";
+    inp.min = String(min); inp.max = String(max); inp.step = String(step); inp.placeholder = ph;
+    if (curAmbObj && curAmbObj[key] != null) inp.value = String(curAmbObj[key]);
+    inp.addEventListener("change", () => {
+      const a = ensureAmbObj();
+      if (inp.value === "") delete a[key];
+      else a[key] = Number(inp.value);
+      setDirty(true);
+      reloadStage(true);
+    });
+    w.append(sp, inp);
+    return w;
+  };
+  ambGrid.appendChild(mkAmbNum("تراکم (Density)", "density", "1.0", 0.35, 1.8, 0.1));
+  ambGrid.appendChild(mkAmbNum("سرعت (Speed)", "speed", "1.0", 0.2, 2.5, 0.1));
+  ambGrid.appendChild(mkAmbNum("شفافیت (Opacity)", "opacity", "0.45", 0.05, 1.0, 0.05));
+  ambAdv.appendChild(ambGrid);
+  ambGroup.appendChild(ambAdv);
+  secNar.appendChild(ambGroup);
 
   const lmGroup = document.createElement("div");
   lmGroup.className = "field-group";
@@ -1416,8 +1819,66 @@ function renderContentTab(container, slide) {
   secNar.appendChild(lmGroup);
   container.appendChild(secNar);
 
+  // 3b. Mascot Character & Offline Audio Lip-Sync Controls
+  const audInfo = state.slideAudioMap.get(slide) || null;
+  renderMascotControls({
+    container,
+    slide,
+    audioState: audInfo,
+    setStatus,
+    onDirtyReload: (reRenderInsp, autoPlay) => {
+      setDirty(true);
+      if (reRenderInsp) renderInspector();
+      reloadStage(autoPlay);
+    },
+    onToneChange: (toneCfg, markDirty) => {
+      if (markDirty) setDirty(true, false);
+      if (els.stageFrame && els.stageFrame.contentWindow) {
+        els.stageFrame.contentWindow.postMessage({ cmd: "mascotTone", tone: toneCfg }, "*");
+      }
+    },
+    onLoadAudioFile: async (file) => {
+      setStatus(`در حال تحلیل صدای «${file.name}» برای لیپ‌سینک و لحن صدا...`);
+      try {
+        const { visemes, prosody } = await analyzeAudioWithProsodyOffline(file, 30);
+        const url = URL.createObjectURL(file);
+        state.slideAudioMap.set(slide, { url, fileName: file.name, track: visemes, prosody });
+        slide.audio = file.name;
+        setDirty(true);
+        renderInspector();
+        reloadStage(true);
+        setStatus(`صدا، ${visemes.frames.length} فریم لیپ‌سینک و پروزودی (F0≈${Math.round(prosody.median_f0_hz || 0)}Hz) آماده شد ✓`);
+      } catch (err) {
+        setStatus("خطا در تحلیل فایل صوتی: " + err.message);
+      }
+    },
+    onClearAudio: () => {
+      const prev = state.slideAudioMap.get(slide);
+      if (prev && prev.url) {
+        try { URL.revokeObjectURL(prev.url); } catch (_) {}
+      }
+      state.slideAudioMap.delete(slide);
+      if (state.previewAudio) {
+        try { state.previewAudio.pause(); state.previewAudio.removeAttribute("src"); } catch (_) {}
+      }
+      delete slide.visemeTrack;
+      delete slide.prosodyTrack;
+      if (slide.mascot && typeof slide.mascot === "object") {
+        delete slide.mascot.visemeTrack;
+        delete slide.mascot.prosodyTrack;
+      }
+      setDirty(true);
+      renderInspector();
+      reloadStage(true);
+      setStatus("فایل صدای پیش‌نمایش حذف شد");
+    },
+  });
+
   // 4. Position/Scale Overrides
   const ovFields = [...editableFields];
+  if (tpl === "mascot_talk" || (slide.mascot && slide.mascot.enabled !== false)) {
+    ovFields.push({ key: "mascot", label: "شخصیت عقاب (Mascot)" });
+  }
   const hasLogo = (slide.logo && slide.logo !== false) || slide.logo_text || (state.data && (state.data.logo || state.data.logo_text));
   if (hasLogo && slide.logo !== false) ovFields.push({ key: "logo", label: "لوگو" });
 
@@ -1512,6 +1973,34 @@ function renderInspector() {
       slide,
       onChange: handleSubModuleChange,
       startPickTarget,
+    });
+  } else if (state.activeTab === "puppet") {
+    renderPuppetInspector({
+      container: els.inspectorBody,
+      slide,
+      projectData: state.data,
+      duration: state.duration,
+      currentTime: state.currentTime,
+      onPuppetChange: (nextPuppet, markDirty) => {
+        if (markDirty) setDirty(true);
+        if (els.stageFrame.contentWindow) {
+          els.stageFrame.contentWindow.postMessage({ cmd: "puppetConfig", puppet: nextPuppet }, "*");
+        }
+      },
+      onDirtyReload: (rerenderInsp, autoPlay) => {
+        setDirty(true);
+        if (rerenderInsp) renderInspector();
+        reloadStage(Boolean(autoPlay), autoPlay ? 0 : state.currentTime);
+      },
+      onApplyProjectDefault: (puppetCfg) => {
+        if (!state.data) return;
+        state.data.puppet = puppetCfg;
+        (state.data.slides || []).forEach((s) => { delete s.puppet; });
+        setDirty(true);
+        reloadStage(false, state.currentTime);
+        setStatus("تنظیمات عروسک روی کل پروژه اعمال شد ✓");
+      },
+      setStatus,
     });
   } else if (state.activeTab === "living") {
     renderLivingAndAudioTab(els.inspectorBody, slide);
@@ -1788,10 +2277,22 @@ async function openProject(name) {
 async function saveProject() {
   if (!state.projectName || !state.data) return;
   setStatus("در حال ذخیره...");
+  // Keep video.yaml clean by stripping transient runtime-only cached tracks before PUT
+  const cleanPayload = JSON.parse(JSON.stringify(state.data));
+  (cleanPayload.slides || []).forEach((sl) => {
+    if (sl && typeof sl === "object") {
+      delete sl.visemeTrack;
+      delete sl.prosodyTrack;
+      if (sl.mascot && typeof sl.mascot === "object") {
+        delete sl.mascot.visemeTrack;
+        delete sl.mascot.prosodyTrack;
+      }
+    }
+  });
   const resp = await fetch(`/api/projects/${encodeURIComponent(state.projectName)}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json; charset=utf-8" },
-    body: JSON.stringify(state.data),
+    body: JSON.stringify(cleanPayload),
   });
   const json = await resp.json();
   if (!resp.ok) {
@@ -1951,6 +2452,76 @@ document.querySelectorAll(".seg-btn").forEach((btn) => {
   });
 });
 
+document.querySelectorAll(".fmt-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const fmt = btn.dataset.format || "16:9";
+    state.format = fmt;
+    const slide = activeSlide();
+    if (slide) {
+      slide.format = fmt;
+      setDirty(true);
+      renderInspector();
+    }
+    reloadStage(true);
+  });
+});
+
+function applyLanguage(lang) {
+  const dictMap = (window.StageMotionTokens && window.StageMotionTokens.EDITOR_I18N) || {};
+  const next = lang === "en" ? "en" : "fa";
+  const dict = dictMap[next];
+  state.lang = next;
+  try {
+    localStorage.setItem("khordegir_ui_lang", next);
+  } catch (_) {}
+  document.documentElement.lang = next;
+  document.documentElement.dir = next === "en" ? "ltr" : "rtl";
+  if (dict) {
+    document.querySelectorAll("[data-i18n]").forEach((node) => {
+      const k = node.getAttribute("data-i18n");
+      if (k && dict[k] != null) node.textContent = dict[k];
+    });
+  }
+  if (els.btnLangToggle) {
+    els.btnLangToggle.setAttribute("aria-pressed", String(next === "en"));
+  }
+}
+
+if (els.btnLangToggle) {
+  els.btnLangToggle.addEventListener("click", () => {
+    applyLanguage(state.lang === "fa" ? "en" : "fa");
+    setStatus(state.lang === "en" ? "Switched UI to English (LTR) ✓" : "زبان رابط به فارسی (RTL) تغییر کرد ✓");
+  });
+}
+
+if (els.btnFpsToggle) {
+  els.btnFpsToggle.addEventListener("click", () => {
+    state.fps = state.fps === 60 ? 30 : 60;
+    els.btnFpsToggle.textContent = `${state.fps}fps`;
+    els.btnFpsToggle.classList.toggle("btn-amber", state.fps === 60);
+    els.btnFpsToggle.classList.toggle("btn-ghost", state.fps !== 60);
+    els.btnFpsToggle.setAttribute("aria-pressed", String(state.fps === 60));
+    if (els.stageFrame.contentWindow) {
+      els.stageFrame.contentWindow.postMessage({ cmd: "setFps", fps: state.fps }, "*");
+    }
+    setStatus(state.lang === "en" ? `Preview rate set to ${state.fps} fps ✓` : `نرخ فریم پیش‌نمایش روی ${fa(state.fps)} fps تنظیم شد ✓`);
+  });
+}
+
+if (els.chkPuppetDebug) {
+  els.chkPuppetDebug.addEventListener("change", () => {
+    state.puppetDebug = Boolean(els.chkPuppetDebug.checked);
+    if (els.stageFrame.contentWindow) {
+      els.stageFrame.contentWindow.postMessage({
+        cmd: "puppetDebug",
+        enabled: state.puppetDebug,
+        showPivots: true,
+        showGraphs: true,
+      }, "*");
+    }
+  });
+}
+
 els.chkCamGuide.addEventListener("change", () => reloadStage(false, state.currentTime));
 els.chkLivingLoop.addEventListener("change", () => {
   state.livingLoop = els.chkLivingLoop.checked;
@@ -2024,6 +2595,7 @@ async function loadStarterAssets() {
   }
 }
 
+applyLanguage(state.lang);
 initSelectors();
 resizeStage();
 const initialProject = new URLSearchParams(window.location.search).get("project");

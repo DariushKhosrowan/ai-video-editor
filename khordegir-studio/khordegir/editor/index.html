@@ -13,76 +13,88 @@
       <div class="brand">
         <div class="brand-badge" aria-hidden="true">خ</div>
         <div class="brand-text">
-          <h1>خرده‌گیر استودیو</h1>
-          <span id="statusText" class="brand-sub">آماده برای ویرایش</span>
+          <h1 data-i18n="appTitle">خرده‌گیر استودیو</h1>
+          <span id="statusText" class="brand-sub" data-i18n="ready">آماده برای ویرایش</span>
         </div>
       </div>
 
       <div class="topbar-center">
         <label class="control-pill">
-          <span>پروژه:</span>
-          <select id="projectSelect" class="select-ctrl" aria-label="انتخاب پروژه"></select>
+          <span data-i18n="project">پروژه:</span>
+          <select id="projectSelect" class="select-ctrl" aria-label="انتخاب پروژه / Select Project"></select>
         </label>
 
-        <button id="btnNewProject" type="button" class="btn btn-ghost">+ پروژه جدید</button>
+        <button id="btnNewProject" type="button" class="btn btn-ghost" data-i18n="newProject">+ پروژه جدید</button>
 
         <label class="control-pill">
-          <span>تم:</span>
-          <select id="themeSelect" class="select-ctrl" aria-label="انتخاب تم"></select>
+          <span data-i18n="theme">تم:</span>
+          <select id="themeSelect" class="select-ctrl" aria-label="انتخاب تم / Select Theme"></select>
         </label>
 
-        <button id="btnProjectStyle" type="button" class="btn btn-ghost">🎨 سبک، لوگو و پادکست</button>
-        <button id="btnOpenImporter" type="button" class="btn btn-ghost">📄 متن به اسلاید</button>
-        <button id="btnRandomAll" type="button" class="btn btn-amber" title="انتخاب تصادفی قطعی برای تم، سبک حرکت، ترنزیشن و لوگو">🎲 تصادفی</button>
+        <button id="btnProjectStyle" type="button" class="btn btn-ghost" data-i18n="projectStyle">🎨 سبک، لوگو و پادکست</button>
+        <button id="btnOpenImporter" type="button" class="btn btn-ghost" data-i18n="importer">📄 متن به اسلاید</button>
+        <button id="btnRandomAll" type="button" class="btn btn-amber" data-i18n="randomAll" title="انتخاب تصادفی قطعی برای تم، سبک حرکت، ترنزیشن و لوگو">🎲 تصادفی</button>
       </div>
 
       <div class="topbar-actions">
-        <div class="undo-group" role="group" aria-label="تاریخچه ویرایش">
+        <button id="btnLangToggle" type="button" class="btn btn-sm btn-ghost" data-i18n="langSwitch" aria-label="تغییر زبان و جهت / Toggle Language and RTL" title="تغییر زبان فارسی (RTL) / انگلیسی (LTR)">EN / LTR</button>
+        <div class="undo-group" role="group" aria-label="تاریخچه ویرایش / Edit History">
           <button id="btnUndo" type="button" class="btn btn-sm btn-ghost" title="برگشت (Ctrl+Z)" disabled>↶</button>
           <button id="btnRedo" type="button" class="btn btn-sm btn-ghost" title="بازگشت به جلو (Ctrl+Shift+Z)" disabled>↷</button>
         </div>
-        <span id="dirtyBadge" class="dirty-badge hidden">تغییرات ذخیره نشده</span>
-        <button id="btnSave" type="button" class="btn btn-primary" disabled>ذخیره video.yaml</button>
-        <button id="btnSendLive" type="button" class="btn btn-live" title="پخش فوری این اسلاید روی OBS Browser Source">📡 ارسال زنده OBS</button>
-        <a id="linkObs" href="/obs/" class="btn btn-amber-outline">کنسول OBS و پرامپتر</a>
+        <span id="dirtyBadge" class="dirty-badge hidden" data-i18n="unsaved">تغییرات ذخیره نشده</span>
+        <button id="btnSave" type="button" class="btn btn-primary" data-i18n="saveYaml" disabled>ذخیره video.yaml</button>
+        <button id="btnSendLive" type="button" class="btn btn-live" data-i18n="sendLive" title="پخش فوری این اسلاید روی OBS Browser Source">📡 ارسال زنده OBS</button>
+        <a id="linkObs" href="/obs/" class="btn btn-amber-outline" data-i18n="obsConsole">کنسول OBS و پرامپتر</a>
       </div>
     </header>
 
     <!-- Main 3-Column Studio -->
     <main class="workspace">
       <!-- Right Column: Slides List -->
-      <aside class="pane pane-slides" aria-label="فهرست اسلایدها">
+      <aside class="pane pane-slides" aria-label="فهرست اسلایدها / Slides List">
         <div class="pane-head">
-          <h2>اسلایدها <span id="slidesCount" class="count-chip">۰</span></h2>
-          <button id="btnOpenGallery" type="button" class="btn btn-sm btn-amber">+ گالری قالب‌ها</button>
+          <h2><span data-i18n="slides">اسلایدها</span> <span id="slidesCount" class="count-chip">۰</span></h2>
+          <button id="btnOpenGallery" type="button" class="btn btn-sm btn-amber" data-i18n="gallery">+ گالری قالب‌ها</button>
         </div>
         <div class="quick-add-bar">
-          <select id="addTemplateSelect" class="select-ctrl compact" aria-label="نوع اسلاید جدید"></select>
-          <button id="btnAddSlide" type="button" class="btn btn-sm btn-primary">+ افزودن</button>
+          <select id="addTemplateSelect" class="select-ctrl compact" aria-label="نوع اسلاید جدید / New Slide Template"></select>
+          <button id="btnAddSlide" type="button" class="btn btn-sm btn-primary" data-i18n="add">+ افزودن</button>
         </div>
         <div id="slidesList" class="slides-list"></div>
       </aside>
 
       <!-- Center Column: Stage Preview & Deterministic Timeline -->
-      <section class="pane pane-stage" aria-label="پیش‌نمایش زنده و خط زمان">
+      <section class="pane pane-stage" aria-label="پیش‌نمایش زنده و خط زمان / Live Stage Preview">
         <div class="stage-toolbar">
-          <div class="layout-switch" role="group" aria-label="چیدمان دوربین">
-            <button type="button" class="seg-btn" data-layout="SLIDE">تمام‌صفحه</button>
-            <button type="button" class="seg-btn" data-layout="SCAM">اسلاید + من (SCAM)</button>
-            <button type="button" class="seg-btn" data-layout="CAM">فقط دوربین</button>
+          <div class="layout-switch" role="group" aria-label="چیدمان دوربین / Camera Layout">
+            <button type="button" class="seg-btn" data-layout="SLIDE" data-i18n="layoutSlide">تمام‌صفحه</button>
+            <button type="button" class="seg-btn" data-layout="SCAM" data-i18n="layoutScam">اسلاید + من (SCAM)</button>
+            <button type="button" class="seg-btn" data-layout="CAM" data-i18n="layoutCam">فقط دوربین</button>
+          </div>
+
+          <div class="layout-switch format-switch" role="group" aria-label="نسبت تصویر خروجی / Aspect Ratio">
+            <button type="button" class="fmt-btn active" data-format="16:9">16:9</button>
+            <button type="button" class="fmt-btn" data-format="9:16">9:16</button>
+            <button type="button" class="fmt-btn" data-format="1:1">1:1</button>
           </div>
 
           <div class="stage-tools-right">
+            <button id="btnFpsToggle" type="button" class="btn btn-sm btn-ghost mono-num" dir="ltr" aria-pressed="false" title="نرخ فریم پیش‌نمایش (30 / 60 fps)">30fps</button>
+            <label class="toggle-chip" title="نمایش لایه دیباگ فنرها، ویزم‌ها، نمودار لحن و پیوت‌های ریگ">
+              <input id="chkPuppetDebug" type="checkbox">
+              <span data-i18n="debugOverlay">دیباگ عروسک</span>
+            </label>
             <label class="toggle-chip" title="پخش مداوم پس‌زمینه و حرکت زنده مثل خروجی OBS">
               <input id="chkLivingLoop" type="checkbox" checked>
-              <span>حالت زنده (Living)</span>
+              <span data-i18n="livingLoop">حالت زنده (Living)</span>
             </label>
             <label class="toggle-chip">
               <input id="chkCamGuide" type="checkbox" checked>
-              <span>قاب دوربین</span>
+              <span data-i18n="camGuide">قاب دوربین</span>
             </label>
-            <span id="camStatusChip" class="status-chip ok">ناحیه دوربین آزاد</span>
-            <button id="btnReroll" type="button" class="btn btn-amber btn-sm">🎲 انیمیشن دیگر</button>
+            <span id="camStatusChip" class="status-chip ok" data-i18n="camFree">ناحیه دوربین آزاد</span>
+            <button id="btnReroll" type="button" class="btn btn-amber btn-sm" data-i18n="reroll">🎲 انیمیشن دیگر</button>
           </div>
         </div>
 
@@ -103,17 +115,17 @@
 
         <div class="transport-bar">
           <div class="transport-left">
-            <button id="btnPlayPause" type="button" class="btn btn-primary btn-play">▶ پخش</button>
-            <button id="btnReplay" type="button" class="btn btn-ghost btn-sm" title="پخش از ابتدا">↺ از اول</button>
+            <button id="btnPlayPause" type="button" class="btn btn-primary btn-play" data-i18n="play">▶ پخش</button>
+            <button id="btnReplay" type="button" class="btn btn-ghost btn-sm" data-i18n="replay" title="پخش از ابتدا">↺ از اول</button>
             <span id="timeReadout" class="time-readout mono-num" dir="ltr">0.00s / 6.00s</span>
           </div>
 
           <div class="scrubber-wrap">
-            <input id="timeScrubber" type="range" min="0" max="6" step="0.02" value="0" aria-label="موقعیت زمانی صحنه">
+            <input id="timeScrubber" type="range" min="0" max="6" step="0.02" value="0" aria-label="موقعیت زمانی صحنه / Timeline Scrubber">
           </div>
 
           <div class="transport-right">
-            <button id="btnSfxMute" type="button" class="btn btn-sm btn-ghost" title="صدای افکت‌های انیمیشن (SFX)">🔊 صدا</button>
+            <button id="btnSfxMute" type="button" class="btn btn-sm btn-ghost" data-i18n="sfx" title="صدای افکت‌های انیمیشن (SFX)">🔊 صدا</button>
             <span id="presetChip" class="meta-chip" title="سبک فعال حرکت">سبک: —</span>
             <span id="transitionChip" class="meta-chip" title="ترنزیشن فعال">ترنزیشن: —</span>
             <span id="sayDurChip" class="meta-chip" title="زمان تخمینی گفتار">گفتار: —</span>
@@ -122,17 +134,18 @@
       </section>
 
       <!-- Left Column: Tabbed Studio Inspector -->
-      <aside class="pane pane-inspector" aria-label="ویرایشگر ویژگی‌ها">
+      <aside class="pane pane-inspector" aria-label="ویرایشگر ویژگی‌ها / Inspector">
         <div class="pane-head">
-          <h2>تنظیمات اسلاید</h2>
+          <h2 data-i18n="slideSettings">تنظیمات اسلاید</h2>
           <span id="activeSlideBadge" class="count-chip">—</span>
         </div>
 
-        <div class="inspector-tabs" role="tablist" aria-label="بخش‌های تنظیمات">
-          <button type="button" class="insp-tab active" data-tab="content">محتوا</button>
-          <button type="button" class="insp-tab" data-tab="curves">منحنی و حرکت</button>
-          <button type="button" class="insp-tab" data-tab="callouts">فلش و نکته</button>
-          <button type="button" class="insp-tab" data-tab="living">زنده و صدا</button>
+        <div class="inspector-tabs" role="tablist" aria-label="بخش‌های تنظیمات / Inspector Tabs">
+          <button type="button" class="insp-tab active" data-tab="content" data-i18n="tabContent" role="tab">محتوا</button>
+          <button type="button" class="insp-tab" data-tab="puppet" data-i18n="tabPuppet" role="tab">عروسک</button>
+          <button type="button" class="insp-tab" data-tab="curves" data-i18n="tabCurves" role="tab">منحنی و حرکت</button>
+          <button type="button" class="insp-tab" data-tab="callouts" data-i18n="tabCallouts" role="tab">فلش و نکته</button>
+          <button type="button" class="insp-tab" data-tab="living" data-i18n="tabLiving" role="tab">زنده و صدا</button>
         </div>
 
         <div id="inspectorBody" class="inspector-body">
@@ -308,6 +321,7 @@
   </script>
   <script src="../themes/_list.js"></script>
   <script src="../templates/_index.js"></script>
+  <script src="../stage/motion-tokens.js"></script>
   <script src="../stage/fx.js"></script>
   <script src="../stage/sfx.js"></script>
   <script src="./importer.js"></script>

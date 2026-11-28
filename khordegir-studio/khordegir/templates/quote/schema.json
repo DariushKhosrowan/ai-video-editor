@@ -1,176 +1,110 @@
 {
- "name": "quote",
- "label": "جمله‌ی کلیدی",
- "description": "یک جمله‌ی بزرگ و پررنگ (با کلمه‌ی زرد/قرمز) و یک خط توضیح کوچک‌تر. برای قانون‌ها و جمع‌بندی‌ها.",
- "aliases": [
-  "statement",
-  "جمله",
-  "نقل‌قول"
- ],
- "category": "متن",
- "fields": [
-  {
-   "key": "text",
-   "label": "جمله (*زرد* ، ~قرمز~)",
-   "type": "textarea",
-   "required": true,
-   "editable": true
+  "name": "quote",
+  "label": "جمله‌ی کلیدی",
+  "description": "یک جمله‌ی بزرگ و پررنگ (با کلمه‌ی زرد/قرمز) و یک خط توضیح کوچک‌تر. برای قانون‌ها و جمع‌بندی‌ها.",
+  "aliases": [
+    "statement",
+    "جمله",
+    "نقل‌قول"
+  ],
+  "category": "متن",
+  "fields": [
+    {
+      "key": "text",
+      "label": "جمله (*زرد* ، ~قرمز~)",
+      "type": "textarea",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "highlight",
+      "label": "خط دوم بزرگ‌تر (اختیاری)",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "highlight_color",
+      "label": "رنگ خط دوم",
+      "type": "select",
+      "options": [
+        [
+          "accent",
+          "زرد"
+        ],
+        [
+          "danger",
+          "قرمز"
+        ],
+        [
+          "text",
+          "سفید"
+        ]
+      ],
+      "default": "accent",
+      "editable": false
+    },
+    {
+      "key": "caption",
+      "label": "توضیح کوچک",
+      "type": "textarea",
+      "editable": true
+    },
+    {
+      "key": "author",
+      "label": "گوینده (اختیاری)",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["editorial-mark", "نشان نقل‌قول تحریریه"],
+        ["kinetic-words", "کلمه‌به‌کلمه زنده"],
+        ["accent-brace", "کروشهٔ تأکید"],
+        ["glass-panel", "پنل شیشه‌ای"],
+        ["spotlight-serif", "کلاسیک برجسته"],
+        ["bold-contrast", "کنتراست پررنگ"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["soft-fade", "محو نرم"],
+        ["curtain-rtl", "پرده از راست به چپ"],
+        ["accent-slash", "نوار تأکید مورب"],
+        ["iris-rise", "باز شدن دایره‌ای"],
+        ["split-curtain", "پرده دوقسمتی"],
+        ["diagonal-wipe", "پاک‌شدن مورب"],
+        ["zoom-iris", "گشایش زوم"],
+        ["shutter-bars", "کرکره ستونی"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
+    }
+  ],
+  "example": {
+    "text": "هر رفتاری که پاداشش بدی،",
+    "highlight": "بیشتر می‌شه",
+    "caption": "",
+    "layout": "SCAM"
   },
-  {
-   "key": "highlight",
-   "label": "خط دوم بزرگ‌تر (اختیاری)",
-   "type": "text",
-   "editable": true
-  },
-  {
-   "key": "highlight_color",
-   "label": "رنگ خط دوم",
-   "type": "select",
-   "options": [
-    [
-     "accent",
-     "زرد"
-    ],
-    [
-     "danger",
-     "قرمز"
-    ],
-    [
-     "text",
-     "سفید"
-    ]
-   ],
-   "default": "accent",
-   "editable": false
-  },
-  {
-   "key": "caption",
-   "label": "توضیح کوچک",
-   "type": "textarea",
-   "editable": true
-  },
-  {
-   "key": "author",
-   "label": "گوینده (اختیاری)",
-   "type": "text",
-   "editable": true
-  },
-  {
-   "key": "preset",
-   "label": "سبک انیمیشن",
-   "type": "select",
-   "options": [
-    [
-     "auto",
-     "کلاسیک / ارث‌بری"
-    ],
-    [
-     "random",
-     "🎲 تصادفی"
-    ],
-    [
-     "editorial-mark",
-     "نشان نقل‌قول تحریریه"
-    ],
-    [
-     "kinetic-words",
-     "کلمه‌به‌کلمه زنده"
-    ],
-    [
-     "accent-brace",
-     "کروشهٔ تأکید"
-    ],
-    [
-     "glass-panel",
-     "پنل شیشه‌ای"
-    ],
-    [
-     "spotlight-serif",
-     "کلاسیک برجسته"
-    ],
-    [
-     "bold-contrast",
-     "کنتراست پررنگ"
-    ]
-   ],
-   "default": "auto",
-   "editable": false
-  },
-  {
-   "key": "transition",
-   "label": "ترنزیشن ورود",
-   "type": "select",
-   "options": [
-    [
-     "auto",
-     "ارث‌بری"
-    ],
-    [
-     "random",
-     "🎲 تصادفی"
-    ],
-    [
-     "soft-fade",
-     "محو نرم"
-    ],
-    [
-     "curtain-rtl",
-     "پرده از راست به چپ"
-    ],
-    [
-     "accent-slash",
-     "نوار تأکید مورب"
-    ],
-    [
-     "iris-rise",
-     "باز شدن دایره‌ای"
-    ],
-    [
-     "split-curtain",
-     "پرده دوقسمتی"
-    ],
-    [
-     "diagonal-wipe",
-     "پاک‌شدن مورب"
-    ],
-    [
-     "zoom-iris",
-     "گشایش زوم"
-    ],
-    [
-     "shutter-bars",
-     "کرکره ستونی"
-    ]
-   ],
-   "default": "auto",
-   "editable": false
-  },
-  {
-   "key": "seed",
-   "label": "بذر تصادفی",
-   "type": "number",
-   "default": 0,
-   "editable": false
-  }
- ],
- "example": {
-  "text": "هر رفتاری که پاداشش بدی،",
-  "highlight": "بیشتر می‌شه",
-  "caption": "",
-  "layout": "SCAM"
- },
- "order": 80,
- "version": 1,
- "example_fa": {
-  "text": "هر رفتاری که پاداشش بدی،",
-  "highlight": "بیشتر می‌شه",
-  "caption": "",
-  "layout": "SCAM"
- },
- "example_en": {
-  "text": "Whatever you reward,",
-  "highlight": "grows",
-  "author": "Sample author",
-  "layout": "SCAM"
- }
+  "order": 80,
+  "version": 1
 }

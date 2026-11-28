@@ -24,7 +24,7 @@ Stage.template({
       right: A.area.x, left, top: topY, bottom: A.scam ? 200 : A.L.bottom + 30,
       justifyContent: "center",
       alignItems: center && !A.scam ? "center" : "flex-start",
-      textAlign: center && !A.scam ? "center" : "start",
+      textAlign: center && !A.scam ? "center" : "right",
       gap: "14px",
     });
 
@@ -53,13 +53,16 @@ Stage.template({
     A.field("title", t);
 
     let titleEnd = A.at("title");
-    if (!lively) {
+    const explicitTextMotion = s.textMotion || s.text_motion || null;
+    if (explicitTextMotion) {
+      titleEnd = A.kinetic(t, { at: A.at("title"), mode: explicitTextMotion, role: "title" });
+    } else if (!lively) {
       titleEnd = A.enter(t, "title");
     } else if (preset === "curtain-editorial") {
       titleEnd = A.kinetic(t, { at: A.at("title"), mode: "rise-mask", role: "title", stagger: 0.048, y: 24, ease: "vox" });
-      A.sweepLine(col, { width: 220, height: 6, origin: center && !A.scam ? "50% 50%" : A.originStart, at: A.at("title") + 0.08 });
+      A.sweepLine(col, { width: 220, height: 6, origin: center && !A.scam ? "50% 50%" : "100% 50%", at: A.at("title") + 0.08 });
     } else if (preset === "split-contrast") {
-      titleEnd = A.kinetic(t, { at: A.at("title"), mode: "glide", role: "title", stagger: 0.045, ease: "vox" });
+      titleEnd = A.kinetic(t, { at: A.at("title"), mode: "glide-rtl", role: "title", stagger: 0.045, ease: "vox" });
     } else if (preset === "minimal-type") {
       titleEnd = A.kinetic(t, { at: A.at("title"), mode: "editorial-blur", role: "title", stagger: 0.038, ease: "fluid" });
     } else if (preset === "glitch-pop") {
@@ -79,9 +82,9 @@ Stage.template({
 
     if (!s.image && (!lively || preset !== "curtain-editorial")) {
       const r = A.el("div", "rule", col);
-      r.style.transformOrigin = center && !A.scam ? "50% 50%" : A.originStart;
+      r.style.transformOrigin = center && !A.scam ? "50% 50%" : "100% 50%";
       if (lively) r.style.width = preset === "spotlight" ? "260px" : "190px";
-      Stage.tl.from(r, { scaleX: 0, duration: 0.62, ease: Stage.ease("vox"), immediateRender: true }, A.at("body", 1));
+      Stage.tl.from(r, { scaleX: 0, duration: A.dur("expressive"), ease: Stage.ease("vox"), immediateRender: true }, A.at("body", 1));
     }
 
     A.fit(col, 0.5);

@@ -1,0 +1,122 @@
+{
+  "name": "two_source_compare",
+  "label": "مقایسه دو رسانه (Two-Source Compare)",
+  "description": "مقایسه رویکرد و تیتر دو رسانه یا منبع مختلف درباره یک رویداد واحد، همراه با جمع‌بندی تحریریه.",
+  "aliases": [
+    "two-source-compare",
+    "مقایسه-منابع",
+    "دو-رسانه"
+  ],
+  "category": "خبر",
+  "fields": [
+    {
+      "key": "eyebrow",
+      "label": "برچسب بالا",
+      "type": "text",
+      "default": "یک خبر، دو روایت",
+      "editable": true
+    },
+    {
+      "key": "title",
+      "label": "عنوان رویداد",
+      "type": "text",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "left_source",
+      "label": "نام رسانه اول (راست در RTL)",
+      "type": "text",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "left_headline",
+      "label": "تیتر رسانه اول",
+      "type": "textarea",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "left_angle",
+      "label": "زاویه دید رسانه اول",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "right_source",
+      "label": "نام رسانه دوم (چپ در RTL)",
+      "type": "text",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "right_headline",
+      "label": "تیتر رسانه دوم",
+      "type": "textarea",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "right_angle",
+      "label": "زاویه دید رسانه دوم",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "takeaway",
+      "label": "جمع‌بندی تحریریه (پایین)",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["headline-clash", "تقابل دو تیتر"],
+        ["editorial-mirror", "آینه دو رسانه"],
+        ["bias-delta", "تحلیل زاویه دید"],
+        ["minimal-sources", "مقایسه ساده منابع"]
+      ],
+      "default": "headline-clash",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["split-curtain", "پرده دوقسمتی"],
+        ["editorial-push", "پوش تحریریه"],
+        ["soft-fade", "محو نرم"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
+    }
+  ],
+  "example": {
+    "eyebrow": "یک رویداد، دو قاب خبری",
+    "title": "گزارش تورم فصل بهار چگونه تیتر شد؟",
+    "left_source": "رسانه اقتصادی الف",
+    "left_headline": "«کاهش شتاب تورم ماهانه برای سومین ماه پیاپی»",
+    "left_angle": "تمرکز بر تغییر نرخ ماهانه",
+    "right_source": "روزنامه تحلیلی ب",
+    "right_headline": "«تورم نقطه‌به‌نقطه همچنان بالای میانگین ده سال اخیر است»",
+    "right_angle": "تمرکز بر فشار معیشتی سالانه",
+    "takeaway": "هر دو آمار از یک گزارش رسمی استخراج شده‌اند، اما شاخص انتخابی روایت را تغییر می‌دهد.",
+    "layout": "SLIDE"
+  },
+  "order": 240,
+  "version": 1
+}

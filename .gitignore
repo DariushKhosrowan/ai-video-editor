@@ -7,9 +7,3 @@ wt/
 *.png
 !assets/fonts/
 .pytest_cache/
-
-# Khordegir Studio: template previews + gallery sheets are documentation, keep them in git (2026-11-28)
-!khordegir-studio/khordegir/templates/*/preview.png
-!khordegir-studio/khordegir/templates/*/preview-en.png
-!khordegir-studio/khordegir/gallery/gallery.png
-!khordegir-studio/khordegir/gallery/gallery-en.png

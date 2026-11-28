@@ -1,88 +1,41 @@
 {
- "name": "podcast_end",
- "label": "صفحهٔ پایان پادکست و سابسکرایب",
- "description": "کارت پایانی یوتیوب با جایگاه دو ویدیوی پیشنهادی، دکمهٔ انیمیشنی سابسکرایب و آیدی کانال.",
- "aliases": [
-  "podcast-end",
-  "outro",
-  "end-screen",
-  "پایان پادکست",
-  "پایان"
- ],
- "category": "پادکست",
- "fields": [
-  {
-   "key": "eyebrow",
-   "label": "تیتر کوچک بالا",
-   "type": "text",
-   "editable": true
+  "name": "podcast_end",
+  "label": "صفحهٔ پایان پادکست و سابسکرایب",
+  "description": "کارت پایانی یوتیوب با جایگاه دو ویدیوی پیشنهادی، دکمهٔ انیمیشنی سابسکرایب و آیدی کانال.",
+  "aliases": [
+    "podcast-end",
+    "outro",
+    "end-screen",
+    "پایان پادکست",
+    "پایان"
+  ],
+  "category": "پادکست",
+  "fields": [
+    { "key": "eyebrow", "label": "تیتر کوچک بالا", "type": "text", "editable": true },
+    { "key": "title", "label": "جملهٔ خداحافظی / دعوت", "type": "text", "required": true, "editable": true },
+    { "key": "subtitle", "label": "لینک یا آیدی کانال", "type": "text", "editable": true },
+    { "key": "cta", "label": "متن دکمهٔ سابسکرایب", "type": "text", "editable": false },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["spotlight", "نورپردازی متمرکز"],
+        ["kinetic-hero", "تایپ کینتیک سینمایی"]
+      ],
+      "default": "auto",
+      "editable": false
+    }
+  ],
+  "example": {
+    "eyebrow": "ممنون که تا اینجا همراه بودید",
+    "title": "اگر این بحث برایتان مفید بود، *سابسکرایب* یادتان نرود",
+    "subtitle": "اپیزود بعدی هر پنج‌شنبه ساعت ۲۰ منتشر می‌شود",
+    "cta": "عضویت در کانال + زنگوله 🔔",
+    "layout": "SLIDE"
   },
-  {
-   "key": "title",
-   "label": "جملهٔ خداحافظی / دعوت",
-   "type": "text",
-   "required": true,
-   "editable": true
-  },
-  {
-   "key": "subtitle",
-   "label": "لینک یا آیدی کانال",
-   "type": "text",
-   "editable": true
-  },
-  {
-   "key": "cta",
-   "label": "متن دکمهٔ سابسکرایب",
-   "type": "text",
-   "editable": false
-  },
-  {
-   "key": "preset",
-   "label": "سبک انیمیشن",
-   "type": "select",
-   "options": [
-    [
-     "auto",
-     "کلاسیک / ارث‌بری"
-    ],
-    [
-     "random",
-     "🎲 تصادفی"
-    ],
-    [
-     "spotlight",
-     "نورپردازی متمرکز"
-    ],
-    [
-     "kinetic-hero",
-     "تایپ کینتیک سینمایی"
-    ]
-   ],
-   "default": "auto",
-   "editable": false
-  }
- ],
- "example": {
-  "eyebrow": "ممنون که تا اینجا همراه بودید",
-  "title": "اگر این بحث برایتان مفید بود، *سابسکرایب* یادتان نرود",
-  "subtitle": "اپیزود بعدی هر پنج‌شنبه ساعت ۲۰ منتشر می‌شود",
-  "cta": "عضویت در کانال + زنگوله 🔔",
-  "layout": "SLIDE"
- },
- "order": 17,
- "version": 1,
- "example_fa": {
-  "eyebrow": "ممنون که تا اینجا همراه بودید",
-  "title": "اگر این بحث برایتان مفید بود، *سابسکرایب* یادتان نرود",
-  "subtitle": "اپیزود بعدی هر پنج‌شنبه ساعت ۲۰ منتشر می‌شود",
-  "cta": "عضویت در کانال + زنگوله 🔔",
-  "layout": "SLIDE"
- },
- "example_en": {
-  "eyebrow": "THANKS FOR WATCHING",
-  "title": "If this helped, *subscribe*",
-  "subtitle": "New video every Thursday",
-  "cta": "Subscribe + 🔔",
-  "layout": "SLIDE"
- }
+  "order": 17,
+  "version": 1
 }

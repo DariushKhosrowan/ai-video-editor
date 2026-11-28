@@ -1,216 +1,101 @@
 {
- "name": "counter_grid",
- "label": "کارت‌های عددی",
- "description": "دو تا چهار کارت، هر کدام یک عدد که می‌شمارد و توضیح زیرش (مثل مقایسه‌ی دو گروه).",
- "aliases": [
-  "counter-grid",
-  "cards-numbers",
-  "اعداد"
- ],
- "category": "عدد",
- "fields": [
-  {
-   "key": "title",
-   "label": "عنوان",
-   "type": "text",
-   "editable": true
-  },
-  {
-   "key": "cards",
-   "label": "کارت‌ها",
-   "type": "table",
-   "columns": [
-    [
-     "value",
-     "عدد"
-    ],
-    [
-     "prefix",
-     "قبل"
-    ],
-    [
-     "suffix",
-     "بعد"
-    ],
-    [
-     "label",
-     "توضیح"
-    ],
-    [
-     "sub",
-     "توضیح کوچک"
-    ],
-    [
-     "color",
-     "رنگ"
-    ]
-   ],
-   "editable": true
-  },
-  {
-   "key": "preset",
-   "label": "سبک انیمیشن",
-   "type": "select",
-   "options": [
-    [
-     "auto",
-     "کلاسیک / ارث‌بری"
-    ],
-    [
-     "random",
-     "🎲 تصادفی"
-    ],
-    [
-     "stagger-counters",
-     "شمارش پلکانی"
-    ],
-    [
-     "pulse-tiles",
-     "کارت‌های نبض‌دار"
-    ],
-    [
-     "editorial-grid",
-     "شبکه تحریریه"
-    ],
-    [
-     "spring-cards",
-     "کارت‌های فنری"
-    ],
-    [
-     "sweep-row",
-     "ردیف کشیده"
-    ],
-    [
-     "minimal-grid",
-     "شبکه مینیمال"
-    ]
-   ],
-   "default": "auto",
-   "editable": false
-  },
-  {
-   "key": "transition",
-   "label": "ترنزیشن ورود",
-   "type": "select",
-   "options": [
-    [
-     "auto",
-     "ارث‌بری"
-    ],
-    [
-     "random",
-     "🎲 تصادفی"
-    ],
-    [
-     "soft-fade",
-     "محو نرم"
-    ],
-    [
-     "curtain-rtl",
-     "پرده از راست به چپ"
-    ],
-    [
-     "accent-slash",
-     "نوار تأکید مورب"
-    ],
-    [
-     "iris-rise",
-     "باز شدن دایره‌ای"
-    ],
-    [
-     "split-curtain",
-     "پرده دوقسمتی"
-    ],
-    [
-     "diagonal-wipe",
-     "پاک‌شدن مورب"
-    ],
-    [
-     "zoom-iris",
-     "گشایش زوم"
-    ],
-    [
-     "shutter-bars",
-     "کرکره ستونی"
-    ]
-   ],
-   "default": "auto",
-   "editable": false
-  },
-  {
-   "key": "seed",
-   "label": "بذر تصادفی",
-   "type": "number",
-   "default": 0,
-   "editable": false
-  }
- ],
- "example": {
-  "title": "آزمایش بیمه‌ی سلامت RAND",
-  "cards": [
-   {
-    "value": 50,
-    "prefix": "+",
-    "suffix": "٪",
-    "label": "مصرف بیشترِ خدمات درمانی وقتی برای افراد عادی رایگان شد",
-    "sub": "خطر اخلاقی",
-    "color": "accent"
-   },
-   {
-    "value": 14,
-    "prefix": "+",
-    "suffix": "٪",
-    "label": "احتمال پیش‌بینی‌شده‌ی مرگ در کم‌درآمدهای دارای فشار خون بالا",
-    "sub": "وقتی هزینه روی دوششون گذاشتند",
-    "color": "danger"
-   }
+  "name": "counter_grid",
+  "label": "کارت‌های عددی",
+  "description": "دو تا چهار کارت، هر کدام یک عدد که می‌شمارد و توضیح زیرش (مثل مقایسه‌ی دو گروه).",
+  "aliases": [
+    "counter-grid",
+    "cards-numbers",
+    "اعداد"
   ],
-  "source": "Manning et al., 1987; Newhouse, 1993",
-  "layout": "SLIDE"
- },
- "order": 70,
- "version": 1,
- "example_fa": {
-  "title": "آزمایش بیمه‌ی سلامت RAND",
-  "cards": [
-   {
-    "value": 50,
-    "prefix": "+",
-    "suffix": "٪",
-    "label": "مصرف بیشترِ خدمات درمانی وقتی برای افراد عادی رایگان شد",
-    "sub": "خطر اخلاقی",
-    "color": "accent"
-   },
-   {
-    "value": 14,
-    "prefix": "+",
-    "suffix": "٪",
-    "label": "احتمال پیش‌بینی‌شده‌ی مرگ در کم‌درآمدهای دارای فشار خون بالا",
-    "sub": "وقتی هزینه روی دوششون گذاشتند",
-    "color": "danger"
-   }
+  "category": "عدد",
+  "fields": [
+    {
+      "key": "title",
+      "label": "عنوان",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "cards",
+      "label": "کارت‌ها",
+      "type": "table",
+      "columns": [
+        ["value", "عدد"],
+        ["prefix", "قبل"],
+        ["suffix", "بعد"],
+        ["label", "توضیح"],
+        ["sub", "توضیح کوچک"],
+        ["color", "رنگ"]
+      ],
+      "editable": true
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["stagger-counters", "شمارش پلکانی"],
+        ["pulse-tiles", "کارت‌های نبض‌دار"],
+        ["editorial-grid", "شبکه تحریریه"],
+        ["spring-cards", "کارت‌های فنری"],
+        ["sweep-row", "ردیف کشیده"],
+        ["minimal-grid", "شبکه مینیمال"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["soft-fade", "محو نرم"],
+        ["curtain-rtl", "پرده از راست به چپ"],
+        ["accent-slash", "نوار تأکید مورب"],
+        ["iris-rise", "باز شدن دایره‌ای"],
+        ["split-curtain", "پرده دوقسمتی"],
+        ["diagonal-wipe", "پاک‌شدن مورب"],
+        ["zoom-iris", "گشایش زوم"],
+        ["shutter-bars", "کرکره ستونی"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
+    }
   ],
-  "source": "Manning et al., 1987; Newhouse, 1993",
-  "layout": "SLIDE"
- },
- "example_en": {
-  "title": "Sample counters",
-  "cards": [
-   {
-    "value": 50,
-    "suffix": "%",
-    "label": "First sample metric"
-   },
-   {
-    "value": 3,
-    "label": "Second sample metric",
-    "tone": "accent"
-   },
-   {
-    "value": 1200,
-    "label": "Third sample metric"
-   }
-  ],
-  "layout": "SLIDE"
- }
+  "example": {
+    "title": "آزمایش بیمه‌ی سلامت RAND",
+    "cards": [
+      {
+        "value": 50,
+        "prefix": "+",
+        "suffix": "٪",
+        "label": "مصرف بیشترِ خدمات درمانی وقتی برای افراد عادی رایگان شد",
+        "sub": "خطر اخلاقی",
+        "color": "accent"
+      },
+      {
+        "value": 14,
+        "prefix": "+",
+        "suffix": "٪",
+        "label": "احتمال پیش‌بینی‌شده‌ی مرگ در کم‌درآمدهای دارای فشار خون بالا",
+        "sub": "وقتی هزینه روی دوششون گذاشتند",
+        "color": "danger"
+      }
+    ],
+    "source": "Manning et al., 1987; Newhouse, 1993",
+    "layout": "SLIDE"
+  },
+  "order": 70,
+  "version": 1
 }

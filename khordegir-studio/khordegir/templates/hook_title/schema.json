@@ -1,0 +1,91 @@
+{
+  "name": "hook_title",
+  "label": "قلاب ۳ ثانیه (Hook Title)",
+  "description": "تیتر آغازین پرانرژی برای شورتس، ریلز و شروع یوتیوب با تأکید دو رنگ، عدد قلاب اختیاری و حرکت کینتیک سریع.",
+  "aliases": [
+    "hook-title",
+    "قلاب",
+    "تیتر-شورتس"
+  ],
+  "category": "شبکه‌های اجتماعی",
+  "fields": [
+    {
+      "key": "kicker",
+      "label": "برچسب قلاب بالا (Kicker)",
+      "type": "text",
+      "default": "نکته‌ای که کمتر گفته می‌شود",
+      "editable": true
+    },
+    {
+      "key": "title",
+      "label": "خط اول تیتر اصلی",
+      "type": "text",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "accent_line",
+      "label": "خط دوم برجسته (رنگ تأکید)",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "subtext",
+      "label": "زیرمتن کوتاه / دعوت به ادامه",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "stat",
+      "label": "عدد قلاب اختیاری (مثلاً ۹۲٪)",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["punch-hook", "قلاب ۳ ثانیه پرضربه"],
+        ["split-slam", "تیتر دو تکه کوبنده"],
+        ["vertical-viral", "ریتم شورتس و ریلز"],
+        ["minimal-hook", "قلاب مینیمال"]
+      ],
+      "default": "punch-hook",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["whip-pan-up", "چرخش سریع عمودی"],
+        ["zoom-through-in", "عبور زوم به داخل"],
+        ["film-flash", "فلش نگاتیو فیلم"],
+        ["soft-fade", "محو نرم"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
+    }
+  ],
+  "example": {
+    "kicker": "در ۳ ثانیه ببینید",
+    "title": "چرا ۹۰٪ ویدیوها قبل از ثانیه پنجم",
+    "accent_line": "رد می‌شوند؟",
+    "subtext": "سه خطای ساده که با یک تغییر کوچک حل می‌شود",
+    "stat": "۹۰٪",
+    "layout": "SLIDE"
+  },
+  "order": 290,
+  "version": 1
+}

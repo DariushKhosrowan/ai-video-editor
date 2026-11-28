@@ -11,6 +11,7 @@
     [/^(گفتگو|پیام|chat)(?=\s|$)/, "chat"], [/^(کارت‌ها|کارتها|cards)(?=\s|$)/, "three_cards"], [/^(اعداد|counter_grid)(?=\s|$)/, "counter_grid"],
     [/^(بخش|section)(?=\s|$)/, "section_break"], [/^(دوربین|cam)(?=\s|$)/, "cam"], [/^(خط زمان|timeline)(?=\s|$)/, "timeline"],
     [/^(مقاله|زوم مقاله|سند|article_zoom|article)(?=\s|$)/, "article_zoom"],
+    [/^(عقاب|شخصیت|مسکات|ماسکوت|mascot_talk|mascot)(?=\s|$)/, "mascot_talk"],
   ];
   function marker(body) {
     const parts = body.split("|").map((p) => p.trim());

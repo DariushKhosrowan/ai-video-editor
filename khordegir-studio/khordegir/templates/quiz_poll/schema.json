@@ -1,0 +1,101 @@
+{
+  "name": "quiz_poll",
+  "label": "کوییز و نظرسنجی (Quiz / Poll)",
+  "description": "سؤال چندگزینه‌ای با نوار شمارش‌معکوس و نمایش پاسخ درست یا درصد آرای هر گزینه در لحظه مشخص.",
+  "aliases": [
+    "quiz-poll",
+    "کوییز",
+    "نظرسنجی",
+    "آزمون"
+  ],
+  "category": "آموزش",
+  "fields": [
+    {
+      "key": "eyebrow",
+      "label": "برچسب بالا",
+      "type": "text",
+      "default": "آزمون کوتاه",
+      "editable": true
+    },
+    {
+      "key": "question",
+      "label": "متن سؤال اصلی",
+      "type": "text",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "options",
+      "label": "گزینه‌ها (هر خط یک گزینه یا جدول label/percent)",
+      "type": "textarea",
+      "required": true,
+      "editable": true
+    },
+    {
+      "key": "correct_index",
+      "label": "شماره گزینه درست (از ۱ شروع می‌شود؛ ۰ برای نظرسنجی بدون پاسخ درست)",
+      "type": "number",
+      "default": 2,
+      "editable": false
+    },
+    {
+      "key": "reveal_at",
+      "label": "زمان نمایش پاسخ درست (ثانیه)",
+      "type": "number",
+      "default": 2.4,
+      "editable": false
+    },
+    {
+      "key": "explanation",
+      "label": "توضیح کوتاه پاسخ (اختیاری)",
+      "type": "text",
+      "editable": true
+    },
+    {
+      "key": "preset",
+      "label": "سبک انیمیشن",
+      "type": "select",
+      "options": [
+        ["auto", "کلاسیک / ارث‌بری"],
+        ["random", "🎲 تصادفی"],
+        ["option-cascade", "ورود پلکانی گزینه‌ها"],
+        ["countdown-reveal", "تایمر و پاسخ درست"],
+        ["studio-quiz", "کوییز استودیویی"],
+        ["minimal-poll", "نظرسنجی ساده"]
+      ],
+      "default": "countdown-reveal",
+      "editable": false
+    },
+    {
+      "key": "transition",
+      "label": "ترنزیشن ورود",
+      "type": "select",
+      "options": [
+        ["auto", "ارث‌بری"],
+        ["push-up", "هل دادن به بالا"],
+        ["curtain-rtl", "پرده از راست به چپ"],
+        ["soft-fade", "محو نرم"]
+      ],
+      "default": "auto",
+      "editable": false
+    },
+    {
+      "key": "seed",
+      "label": "بذر تصادفی",
+      "type": "number",
+      "default": 0,
+      "editable": false
+    }
+  ],
+  "example": {
+    "eyebrow": "حدس بزنید",
+    "question": "کدام عامل بیشترین سهم را در حفظ توجه مخاطب در ۱۰ ثانیه اول دارد؟",
+    "options": "۱. کیفیت میکروفون\n۲. شفافیت مسئله و کنجکاوی فوری\n۳. تعداد افکت‌های تصویری\n۴. طول ویدیو",
+    "correct_index": 2,
+    "reveal_at": 2.4,
+    "explanation": "مخاطب در ۳ تا ۱۰ ثانیه اول تصمیم می‌گیرد آیا موضوع به مسئله او پاسخ می‌دهد یا نه.",
+    "layout": "SLIDE"
+  },
+  "order": 260,
+  "version": 1
+}
