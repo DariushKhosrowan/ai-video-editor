@@ -18,7 +18,7 @@ Stage.template({
       if (lively && (preset === "sweep-row" || preset === "editorial-grid")) {
         const bar = A.el("div", "abs", card, {
           left: 0, right: 0, top: 0, height: "5px",
-          background: A.color(tone), transformOrigin: "100% 50%",
+          background: A.color(tone), transformOrigin: A.originStart,
         });
         Stage.tl.from(bar, { scaleX: 0, duration: 0.52, ease: Stage.ease("vox"), immediateRender: true }, A.at("card", i) + 0.08);
       }
