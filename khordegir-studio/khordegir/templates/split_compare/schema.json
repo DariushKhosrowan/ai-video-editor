@@ -1,0 +1,174 @@
+{
+  "name": "split_compare",
+  "label": "Split Compare",
+  "label_fa": "مقایسه دوتایی",
+  "description": "Two side-by-side panels following reading direction with tone, optional icon/emoji, headline, body, drawing center divider, popping VS badge, and optional verdict.",
+  "category": "compare",
+  "order": 55,
+  "version": 1,
+  "aliases": [
+    "split-compare",
+    "versus",
+    "vs",
+    "مقایسه-دوتایی"
+  ],
+  "fields": [
+    {
+      "key": "eyebrow",
+      "label": "Eyebrow (optional)",
+      "type": "text"
+    },
+    {
+      "key": "title",
+      "label": "Header Title (optional)",
+      "type": "text"
+    },
+    {
+      "key": "a_icon",
+      "label": "Side A — Icon / Emoji (optional)",
+      "type": "text"
+    },
+    {
+      "key": "a_title",
+      "label": "Side A — Headline",
+      "type": "text",
+      "required": true
+    },
+    {
+      "key": "a_body",
+      "label": "Side A — Body (lines or paragraph)",
+      "type": "textarea"
+    },
+    {
+      "key": "a_tone",
+      "label": "Side A — Tone",
+      "type": "select",
+      "options": [
+        [
+          "danger",
+          "Danger"
+        ],
+        [
+          "accent",
+          "Accent"
+        ],
+        [
+          "good",
+          "Good"
+        ],
+        [
+          "muted",
+          "Muted"
+        ]
+      ],
+      "default": "danger"
+    },
+    {
+      "key": "b_icon",
+      "label": "Side B — Icon / Emoji (optional)",
+      "type": "text"
+    },
+    {
+      "key": "b_title",
+      "label": "Side B — Headline",
+      "type": "text",
+      "required": true
+    },
+    {
+      "key": "b_body",
+      "label": "Side B — Body (lines or paragraph)",
+      "type": "textarea"
+    },
+    {
+      "key": "b_tone",
+      "label": "Side B — Tone",
+      "type": "select",
+      "options": [
+        [
+          "accent",
+          "Accent"
+        ],
+        [
+          "good",
+          "Good"
+        ],
+        [
+          "danger",
+          "Danger"
+        ],
+        [
+          "muted",
+          "Muted"
+        ]
+      ],
+      "default": "accent"
+    },
+    {
+      "key": "vs_label",
+      "label": "Center Badge Label",
+      "type": "text",
+      "default": "VS"
+    },
+    {
+      "key": "verdict",
+      "label": "Verdict Line (optional)",
+      "type": "text"
+    },
+    {
+      "key": "verdict_tone",
+      "label": "Verdict Tone",
+      "type": "select",
+      "options": [
+        [
+          "accent",
+          "Accent"
+        ],
+        [
+          "good",
+          "Good"
+        ],
+        [
+          "danger",
+          "Danger"
+        ],
+        [
+          "muted",
+          "Muted"
+        ]
+      ],
+      "default": "accent"
+    }
+  ],
+  "example": {
+    "eyebrow": "TWO KINDS OF NO",
+    "title": "Same word, *different* weight",
+    "a_icon": "🍦",
+    "a_title": "Personal boundary",
+    "a_body": "\"I'm skipping coffee tonight.\"\nSays what you won't do\nNo verdict on anyone else",
+    "a_tone": "accent",
+    "b_icon": "⚖️",
+    "b_title": "Principled refusal",
+    "b_body": "\"I won't join this.\"\nCan feel like a verdict\nMay make others question themselves",
+    "b_tone": "danger",
+    "vs_label": "VS",
+    "verdict": "Most everyday refusals land *softer* than we fear.",
+    "verdict_tone": "accent",
+    "layout": "SCAM"
+  },
+  "example_fa": {
+    "eyebrow": "دو نوع «نه»",
+    "title": "یک کلمه، *دو* وزن",
+    "a_icon": "🍦",
+    "a_title": "مرز شخصی",
+    "a_body": "«امشب قهوه نمی‌خورم.»\nفقط حدِ خودت را می‌گوید\nدرباره‌ی کسی قضاوت نمی‌کند",
+    "a_tone": "accent",
+    "b_icon": "⚖️",
+    "b_title": "امتناعِ اصولی",
+    "b_body": "«من در این کار شریک نمی‌شوم.»\nمثل حکم به نظر می‌رسد\nدیگران را به فکر وامی‌دارد",
+    "b_tone": "danger",
+    "vs_label": "در برابر",
+    "verdict": "بیشترِ «نه»‌های روزمره *نرم‌تر* از ترسِ ما فرود می‌آیند.",
+    "verdict_tone": "accent",
+    "layout": "SCAM"
+  }
+}
