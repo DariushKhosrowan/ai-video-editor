@@ -1,0 +1,79 @@
+{
+  "name": "chapter_card",
+  "label": "Chapter Card",
+  "label_fa": "کارت فصل",
+  "description": "Section transition card with a full-width wiping accent band, big part number, title, and subtitle; stays clear of the camera box in SCAM.",
+  "category": "transition",
+  "order": 95,
+  "version": 1,
+  "aliases": [
+    "chapter-card",
+    "chapter",
+    "part-card",
+    "فصل"
+  ],
+  "fields": [
+    {
+      "key": "prefix",
+      "label": "Number Prefix (e.g. PART )",
+      "type": "text"
+    },
+    {
+      "key": "number",
+      "label": "Part Number (e.g. 2 or PART 2)",
+      "type": "text",
+      "required": true
+    },
+    {
+      "key": "title",
+      "label": "Chapter Title",
+      "type": "text",
+      "required": true
+    },
+    {
+      "key": "subtitle",
+      "label": "Subtitle (optional)",
+      "type": "text"
+    },
+    {
+      "key": "tone",
+      "label": "Band Accent Tone",
+      "type": "select",
+      "options": [
+        [
+          "accent",
+          "Accent"
+        ],
+        [
+          "danger",
+          "Danger"
+        ],
+        [
+          "good",
+          "Good"
+        ],
+        [
+          "info",
+          "Info"
+        ]
+      ],
+      "default": "accent"
+    }
+  ],
+  "example": {
+    "prefix": "PART ",
+    "number": "2",
+    "title": "The Discomfort *Inside* Your Own Head",
+    "subtitle": "Why saying no feels heavier than it is.",
+    "tone": "accent",
+    "layout": "SCAM"
+  },
+  "example_fa": {
+    "prefix": "بخش ",
+    "number": "۲",
+    "title": "ناراحتیِ *درونِ* ذهنِ خودت",
+    "subtitle": "چرا «نه» گفتن سنگین‌تر از واقعیت به نظر می‌رسد.",
+    "tone": "accent",
+    "layout": "SCAM"
+  }
+}
