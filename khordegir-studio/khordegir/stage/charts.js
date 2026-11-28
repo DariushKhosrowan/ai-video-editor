@@ -153,42 +153,44 @@
   };
 
   /* ------------------------------------------------------------ bar (horizontal, RTL) */
+  /* horizontal bars, direction-aware (layout adapted from an AI Studio Build draft, 2026-11-28):
+     RTL: labels right, axis right, bars grow right->left.  LTR: labels left, axis left, bars grow left->right.
+     RTL geometry is unchanged from the original Persian version. */
   C.hbar = function (A, box, spec, t0 = 0) {
     const M = S.theme.motion, its = items(spec), n = its.length || 1;
     const preset = activePreset(spec);
     const lively = preset !== "classic";
+    const ltr = S.isLTR(), start = ltr ? "left" : "right", end = ltr ? "right" : "left";
     const W = box.clientWidth || 1200, H = box.clientHeight || 640;
     const pre = spec.prefix || "", suf = spec.suffix || "";
     const labs = its.map((d) => A.text(box, d.label, "label", "abs", { whiteSpace: "nowrap" }));
     const labW = Math.min(W * 0.36, Math.max(...labs.map((l) => l.offsetWidth)) + 30);
     const vsize = spec.value_size || 52;
-    const px1 = W - labW, px0 = vsize * 3.4;
+    /* distances measured from the reading-start edge of the box */
+    const axD = labW, maxLen = Math.max(40, W - labW - vsize * 3.4);
     const vmax = spec.ymax != null ? S.toNum(spec.ymax) : Math.max(...its.map((d) => d.v), 1e-9);
     const row = H / n, bh = Math.min(spec.bar_width || 90, row * 0.58);
     const axM = M.axes || { delay: 0, dur: 0.34 };
     const barM = M.bar || { delay: 0.25, dur: 0.68, stagger: 0.08, ease: "vox" };
     const barEase = preset === "elastic-rise" ? "spring" : (lively ? "vox" : barM.ease);
-    const ax = A.el("div", "abs", box, {
-      left: px1, top: 0, width: 3, height: H, background: S.theme.colors.axis, transformOrigin: "50% 0%",
-    });
+    const ax = A.el("div", "abs", box, { [start]: axD - 3, top: 0, width: 3, height: H, background: S.theme.colors.axis, transformOrigin: "50% 0%" });
     S.tl.from(ax, { opacity: 0, scaleY: lively ? 0 : 1, duration: axM.dur + 0.1, ease: S.ease("vox"), immediateRender: true }, t0);
     its.forEach((d, i) => {
       const cy = row * (i + 0.5), t = t0 + barM.delay + i * barM.stagger;
-      const bw = Math.max(3, d.v / (vmax || 1) * (px1 - px0));
+      const bw = Math.max(3, d.v / (vmax || 1) * maxLen);
       const baseCol = S.color(d.color);
       const bar = A.el("div", "abs bar", box, {
-        left: px1 - bw, top: cy - bh / 2, width: bw, height: bh,
-        background: lively ? `linear-gradient(270deg, ${baseCol} 0%, color-mix(in srgb, ${baseCol} 80%, #000 20%) 100%)` : baseCol,
-        borderRadius: "10px 0 0 10px", transformOrigin: "100% 50%",
+        [start]: axD, top: cy - bh / 2, width: bw, height: bh,
+        background: lively ? `linear-gradient(${ltr ? 90 : 270}deg, ${baseCol} 0%, color-mix(in srgb, ${baseCol} 80%, #000 20%) 100%)` : baseCol,
+        borderRadius: ltr ? "0 10px 10px 0" : "10px 0 0 10px", transformOrigin: ltr ? "0% 50%" : "100% 50%",
       });
       S.tl.from(bar, { scaleX: 0, duration: barM.dur, ease: S.ease(barEase), immediateRender: true }, t);
-      const v = A.el("div", "abs t-value", box, {
-        fontSize: vsize, color: S.color(d.color === "#5A5A5A" ? "muted" : d.color),
-      });
+      const v = A.el("div", "abs t-value", box, { fontSize: vsize, color: S.color(d.color === "#5A5A5A" ? "muted" : d.color) });
       A.count(v, { to: d.v, decimals: d.dec, prefix: d.prefix ?? pre, suffix: d.suffix ?? suf, at: t, dur: Math.max(0.55, barM.dur * 0.95), enter: false });
-      v.style.right = (W - (px1 - bw) + 16) + "px"; v.style.top = (cy - v.offsetHeight / 2) + "px";
-      S.tl.from(v, { opacity: 0, x: 10, duration: 0.42, ease: S.ease("vox"), immediateRender: true }, t + 0.06);
-      const l = labs[i]; l.style.right = "0px"; l.style.top = (cy - l.offsetHeight / 2) + "px";
+      v.style[start] = (axD + bw + 16) + "px"; v.style.top = (cy - v.offsetHeight / 2) + "px";
+      S.tl.from(v, { opacity: 0, x: 10 * (ltr ? -1 : 1), duration: 0.42, ease: S.ease("vox"), immediateRender: true }, t + 0.06);
+      const l = labs[i]; l.style[start] = "0px"; l.style[end] = "auto"; l.style.top = (cy - l.offsetHeight / 2) + "px";
+      l.style.maxWidth = (labW - 24) + "px";
       A.enter(l, "body", 0, 0, { at: t });
     });
   };
@@ -486,7 +488,7 @@
     if (spec.caption) A.enter(A.text(col, spec.caption, "h1"), "title", 0, 0.25);
   };
 
-  /* ------------------------------------------------------------ compare: before -> after (RTL: first on the right, arrow points left) */
+  /* ------------------------------------------------------------ compare: before -> after, in reading order (RTL: first on the right, arrow points left; LTR: first on the left, arrow points right) */
   C.compare = function (A, box, spec, t0 = 0) {
     const steps = spec.steps || [spec.before || {}, spec.after || {}];
     const preset = activePreset(spec);
@@ -498,14 +500,15 @@
     const svgNS = "http://www.w3.org/2000/svg";
 
     steps.forEach((s, i) => {
-      const right = i * (colW + arrowW);
-      const c = A.el("div", "col", box, { right, width: colW, top: 0, height: H, alignItems: "center", textAlign: "center", gap: "6px" });
+      const ltr = S.isLTR(), start = ltr ? "left" : "right";
+      const off = i * (colW + arrowW);                       // distance from the reading-start edge
+      const c = A.el("div", "col", box, { [start]: off, width: colW, top: 0, height: H, alignItems: "center", textAlign: "center", gap: "6px" });
       const num = A.el("div", "t-number", c, { color: S.color(s.color || defs[i % defs.length]), fontSize: size + "px" });
       const t = t0 + 0.18 + i * (preset === "versus-clash" ? 0.34 : 0.5);
       A.count(num, { to: s.value, prefix: s.prefix ?? spec.prefix, suffix: s.suffix ?? spec.suffix, decimals: s.decimals, at: t, dur: 0.88 });
       if (lively) {
         const fromVars = preset === "versus-clash"
-          ? { x: i === 0 ? 44 : -44, scale: 0.92, opacity: 0 }
+          ? { x: (i === 0 ? 44 : -44) * (ltr ? -1 : 1), scale: 0.92, opacity: 0 }
           : preset === "mirror-flip"
             ? { scaleX: 0.78, opacity: 0 }
             : { y: 18, scale: 0.95, opacity: 0 };
@@ -518,15 +521,15 @@
       }
       if (s.label) A.enter(A.text(c, s.label, "label", "", { maxWidth: colW * 0.95 + "px" }), "body", 0, 0, { at: t + 0.15 });
       if (i < n - 1) {
-        const ar = A.el("div", "abs", box, { right: right + colW + 14, width: arrowW - 28, top: H / 2 - 40, height: 40 });
+        const ar = A.el("div", "abs", box, { [start]: off + colW + 14, width: arrowW - 28, top: H / 2 - 40, height: 40 });
         const arSvg = document.createElementNS(svgNS, "svg");
         arSvg.setAttribute("viewBox", "0 0 100 40");
         arSvg.setAttribute("width", "100%");
         arSvg.setAttribute("height", "40");
         arSvg.setAttribute("preserveAspectRatio", "none");
         const arrColor = S.color(spec.arrow_color || (lively ? "accent" : "muted"));
-        const shaft = A.svgEl(arSvg, "path", { d: "M100 20 H12", fill: "none", stroke: arrColor, "stroke-width": 7, "stroke-linecap": "round" });
-        const head = A.svgEl(arSvg, "path", { d: "M26 4 L6 20 L26 36", fill: "none", stroke: arrColor, "stroke-width": 7, "stroke-linecap": "round", "stroke-linejoin": "round" });
+        const shaft = A.svgEl(arSvg, "path", { d: ltr ? "M0 20 H88" : "M100 20 H12", fill: "none", stroke: arrColor, "stroke-width": 7, "stroke-linecap": "round" });
+        const head = A.svgEl(arSvg, "path", { d: ltr ? "M74 4 L94 20 L74 36" : "M26 4 L6 20 L26 36", fill: "none", stroke: arrColor, "stroke-width": 7, "stroke-linecap": "round", "stroke-linejoin": "round" });
         ar.appendChild(arSvg);
         const arrowAt = t + 0.35;
         A.draw(shaft, arrowAt, preset === "sweep-compare" ? 0.5 : 0.42, "vox");
