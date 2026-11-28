@@ -116,6 +116,8 @@ DEFAULT_SECONDARY: Dict[str, Any] = {
     "crestOverlap": 0.65,
     "wingFollowThrough": 0.60,
     "squashPreserveVolume": True,
+    "headParallax": 0.75,
+    "pupilDilation": 0.65,
 }
 
 # 10 Beginner One-Click Presets (Phase 1 Item 3)
@@ -474,6 +476,8 @@ def normalize_puppet_config(
         "crestOverlap": round(_num(raw_sec.get("crestOverlap"), DEFAULT_SECONDARY["crestOverlap"], 0.0, 2.0), 3),
         "wingFollowThrough": round(_num(raw_sec.get("wingFollowThrough"), DEFAULT_SECONDARY["wingFollowThrough"], 0.0, 2.0), 3),
         "squashPreserveVolume": True if raw_sec.get("squashPreserveVolume") is None else bool(raw_sec.get("squashPreserveVolume")),
+        "headParallax": round(_num(raw_sec.get("headParallax"), DEFAULT_SECONDARY["headParallax"], 0.0, 2.0), 3),
+        "pupilDilation": round(_num(raw_sec.get("pupilDilation"), DEFAULT_SECONDARY["pupilDilation"], 0.0, 2.0), 3),
     }
 
     # Emotion & Acting defaults
@@ -529,7 +533,7 @@ def normalize_puppet_config(
     for g in merged.get("gestures") or []:
         if not isinstance(g, dict):
             continue
-        gname = str(g.get("gesture") or g.get("name") or "").strip().lower()
+        gname = str(g.get("gesture") or g.get("name") or g.get("type") or "").strip().lower()
         if gname not in GESTURE_NAMES:
             continue
         gestures.append({
@@ -729,7 +733,7 @@ def normalize_puppet_config(
     for g in merged.get("gestures") or []:
         if not isinstance(g, dict):
             continue
-        gname = str(g.get("gesture") or g.get("name") or "").strip().lower()
+        gname = str(g.get("gesture") or g.get("name") or g.get("type") or "").strip().lower()
         if gname in plugin_gestures and gname not in GESTURE_NAMES:
             gestures.append({
                 "t": round(max(0.0, float(g.get("t", 0.0) or 0.0)), 3),

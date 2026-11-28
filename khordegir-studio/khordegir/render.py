@@ -322,6 +322,8 @@ def render_project(
     )
 
     manifest_summary = {
+        "schema": "khordegir-render-manifest",
+        "version": 1,
         "project": proj["name"],
         "out_dir": str(target_out),
         "fps": int(fps),

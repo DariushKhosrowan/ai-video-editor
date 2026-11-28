@@ -1,0 +1,20 @@
+{
+  "name": "pull_quote",
+  "aliases": ["editorial-quote", "نقل-قول-مجله‌ای", "جمله-ماندگار"],
+  "order": 56,
+  "category": "متن، مقاله و آموزش (Passages & Reading)",
+  "label": "نقل‌قول مجله‌ای و سینمایی (Editorial Pull-Quote)",
+  "description": "نقل‌قول بزرگ تایپوگرافی با گیومه گرافیکی، ورود آرام کلمه‌به‌کلمه، نام گوینده و زمینه",
+  "fields": [
+    { "key": "eyebrow", "label": "برچسب بخش (Eyebrow)", "type": "text", "editable": true },
+    { "key": "quote", "label": "متن نقل‌قول (Quote)", "type": "textarea", "required": true, "editable": true },
+    { "key": "speaker", "label": "گوینده (Speaker)", "type": "text", "editable": true },
+    { "key": "role", "label": "سمت یا منبع (Role / Source)", "type": "text", "editable": true }
+  ],
+  "example": {
+    "eyebrow": "جمله کلیدی این فصل",
+    "quote": "طراحی خوب یعنی حذف کردن هر چیز اضافی تا *تنها پیام اصلی* در آرامش نفس بکشد.",
+    "speaker": "دیتر رامس",
+    "role": "طراح صنعتی و نظریه‌پرداز طراحی"
+  }
+}

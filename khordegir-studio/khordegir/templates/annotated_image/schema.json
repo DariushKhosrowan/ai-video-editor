@@ -1,0 +1,24 @@
+{
+  "name": "annotated_image",
+  "aliases": ["image-callouts", "تصویر-توضیحی", "نقاط-روی-تصویر"],
+  "order": 58,
+  "category": "تصویر و داستان‌سرایی بصری (Images & Visuals)",
+  "label": "تصویر با نقاط توضیحی (Annotated Image)",
+  "description": "تصویر اصلی با پین‌های شماره‌دار و کارت‌های توضیحی که هنگام شرح دادن یکی‌یکی ظاهر و به نقطه مربوطه وصل می‌شوند",
+  "fields": [
+    { "key": "eyebrow", "label": "برچسب بالا (Eyebrow)", "type": "text", "editable": true },
+    { "key": "title", "label": "عنوان (Title)", "type": "text", "editable": true },
+    { "key": "image", "label": "تصویر اصلی (Hero Image)", "type": "image", "editable": true },
+    { "key": "callouts", "label": "نقاط توضیحی (هر خط: x% ; y% ; عنوان ; توضیح)", "type": "list", "editable": true }
+  ],
+  "example": {
+    "eyebrow": "کالبدشکافی بصری",
+    "title": "سه جزئیات کلیدی که نباید *از قلم بیفتد*",
+    "image": "/assets/images/starter_regional_map_topo_1795696523977.jpg",
+    "callouts": [
+      "30 ; 35 ; مسیر شمالی ; محور اصلی انتقال و ارتباط",
+      "62 ; 52 ; هسته مرکزی ; بیشترین تمرکز داده و فعالیت",
+      "45 ; 76 ; نقطه خروجی ; نتیجه نهایی در پایین نقشه"
+    ]
+  }
+}

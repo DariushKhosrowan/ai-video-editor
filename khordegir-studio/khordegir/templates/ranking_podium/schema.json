@@ -1,0 +1,22 @@
+{
+  "name": "ranking_podium",
+  "aliases": ["podium", "top-3", "سکوی-رتبه‌بندی", "سه-برتر"],
+  "order": 64,
+  "category": "مقایسه و فهرست (Compares & Lists)",
+  "label": "سکوی رتبه‌بندی سه برتر (Top-3 Podium)",
+  "description": "معرفی سه رتبه برتر از جایگاه سوم به اول با بالا آمدن تدریجی سکوها و مدال‌ها",
+  "fields": [
+    { "key": "eyebrow", "label": "برچسب بالا (Eyebrow)", "type": "text", "editable": true },
+    { "key": "title", "label": "عنوان رتبه‌بندی (Title)", "type": "text", "required": true, "editable": true },
+    { "key": "first", "label": "رتبه ۱ — طلایی (نام | عدد/امتیاز | توضیح)", "type": "text", "editable": true },
+    { "key": "second", "label": "رتبه ۲ — نقره‌ای (نام | عدد/امتیاز | توضیح)", "type": "text", "editable": true },
+    { "key": "third", "label": "رتبه ۳ — برنزی (نام | عدد/امتیاز | توضیح)", "type": "text", "editable": true }
+  ],
+  "example": {
+    "eyebrow": "رتبه‌بندی نهایی",
+    "title": "سه عامل برتر در *نگه‌داشتن مخاطب*",
+    "first": "روایت شفاف و آرام | ۹۴ امتیاز | مهم‌ترین عامل تماشای تا پایان",
+    "second": "قلاب قوی ۵ ثانیه اول | ۸۶ امتیاز | تعیین‌کننده نرخ ماندن بیننده",
+    "third": "صدا و موسیقی متعادل | ۷۹ امتیاز | ایجاد حس حرفه‌ای و اعتماد"
+  }
+}

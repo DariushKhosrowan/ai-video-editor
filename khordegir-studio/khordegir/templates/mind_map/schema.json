@@ -1,0 +1,23 @@
+{
+  "name": "mind_map",
+  "aliases": ["mindmap", "نقشه-ذهنی", "درخت-مفهومی"],
+  "order": 49,
+  "category": "دیاگرام و نقشه مفهومی (Diagrams)",
+  "label": "نقشه ذهنی (Mind Map)",
+  "description": "هسته مرکزی با شاخه‌های منحنی SVG و کارت‌های مفهومی که گام‌به‌گام اطراف موضوع اصلی باز می‌شوند",
+  "fields": [
+    { "key": "eyebrow", "label": "برچسب بالا (Eyebrow)", "type": "text", "editable": true },
+    { "key": "center", "label": "مفهوم مرکزی (Center Hub)", "type": "text", "required": true, "editable": true },
+    { "key": "branches", "label": "شاخه‌ها (هر خط: عنوان شاخه | زیرتوضیح)", "type": "list", "editable": true }
+  ],
+  "example": {
+    "eyebrow": "نقشه مفهومی",
+    "center": "تولید محتوای ماندگار",
+    "branches": [
+      "پژوهش عمیق | داده و مثال واقعی",
+      "ریتم آرام | فرصت فهم برای بیننده",
+      "بصری‌سازی | دیاگرام به‌جای دیوار متن",
+      "صدای شفاف | لحن طبیعی و پرانرژی"
+    ]
+  }
+}

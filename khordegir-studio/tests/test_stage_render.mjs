@@ -1303,9 +1303,25 @@ function createRichDomElement(tag, docRef) {
       return sel.split(",").some((part) => {
         const s = part.trim();
         if (s.startsWith(".")) return this.classList.contains(s.slice(1));
-        if (s.startsWith("[data-")) {
-          const key = s.slice(6, -1).replace(/-([a-z])/g, (_, c) => c.toUpperCase());
-          return this.dataset[key] !== undefined;
+        if (s.startsWith("[") && s.endsWith("]")) {
+          const inner = s.slice(1, -1);
+          const eqIdx = inner.indexOf("=");
+          if (eqIdx > 0) {
+            const attrName = inner.slice(0, eqIdx).trim();
+            const want = inner.slice(eqIdx + 1).trim().replace(/^['"]|['"]$/g, "");
+            if (this.attrs[attrName] === want) return true;
+            if (attrName.startsWith("data-")) {
+              const key = attrName.slice(5).replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+              return this.dataset[key] === want;
+            }
+            return false;
+          }
+          if (this.attrs[inner] !== undefined) return true;
+          if (inner.startsWith("data-")) {
+            const key = inner.slice(5).replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+            return this.dataset[key] !== undefined;
+          }
+          return false;
         }
         return this.tagName === s.toUpperCase();
       });
@@ -1470,7 +1486,7 @@ function createFullStageEngineSandbox() {
   return { sandbox, stageEl, loadScript };
 }
 
-test("Studio A1: Motion tokens, 5 personalities, overshoot protection on body/image, anticipation & enhanced A.stagger", async () => {
+test("Studio A1: Motion tokens, 8 personalities, overshoot protection on body/image, anticipation & enhanced A.stagger", async () => {
   const { sandbox } = createFullStageEngineSandbox();
   const MT = sandbox.StageMotionTokens;
   const S = sandbox.Stage;
@@ -1479,7 +1495,7 @@ test("Studio A1: Motion tokens, 5 personalities, overshoot protection on body/im
   assert.equal(Object.keys(MT.DURATION_TOKENS).length, 7);
   assert.equal(Object.keys(MT.STAGGER_TOKENS).length, 6);
   assert.ok(Object.keys(MT.EASING_FAMILIES).length >= 16);
-  assert.equal(Object.keys(MT.MOTION_PERSONALITIES).length, 5);
+  assert.equal(Object.keys(MT.MOTION_PERSONALITIES).length, 8);
   assert.equal(MT.OVERSHOOT_RULES.body.allowOvershoot, false);
   assert.equal(MT.OVERSHOOT_RULES.image.allowOvershoot, false);
   assert.equal(MT.OVERSHOOT_RULES.badge.allowOvershoot, true);
@@ -1574,12 +1590,12 @@ test("Studio A2: All 14 RTL-safe Text Animation presets preserve Persian cursive
   }
 });
 
-test("Studio A4: Transition Library 2.0 — all 32 broadcast transitions run deterministically across 3 formats within 1.06 zoom cap", async () => {
+test("Studio A4: Transition Library 3.0 — all 40 broadcast transitions run deterministically across 3 formats within 1.06 zoom cap", async () => {
   const { sandbox } = createFullStageEngineSandbox();
   const S = sandbox.Stage;
   const FX = S.fx;
 
-  assert.equal(FX.CATALOG.transitions.length, 32, `Expected 32 transitions, got ${FX.CATALOG.transitions.length}`);
+  assert.equal(FX.CATALOG.transitions.length, 40, `Expected 40 transitions, got ${FX.CATALOG.transitions.length}`);
 
   S.template({
     name: "probe_a4",
@@ -1975,7 +1991,7 @@ test("Puppet Phase 5 (#15 & #16): Shot system (<=1.06 cap), parallax backdrops, 
     assert.notEqual(layer0, layer1, "Parallax backdrop layers must shift deterministically over time");
 
     // Brand Palette Lock preserved under lighting overlay (#EB1818 untouched)
-    const palNodes = stageEl.querySelectorAll("[data-pal-fill='red']");
+    const palNodes = stageEl.querySelectorAll("[data-pal-fill='redPrimary']");
     assert.ok(palNodes.length > 0);
     assert.ok(palNodes.every((n) => n.getAttribute("fill") === "#EB1818"), "Lighting must never mutate Brand Palette Lock fill #EB1818");
   }
@@ -2030,15 +2046,15 @@ Deterministic English caption line
   assert.equal(capBar.style.opacity, "0");
   S.seek(0.75);
   assert.equal(capBar.style.opacity, "1");
-  assert.equal(capText.dir, "rtl");
+  assert.equal(capText.getAttribute("dir"), "rtl");
   assert.ok(capText.textContent.includes("سلام"));
   S.seek(2.3);
   assert.equal(capBar.style.opacity, "1");
-  assert.equal(capText.dir, "ltr");
+  assert.equal(capText.getAttribute("dir"), "ltr");
   assert.ok(capText.textContent.includes("English"));
 
   // Verify deterministic 60 fps frame cache hits on repeat seeks and invalidation on config change
-  const inst = S.mascots[0];
+  const inst = S._mascots[0];
   assert.ok(inst && typeof inst.getCacheStats === "function");
   inst.clearFrameCache();
   S.seek(1.0);
@@ -2047,8 +2063,11 @@ Deterministic English caption line
   S.seek(1.0);
   const stAfter = inst.getCacheStats();
   assert.ok(stAfter.hits > stBefore.hits, "Repeat seek to cached timestamp must record a deterministic cache hit");
+  const verBefore = stAfter.version;
   inst.setPuppetConfig({ emotion: "happy" });
-  assert.equal(inst.getCacheStats().entries, 0, "Changing puppet config must invalidate frame cache immediately");
+  const stInvalidated = inst.getCacheStats();
+  assert.ok(stInvalidated.version > verBefore, "Changing puppet config must increment cache version and invalidate prior entries");
+  assert.ok(stInvalidated.size <= 1, "Cache must drop prior frames on config invalidation");
 });
 
 test("Puppet Phase 6 (#19, #21, #22): Debug overlay (18 pivots + graphs), Bilingual fa/en i18n, and Plugin API", async () => {
@@ -2108,7 +2127,7 @@ test("Puppet Phase 6 (#19, #21, #22): Debug overlay (18 pivots + graphs), Biling
   assert.ok(SM.listGestures().includes("yaml-wave"));
 
   S.seek(1.0);
-  const inst = S.mascots[0];
+  const inst = S._mascots[0];
   const st = inst.getState();
   assert.equal(st.emotion, "laser-focus");
   assert.equal(st.gesture, "hero-salute");
@@ -2117,20 +2136,20 @@ test("Puppet Phase 6 (#19, #21, #22): Debug overlay (18 pivots + graphs), Biling
   // #19 Debug Overlay: all 18 canonical pivot crosshairs + HUD sparklines
   const stageEl = sandbox.document.getElementById("stage");
   const pivotGroup = stageEl.querySelector(".m-debug-pivots");
-  assert.ok(pivotGroup && pivotGroup.style.display !== "none", "Debug pivot overlay should be visible");
+  assert.ok(pivotGroup && pivotGroup.getAttribute("display") !== "none", "Debug pivot overlay should be visible");
   const partKeys = Object.keys(MT.PUPPET_PARTS);
   assert.equal(partKeys.length, 18);
   for (const pk of partKeys) {
     assert.ok(stageEl.querySelector(`.m-pivot-${pk}`), `Missing debug pivot marker for part ${pk}`);
   }
   const debugHud = stageEl.querySelector(".mascot-debug-hud");
-  assert.ok(debugHud && !debugHud.classList.contains("hidden"), "Debug HUD panel should be visible");
-  assert.ok(debugHud.innerHTML.includes("DEBUG · 18 PIVOTS"), "Debug HUD must render spring/viseme/prosody telemetry");
+  assert.ok(debugHud && debugHud.style.display === "block", "Debug HUD panel should be visible");
+  assert.ok(debugHud.innerHTML.includes("DEBUG ·") && debugHud.innerHTML.includes("pivots=18"), "Debug HUD must render spring/viseme/prosody telemetry");
 
   // Toggle debug off cleanly via Stage.setPuppetDebug
   S.setPuppetDebug({ enabled: false });
-  assert.ok(debugHud.classList.contains("hidden"));
-  assert.equal(pivotGroup.style.display, "none");
+  assert.equal(debugHud.style.display, "none");
+  assert.equal(pivotGroup.getAttribute("display"), "none");
 
   // Clean unregister
   assert.equal(SM.unregisterEmotion("laser-focus"), true);
@@ -2225,7 +2244,7 @@ test("Puppet Phase 6 (#20): Golden-Frame Visual Regression (SHA-256 bit-exact ac
       }
       sandbox.Stage.seek(sc.t);
       const stageEl = sandbox.document.getElementById("stage");
-      const rigStates = sandbox.Stage.mascots.map((m) => m.getState());
+      const rigStates = sandbox.Stage._mascots.map((m) => m.getState());
       hashes.push(serializeStageHash(stageEl, { shot: sandbox.Stage._shotState, rigStates }));
     }
     assert.equal(hashes[0], hashes[1], `Golden-frame SHA-256 mismatch for scenario ${sc.name}`);
@@ -2255,6 +2274,155 @@ test("Puppet Phase 6 (#20): Golden-Frame Visual Regression (SHA-256 bit-exact ac
   const elapsedMs = performance.now() - tStart;
   const avgFrameMs = elapsedMs / totalFrames;
   assert.ok(avgFrameMs < 16.6, `60 fps benchmark exceeded 16.6 ms/frame budget: ${avgFrameMs.toFixed(3)} ms/frame`);
+});
+
+test("Slow Real-Edit Pacing & Step-by-Step Progressive Reveal: slow personalities, pace presets, A.stepReveal & dim-previous spotlight", async () => {
+  const { sandbox } = createFullStageEngineSandbox();
+  const MT = sandbox.StageMotionTokens;
+  const S = sandbox.Stage;
+
+  assert.equal(Object.keys(MT.MOTION_PACE_PRESETS).length, 5);
+  assert.equal(Object.keys(MT.REVEAL_MODES).length, 4);
+  assert.ok(MT.MOTION_PERSONALITIES["explainer-slow"]);
+  assert.ok(MT.MOTION_PERSONALITIES["documentary-calm"]);
+  assert.ok(MT.MOTION_PERSONALITIES["podcast-story"]);
+
+  let probe = null;
+  S.template({
+    name: "probe_slow_steps",
+    build(s, A) {
+      const title = A.text(A.root, "تست سرعت آرام", "h1");
+      A.enter(title, "title");
+      const items = [0, 1, 2, 3].map((i) => A.text(A.root, `مورد ${i + 1}`, "body"));
+      const stepTimes = [];
+      const endAt = A.stepReveal(items, {
+        role: "body",
+        at: 0.4,
+        onStep(_el, _idx, stepAt) { stepTimes.push(stepAt); },
+      });
+      probe = {
+        durBase: A.dur("base"),
+        pacing: A.pacing,
+        stepTimes,
+        endAt,
+        items,
+      };
+    },
+  });
+
+  await S.load({ template: "probe_slow_steps", motionPersonality: "punchy", motionPace: "fast" });
+  const fastDur = probe.durBase;
+  const fastEnd = probe.endAt;
+  const fastGap = probe.stepTimes[1] - probe.stepTimes[0];
+
+  await S.load({ template: "probe_slow_steps", motionPersonality: "editorial", motionPace: "normal" });
+  const normDur = probe.durBase;
+  const normEnd = probe.endAt;
+
+  await S.load({ template: "probe_slow_steps", motionPersonality: "explainer-slow", motionPace: "slow-step" });
+  const slowDur = probe.durBase;
+  const slowEnd = probe.endAt;
+  const slowGap = probe.stepTimes[1] - probe.stepTimes[0];
+
+  await S.load({ template: "probe_slow_steps", motionPersonality: "podcast-story", motionPace: "ultra-slow" });
+  const ultraDur = probe.durBase;
+  const ultraEnd = probe.endAt;
+  const ultraGap = probe.stepTimes[1] - probe.stepTimes[0];
+  const ultraDim = probe.pacing.dimPrevious;
+  const ultraSlideDur = S.duration();
+
+  assert.ok(fastDur < normDur && normDur < slowDur && slowDur < ultraDur, `Expected monotonic durations: ${fastDur} < ${normDur} < ${slowDur} < ${ultraDur}`);
+  assert.ok(fastGap < slowGap && slowGap < ultraGap, `Expected monotonic step gaps: ${fastGap} < ${slowGap} < ${ultraGap}`);
+  assert.ok(fastEnd < normEnd && normEnd < slowEnd && slowEnd < ultraEnd, `Expected monotonic sequence end times`);
+  assert.equal(ultraDim, true, "ultra-slow / podcast-story should activate dim-previous focus spotlight");
+  assert.ok(ultraSlideDur >= ultraEnd, "Stage.load must automatically extend slide duration to cover slow step-by-step reveals");
+
+  const dimTweens = S.tl._entries.filter((e) => e.to && typeof e.to.opacity === "number" && e.to.opacity > 0.4 && e.to.opacity < 0.7);
+  assert.ok(dimTweens.length >= 3, `Expected >= 3 dim-previous focus tweens, got ${dimTweens.length}`);
+
+  S.seek(1.5);
+  S.seek(4.2);
+  S.seek(1.5);
+});
+
+test("Studio Wave 3 (66 Templates Total): All 20 new diagram/passage/image/compare/YouTube templates render across 16:9, 9:16 & 1:1", async () => {
+  const { sandbox, loadScript } = createFullStageEngineSandbox();
+  const S = sandbox.Stage;
+
+  const wave3Templates = [
+    "flowchart", "funnel_diagram", "mind_map", "venn_diagram",
+    "pyramid_hierarchy", "cycle_diagram", "passage_highlight", "convey_english",
+    "book_excerpt", "pull_quote", "image_gallery", "annotated_image",
+    "corkboard", "phone_mockup", "pros_cons", "matrix_2x2",
+    "checklist_progressive", "ranking_podium", "stat_hero", "subscribe_cta",
+  ];
+
+  for (const name of wave3Templates) {
+    loadScript(`templates/${name}/template.js`);
+    assert.ok(S.templates[name], `Template ${name} failed to register`);
+    const schema = JSON.parse(fs.readFileSync(path.join(KH_DIR, "templates", name, "schema.json"), "utf8"));
+    const ex = Object.assign({ template: name, motionPace: "slow-step", seed: 19 }, schema.example || {});
+
+    for (const fmt of ["16:9", "9:16", "1:1"]) {
+      await S.load(ex, { format: fmt });
+      assert.ok(S.ready, `${name} (${fmt}) did not mark Stage ready`);
+      assert.ok(S.duration() >= 4, `${name} (${fmt}) duration too short`);
+      for (const entry of S.tl._entries) {
+        if (entry.target && entry.target.className === "content") {
+          if (entry.from && typeof entry.from.scale === "number") assert.ok(entry.from.scale <= 1.06001);
+          if (entry.to && typeof entry.to.scale === "number") assert.ok(entry.to.scale <= 1.06001);
+        }
+      }
+      S.seek(0.4);
+      S.seek(2.2);
+      S.seek(0.4);
+    }
+  }
+});
+
+test("14 Visual Themes, Viral SFX 2.0 (26 cues, transition auto-sync) & 5 Karaoke Caption Styles", async () => {
+  const { sandbox, loadScript } = createFullStageEngineSandbox();
+  const S = sandbox.Stage;
+
+  const newThemes = [
+    "vox-documentary", "magnates-noir", "kurzgesagt-cosmos",
+    "ali-productivity", "viral-shorts", "persian-turquoise",
+  ];
+  for (const th of newThemes) {
+    loadScript(`themes/${th}.js`);
+    assert.ok(S.themes[th], `Theme ${th} failed to register`);
+    S.useTheme(th);
+    assert.equal(S.theme.name, th);
+  }
+
+  loadScript("stage/sfx.js");
+  assert.ok(sandbox.StageSFX, "StageSFX must load");
+  assert.ok(sandbox.StageSFX.CATALOG.length >= 25, `Expected >= 25 viral SFX cues, got ${sandbox.StageSFX.CATALOG.length}`);
+  assert.equal(sandbox.StageSFX.sfxForTransition("camera-flash"), "shutter");
+  assert.ok(typeof sandbox.StageSFX.sfxForTransition("film-burn") === "string" && sandbox.StageSFX.sfxForTransition("film-burn").length > 0);
+
+  loadScript("templates/pull_quote/template.js");
+  await S.load({
+    template: "pull_quote",
+    quote: "تست زیرنویس کارائوکه",
+    captionStyle: "karaoke-gold",
+    captions: [
+      { index: 1, start: 0.0, end: 4.0, text: "کلمه اول کلمه دوم کلمه سوم کلمه چهارم", dir: "rtl" },
+    ],
+  }, { format: "9:16" });
+
+  S.seek(0.5);
+  assert.ok(S._captionEl && S._captionEl.className.includes("caption-style-karaoke-gold"));
+  const capInner = S._captionEl.children[0];
+  assert.ok(capInner, "Caption bar must contain .stage-caption-text child");
+  const htmlEarly = capInner.innerHTML;
+  assert.ok(htmlEarly.includes("cap-word is-active"), `Expected karaoke active word span, got: ${htmlEarly}`);
+  S.seek(3.5);
+  const htmlLate = capInner.innerHTML;
+  assert.ok(htmlLate.includes("cap-word is-active"), `Expected karaoke active word span at late time, got: ${htmlLate}`);
+  assert.notEqual(htmlEarly, htmlLate, "Karaoke active word must advance deterministically across seek(t)");
+  S.seek(0.5);
+  assert.equal(capInner.innerHTML, htmlEarly, "Karaoke highlighting must be 100% deterministic when seeking backwards");
 });
 
 

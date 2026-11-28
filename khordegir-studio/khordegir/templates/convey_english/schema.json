@@ -1,0 +1,32 @@
+{
+  "name": "convey_english",
+  "aliases": ["english-expression", "english-passage", "آموزش-انگلیسی", "عبارت-انگلیسی"],
+  "order": 54,
+  "category": "متن، مقاله و آموزش (Passages & Reading)",
+  "label": "آموزش عبارت و مفهوم انگلیسی (Convey English)",
+  "description": "قالب تخصصی آموزش زبان و ترجمه مفهومی انگلیسی به فارسی: جمله انگلیسی + آوانگاری + ترجمه طبیعی + نکات ظریف و مثال که گام‌به‌گام یکی‌یکی باز می‌شوند",
+  "fields": [
+    { "key": "eyebrow", "label": "برچسب درس (Lesson Tag)", "type": "text", "editable": true },
+    { "key": "english", "label": "عبارت یا جمله انگلیسی (English Phrase)", "type": "textarea", "required": true, "editable": true },
+    { "key": "ipa", "label": "تلفظ و تکیه (Pronunciation / IPA)", "type": "text", "editable": true },
+    { "key": "natural_fa", "label": "معنای طبیعی و روان فارسی (Natural Meaning)", "type": "textarea", "editable": true },
+    { "key": "literal_fa", "label": "ترجمه تحت‌اللفظی / ساختار (Literal Breakdown)", "type": "text", "editable": true },
+    { "key": "nuances", "label": "نکات ظریف و کاربردی (هر خط یک نکته)", "type": "list", "editable": true },
+    { "key": "example_en", "label": "مثال کاربردی انگلیسی (Example EN)", "type": "text", "editable": true },
+    { "key": "example_fa", "label": "ترجمه مثال فارسی (Example FA)", "type": "text", "editable": true }
+  ],
+  "example": {
+    "eyebrow": "English in Context · آموزش مفهومی",
+    "english": "Read between the lines",
+    "ipa": "/riːd bɪˈtwiːn ðə laɪnz/ · Stress on BETWEEN & LINES",
+    "natural_fa": "درک منظور پنهانِ پشت کلمات؛ فهمیدن چیزی که مستقیم گفته نشده",
+    "literal_fa": "تحت‌اللفظی: خواندنِ بینِ خطوط",
+    "nuances": [
+      "لحن طبیعی و پرکاربرد در مکالمه، مصاحبه و مقاله",
+      "معمولاً وقتی استفاده می‌شود که گوینده حرف اصلی را غیرمستقیم زده است",
+      "معادل فارسی نزدیک: «از لابه‌لای حرف‌ها فهمیدن»"
+    ],
+    "example_en": "He said the project was fine, but reading between the lines, he wasn't happy.",
+    "example_fa": "گفت پروژه خوب است، اما از لابه‌لای حرف‌هایش معلوم بود راضی نیست."
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "pyramid_hierarchy",
+  "aliases": ["pyramid", "هرم", "هرم-اولویت"],
+  "order": 51,
+  "category": "دیاگرام و نقشه مفهومی (Diagrams)",
+  "label": "هرم سطوح و اولویت (Pyramid Hierarchy)",
+  "description": "هرم طبقاتی با نمایش گام‌به‌گام از پایه به قله به همراه توضیح هر طبقه",
+  "fields": [
+    { "key": "eyebrow", "label": "برچسب بالا (Eyebrow)", "type": "text", "editable": true },
+    { "key": "title", "label": "عنوان هرم (Title)", "type": "text", "required": true, "editable": true },
+    { "key": "tiers", "label": "طبقات هرم از قله به پایه (هر خط: عنوان | توضیح)", "type": "list", "editable": true }
+  ],
+  "example": {
+    "eyebrow": "مدل اولویت‌بندی",
+    "title": "هرم *تسلط عمیق* در یادگیری",
+    "tiers": [
+      "آموزش به دیگران | بالاترین سطح درک و تثبیت",
+      "ساخت پروژه واقعی | تمرین عملی در دنیای واقعی",
+      "تمرین فعال و آزمون | بازیابی اطلاعات از حافظه",
+      "مطالعه و شنیدن | پایهٔ اولیه دریافت مفاهیم"
+    ]
+  }
+}

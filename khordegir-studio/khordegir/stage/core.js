@@ -278,25 +278,28 @@
     const base = 0.1;
     const personality = MT.resolveMotionPersonality
       ? MT.resolveMotionPersonality(slide.motionPersonality || slide.motion_personality || (th && th.motionPersonality) || "editorial")
-      : { name: "editorial", durScale: 1, staggerScale: 1, ease: "vox", bodyEase: "fluid", overshootMult: 0.4, anticipation: false, textPreset: "rise-mask" };
+      : { name: "editorial", durScale: 1, staggerScale: 1, stepGap: 0, leadIn: 0, revealMode: "stagger", ease: "vox", bodyEase: "fluid", overshootMult: 0.4, anticipation: false, textPreset: "rise-mask" };
+    const pacing = MT.resolveMotionPacing
+      ? MT.resolveMotionPacing(slide, personality)
+      : { pace: "normal", durMult: 1, staggerMult: 1, stepGap: 0, leadIn: 0, revealMode: "stagger", dimPrevious: false, isStepByStep: false };
     const durTokens = MT.DURATION_TOKENS || { instant: 0.1, micro: 0.18, snappy: 0.32, base: 0.5, expressive: 0.68, dramatic: 0.92, slow: 1.25 };
     const staggerTokens = MT.STAGGER_TOKENS || { tight: 0.028, normal: 0.048, editorial: 0.072, list: 0.085, grid: 0.064, dramatic: 0.115 };
     const overshootRules = MT.OVERSHOOT_RULES || {};
     const marginX = Math.min(L.margin, Math.round(W * 0.05));
     const marginY = Math.min(L.top, Math.round(H * 0.055));
     const A = {
-      slide, root, th, scam, W, H, L, format: S.format, personality,
+      slide, root, th, scam, W, H, L, format: S.format, personality, pacing,
       dur(tokenOrSec = "base") {
         const raw = typeof tokenOrSec === "number" ? tokenOrSec : (durTokens[tokenOrSec] ?? durTokens.base);
         const mc = S.slide && S.slide.motionCurve;
         const mcScale = mc && Number.isFinite(+mc.durationScale) ? Math.max(0.3, Math.min(2.5, +mc.durationScale)) : 1;
-        return +(raw * personality.durScale * mcScale).toFixed(3);
+        return +(raw * personality.durScale * pacing.durMult * mcScale).toFixed(3);
       },
       staggerStep(tokenOrSec = "normal") {
         const raw = typeof tokenOrSec === "number" ? tokenOrSec : (staggerTokens[tokenOrSec] ?? staggerTokens.normal);
         const mc = S.slide && S.slide.motionCurve;
         const mcScale = mc && Number.isFinite(+mc.staggerScale) ? Math.max(0.25, Math.min(2.5, +mc.staggerScale)) : 1;
-        return +(raw * personality.staggerScale * mcScale).toFixed(4);
+        return +(raw * personality.staggerScale * pacing.staggerMult * mcScale).toFixed(4);
       },
       area: {
         x: marginX, y: marginY, w: W - 2 * marginX, h: H - marginY - Math.min(L.bottom, Math.round(H * 0.055)),
@@ -427,20 +430,22 @@
       at(role, i = 0, extra = 0) {
         const m = M[role] || M.body || { delay: 0.2, stagger: 0.08 };
         const mc = S.slide && S.slide.motionCurve;
-        const stScale = (mc && Number.isFinite(+mc.staggerScale) ? Math.max(0.25, Math.min(2.5, +mc.staggerScale)) : 1) * personality.staggerScale;
-        return base + (m.delay || 0) * Math.min(1.25, personality.durScale) + i * (m.stagger || 0) * stScale + extra;
+        const stScale = (mc && Number.isFinite(+mc.staggerScale) ? Math.max(0.25, Math.min(2.5, +mc.staggerScale)) : 1) * personality.staggerScale * pacing.staggerMult;
+        const leadPause = (role === "eyebrow" || role === "title") ? 0 : pacing.leadIn;
+        const itemStepGap = i > 0 ? i * pacing.stepGap : 0;
+        return +(base + leadPause + (m.delay || 0) * Math.min(1.65, personality.durScale * pacing.durMult) + i * (m.stagger || 0) * stScale + itemStepGap + extra).toFixed(4);
       },
       /* entrance by role: eyebrow | title | body | card | bubble | badge | image | note
-         A1 Motion Audit: token-driven durations, role-aware overshoot rules, and deterministic anticipation/follow-through */
+         A1 Motion Audit: token-driven durations, role-aware overshoot rules, slow real-edit pacing, and deterministic anticipation/follow-through */
       enter(e, role, i = 0, extra = 0, over) {
         if (!e) return 0;
         if (e.dataset && e.dataset.fieldWrap && e.firstElementChild) e = e.firstElementChild;
         const rule = overshootRules[role] || overshootRules.body || { allowOvershoot: false, maxScale: 1, anticipationPx: 0, followThrough: 0, durToken: "base", defaultEase: "vox" };
         const m = Object.assign({}, M[role] || M.body, over || {});
         const mc = S.slide && S.slide.motionCurve;
-        const durScale = (mc && Number.isFinite(+mc.durationScale) ? Math.max(0.3, Math.min(2.5, +mc.durationScale)) : 1) * personality.durScale;
+        const durScale = (mc && Number.isFinite(+mc.durationScale) ? Math.max(0.3, Math.min(2.5, +mc.durationScale)) : 1) * personality.durScale * pacing.durMult;
         const baseDur = m.dur != null ? (typeof m.dur === "string" ? (durTokens[m.dur] ?? 0.5) : m.dur) : (durTokens[rule.durToken] ?? 0.55);
-        const dur = baseDur * durScale;
+        const dur = +(baseDur * durScale).toFixed(3);
         const explicit = over && (over.x != null || over.y != null || over.scale != null || over.clipPath != null || over.filter != null || over.rotation != null);
         let from;
         if (explicit || !S.fx) {
@@ -739,15 +744,19 @@
         const dx = opts.x ?? 2.0, dy = opts.y ?? 1.2, dur = opts.dur ?? 18;
         S.amb.fromTo(el, { x: -dx, y: -dy }, { x: dx, y: dy, duration: dur, ease: "sine.inOut", yoyo: true, repeat: 99, force3D: true }, 0);
       },
-      /* A1: Enhanced Stagger System (supports start | end | center | edges & ease curves, backward-compatible with extra number) */
+      /* A1: Enhanced Stagger System (honors slow real-edit pacing, step-by-step gap & dim-previous spotlight) */
       stagger(list, role, extraOrOpts = 0) {
         if (!Array.isArray(list) || !list.length) return 0;
         const opts = (typeof extraOrOpts === "object" && extraOrOpts !== null) ? extraOrOpts : { extra: Number(extraOrOpts) || 0 };
         const n = list.length;
         const fromMode = opts.from || "start";
-        const baseStep = opts.step != null ? A.staggerStep(opts.step) : A.staggerStep("list");
+        const rawStep = opts.step != null ? A.staggerStep(opts.step) : A.staggerStep("list");
+        const baseStep = +(rawStep + pacing.stepGap).toFixed(4);
         const baseAt = opts.at != null ? opts.at : A.at(role, 0, opts.extra || 0);
+        const dimPrev = opts.dimPrevious != null ? Boolean(opts.dimPrevious) : pacing.dimPrevious;
+        const dimTo = opts.dimTo ?? 0.54;
         let maxEnd = baseAt;
+        const resolvedNodes = [];
         for (let i = 0; i < n; i += 1) {
           let orderIdx = i;
           if (fromMode === "end") orderIdx = (n - 1) - i;
@@ -755,9 +764,64 @@
           else if (fromMode === "edges") orderIdx = Math.min(i, (n - 1) - i);
           const frac = n > 1 ? orderIdx / (n - 1) : 0;
           const curved = opts.curve === "ease-out" ? Math.sqrt(frac) * (n - 1) : orderIdx;
-          const itemAt = baseAt + curved * baseStep;
+          const itemAt = +(baseAt + curved * baseStep).toFixed(4);
           const end = A.enter(list[i], role, i, 0, Object.assign({}, opts.over || {}, { at: itemAt }));
+          const node = (list[i] && list[i].dataset && list[i].dataset.fieldWrap && list[i].firstElementChild) ? list[i].firstElementChild : list[i];
+          resolvedNodes.push({ node, at: itemAt, end });
+          if (dimPrev && i > 0 && resolvedNodes[i - 1].node) {
+            S.tl.to(resolvedNodes[i - 1].node, { opacity: dimTo, duration: 0.34, ease: "power2.out" }, itemAt);
+          }
           if (end > maxEnd) maxEnd = end;
+        }
+        // Restore full clarity after final step so the completed summary frame is crisp
+        if (dimPrev && resolvedNodes.length > 1) {
+          const restoreAt = +(maxEnd + Math.max(0.45, pacing.stepGap * 0.6)).toFixed(3);
+          resolvedNodes.forEach((rn) => {
+            if (rn.node) S.tl.to(rn.node, { opacity: 1, duration: 0.42, ease: "power2.out" }, restoreAt);
+          });
+          maxEnd = restoreAt + 0.42;
+        }
+        return maxEnd;
+      },
+      /* Dedicated Real-Edit Step-by-Step Progressive Reveal (items appear cleanly one by one while explaining) */
+      stepReveal(list, opts = {}) {
+        if (!Array.isArray(list) || !list.length) return 0;
+        const role = opts.role || "card";
+        const baseAt = opts.at != null ? opts.at : A.at(role, 0, opts.extra || 0.25);
+        const minGap = opts.minGap != null ? opts.minGap : 0.62;
+        const autoGap = pacing.stepGap > 0
+          ? pacing.stepGap
+          : +(minGap * Math.max(0.65, personality.staggerScale * pacing.staggerMult)).toFixed(3);
+        const stepGap = opts.step != null ? Number(opts.step) : Math.max(0.32, autoGap);
+        const dimPrev = opts.dimPrevious != null ? Boolean(opts.dimPrevious) : (pacing.dimPrevious || opts.focus === true);
+        const dimTo = opts.dimTo ?? 0.56;
+        const sfxName = opts.sfx || "pop";
+        let maxEnd = baseAt;
+        const nodes = [];
+        for (let i = 0; i < list.length; i += 1) {
+          const el = list[i];
+          const stepAt = +(baseAt + i * stepGap).toFixed(3);
+          const over = Object.assign({ at: stepAt }, opts.over || {});
+          const end = A.enter(el, role, i, 0, over);
+          const inner = (el && el.dataset && el.dataset.fieldWrap && el.firstElementChild) ? el.firstElementChild : el;
+          nodes.push(inner);
+          if (dimPrev && i > 0 && nodes[i - 1]) {
+            S.tl.to(nodes[i - 1], { opacity: dimTo, duration: 0.32, ease: "power2.out" }, stepAt);
+          }
+          if (typeof opts.onStep === "function") {
+            opts.onStep(el, i, stepAt, Math.max(0.2, end - stepAt));
+          }
+          if (S.fx && sfxName && i > 0) {
+            S.fx.cue(stepAt, sfxName, `step-${i + 1}`, { index: i, pitch: i });
+          }
+          if (end > maxEnd) maxEnd = end;
+        }
+        if (dimPrev && nodes.length > 1 && opts.restoreAll !== false) {
+          const restoreAt = +(maxEnd + Math.max(0.55, stepGap * 0.55)).toFixed(3);
+          nodes.forEach((nd) => {
+            if (nd) S.tl.to(nd, { opacity: 1, duration: 0.44, ease: "power2.out" }, restoreAt);
+          });
+          maxEnd = restoreAt + 0.44;
         }
         return maxEnd;
       },
@@ -1238,8 +1302,10 @@
       captionCues = MT.parseSrt(slide.srtText);
     }
     if (captionCues && captionCues.length) {
+      const capStyleKey = String(slide.captionStyle || slide.caption_style || "broadcast-box").trim().toLowerCase();
       const capWrap = document.createElement("div");
-      capWrap.className = "stage-caption-bar";
+      capWrap.className = "stage-caption-bar caption-style-" + capStyleKey;
+      capWrap.setAttribute("data-caption-style", capStyleKey);
       capWrap.setAttribute("role", "status");
       capWrap.setAttribute("aria-live", "polite");
       capWrap.style.opacity = "0";
@@ -1248,11 +1314,25 @@
       capWrap.appendChild(capInner);
       stage.appendChild(capWrap);
       S._captionEl = capWrap;
+      const isKaraoke = capStyleKey === "karaoke-gold" || capStyleKey === "shorts-pop";
       S.onSeek((t) => {
         const cue = MT.activeCaptionAt ? MT.activeCaptionAt(captionCues, t) : null;
         if (cue && cue.text) {
-          capWrap.setAttribute("dir", cue.dir || (hasFa(cue.text) ? "rtl" : "ltr"));
-          capInner.textContent = cue.text;
+          const capDir = cue.dir || (hasFa(cue.text) ? "rtl" : "ltr");
+          capWrap.setAttribute("dir", capDir);
+          capInner.setAttribute("dir", capDir);
+          if (isKaraoke) {
+            const words = String(cue.text).trim().split(/\s+/).filter(Boolean);
+            const span = Math.max(0.05, (Number(cue.end) || (Number(cue.start) + 2)) - (Number(cue.start) || 0));
+            const prog = Math.max(0, Math.min(0.9999, (t - (Number(cue.start) || 0)) / span));
+            const activeWordIdx = Math.min(words.length - 1, Math.floor(prog * words.length));
+            capInner.innerHTML = words.map((w, wi) => {
+              const cls = wi === activeWordIdx ? "cap-word is-active" : (wi < activeWordIdx ? "cap-word is-past" : "cap-word");
+              return `<span class="${cls}">${esc(w)}</span>`;
+            }).join(" ");
+          } else {
+            capInner.textContent = cue.text;
+          }
           capWrap.style.opacity = "1";
           capWrap.setAttribute("data-active-caption", String(cue.index || 1));
         } else {

@@ -683,7 +683,7 @@
     const list = [];
     const pushG = (item) => {
       if (!item) return;
-      const gName = String(item.gesture || item.name || "").toLowerCase();
+      const gName = String(item.gesture || item.name || item.type || "").toLowerCase();
       const gSpec = getGestureSpec(gName, puppet);
       if (!gSpec) return;
       const offset = clamp(Number(item.offset || 0), -1.0, 1.0);
@@ -2113,7 +2113,23 @@
 
     // Puppet Schema v2 configuration (fully backwards-compatible with legacy cfg.tone / mascot.tone)
     const legacyTone = cfg.tone || (cfg.mascot && cfg.mascot.tone) || null;
-    let puppet = resolvePuppetConfig(cfg.puppet || (cfg.mascot && cfg.mascot.puppet) || null, legacyTone);
+    const hydrateDeclarativePlugins = (pObj) => {
+      if (!pObj || !pObj.plugins || typeof pObj.plugins !== "object") return;
+      if (pObj.plugins.emotions && typeof pObj.plugins.emotions === "object") {
+        Object.keys(pObj.plugins.emotions).forEach((k) => {
+          registerEmotion(k, pObj.plugins.emotions[k]);
+        });
+      }
+      if (pObj.plugins.gestures && typeof pObj.plugins.gestures === "object") {
+        Object.keys(pObj.plugins.gestures).forEach((k) => {
+          registerGesture(k, pObj.plugins.gestures[k]);
+        });
+      }
+    };
+    const rawPuppetIn = cfg.puppet || (cfg.mascot && cfg.mascot.puppet) || null;
+    hydrateDeclarativePlugins(rawPuppetIn);
+    let puppet = resolvePuppetConfig(rawPuppetIn, legacyTone);
+    hydrateDeclarativePlugins(puppet);
     let tone = puppet.tone;
 
     const activePeaks = (prosody.peaks && prosody.peaks.length) ? prosody.peaks : track.peaks;
@@ -2581,6 +2597,7 @@
         volumeProduct: +(squashX * squashY).toFixed(5),
         dampingRatio: +computeDampingRatio(dyn.spring).toFixed(3),
         lighting: (puppet.scene && puppet.scene.lighting) || "studio",
+        accent: acc,
         fps: currentFps,
         debugEnabled: Boolean(debugCfg.enabled),
         puppetVersion: 2,
@@ -2669,7 +2686,7 @@
         `<div>t=${st.t}s | emo=${st.emotion} | gest=${st.gesture || "-"}</div>` +
         `<div>mouth=${st.mouthOpen} | brow=${st.browY} | tilt=${st.headTilt}°</div>` +
         `<div>nod=${st.headNodY} | chest=${st.chestBounceY} | wing=${st.wingAngle}°</div>` +
-        `<div>loud=${st.loudness} | f0=${st.f0Hz}Hz | cache=${cacheStats.hits}/${cacheStats.hits + cacheStats.misses}</div>` +
+        `<div>loud=${st.loudness} | f0=${st.f0Hz}Hz | pivots=18 | cache=${frameCacheEnabled ? "ON" : "OFF"}</div>` +
         `<svg viewBox="0 0 200 30" width="204" height="30" style="display:block;margin-top:4px;background:rgba(15,23,42,0.85);border-radius:4px">` +
           `<polyline fill="none" stroke="#38BDF8" stroke-width="1.6" points="${loudPts}"/>` +
           `<polyline fill="none" stroke="#FBBF24" stroke-width="1.4" points="${pitchPts}"/>` +
@@ -2889,6 +2906,7 @@
     function rebakeAll() {
       configVersion += 1;
       clearFrameCache();
+      hydrateDeclarativePlugins(puppet);
       tone = puppet.tone;
       if (puppet.performance) {
         if (Number(puppet.performance.fps) >= 50) currentFps = 60;

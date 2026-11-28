@@ -1,0 +1,28 @@
+{
+  "name": "matrix_2x2",
+  "aliases": ["quadrant", "eisenhower", "ماتریس-دو-در-دو", "ماتریس-تصمیم"],
+  "order": 62,
+  "category": "مقایسه و فهرست (Compares & Lists)",
+  "label": "ماتریس ۲×۲ تصمیم‌گیری (2×2 Matrix)",
+  "description": "ماتریس چهارخانه با محورهای افقی و عمودی که چهار ربع آن یکی‌یکی برای تحلیل استراتژیک نمایش داده می‌شوند",
+  "fields": [
+    { "key": "eyebrow", "label": "برچسب بالا (Eyebrow)", "type": "text", "editable": true },
+    { "key": "title", "label": "عنوان ماتریس (Title)", "type": "text", "required": true, "editable": true },
+    { "key": "x_axis", "label": "عنوان محور افقی (X Axis)", "type": "text", "editable": true },
+    { "key": "y_axis", "label": "عنوان محور عمودی (Y Axis)", "type": "text", "editable": true },
+    { "key": "q1", "label": "ربع ۱ — بالا راست (عنوان | توضیح)", "type": "text", "editable": true },
+    { "key": "q2", "label": "ربع ۲ — بالا چپ (عنوان | توضیح)", "type": "text", "editable": true },
+    { "key": "q3", "label": "ربع ۳ — پایین راست (عنوان | توضیح)", "type": "text", "editable": true },
+    { "key": "q4", "label": "ربع ۴ — پایین چپ (عنوان | توضیح)", "type": "text", "editable": true }
+  ],
+  "example": {
+    "eyebrow": "ماتریس اولویت‌بندی آیزنهاور",
+    "title": "تصمیم‌گیری هوشمند بر اساس *اهمیت و فوریت*",
+    "x_axis": "فوریت ←",
+    "y_axis": "اهمیت ↑",
+    "q1": "فوراً انجام بده | مهم و فوری · اولویت مطلق امروز",
+    "q2": "برنامه‌ریزی کن | مهم ولی غیرفوری · سرمایه‌گذاری بلندمدت",
+    "q3": "واگذار کن | فوری ولی کم‌اهمیت · تفویض یا خودکارسازی",
+    "q4": "حذف کن | نه مهم و نه فوری · حواس‌پرتی‌های روزانه"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "image_gallery",
+  "aliases": ["gallery", "photo-grid", "گالری-تصاویر", "چند-تصویر"],
+  "order": 57,
+  "category": "تصویر و داستان‌سرایی بصری (Images & Visuals)",
+  "label": "گالری تصاویر گام‌به‌گام (Image Gallery)",
+  "description": "نمایش ۲ تا ۴ تصویر با زیرنویس اختصاصی که به‌آرامی یکی‌یکی روی صفحه ظاهر می‌شوند",
+  "fields": [
+    { "key": "eyebrow", "label": "برچسب بالا (Eyebrow)", "type": "text", "editable": true },
+    { "key": "title", "label": "عنوان گالری (Title)", "type": "text", "editable": true },
+    { "key": "photo1", "label": "تصویر ۱", "type": "image", "editable": true },
+    { "key": "caption1", "label": "زیرنویس ۱", "type": "text", "editable": true },
+    { "key": "photo2", "label": "تصویر ۲", "type": "image", "editable": true },
+    { "key": "caption2", "label": "زیرنویس ۲", "type": "text", "editable": true },
+    { "key": "photo3", "label": "تصویر ۳ (اختیاری)", "type": "image", "editable": true },
+    { "key": "caption3", "label": "زیرنویس ۳", "type": "text", "editable": true },
+    { "key": "photo4", "label": "تصویر ۴ (اختیاری)", "type": "image", "editable": true },
+    { "key": "caption4", "label": "زیرنویس ۴", "type": "text", "editable": true }
+  ],
+  "example": {
+    "eyebrow": "مستندات تصویری",
+    "title": "سه زاویه مختلف از یک *پدیده واحد*",
+    "photo1": "/assets/images/starter_article_archive_paper_1795696524701.jpg",
+    "caption1": "۱. اسناد و آرشیو مطبوعاتی",
+    "photo2": "/assets/images/starter_psychology_lab_desk_1795696526162.jpg",
+    "caption2": "۲. مشاهدات آزمایشگاهی",
+    "photo3": "/assets/images/starter_world_map_dark_1795696523627.jpg",
+    "caption3": "۳. مقایسه در مقیاس جهانی"
+  }
+}

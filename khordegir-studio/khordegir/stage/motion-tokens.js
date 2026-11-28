@@ -388,6 +388,8 @@
     crestOverlap: 0.65,
     wingFollowThrough: 0.60,
     squashPreserveVolume: true,
+    headParallax: 0.75,
+    pupilDilation: 0.65,
   };
 
   function numClamp(v, fallback, lo, hi) {
@@ -514,6 +516,8 @@
       crestOverlap: numClamp(rawSec.crestOverlap, SECONDARY_DEFAULTS.crestOverlap, 0, 2.0),
       wingFollowThrough: numClamp(rawSec.wingFollowThrough, SECONDARY_DEFAULTS.wingFollowThrough, 0, 2.0),
       squashPreserveVolume: rawSec.squashPreserveVolume !== false,
+      headParallax: numClamp(rawSec.headParallax, SECONDARY_DEFAULTS.headParallax, 0, 2.0),
+      pupilDilation: numClamp(rawSec.pupilDilation, SECONDARY_DEFAULTS.pupilDilation, 0, 2.0),
     };
 
     const rawEmo = String(src.emotion || "").toLowerCase();
@@ -545,9 +549,9 @@
 
     const gestures = Array.isArray(src.gestures)
       ? src.gestures
-          .filter((g) => g && typeof g === "object" && GESTURES[String(g.gesture || g.name || "").toLowerCase()])
+          .filter((g) => g && typeof g === "object" && GESTURES[String(g.gesture || g.name || g.type || "").toLowerCase()])
           .map((g) => {
-            const name = String(g.gesture || g.name).toLowerCase();
+            const name = String(g.gesture || g.name || g.type).toLowerCase();
             return {
               t: Math.max(0, Number(g.t) || 0),
               gesture: name,
@@ -701,25 +705,30 @@
     }
     const plugins = { emotions: pluginEmotions, gestures: pluginGestures };
 
-    // Preserve plugin emotion / gesture references if declared in src.plugins
+    // Preserve plugin emotion / gesture references (declarative src.plugins OR programmatically registered via StageMascot)
+    const smApi = (typeof window !== "undefined" && window.StageMascot) ? window.StageMascot : null;
     let resolvedEmotion = emotion;
     if (!resolvedEmotion && src.emotion) {
       const k = String(src.emotion).trim().toLowerCase();
-      if (pluginEmotions[k]) resolvedEmotion = k;
+      if (pluginEmotions[k] || (smApi && typeof smApi.listEmotions === "function" && smApi.listEmotions().includes(k))) {
+        resolvedEmotion = k;
+      }
     }
     const extraPluginGestures = Array.isArray(src.gestures)
       ? src.gestures
           .filter((g) => {
             if (!g || typeof g !== "object") return false;
-            const k = String(g.gesture || g.name || "").trim().toLowerCase();
-            return Boolean(pluginGestures[k] && !GESTURES[k]);
+            const k = String(g.gesture || g.name || g.type || "").trim().toLowerCase();
+            if (!k || GESTURES[k]) return false;
+            return Boolean(pluginGestures[k] || (smApi && typeof smApi.listGestures === "function" && smApi.listGestures().includes(k)));
           })
           .map((g) => {
-            const k = String(g.gesture || g.name).trim().toLowerCase();
+            const k = String(g.gesture || g.name || g.type).trim().toLowerCase();
+            const defDur = (pluginGestures[k] && pluginGestures[k].defaultDur) || 1.1;
             return {
               t: Math.max(0, Number(g.t) || 0),
               gesture: k,
-              duration: numClamp(g.duration, pluginGestures[k].defaultDur, 0.25, 4.0),
+              duration: numClamp(g.duration, defDur, 0.25, 4.0),
               offset: numClamp(g.offset, 0, -1.0, 1.0),
               intensity: numClamp(g.intensity, 1.0, 0.1, 1.5),
             };
@@ -1252,33 +1261,80 @@
     note:    { maxScale: 1.00, allowOvershoot: false, anticipationPx: 0,  followThrough: 0.00, durToken: "base",       defaultEase: "silk" },
   };
 
-  /* 5 Beginner One-Click Motion Personalities (A1 & A8) */
+  /* 8 Beginner One-Click Motion Personalities (including Slow Real-Edit & Step-by-Step styles) */
   const MOTION_PERSONALITIES = {
     editorial: {
       label: "تحریریه و مستند (Editorial)", labelEn: "Editorial",
-      durScale: 1.00, staggerScale: 1.00, ease: "vox", bodyEase: "fluid",
-      overshootMult: 0.4, anticipation: false, textPreset: "rise-mask",
+      durScale: 1.00, staggerScale: 1.00, stepGap: 0.0, leadIn: 0.0, revealMode: "stagger",
+      ease: "vox", bodyEase: "fluid", overshootMult: 0.4, anticipation: false, textPreset: "rise-mask",
     },
     calm: {
       label: "آرام و سینمایی (Calm)", labelEn: "Calm",
-      durScale: 1.28, staggerScale: 1.25, ease: "silk", bodyEase: "silk",
-      overshootMult: 0.0, anticipation: false, textPreset: "editorial-blur",
+      durScale: 1.28, staggerScale: 1.28, stepGap: 0.22, leadIn: 0.12, revealMode: "paced",
+      ease: "silk", bodyEase: "silk", overshootMult: 0.0, anticipation: false, textPreset: "editorial-blur",
+    },
+    "explainer-slow": {
+      label: "توضیح آرام و گام‌به‌گام (Slow Step-by-Step)", labelEn: "Slow Explainer (Step-by-Step)",
+      durScale: 1.78, staggerScale: 2.55, stepGap: 0.95, leadIn: 0.35, revealMode: "step-by-step",
+      ease: "fluid", bodyEase: "silk", overshootMult: 0.0, anticipation: false, textPreset: "line-curtain",
+    },
+    "documentary-calm": {
+      label: "مستند سینمایی آرام (Calm Documentary)", labelEn: "Calm Documentary",
+      durScale: 1.58, staggerScale: 2.00, stepGap: 0.68, leadIn: 0.28, revealMode: "paced",
+      ease: "cinematic", bodyEase: "silk", overshootMult: 0.0, anticipation: false, textPreset: "editorial-blur",
+    },
+    "podcast-story": {
+      label: "روایت پادکستی · خیلی آرام (Podcast Story)", labelEn: "Podcast Storytelling (Ultra Slow)",
+      durScale: 2.08, staggerScale: 3.10, stepGap: 1.32, leadIn: 0.45, revealMode: "dim-previous",
+      ease: "silk", bodyEase: "silk", overshootMult: 0.0, anticipation: false, textPreset: "rise-mask",
     },
     punchy: {
       label: "پرانرژی و شورتس (Punchy)", labelEn: "Punchy",
-      durScale: 0.78, staggerScale: 0.76, ease: "snappy", bodyEase: "power4",
-      overshootMult: 1.0, anticipation: true, textPreset: "punch-scale",
+      durScale: 0.78, staggerScale: 0.76, stepGap: 0.0, leadIn: 0.0, revealMode: "stagger",
+      ease: "snappy", bodyEase: "power4", overshootMult: 1.0, anticipation: true, textPreset: "punch-scale",
     },
     playful: {
       label: "بازیگوش و پویا (Playful)", labelEn: "Playful",
-      durScale: 0.88, staggerScale: 0.85, ease: "spring", bodyEase: "back",
-      overshootMult: 1.35, anticipation: true, textPreset: "pop-clean",
+      durScale: 0.88, staggerScale: 0.85, stepGap: 0.0, leadIn: 0.0, revealMode: "stagger",
+      ease: "spring", bodyEase: "back", overshootMult: 1.35, anticipation: true, textPreset: "pop-clean",
     },
     news: {
       label: "خبری و فوری (Newsroom)", labelEn: "Newsroom",
-      durScale: 0.72, staggerScale: 0.68, ease: "sharp", bodyEase: "snappy",
-      overshootMult: 0.2, anticipation: false, textPreset: "glide-rtl",
+      durScale: 0.72, staggerScale: 0.68, stepGap: 0.0, leadIn: 0.0, revealMode: "stagger",
+      ease: "sharp", bodyEase: "snappy", overshootMult: 0.2, anticipation: false, textPreset: "glide-rtl",
     },
+  };
+
+  /* 5 Beginner One-Click Pacing Presets (controls global & per-slide animation tempo + one-by-one item delay) */
+  const MOTION_PACE_PRESETS = {
+    fast: {
+      label: "سریع · شورتس (Fast · 0.72×)", labelEn: "Fast (Shorts · 0.72x)",
+      durMult: 0.72, staggerMult: 0.72, stepGap: 0.0, leadIn: 0.0, revealMode: "stagger",
+    },
+    normal: {
+      label: "استاندارد · پخش (Normal · 1.0×)", labelEn: "Normal (Broadcast · 1.0x)",
+      durMult: 1.00, staggerMult: 1.00, stepGap: 0.0, leadIn: 0.0, revealMode: "stagger",
+    },
+    relaxed: {
+      label: "آرام و خوانا (Relaxed · 1.45×)", labelEn: "Relaxed Real Edit (1.45x)",
+      durMult: 1.45, staggerMult: 1.85, stepGap: 0.45, leadIn: 0.20, revealMode: "paced",
+    },
+    "slow-step": {
+      label: "خیلی آرام · گام‌به‌گام یکی‌یکی (Slow Step-by-Step · 1.9×)", labelEn: "Slow Step-by-Step (One by One · 1.9x)",
+      durMult: 1.90, staggerMult: 2.60, stepGap: 1.05, leadIn: 0.35, revealMode: "step-by-step",
+    },
+    "ultra-slow": {
+      label: "بسیار آرام · روایت عمیق (Ultra Slow Essay · 2.45×)", labelEn: "Ultra Slow Deep Essay (2.45x)",
+      durMult: 2.45, staggerMult: 3.25, stepGap: 1.55, leadIn: 0.48, revealMode: "dim-previous",
+    },
+  };
+
+  /* 4 Progressive Reveal Modes for lists, cards, diagrams, comparisons & passages */
+  const REVEAL_MODES = {
+    stagger:        { label: "ورود پیوسته استاندارد (Stagger)",             labelEn: "Standard Stagger" },
+    paced:          { label: "ورود آرام با مکث تنفسی (Paced)",              labelEn: "Calm Paced" },
+    "step-by-step": { label: "نمایش یکی‌یکی گام‌به‌گام (Step-by-Step)",     labelEn: "One-by-One Step Reveal" },
+    "dim-previous": { label: "تمرکز روی مورد فعال (Focus · Dim Previous)", labelEn: "Focus Spotlight (Dim Previous)" },
   };
 
   /* A2: 14 RTL-Safe Persian + English Kinetic Typography Presets */
@@ -1339,11 +1395,61 @@
     "film-flash":       { cat: "creative",  label: "فلش نگاتیو فیلم (Film Flash)",        labelEn: "Film Flash",       dur: 0.44, ease: "power4" },
     "rgb-split":        { cat: "creative",  label: "شکاف رنگی RGB (RGB Split)",           labelEn: "RGB Split",        dur: 0.44, ease: "snap" },
     "page-turn":        { cat: "creative",  label: "ورق زدن صفحه (Page Turn)",            labelEn: "Page Turn",        dur: 0.62, ease: "cinematic" },
+    // Viral YouTuber Cinema & Documentary Transitions (8 new -> 40 total)
+    "film-burn":            { cat: "youtuber", label: "سوختگی فیلم ۳۵ میلی‌متری (Film Burn)",  labelEn: "35mm Film Burn",    dur: 0.62, ease: "cinematic" },
+    "camera-flash":         { cat: "youtuber", label: "فلاش شاتر مستند (Camera Flash)",        labelEn: "Camera Flash",      dur: 0.42, ease: "power4" },
+    "paper-crumple":        { cat: "youtuber", label: "تای کاغذ تحریریه (Paper Fold)",         labelEn: "Paper Fold",        dur: 0.58, ease: "vox" },
+    "crt-power":            { cat: "youtuber", label: "روشن‌شدن مانیتور CRT (CRT Power)",      labelEn: "CRT Power On",      dur: 0.46, ease: "snap" },
+    "split-diagonal-slash": { cat: "youtuber", label: "برش مورب دوتایی (Diagonal Slash)",      labelEn: "Diagonal Slash",    dur: 0.48, ease: "snappy" },
+    "zoom-blur-whip":       { cat: "youtuber", label: "زوم ویپ سرعتی (Zoom Blur Whip)",       labelEn: "Zoom Blur Whip",    dur: 0.42, ease: "snap" },
+    "ribbon-sweep":         { cat: "youtuber", label: "روبان سه‌لایه برند (Ribbon Sweep)",     labelEn: "Brand Ribbon Sweep",dur: 0.54, ease: "vox" },
+    "type-cut":             { cat: "youtuber", label: "کات سریع ادیتوریال (Editorial Cut)",    labelEn: "Editorial Flash Cut",dur: 0.30, ease: "sharp" },
   };
 
   function resolveMotionPersonality(name) {
     const k = String(name || "editorial").trim().toLowerCase();
     return Object.assign({ name: MOTION_PERSONALITIES[k] ? k : "editorial" }, MOTION_PERSONALITIES[k] || MOTION_PERSONALITIES.editorial);
+  }
+
+  function resolveMotionPacing(slide, personality) {
+    const s = (slide && typeof slide === "object") ? slide : {};
+    const p = personality || resolveMotionPersonality(s.motionPersonality || s.motion_personality);
+    const paceKeyRaw = String(s.motionPace || s.motion_pace || "").trim().toLowerCase();
+    const hasExplicitPace = Boolean(paceKeyRaw && MOTION_PACE_PRESETS[paceKeyRaw]);
+    const paceSpec = hasExplicitPace ? MOTION_PACE_PRESETS[paceKeyRaw] : MOTION_PACE_PRESETS.normal;
+
+    // Optional Advanced speed multiplier: motionSpeed = 0.5 means 2x slower (durMult *= 2)
+    const rawSpeed = s.motionSpeed != null ? Number(s.motionSpeed) : (s.motion_speed != null ? Number(s.motion_speed) : null);
+    const speedInv = (rawSpeed != null && Number.isFinite(rawSpeed) && rawSpeed > 0)
+      ? Math.max(0.45, Math.min(3.5, 1 / rawSpeed))
+      : 1.0;
+
+    const rawStepDelay = s.stepDelay != null ? Number(s.stepDelay) : (s.step_delay != null ? Number(s.step_delay) : null);
+    const hasStepOverride = rawStepDelay != null && Number.isFinite(rawStepDelay) && rawStepDelay >= 0;
+
+    const rawReveal = String(s.revealMode || s.reveal_mode || "").trim().toLowerCase();
+    const revealMode = REVEAL_MODES[rawReveal]
+      ? rawReveal
+      : (hasExplicitPace ? paceSpec.revealMode : (p.revealMode || "stagger"));
+
+    const baseGap = hasStepOverride
+      ? Math.min(4.0, rawStepDelay)
+      : Math.max(hasExplicitPace ? paceSpec.stepGap : 0, Number(p.stepGap) || 0);
+    // If user explicitly chose step-by-step or dim-previous without setting stepDelay, ensure real breathing room
+    const stepGap = (baseGap === 0 && (revealMode === "step-by-step" || revealMode === "dim-previous"))
+      ? 0.95
+      : +(baseGap * (speedInv > 1 ? Math.min(2.0, speedInv) : 1)).toFixed(3);
+
+    return {
+      pace: hasExplicitPace ? paceKeyRaw : "normal",
+      durMult: +(paceSpec.durMult * speedInv).toFixed(3),
+      staggerMult: +(paceSpec.staggerMult * speedInv).toFixed(3),
+      stepGap,
+      leadIn: +Math.max(hasExplicitPace ? paceSpec.leadIn : 0, Number(p.leadIn) || 0).toFixed(3),
+      revealMode,
+      dimPrevious: revealMode === "dim-previous",
+      isStepByStep: revealMode === "step-by-step" || revealMode === "dim-previous" || stepGap >= 0.45,
+    };
   }
 
   function resolveTransitionTiming(mode, rawTiming) {
@@ -1680,8 +1786,165 @@
       tabLiving: "Living & Audio",
       langSwitch: "فا / RTL",
       fpsLabel: "FPS:",
+      brandKit: "Brand Kit",
+      captionsStudio: "Captions & SRT",
+      exportStudio: "Export & SFX",
+      timelineToggle: "Timeline",
     },
   };
+
+  // Add fa keys cleanly
+  Object.assign(EDITOR_I18N.fa, {
+    brandKit: "کیت برند",
+    captionsStudio: "زیرنویس و کارائوکه",
+    exportStudio: "خروجی و صدا (SFX)",
+    timelineToggle: "تایم‌لاین",
+  });
+
+  /* C4: 6 One-Click Curated YouTuber Brand Kits */
+  const BRAND_KITS = {
+    "khordegir-editorial": {
+      id: "khordegir-editorial",
+      label: "خرده‌گیر تحریریه (Khordegir Editorial)",
+      labelEn: "Khordegir Editorial",
+      theme: "khordegir-dark",
+      motionPersonality: "editorial",
+      transition: "curtain-rtl",
+      logoText: "خرده‌گیر",
+      logoPosition: "top-left",
+      logoMotion: "pop-spin",
+      captionStyle: "karaoke-gold",
+      puppetPreset: "lively",
+      puppetOutfit: "podcast_host",
+      puppetSkin: "classic",
+      livingBg: "studio-mix",
+      colors: { bg: "#121212", accent: "#FFD600", danger: "#E53935", text: "#FFFFFF" },
+    },
+    "vox-documentary": {
+      id: "vox-documentary",
+      label: "مستند واکس و جانی هریس (Vox Documentary)",
+      labelEn: "Vox Documentary",
+      theme: "vox-documentary",
+      motionPersonality: "editorial",
+      transition: "paper-tear",
+      logoText: "مستند تحلیلی",
+      logoPosition: "top-left",
+      logoMotion: "slide-rtl",
+      captionStyle: "broadcast-box",
+      puppetPreset: "newsreader",
+      puppetOutfit: "detective",
+      puppetSkin: "vintage",
+      livingBg: "editorial-blur",
+      colors: { bg: "#F4EFE4", accent: "#EAB308", danger: "#DC2626", text: "#141414" },
+    },
+    "magnates-noir": {
+      id: "magnates-noir",
+      label: "سینمای مالی و مستند (Magnates Noir)",
+      labelEn: "Magnates Cinema Noir",
+      theme: "magnates-noir",
+      motionPersonality: "calm",
+      transition: "film-burn",
+      logoText: "سینمای اقتصاد",
+      logoPosition: "top-right",
+      logoMotion: "float-fade",
+      captionStyle: "minimal-shadow",
+      puppetPreset: "dramatic",
+      puppetOutfit: "news_anchor",
+      puppetSkin: "midnight",
+      livingBg: "dreamy-bokeh",
+      colors: { bg: "#090A0E", accent: "#D4AF37", danger: "#EF4444", text: "#F8FAFC" },
+    },
+    "kurzgesagt-cosmos": {
+      id: "kurzgesagt-cosmos",
+      label: "علمی کیهانی (Kurzgesagt Cosmos)",
+      labelEn: "Kurzgesagt Cosmos",
+      theme: "kurzgesagt-cosmos",
+      motionPersonality: "playful",
+      transition: "ribbon-sweep",
+      logoText: "دانش کیهانی",
+      logoPosition: "top-left",
+      logoMotion: "orbit-pulse",
+      captionStyle: "shorts-pop",
+      puppetPreset: "excited",
+      puppetOutfit: "professor",
+      puppetSkin: "neon",
+      livingBg: "aurora",
+      colors: { bg: "#0C102B", accent: "#00E5FF", danger: "#FF4D6D", text: "#F8FAFC" },
+    },
+    "ali-productivity": {
+      id: "ali-productivity",
+      label: "مینیمال آموزشی (Studio Minimal)",
+      labelEn: "Creator Minimal Light",
+      theme: "ali-productivity",
+      motionPersonality: "editorial",
+      transition: "push-left",
+      logoText: "استودیو آموزش",
+      logoPosition: "top-left",
+      logoMotion: "slide-rtl",
+      captionStyle: "broadcast-box",
+      puppetPreset: "calm",
+      puppetOutfit: "default",
+      puppetSkin: "classic",
+      livingBg: "grid",
+      colors: { bg: "#F7F8FA", accent: "#2563EB", danger: "#E11D48", text: "#0F172A" },
+    },
+    "viral-shorts": {
+      id: "viral-shorts",
+      label: "وایرال شورتس و ریلز (Viral Shorts)",
+      labelEn: "Viral Shorts & Reels",
+      theme: "viral-shorts",
+      motionPersonality: "punchy",
+      transition: "whip-pan-rtl",
+      logoText: "وایرال",
+      logoPosition: "top-right",
+      logoMotion: "stamp-drop",
+      captionStyle: "shorts-pop",
+      puppetPreset: "comedian",
+      puppetOutfit: "streetwear",
+      puppetSkin: "classic",
+      livingBg: "particles",
+      colors: { bg: "#09090F", accent: "#FFD60A", danger: "#FF2A5F", text: "#FFFFFF" },
+    },
+  };
+
+  /* C5: 5 Broadcast & Viral YouTube Caption Styles (RTL-Safe Karaoke) */
+  const CAPTION_STYLES = {
+    "broadcast-box":  { label: "کادر استاندارد پخش (Broadcast Box)",     labelEn: "Broadcast Box",    karaoke: false },
+    "karaoke-gold":   { label: "کارائوکه طلایی کلمه‌به‌کلمه (Karaoke Gold)", labelEn: "Karaoke Gold",  karaoke: true },
+    "shorts-pop":     { label: "وایرال شورتس پررنگ (Viral Shorts Pop)",   labelEn: "Viral Shorts Pop", karaoke: true },
+    "minimal-shadow": { label: "سینمایی بدون کادر (Cinema Shadow)",       labelEn: "Cinema Shadow",    karaoke: false },
+    "news-ticker":    { label: "نوار خبری پایین صفحه (News Ticker)",      labelEn: "News Ticker",      karaoke: false },
+  };
+
+  /* C7: Platform Export Presets (YouTube, Shorts, Reels, Aparat, Transparent Overlay) */
+  const PLATFORM_EXPORT_PRESETS = {
+    "youtube-16x9":        { label: "یوتیوب استاندارد (YouTube 16:9 · 30fps)",       labelEn: "YouTube 16:9",          format: "16:9", fps: 30, outputFormat: "mp4",    transparent: false, lufs: -14 },
+    "youtube-60fps":       { label: "یوتیوب روان ۶۰ فریم (YouTube 16:9 · 60fps)",    labelEn: "YouTube 60fps",         format: "16:9", fps: 60, outputFormat: "mp4",    transparent: false, lufs: -14 },
+    "youtube-shorts":      { label: "یوتیوب شورتس (YouTube Shorts 9:16 · 60fps)",    labelEn: "YouTube Shorts 9:16",   format: "9:16", fps: 60, outputFormat: "mp4",    transparent: false, lufs: -14 },
+    "instagram-reels":     { label: "اینستاگرام ریلز (Instagram Reels 9:16 · 30fps)",labelEn: "Instagram Reels 9:16",  format: "9:16", fps: 30, outputFormat: "mp4",    transparent: false, lufs: -14 },
+    "aparat":              { label: "آپارات استاندارد (Aparat 16:9 · 30fps)",         labelEn: "Aparat 16:9",           format: "16:9", fps: 30, outputFormat: "mp4",    transparent: false, lufs: -14 },
+    "square-1x1":          { label: "پست مربعی (Square Feed 1:1 · 30fps)",           labelEn: "Square Feed 1:1",       format: "1:1",  fps: 30, outputFormat: "mp4",    transparent: false, lufs: -14 },
+    "puppet-overlay-webm": { label: "لایه شفاف عروسک (Transparent WebM Alpha)",      labelEn: "Transparent WebM",      format: "16:9", fps: 60, outputFormat: "webm",   transparent: true,  lufs: -16 },
+    "broadcast-prores":    { label: "پخش حرفه‌ای ProRes 4444 (Alpha MOV)",           labelEn: "ProRes 4444 Alpha",     format: "16:9", fps: 30, outputFormat: "prores", transparent: true,  lufs: -16 },
+    "png-sequence":        { label: "توالی فریم PNG شفاف (PNG Sequence)",            labelEn: "PNG Sequence",          format: "16:9", fps: 30, outputFormat: "png-seq",transparent: true,  lufs: -16 },
+    "viral-gif":           { label: "گیف متحرک شبکه‌های اجتماعی (Animated GIF)",      labelEn: "Animated GIF",          format: "1:1",  fps: 15, outputFormat: "gif",    transparent: false, lufs: -14 },
+  };
+
+  /* C3: Licence-Free Geometric SVG Icon Vault (MIT / Original Vector Paths) */
+  const ICON_VAULT = [
+    { id: "flame",     label: "آتش وایرال",   en: "Trending",   path: "M12 2c.5 4-3 6-3 10a5 5 0 0 0 10 0c0-3.5-2.5-6-4-8-.2 2-1.5 3-3 3 0-2 .5-3.5 0-5z" },
+    { id: "bolt",      label: "صاعقه سریع",   en: "Lightning",  path: "M13 2L4 14h7l-1 8 9-12h-7l1-8z" },
+    { id: "bell",      label: "زنگ اعلان",    en: "Bell",       path: "M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" },
+    { id: "chart-up",  label: "رشد نمودار",   en: "Growth",     path: "M3 17l6-6 4 4 8-8M15 7h6v6" },
+    { id: "check",     label: "تایید راستی",  en: "Verified",   path: "M20 6L9 17l-5-5" },
+    { id: "alert",     label: "هشدار خبری",   en: "Alert",      path: "M12 3L2 20h20L12 3zm0 6v5m0 3h.01" },
+    { id: "mic",       label: "میکروفون",     en: "Podcast Mic",path: "M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3zM19 10v2a7 7 0 0 1-14 0v-2M12 19v3" },
+    { id: "globe",     label: "جهان و خبر",   en: "World",      path: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20" },
+    { id: "pin",       label: "سنجاق سند",    en: "Pin",        path: "M12 17v5M9 3h6l-1 7 3 3H7l3-3-1-7z" },
+    { id: "trophy",    label: "جام برنده",    en: "Trophy",     path: "M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3" },
+    { id: "bulb",      label: "ایده و نکته",  en: "Insight",    path: "M9 18h6M10 21h4M12 2a7 7 0 0 0-4 12.7V16h8v-1.3A7 7 0 0 0 12 2z" },
+    { id: "clock",     label: "زمان و فوری",  en: "Timer",      path: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 6v6l4 2" },
+  ];
 
   function clampZoom(val, fallback = 1) {
     const n = Number(val);
@@ -1703,6 +1966,8 @@
     EASING_FAMILIES,
     OVERSHOOT_RULES,
     MOTION_PERSONALITIES,
+    MOTION_PACE_PRESETS,
+    REVEAL_MODES,
     TEXT_ANIMATION_PRESETS,
     TRANSITION_LIBRARY,
     SHAPE_WIPE_PRESETS,
@@ -1711,6 +1976,10 @@
     SHOT_PRESETS,
     PUPPET_BACKGROUNDS,
     LIGHTING_PRESETS,
+    BRAND_KITS,
+    CAPTION_STYLES,
+    PLATFORM_EXPORT_PRESETS,
+    ICON_VAULT,
     EDITOR_I18N,
     MASCOT_PALETTE,
     CHARACTERS,
@@ -1729,6 +1998,7 @@
     DEFAULT_LIVE_HOTKEYS,
     DEFAULT_MIDI_MAP,
     resolveMotionPersonality,
+    resolveMotionPacing,
     resolveTransitionTiming,
     resolveCameraConfig,
     resolveAmbienceConfig,

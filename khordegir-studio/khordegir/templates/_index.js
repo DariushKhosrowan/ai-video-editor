@@ -2867,6 +2867,154 @@ window.TEMPLATE_INDEX = [
   }
  },
  {
+  "name": "flowchart",
+  "js": "../templates/flowchart/template.js",
+  "schema": {
+   "name": "flowchart",
+   "aliases": [
+    "process-flow",
+    "فلوچارت",
+    "دیاگرام-فرآیند"
+   ],
+   "order": 47,
+   "category": "دیاگرام و نقشه مفهومی (Diagrams)",
+   "label": "فلوچارت و دیاگرام فرآیند (Flowchart)",
+   "description": "دیاگرام گام‌به‌گام با کارت‌های متصل و فلش‌های متحرک SVG که هنگام توضیح یکی‌یکی ظاهر می‌شوند",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "عنوان دیاگرام (Title)",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "nodes",
+     "label": "مراحل فلوچارت (هر خط: عنوان | توضیح کوتاه)",
+     "type": "list",
+     "editable": true
+    },
+    {
+     "key": "conclusion",
+     "label": "نتیجه نهایی (Outcome)",
+     "type": "text",
+     "editable": true
+    }
+   ],
+   "example": {
+    "eyebrow": "معماری تصمیم‌گیری",
+    "title": "مسیر تبدیل یک ایده خام به *ویدیوی حرفه‌ای*",
+    "nodes": [
+     "پژوهش و یادداشت | جمع‌آوری داده‌ها و منابع معتبر",
+     "ساختار روایت | چیدن قلاب، تنه اصلی و جمع‌بندی",
+     "طراحی صحنه | انتخاب قالب، دیاگرام و سرعت آرام",
+     "تدوین و صدا | همگام‌سازی گام‌به‌گام با لحن گوینده"
+    ],
+    "conclusion": "خروجی نهایی: روایت شفاف، آرام و ماندگار در ذهن مخاطب"
+   }
+  }
+ },
+ {
+  "name": "funnel_diagram",
+  "js": "../templates/funnel_diagram/template.js",
+  "schema": {
+   "name": "funnel_diagram",
+   "aliases": [
+    "funnel",
+    "قیف-تبدیل",
+    "قیف"
+   ],
+   "order": 48,
+   "category": "دیاگرام و نقشه مفهومی (Diagrams)",
+   "label": "قیف مراحل و تبدیل (Funnel Diagram)",
+   "description": "قیف لایه‌لایه با درصد و توضیح که از بالا به پایین یکی‌یکی باز می‌شود",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "عنوان (Title)",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "stages",
+     "label": "لایه‌های قیف (هر خط: عنوان | مقدار | توضیح)",
+     "type": "list",
+     "editable": true
+    }
+   ],
+   "example": {
+    "eyebrow": "تحلیل مسیر مخاطب",
+    "title": "از *بازدید اول* تا مخاطب وفادار",
+    "stages": [
+     "بازدیدکنندگان صفحه | ۱۰۰٪ | آشنایی اولیه با عنوان و کاور",
+     "تماشای ۳۰ ثانیه اول | ۶۴٪ | عبور از قلاب ابتدایی ویدیو",
+     "تماشای تا پایان | ۳۸٪ | درگیر شدن با روایت گام‌به‌گام",
+     "عضویت و بازگشت | ۱۴٪ | تبدیل شدن به دنبال‌کننده دائمی"
+    ]
+   }
+  }
+ },
+ {
+  "name": "mind_map",
+  "js": "../templates/mind_map/template.js",
+  "schema": {
+   "name": "mind_map",
+   "aliases": [
+    "mindmap",
+    "نقشه-ذهنی",
+    "درخت-مفهومی"
+   ],
+   "order": 49,
+   "category": "دیاگرام و نقشه مفهومی (Diagrams)",
+   "label": "نقشه ذهنی (Mind Map)",
+   "description": "هسته مرکزی با شاخه‌های منحنی SVG و کارت‌های مفهومی که گام‌به‌گام اطراف موضوع اصلی باز می‌شوند",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "center",
+     "label": "مفهوم مرکزی (Center Hub)",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "branches",
+     "label": "شاخه‌ها (هر خط: عنوان شاخه | زیرتوضیح)",
+     "type": "list",
+     "editable": true
+    }
+   ],
+   "example": {
+    "eyebrow": "نقشه مفهومی",
+    "center": "تولید محتوای ماندگار",
+    "branches": [
+     "پژوهش عمیق | داده و مثال واقعی",
+     "ریتم آرام | فرصت فهم برای بیننده",
+     "بصری‌سازی | دیاگرام به‌جای دیوار متن",
+     "صدای شفاف | لحن طبیعی و پرانرژی"
+    ]
+   }
+  }
+ },
+ {
   "name": "line_chart",
   "js": "../templates/line_chart/template.js",
   "schema": {
@@ -3036,6 +3184,613 @@ window.TEMPLATE_INDEX = [
    },
    "order": 50,
    "version": 1
+  }
+ },
+ {
+  "name": "venn_diagram",
+  "js": "../templates/venn_diagram/template.js",
+  "schema": {
+   "name": "venn_diagram",
+   "aliases": [
+    "venn",
+    "دیاگرام-ون",
+    "نقطه-اشتراک"
+   ],
+   "order": 50,
+   "category": "دیاگرام و نقشه مفهومی (Diagrams)",
+   "label": "دیاگرام ون و نقطه اشتراک (Venn Diagram)",
+   "description": "نمایش هم‌پوشانی دو یا سه مفهوم کلیدی و برجسته‌سازی نقطه اشتراک به صورت گام‌به‌گام",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "عنوان (Title)",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "circle_a",
+     "label": "دایره اول (عنوان | توضیح)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "circle_b",
+     "label": "دایره دوم (عنوان | توضیح)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "circle_c",
+     "label": "دایره سوم اختیاری (عنوان | توضیح)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "overlap",
+     "label": "نقطه اشتراک مرکزی (Intersection)",
+     "type": "text",
+     "editable": true
+    }
+   ],
+   "example": {
+    "eyebrow": "هم‌پوشانی مهارت‌ها",
+    "title": "نقطه طلایی *روایت بصری موفق*",
+    "circle_a": "داده و منطق | استدلال دقیق و مستند",
+    "circle_b": "داستان و احساس | درگیری ذهنی مخاطب",
+    "circle_c": "طراحی و ریتم | گرافیک تمیز و سرعت آرام",
+    "overlap": "تأثیر ماندگار"
+   }
+  }
+ },
+ {
+  "name": "pyramid_hierarchy",
+  "js": "../templates/pyramid_hierarchy/template.js",
+  "schema": {
+   "name": "pyramid_hierarchy",
+   "aliases": [
+    "pyramid",
+    "هرم",
+    "هرم-اولویت"
+   ],
+   "order": 51,
+   "category": "دیاگرام و نقشه مفهومی (Diagrams)",
+   "label": "هرم سطوح و اولویت (Pyramid Hierarchy)",
+   "description": "هرم طبقاتی با نمایش گام‌به‌گام از پایه به قله به همراه توضیح هر طبقه",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "عنوان هرم (Title)",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "tiers",
+     "label": "طبقات هرم از قله به پایه (هر خط: عنوان | توضیح)",
+     "type": "list",
+     "editable": true
+    }
+   ],
+   "example": {
+    "eyebrow": "مدل اولویت‌بندی",
+    "title": "هرم *تسلط عمیق* در یادگیری",
+    "tiers": [
+     "آموزش به دیگران | بالاترین سطح درک و تثبیت",
+     "ساخت پروژه واقعی | تمرین عملی در دنیای واقعی",
+     "تمرین فعال و آزمون | بازیابی اطلاعات از حافظه",
+     "مطالعه و شنیدن | پایهٔ اولیه دریافت مفاهیم"
+    ]
+   }
+  }
+ },
+ {
+  "name": "cycle_diagram",
+  "js": "../templates/cycle_diagram/template.js",
+  "schema": {
+   "name": "cycle_diagram",
+   "aliases": [
+    "cycle",
+    "feedback-loop",
+    "چرخه",
+    "حلقه-بازخورد"
+   ],
+   "order": 52,
+   "category": "دیاگرام و نقشه مفهومی (Diagrams)",
+   "label": "چرخه و حلقه بازخورد (Cycle Diagram)",
+   "description": "چرخه دایره‌ای با کمان‌های SVG و مراحل شماره‌دار که به‌نوبت یکی‌یکی روشن و توضیح داده می‌شوند",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "عنوان چرخه (Title)",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "center_label",
+     "label": "برچسب مرکز حلقه (Center)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "steps",
+     "label": "مراحل چرخه (هر خط: عنوان | توضیح کوتاه)",
+     "type": "list",
+     "editable": true
+    }
+   ],
+   "example": {
+    "eyebrow": "حلقه رشد مداوم",
+    "title": "چرخه *عادت‌های پایدار*",
+    "center_label": "چرخه عادت",
+    "steps": [
+     "نشانه (Cue) | محرک شروع رفتار در محیط",
+     "اشتیاق (Craving) | انگیزه ذهنی برای تغییر حس",
+     "پاسخ (Response) | انجام دادن عمل واقعی",
+     "پاداش (Reward) | تثبیت رفتار در مغز"
+    ]
+   }
+  }
+ },
+ {
+  "name": "passage_highlight",
+  "js": "../templates/passage_highlight/template.js",
+  "schema": {
+   "name": "passage_highlight",
+   "aliases": [
+    "passage",
+    "annotated-passage",
+    "متن-تحلیلی",
+    "هایلایت-متن"
+   ],
+   "order": 53,
+   "category": "متن، مقاله و آموزش (Passages & Reading)",
+   "label": "متن و هایلایت جمله‌به‌جمله (Passage Highlight)",
+   "description": "نمایش یک پاراگراف یا بریده مقاله که جملات کلیدی آن یکی‌یکی با ماژیک هایلایت و یادداشت حاشیه توضیح داده می‌شوند",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب منبع یا فصل (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "تیتر متن (Title)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "sentences",
+     "label": "جملات متن (هر خط یک جمله؛ برای هایلایت با ! شروع کنید)",
+     "type": "list",
+     "editable": true
+    },
+    {
+     "key": "takeaway",
+     "label": "یادداشت تحلیلی حاشیه (Margin Note)",
+     "type": "textarea",
+     "editable": true
+    },
+    {
+     "key": "citation",
+     "label": "مرجع و سال (Citation)",
+     "type": "text",
+     "editable": true
+    }
+   ],
+   "example": {
+    "eyebrow": "تحلیل متن · مطالعه موردی",
+    "title": "چرا *ریتم آرام* درک مخاطب را دو برابر می‌کند؟",
+    "sentences": [
+     "بسیاری از ویدیوهای امروزی تمام اطلاعات را در یک ثانیه روی صفحه می‌ریزند.",
+     "!وقتی هر نکته هم‌زمان با کلام گوینده و به‌آرامی ظاهر می‌شود، مغز فرصت پردازش پیدا می‌کند.",
+     "نتیجه این رویکرد، کاهش خستگی چشم و افزایش چشمگیر ماندگاری پیام است."
+    ],
+    "takeaway": "نکته تدوین: بین هر مورد تازه حداقل ۰.۸ تا ۱.۲ ثانیه فضای تنفس بگذارید.",
+    "citation": "پژوهش شناختی رسانه · فصل ۴"
+   }
+  }
+ },
+ {
+  "name": "convey_english",
+  "js": "../templates/convey_english/template.js",
+  "schema": {
+   "name": "convey_english",
+   "aliases": [
+    "english-expression",
+    "english-passage",
+    "آموزش-انگلیسی",
+    "عبارت-انگلیسی"
+   ],
+   "order": 54,
+   "category": "متن، مقاله و آموزش (Passages & Reading)",
+   "label": "آموزش عبارت و مفهوم انگلیسی (Convey English)",
+   "description": "قالب تخصصی آموزش زبان و ترجمه مفهومی انگلیسی به فارسی: جمله انگلیسی + آوانگاری + ترجمه طبیعی + نکات ظریف و مثال که گام‌به‌گام یکی‌یکی باز می‌شوند",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب درس (Lesson Tag)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "english",
+     "label": "عبارت یا جمله انگلیسی (English Phrase)",
+     "type": "textarea",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "ipa",
+     "label": "تلفظ و تکیه (Pronunciation / IPA)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "natural_fa",
+     "label": "معنای طبیعی و روان فارسی (Natural Meaning)",
+     "type": "textarea",
+     "editable": true
+    },
+    {
+     "key": "literal_fa",
+     "label": "ترجمه تحت‌اللفظی / ساختار (Literal Breakdown)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "nuances",
+     "label": "نکات ظریف و کاربردی (هر خط یک نکته)",
+     "type": "list",
+     "editable": true
+    },
+    {
+     "key": "example_en",
+     "label": "مثال کاربردی انگلیسی (Example EN)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "example_fa",
+     "label": "ترجمه مثال فارسی (Example FA)",
+     "type": "text",
+     "editable": true
+    }
+   ],
+   "example": {
+    "eyebrow": "English in Context · آموزش مفهومی",
+    "english": "Read between the lines",
+    "ipa": "/riːd bɪˈtwiːn ðə laɪnz/ · Stress on BETWEEN & LINES",
+    "natural_fa": "درک منظور پنهانِ پشت کلمات؛ فهمیدن چیزی که مستقیم گفته نشده",
+    "literal_fa": "تحت‌اللفظی: خواندنِ بینِ خطوط",
+    "nuances": [
+     "لحن طبیعی و پرکاربرد در مکالمه، مصاحبه و مقاله",
+     "معمولاً وقتی استفاده می‌شود که گوینده حرف اصلی را غیرمستقیم زده است",
+     "معادل فارسی نزدیک: «از لابه‌لای حرف‌ها فهمیدن»"
+    ],
+    "example_en": "He said the project was fine, but reading between the lines, he wasn't happy.",
+    "example_fa": "گفت پروژه خوب است، اما از لابه‌لای حرف‌هایش معلوم بود راضی نیست."
+   }
+  }
+ },
+ {
+  "name": "book_excerpt",
+  "js": "../templates/book_excerpt/template.js",
+  "schema": {
+   "name": "book_excerpt",
+   "aliases": [
+    "book-page",
+    "بریده-کتاب",
+    "صفحه-کتاب"
+   ],
+   "order": 55,
+   "category": "متن، مقاله و آموزش (Passages & Reading)",
+   "label": "بریده کتاب و حاشیه‌نویسی (Book Excerpt)",
+   "description": "نمایش صفحه‌ای از کتاب یا مقاله با خط‌کشی متحرک زیر نکته اصلی، شماره صفحه و خلاصه گوینده",
+   "fields": [
+    {
+     "key": "book_title",
+     "label": "نام کتاب (Book Title)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "chapter",
+     "label": "فصل و صفحه (Chapter / Page)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "excerpt",
+     "label": "متن بریده کتاب (Excerpt)",
+     "type": "textarea",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "key_line",
+     "label": "جمله کلیدی برجسته (Key Highlighted Line)",
+     "type": "textarea",
+     "editable": true
+    },
+    {
+     "key": "author",
+     "label": "نویسنده (Author)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "commentary",
+     "label": "تحلیل کوتاه (Commentary)",
+     "type": "textarea",
+     "editable": true
+    }
+   ],
+   "example": {
+    "book_title": "تفکر، سریع و آهسته",
+    "chapter": "فصل ۱ · صفحه ۲۸",
+    "excerpt": "ذهن انسان دو سیستم دارد: سیستم اول سریع، خودکار و احساسی است؛ سیستم دوم کند، تحلیلی و نیازمند توجه آگاهانه است.",
+    "key_line": "وقتی سرعت اطلاعات بیش از حد زیاد شود، سیستم دوم خاموش می‌شود و قضاوت سطحی جای آن را می‌گیرد.",
+    "author": "دانیل کانمن",
+    "commentary": "همین قانون در ویدیو هم صادق است: سرعت آرام، فکر مخاطب را بیدار نگه می‌دارد."
+   }
+  }
+ },
+ {
+  "name": "pull_quote",
+  "js": "../templates/pull_quote/template.js",
+  "schema": {
+   "name": "pull_quote",
+   "aliases": [
+    "editorial-quote",
+    "نقل-قول-مجله‌ای",
+    "جمله-ماندگار"
+   ],
+   "order": 56,
+   "category": "متن، مقاله و آموزش (Passages & Reading)",
+   "label": "نقل‌قول مجله‌ای و سینمایی (Editorial Pull-Quote)",
+   "description": "نقل‌قول بزرگ تایپوگرافی با گیومه گرافیکی، ورود آرام کلمه‌به‌کلمه، نام گوینده و زمینه",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بخش (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "quote",
+     "label": "متن نقل‌قول (Quote)",
+     "type": "textarea",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "speaker",
+     "label": "گوینده (Speaker)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "role",
+     "label": "سمت یا منبع (Role / Source)",
+     "type": "text",
+     "editable": true
+    }
+   ],
+   "example": {
+    "eyebrow": "جمله کلیدی این فصل",
+    "quote": "طراحی خوب یعنی حذف کردن هر چیز اضافی تا *تنها پیام اصلی* در آرامش نفس بکشد.",
+    "speaker": "دیتر رامس",
+    "role": "طراح صنعتی و نظریه‌پرداز طراحی"
+   }
+  }
+ },
+ {
+  "name": "image_gallery",
+  "js": "../templates/image_gallery/template.js",
+  "schema": {
+   "name": "image_gallery",
+   "aliases": [
+    "gallery",
+    "photo-grid",
+    "گالری-تصاویر",
+    "چند-تصویر"
+   ],
+   "order": 57,
+   "category": "تصویر و داستان‌سرایی بصری (Images & Visuals)",
+   "label": "گالری تصاویر گام‌به‌گام (Image Gallery)",
+   "description": "نمایش ۲ تا ۴ تصویر با زیرنویس اختصاصی که به‌آرامی یکی‌یکی روی صفحه ظاهر می‌شوند",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "عنوان گالری (Title)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "photo1",
+     "label": "تصویر ۱",
+     "type": "image",
+     "editable": true
+    },
+    {
+     "key": "caption1",
+     "label": "زیرنویس ۱",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "photo2",
+     "label": "تصویر ۲",
+     "type": "image",
+     "editable": true
+    },
+    {
+     "key": "caption2",
+     "label": "زیرنویس ۲",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "photo3",
+     "label": "تصویر ۳ (اختیاری)",
+     "type": "image",
+     "editable": true
+    },
+    {
+     "key": "caption3",
+     "label": "زیرنویس ۳",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "photo4",
+     "label": "تصویر ۴ (اختیاری)",
+     "type": "image",
+     "editable": true
+    },
+    {
+     "key": "caption4",
+     "label": "زیرنویس ۴",
+     "type": "text",
+     "editable": true
+    }
+   ],
+   "example": {
+    "eyebrow": "مستندات تصویری",
+    "title": "سه زاویه مختلف از یک *پدیده واحد*",
+    "photo1": "/assets/images/starter_article_archive_paper_1795696524701.jpg",
+    "caption1": "۱. اسناد و آرشیو مطبوعاتی",
+    "photo2": "/assets/images/starter_psychology_lab_desk_1795696526162.jpg",
+    "caption2": "۲. مشاهدات آزمایشگاهی",
+    "photo3": "/assets/images/starter_world_map_dark_1795696523627.jpg",
+    "caption3": "۳. مقایسه در مقیاس جهانی"
+   }
+  }
+ },
+ {
+  "name": "annotated_image",
+  "js": "../templates/annotated_image/template.js",
+  "schema": {
+   "name": "annotated_image",
+   "aliases": [
+    "image-callouts",
+    "تصویر-توضیحی",
+    "نقاط-روی-تصویر"
+   ],
+   "order": 58,
+   "category": "تصویر و داستان‌سرایی بصری (Images & Visuals)",
+   "label": "تصویر با نقاط توضیحی (Annotated Image)",
+   "description": "تصویر اصلی با پین‌های شماره‌دار و کارت‌های توضیحی که هنگام شرح دادن یکی‌یکی ظاهر و به نقطه مربوطه وصل می‌شوند",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "عنوان (Title)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "image",
+     "label": "تصویر اصلی (Hero Image)",
+     "type": "image",
+     "editable": true
+    },
+    {
+     "key": "callouts",
+     "label": "نقاط توضیحی (هر خط: x% ; y% ; عنوان ; توضیح)",
+     "type": "list",
+     "editable": true
+    }
+   ],
+   "example": {
+    "eyebrow": "کالبدشکافی بصری",
+    "title": "سه جزئیات کلیدی که نباید *از قلم بیفتد*",
+    "image": "/assets/images/starter_regional_map_topo_1795696523977.jpg",
+    "callouts": [
+     "30 ; 35 ; مسیر شمالی ; محور اصلی انتقال و ارتباط",
+     "62 ; 52 ; هسته مرکزی ; بیشترین تمرکز داده و فعالیت",
+     "45 ; 76 ; نقطه خروجی ; نتیجه نهایی در پایین نقشه"
+    ]
+   }
+  }
+ },
+ {
+  "name": "corkboard",
+  "js": "../templates/corkboard/template.js",
+  "schema": {
+   "name": "corkboard",
+   "aliases": [
+    "evidence-board",
+    "تخته-شواهد",
+    "تخته-تحقیق"
+   ],
+   "order": 59,
+   "category": "تصویر و داستان‌سرایی بصری (Images & Visuals)",
+   "label": "تخته شواهد و نخ قرمز (Detective Corkboard)",
+   "description": "تخته تحقیق مستند با کارت‌های سنجاق‌شده و نخ قرمز SVG که شواهد را گام‌به‌گام به هم وصل می‌کند",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب پرونده (Case Tag)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "عنوان پرونده (Title)",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "clues",
+     "label": "شواهد و سرنخ‌ها (هر خط: عنوان سرنخ | توضیح)",
+     "type": "list",
+     "editable": true
+    }
+   ],
+   "example": {
+    "eyebrow": "پرونده پژوهشی · شواهد",
+    "title": "چطور *چهار سرنخ پراکنده* یک ماجرا را فاش کردند؟",
+    "clues": [
+     "سرنخ ۱: گزارش مالی | جهش غیرعادی هزینه‌ها در سه‌ماهه سوم",
+     "سرنخ ۲: ایمیل داخلی | هشدار تیم فنی دو هفته پیش از بحران",
+     "سرنخ ۳: آمار کاربران | افت ۴۰ درصدی نرخ بازگشت در ماه بعد",
+     "سرنخ ۴: نتیجه نهایی | تغییر کامل راهبرد محصول در سال جدید"
+    ]
+   }
   }
  },
  {
@@ -3215,6 +3970,472 @@ window.TEMPLATE_INDEX = [
    },
    "order": 60,
    "version": 1
+  }
+ },
+ {
+  "name": "phone_mockup",
+  "js": "../templates/phone_mockup/template.js",
+  "schema": {
+   "name": "phone_mockup",
+   "aliases": [
+    "mobile-showcase",
+    "پیش‌نمایش-گوشی",
+    "موبایل"
+   ],
+   "order": 60,
+   "category": "تصویر و داستان‌سرایی بصری (Images & Visuals)",
+   "label": "پیش‌نمایش موبایل و ویژگی‌ها (Phone Mockup)",
+   "description": "قاب گوشی تمیز با تصویر صفحه اپلیکیشن یا وب‌سایت در کنار فهرست ویژگی‌ها که یکی‌یکی ظاهر می‌شوند",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "عنوان معرفی (Title)",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "image",
+     "label": "اسکرین‌شات گوشی (Screen Image)",
+     "type": "image",
+     "editable": true
+    },
+    {
+     "key": "screen_label",
+     "label": "عنوان بالای صفحه گوشی (App Header)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "features",
+     "label": "ویژگی‌ها (هر خط: تیتر | توضیح کوتاه)",
+     "type": "list",
+     "editable": true
+    }
+   ],
+   "example": {
+    "eyebrow": "بررسی محصول و رابط کاربری",
+    "title": "تجربه کاربری ساده در *سه قابلیت کلیدی*",
+    "image": "/assets/images/starter_podcast_studio_mic_1795696526288.jpg",
+    "screen_label": "اپلیکیشن استودیو",
+    "features": [
+     "پخش آرام و شفاف | همگام‌سازی کامل با صدای گوینده",
+     "حالت شب استاندارد | خوانایی بالا در هر صفحه نمایش",
+     "خروجی سه فرمت | آماده برای یوتیوب، شورتس و اینستاگرام"
+    ]
+   }
+  }
+ },
+ {
+  "name": "pros_cons",
+  "js": "../templates/pros_cons/template.js",
+  "schema": {
+   "name": "pros_cons",
+   "aliases": [
+    "pros-and-cons",
+    "مزایا-معایب",
+    "نقاط-قوت-ضعف"
+   ],
+   "order": 61,
+   "category": "مقایسه و فهرست (Compares & Lists)",
+   "label": "مزایا در برابر معایب (Pros vs Cons)",
+   "description": "مقایسه دو ستونه متعادل بین مزایا (سبز) و معایب (قرمز) که به‌نوبت یکی‌یکی ظاهر می‌شوند + جمع‌بندی نهایی",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "عنوان مقایسه (Title)",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "pros_title",
+     "label": "تیتر ستون مزایا",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "pros",
+     "label": "مزایا (هر خط یک مورد)",
+     "type": "list",
+     "editable": true
+    },
+    {
+     "key": "cons_title",
+     "label": "تیتر ستون معایب",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "cons",
+     "label": "معایب (هر خط یک مورد)",
+     "type": "list",
+     "editable": true
+    },
+    {
+     "key": "verdict",
+     "label": "جمع‌بندی نهایی (Verdict)",
+     "type": "text",
+     "editable": true
+    }
+   ],
+   "example": {
+    "eyebrow": "ارزیابی متعادل",
+    "title": "مزایا و محدودیت‌های *کار از راه دور*",
+    "pros_title": "نقاط قوت و مزایا",
+    "pros": [
+     "صرفه‌جویی در زمان رفت‌وآمد روزانه",
+     "تمرکز عمیق‌تر بدون مزاحمت محیطی",
+     "انعطاف‌پذیری در برنامه‌ریزی شخصی"
+    ],
+    "cons_title": "چالش‌ها و معایب",
+    "cons": [
+     "احتمال احساس انزوا در طول زمان",
+     "سخت‌تر شدن مرز بین کار و استراحت",
+     "نیاز به هماهنگی دقیق‌تر در تیم‌های بزرگ"
+    ],
+    "verdict": "جمع‌بندی: مدل ترکیبی (هیبرید) بهترین تعادل را میان آزادی و هم‌افزایی می‌سازد."
+   }
+  }
+ },
+ {
+  "name": "matrix_2x2",
+  "js": "../templates/matrix_2x2/template.js",
+  "schema": {
+   "name": "matrix_2x2",
+   "aliases": [
+    "quadrant",
+    "eisenhower",
+    "ماتریس-دو-در-دو",
+    "ماتریس-تصمیم"
+   ],
+   "order": 62,
+   "category": "مقایسه و فهرست (Compares & Lists)",
+   "label": "ماتریس ۲×۲ تصمیم‌گیری (2×2 Matrix)",
+   "description": "ماتریس چهارخانه با محورهای افقی و عمودی که چهار ربع آن یکی‌یکی برای تحلیل استراتژیک نمایش داده می‌شوند",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "عنوان ماتریس (Title)",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "x_axis",
+     "label": "عنوان محور افقی (X Axis)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "y_axis",
+     "label": "عنوان محور عمودی (Y Axis)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "q1",
+     "label": "ربع ۱ — بالا راست (عنوان | توضیح)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "q2",
+     "label": "ربع ۲ — بالا چپ (عنوان | توضیح)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "q3",
+     "label": "ربع ۳ — پایین راست (عنوان | توضیح)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "q4",
+     "label": "ربع ۴ — پایین چپ (عنوان | توضیح)",
+     "type": "text",
+     "editable": true
+    }
+   ],
+   "example": {
+    "eyebrow": "ماتریس اولویت‌بندی آیزنهاور",
+    "title": "تصمیم‌گیری هوشمند بر اساس *اهمیت و فوریت*",
+    "x_axis": "فوریت ←",
+    "y_axis": "اهمیت ↑",
+    "q1": "فوراً انجام بده | مهم و فوری · اولویت مطلق امروز",
+    "q2": "برنامه‌ریزی کن | مهم ولی غیرفوری · سرمایه‌گذاری بلندمدت",
+    "q3": "واگذار کن | فوری ولی کم‌اهمیت · تفویض یا خودکارسازی",
+    "q4": "حذف کن | نه مهم و نه فوری · حواس‌پرتی‌های روزانه"
+   }
+  }
+ },
+ {
+  "name": "checklist_progressive",
+  "js": "../templates/checklist_progressive/template.js",
+  "schema": {
+   "name": "checklist_progressive",
+   "aliases": [
+    "checklist",
+    "چک‌لیست",
+    "فهرست-تیک‌دار"
+   ],
+   "order": 63,
+   "category": "مقایسه و فهرست (Compares & Lists)",
+   "label": "چک‌لیست تیک‌دار گام‌به‌گام (Progressive Checklist)",
+   "description": "فهرست اجرایی که هر مورد به‌نوبت ظاهر می‌شود و بلافاصله تیک سبز آن با انیمیشن کشیده می‌شود",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "عنوان چک‌لیست (Title)",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "items",
+     "label": "موارد چک‌لیست (هر خط: عنوان | توضیح کوتاه)",
+     "type": "list",
+     "editable": true
+    },
+    {
+     "key": "summary",
+     "label": "پیام پایانی (Summary)",
+     "type": "text",
+     "editable": true
+    }
+   ],
+   "example": {
+    "eyebrow": "چک‌لیست پیش از انتشار",
+    "title": "۵ کار ضروری قبل از *آپلود ویدیو*",
+    "items": [
+     "قلاب ۵ ثانیه اول | آیا سؤال اصلی همان ابتدا مطرح شده؟",
+     "ریتم آرام اسلایدها | آیا هر نکته فرصت خواندن دارد؟",
+     "شفافیت صدا | تعادل صدای گوینده با موسیقی پس‌زمینه",
+     "زیرنویس دقیق | خوانایی در موبایل و حالت بی‌صدا",
+     "پایان‌بندی هدفمند | هدایت بیننده به ویدیوی بعدی"
+    ],
+    "summary": "با تیک زدن همین ۵ مورد، کیفیت خروجی شما در سطح حرفه‌ای قرار می‌گیرد."
+   }
+  }
+ },
+ {
+  "name": "ranking_podium",
+  "js": "../templates/ranking_podium/template.js",
+  "schema": {
+   "name": "ranking_podium",
+   "aliases": [
+    "podium",
+    "top-3",
+    "سکوی-رتبه‌بندی",
+    "سه-برتر"
+   ],
+   "order": 64,
+   "category": "مقایسه و فهرست (Compares & Lists)",
+   "label": "سکوی رتبه‌بندی سه برتر (Top-3 Podium)",
+   "description": "معرفی سه رتبه برتر از جایگاه سوم به اول با بالا آمدن تدریجی سکوها و مدال‌ها",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "title",
+     "label": "عنوان رتبه‌بندی (Title)",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "first",
+     "label": "رتبه ۱ — طلایی (نام | عدد/امتیاز | توضیح)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "second",
+     "label": "رتبه ۲ — نقره‌ای (نام | عدد/امتیاز | توضیح)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "third",
+     "label": "رتبه ۳ — برنزی (نام | عدد/امتیاز | توضیح)",
+     "type": "text",
+     "editable": true
+    }
+   ],
+   "example": {
+    "eyebrow": "رتبه‌بندی نهایی",
+    "title": "سه عامل برتر در *نگه‌داشتن مخاطب*",
+    "first": "روایت شفاف و آرام | ۹۴ امتیاز | مهم‌ترین عامل تماشای تا پایان",
+    "second": "قلاب قوی ۵ ثانیه اول | ۸۶ امتیاز | تعیین‌کننده نرخ ماندن بیننده",
+    "third": "صدا و موسیقی متعادل | ۷۹ امتیاز | ایجاد حس حرفه‌ای و اعتماد"
+   }
+  }
+ },
+ {
+  "name": "stat_hero",
+  "js": "../templates/stat_hero/template.js",
+  "schema": {
+   "name": "stat_hero",
+   "aliases": [
+    "hero-stat",
+    "kpi-hero",
+    "آمار-کلیدی",
+    "عدد-روند"
+   ],
+   "order": 65,
+   "category": "داده و آمار (Data & Metrics)",
+   "label": "کارت آمار کلیدی و روند (Stat Hero + Sparkline)",
+   "description": "نمایش عدد اصلی با شمارش متحرک، برچسب تغییر، خط روند SVG و نکات توضیحی گام‌به‌گام",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "value",
+     "label": "عدد اصلی (Main Metric)",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "suffix",
+     "label": "واحد / پسوند (Suffix)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "delta",
+     "label": "برچسب تغییر (Delta Badge)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "headline",
+     "label": "توضیح اصلی عدد (Headline)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "spark",
+     "label": "اعداد خط روند با کاما (Sparkline Values)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "points",
+     "label": "نکات تکمیلی زیر آمار (هر خط یک مورد)",
+     "type": "list",
+     "editable": true
+    }
+   ],
+   "example": {
+    "eyebrow": "شاخص کلیدی گزارش",
+    "value": "74",
+    "suffix": "٪",
+    "delta": "+۱۸٪ رشد نسبت به سال گذشته",
+    "headline": "افزایش تماشای کامل ویدیوهای آموزشی با *گرافیک گام‌به‌گام*",
+    "spark": "22, 31, 38, 46, 52, 65, 74",
+    "points": [
+     "کاهش چشمگیر خروج بینندگان در ۶۰ ثانیه اول",
+     "افزایش ۲.۳ برابری ذخیره و اشتراک‌گذاری توسط مخاطبان"
+    ]
+   }
+  }
+ },
+ {
+  "name": "subscribe_cta",
+  "js": "../templates/subscribe_cta/template.js",
+  "schema": {
+   "name": "subscribe_cta",
+   "aliases": [
+    "end-card",
+    "youtube-cta",
+    "دعوت-عضویت",
+    "پایان-ویدیو"
+   ],
+   "order": 66,
+   "category": "یوتیوب و پایان‌بندی (YouTube & Social)",
+   "label": "دعوت به عضویت و پایان ویدیو (Subscribe CTA)",
+   "description": "کارت پایانی یوتیوب با نام کانال، دکمه سابسکرایب و زنگوله متحرک و پیشنهاد ویدیوی بعدی",
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "برچسب بالا (Eyebrow)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "channel",
+     "label": "نام کانال (Channel Name)",
+     "type": "text",
+     "required": true,
+     "editable": true
+    },
+    {
+     "key": "handle",
+     "label": "آیدی کانال (Handle)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "cta_text",
+     "label": "پیام دعوت (CTA Message)",
+     "type": "textarea",
+     "editable": true
+    },
+    {
+     "key": "button_label",
+     "label": "متن دکمه (Button Label)",
+     "type": "text",
+     "editable": true
+    },
+    {
+     "key": "next_video",
+     "label": "پیشنهاد ویدیوی بعدی (Next Video Teaser)",
+     "type": "text",
+     "editable": true
+    }
+   ],
+   "example": {
+    "eyebrow": "ممنون که تا پایان همراه بودید",
+    "channel": "استودیو خرده‌گیر",
+    "handle": "@KhordegirStudio",
+    "cta_text": "اگر این تحلیل برایتان مفید بود، *عضو کانال شوید* و زنگوله را روشن کنید تا قسمت بعدی را از دست ندهید.",
+    "button_label": "عضویت در کانال · Subscribe",
+    "next_video": "ویدیوی پیشنهادی بعدی: چگونه روایت‌های پیچیده را ساده و ماندگار کنیم؟"
+   }
   }
  },
  {

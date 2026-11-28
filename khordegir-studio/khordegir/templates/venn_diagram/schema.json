@@ -1,0 +1,24 @@
+{
+  "name": "venn_diagram",
+  "aliases": ["venn", "دیاگرام-ون", "نقطه-اشتراک"],
+  "order": 50,
+  "category": "دیاگرام و نقشه مفهومی (Diagrams)",
+  "label": "دیاگرام ون و نقطه اشتراک (Venn Diagram)",
+  "description": "نمایش هم‌پوشانی دو یا سه مفهوم کلیدی و برجسته‌سازی نقطه اشتراک به صورت گام‌به‌گام",
+  "fields": [
+    { "key": "eyebrow", "label": "برچسب بالا (Eyebrow)", "type": "text", "editable": true },
+    { "key": "title", "label": "عنوان (Title)", "type": "text", "required": true, "editable": true },
+    { "key": "circle_a", "label": "دایره اول (عنوان | توضیح)", "type": "text", "editable": true },
+    { "key": "circle_b", "label": "دایره دوم (عنوان | توضیح)", "type": "text", "editable": true },
+    { "key": "circle_c", "label": "دایره سوم اختیاری (عنوان | توضیح)", "type": "text", "editable": true },
+    { "key": "overlap", "label": "نقطه اشتراک مرکزی (Intersection)", "type": "text", "editable": true }
+  ],
+  "example": {
+    "eyebrow": "هم‌پوشانی مهارت‌ها",
+    "title": "نقطه طلایی *روایت بصری موفق*",
+    "circle_a": "داده و منطق | استدلال دقیق و مستند",
+    "circle_b": "داستان و احساس | درگیری ذهنی مخاطب",
+    "circle_c": "طراحی و ریتم | گرافیک تمیز و سرعت آرام",
+    "overlap": "تأثیر ماندگار"
+  }
+}

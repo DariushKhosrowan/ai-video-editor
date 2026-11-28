@@ -149,7 +149,7 @@ Line two English.
         self.assertEqual(cfg["emotion"], "eureka")
         self.assertIn("eureka", cfg["plugins"]["emotions"])
         self.assertIn("victory-flap", cfg["plugins"]["gestures"])
-        self.assertEqual(cfg["gestures"][0]["type"], "victory-flap")
+        self.assertEqual(cfg["gestures"][0]["gesture"], "victory-flap")
 
     def test_ffmpeg_commands_alpha_webm_prores_and_srt_burnin(self) -> None:
         self.assertEqual(SUPPORTED_OUTPUT_FORMATS, ("mp4", "webm", "prores", "png-seq"))

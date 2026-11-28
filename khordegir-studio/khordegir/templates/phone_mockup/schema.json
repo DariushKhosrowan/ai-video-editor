@@ -1,0 +1,26 @@
+{
+  "name": "phone_mockup",
+  "aliases": ["mobile-showcase", "پیش‌نمایش-گوشی", "موبایل"],
+  "order": 60,
+  "category": "تصویر و داستان‌سرایی بصری (Images & Visuals)",
+  "label": "پیش‌نمایش موبایل و ویژگی‌ها (Phone Mockup)",
+  "description": "قاب گوشی تمیز با تصویر صفحه اپلیکیشن یا وب‌سایت در کنار فهرست ویژگی‌ها که یکی‌یکی ظاهر می‌شوند",
+  "fields": [
+    { "key": "eyebrow", "label": "برچسب بالا (Eyebrow)", "type": "text", "editable": true },
+    { "key": "title", "label": "عنوان معرفی (Title)", "type": "text", "required": true, "editable": true },
+    { "key": "image", "label": "اسکرین‌شات گوشی (Screen Image)", "type": "image", "editable": true },
+    { "key": "screen_label", "label": "عنوان بالای صفحه گوشی (App Header)", "type": "text", "editable": true },
+    { "key": "features", "label": "ویژگی‌ها (هر خط: تیتر | توضیح کوتاه)", "type": "list", "editable": true }
+  ],
+  "example": {
+    "eyebrow": "بررسی محصول و رابط کاربری",
+    "title": "تجربه کاربری ساده در *سه قابلیت کلیدی*",
+    "image": "/assets/images/starter_podcast_studio_mic_1795696526288.jpg",
+    "screen_label": "اپلیکیشن استودیو",
+    "features": [
+      "پخش آرام و شفاف | همگام‌سازی کامل با صدای گوینده",
+      "حالت شب استاندارد | خوانایی بالا در هر صفحه نمایش",
+      "خروجی سه فرمت | آماده برای یوتیوب، شورتس و اینستاگرام"
+    ]
+  }
+}

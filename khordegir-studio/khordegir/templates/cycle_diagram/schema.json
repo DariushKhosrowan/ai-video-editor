@@ -1,0 +1,25 @@
+{
+  "name": "cycle_diagram",
+  "aliases": ["cycle", "feedback-loop", "چرخه", "حلقه-بازخورد"],
+  "order": 52,
+  "category": "دیاگرام و نقشه مفهومی (Diagrams)",
+  "label": "چرخه و حلقه بازخورد (Cycle Diagram)",
+  "description": "چرخه دایره‌ای با کمان‌های SVG و مراحل شماره‌دار که به‌نوبت یکی‌یکی روشن و توضیح داده می‌شوند",
+  "fields": [
+    { "key": "eyebrow", "label": "برچسب بالا (Eyebrow)", "type": "text", "editable": true },
+    { "key": "title", "label": "عنوان چرخه (Title)", "type": "text", "required": true, "editable": true },
+    { "key": "center_label", "label": "برچسب مرکز حلقه (Center)", "type": "text", "editable": true },
+    { "key": "steps", "label": "مراحل چرخه (هر خط: عنوان | توضیح کوتاه)", "type": "list", "editable": true }
+  ],
+  "example": {
+    "eyebrow": "حلقه رشد مداوم",
+    "title": "چرخه *عادت‌های پایدار*",
+    "center_label": "چرخه عادت",
+    "steps": [
+      "نشانه (Cue) | محرک شروع رفتار در محیط",
+      "اشتیاق (Craving) | انگیزه ذهنی برای تغییر حس",
+      "پاسخ (Response) | انجام دادن عمل واقعی",
+      "پاداش (Reward) | تثبیت رفتار در مغز"
+    ]
+  }
+}

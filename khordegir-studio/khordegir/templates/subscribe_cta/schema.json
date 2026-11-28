@@ -1,0 +1,24 @@
+{
+  "name": "subscribe_cta",
+  "aliases": ["end-card", "youtube-cta", "دعوت-عضویت", "پایان-ویدیو"],
+  "order": 66,
+  "category": "یوتیوب و پایان‌بندی (YouTube & Social)",
+  "label": "دعوت به عضویت و پایان ویدیو (Subscribe CTA)",
+  "description": "کارت پایانی یوتیوب با نام کانال، دکمه سابسکرایب و زنگوله متحرک و پیشنهاد ویدیوی بعدی",
+  "fields": [
+    { "key": "eyebrow", "label": "برچسب بالا (Eyebrow)", "type": "text", "editable": true },
+    { "key": "channel", "label": "نام کانال (Channel Name)", "type": "text", "required": true, "editable": true },
+    { "key": "handle", "label": "آیدی کانال (Handle)", "type": "text", "editable": true },
+    { "key": "cta_text", "label": "پیام دعوت (CTA Message)", "type": "textarea", "editable": true },
+    { "key": "button_label", "label": "متن دکمه (Button Label)", "type": "text", "editable": true },
+    { "key": "next_video", "label": "پیشنهاد ویدیوی بعدی (Next Video Teaser)", "type": "text", "editable": true }
+  ],
+  "example": {
+    "eyebrow": "ممنون که تا پایان همراه بودید",
+    "channel": "استودیو خرده‌گیر",
+    "handle": "@KhordegirStudio",
+    "cta_text": "اگر این تحلیل برایتان مفید بود، *عضو کانال شوید* و زنگوله را روشن کنید تا قسمت بعدی را از دست ندهید.",
+    "button_label": "عضویت در کانال · Subscribe",
+    "next_video": "ویدیوی پیشنهادی بعدی: چگونه روایت‌های پیچیده را ساده و ماندگار کنیم؟"
+  }
+}

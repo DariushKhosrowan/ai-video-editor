@@ -1,0 +1,29 @@
+{
+  "name": "stat_hero",
+  "aliases": ["hero-stat", "kpi-hero", "آمار-کلیدی", "عدد-روند"],
+  "order": 65,
+  "category": "داده و آمار (Data & Metrics)",
+  "label": "کارت آمار کلیدی و روند (Stat Hero + Sparkline)",
+  "description": "نمایش عدد اصلی با شمارش متحرک، برچسب تغییر، خط روند SVG و نکات توضیحی گام‌به‌گام",
+  "fields": [
+    { "key": "eyebrow", "label": "برچسب بالا (Eyebrow)", "type": "text", "editable": true },
+    { "key": "value", "label": "عدد اصلی (Main Metric)", "type": "text", "required": true, "editable": true },
+    { "key": "suffix", "label": "واحد / پسوند (Suffix)", "type": "text", "editable": true },
+    { "key": "delta", "label": "برچسب تغییر (Delta Badge)", "type": "text", "editable": true },
+    { "key": "headline", "label": "توضیح اصلی عدد (Headline)", "type": "text", "editable": true },
+    { "key": "spark", "label": "اعداد خط روند با کاما (Sparkline Values)", "type": "text", "editable": true },
+    { "key": "points", "label": "نکات تکمیلی زیر آمار (هر خط یک مورد)", "type": "list", "editable": true }
+  ],
+  "example": {
+    "eyebrow": "شاخص کلیدی گزارش",
+    "value": "74",
+    "suffix": "٪",
+    "delta": "+۱۸٪ رشد نسبت به سال گذشته",
+    "headline": "افزایش تماشای کامل ویدیوهای آموزشی با *گرافیک گام‌به‌گام*",
+    "spark": "22, 31, 38, 46, 52, 65, 74",
+    "points": [
+      "کاهش چشمگیر خروج بینندگان در ۶۰ ثانیه اول",
+      "افزایش ۲.۳ برابری ذخیره و اشتراک‌گذاری توسط مخاطبان"
+    ]
+  }
+}

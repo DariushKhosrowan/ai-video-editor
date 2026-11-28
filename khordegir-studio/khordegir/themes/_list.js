@@ -1,1 +1,1 @@
-window.THEME_FILES = ["crimson-news.js", "editorial-dark.js", "emerald-slate.js", "khordegir-dark.js", "midnight-cyan.js", "nordic-frost.js", "royal-indigo.js", "warm-paper.js"];
+window.THEME_FILES = ["ali-productivity.js", "crimson-news.js", "editorial-dark.js", "emerald-slate.js", "khordegir-dark.js", "kurzgesagt-cosmos.js", "magnates-noir.js", "midnight-cyan.js", "nordic-frost.js", "persian-turquoise.js", "royal-indigo.js", "viral-shorts.js", "vox-documentary.js", "warm-paper.js"];

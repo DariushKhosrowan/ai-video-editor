@@ -1,0 +1,34 @@
+{
+  "name": "pros_cons",
+  "aliases": ["pros-and-cons", "مزایا-معایب", "نقاط-قوت-ضعف"],
+  "order": 61,
+  "category": "مقایسه و فهرست (Compares & Lists)",
+  "label": "مزایا در برابر معایب (Pros vs Cons)",
+  "description": "مقایسه دو ستونه متعادل بین مزایا (سبز) و معایب (قرمز) که به‌نوبت یکی‌یکی ظاهر می‌شوند + جمع‌بندی نهایی",
+  "fields": [
+    { "key": "eyebrow", "label": "برچسب بالا (Eyebrow)", "type": "text", "editable": true },
+    { "key": "title", "label": "عنوان مقایسه (Title)", "type": "text", "required": true, "editable": true },
+    { "key": "pros_title", "label": "تیتر ستون مزایا", "type": "text", "editable": true },
+    { "key": "pros", "label": "مزایا (هر خط یک مورد)", "type": "list", "editable": true },
+    { "key": "cons_title", "label": "تیتر ستون معایب", "type": "text", "editable": true },
+    { "key": "cons", "label": "معایب (هر خط یک مورد)", "type": "list", "editable": true },
+    { "key": "verdict", "label": "جمع‌بندی نهایی (Verdict)", "type": "text", "editable": true }
+  ],
+  "example": {
+    "eyebrow": "ارزیابی متعادل",
+    "title": "مزایا و محدودیت‌های *کار از راه دور*",
+    "pros_title": "نقاط قوت و مزایا",
+    "pros": [
+      "صرفه‌جویی در زمان رفت‌وآمد روزانه",
+      "تمرکز عمیق‌تر بدون مزاحمت محیطی",
+      "انعطاف‌پذیری در برنامه‌ریزی شخصی"
+    ],
+    "cons_title": "چالش‌ها و معایب",
+    "cons": [
+      "احتمال احساس انزوا در طول زمان",
+      "سخت‌تر شدن مرز بین کار و استراحت",
+      "نیاز به هماهنگی دقیق‌تر در تیم‌های بزرگ"
+    ],
+    "verdict": "جمع‌بندی: مدل ترکیبی (هیبرید) بهترین تعادل را میان آزادی و هم‌افزایی می‌سازد."
+  }
+}

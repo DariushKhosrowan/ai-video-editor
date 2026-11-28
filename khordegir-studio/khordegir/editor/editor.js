@@ -266,7 +266,10 @@ function buildStagePayload(slide, idx) {
   if (state.data) {
     [
       "preset", "transition", "transitionTiming", "transition_timing",
-      "motionPersonality", "motion_personality", "textMotion", "text_motion",
+      "motionPersonality", "motion_personality",
+      "motionPace", "motion_pace", "motionSpeed", "motion_speed",
+      "stepDelay", "step_delay", "revealMode", "reveal_mode",
+      "textMotion", "text_motion", "captionStyle", "caption_style", "brandKit",
       "camera", "cameraConfig", "ambience", "particles", "weather",
       "logo", "logo_motion", "logo_position", "logo_text", "livingStage", "motionCurve", "puppet",
     ].forEach((k) => {
@@ -276,7 +279,7 @@ function buildStagePayload(slide, idx) {
     });
   }
 
-  ["image", "src", "bg_image", "before_image", "after_image", "avatar", "photo1", "photo2", "photo3"].forEach((ik) => {
+  ["image", "src", "bg_image", "before_image", "after_image", "avatar", "photo1", "photo2", "photo3", "photo4"].forEach((ik) => {
     if (copy[ik]) copy[ik] = resolveImageUrl(copy[ik]);
   });
   if (copy.livingStage && typeof copy.livingStage === "object" && copy.livingStage.bgImage) {
@@ -1487,6 +1490,144 @@ function renderContentTab(container, slide) {
   mpGroup.appendChild(mpSel);
   secNar.appendChild(mpGroup);
 
+  // Beginner one-click Animation Pace & Step-by-Step Reveal (Slow Real-Edit Mode)
+  const paceGroup = document.createElement("div");
+  paceGroup.className = "field-group";
+  paceGroup.innerHTML = `<div class="field-label-row"><strong>سرعت و ریتم انیمیشن (Animation Pace)</strong></div>`;
+  const paceSel = document.createElement("select");
+  paceSel.className = "select-ctrl";
+  const paceMap = FX_CAT.motionPacePresets || {};
+  [
+    { value: "", label: "ارث‌بری از پروژه (Inherit)" },
+    ...Object.keys(paceMap).map((k) => ({ value: k, label: paceMap[k].label || k })),
+  ].forEach((opt) => {
+    const o = document.createElement("option");
+    o.value = opt.value;
+    o.textContent = opt.label;
+    paceSel.appendChild(o);
+  });
+  paceSel.value = slide.motionPace || slide.motion_pace || "";
+  paceSel.addEventListener("change", () => {
+    delete slide.motion_pace;
+    if (!paceSel.value) delete slide.motionPace;
+    else slide.motionPace = paceSel.value;
+    setDirty(true);
+    reloadStage(true);
+  });
+  paceGroup.appendChild(paceSel);
+
+  // Beginner one-click Progressive Item Reveal Mode
+  const revRow = document.createElement("div");
+  revRow.style.marginTop = "8px";
+  revRow.innerHTML = `<div class="field-label-row"><strong>نحوه نمایش آیتم‌ها (Item Reveal · Step-by-Step)</strong></div>`;
+  const revSel = document.createElement("select");
+  revSel.className = "select-ctrl";
+  const revMap = FX_CAT.revealModes || {};
+  [
+    { value: "", label: "خودکار بر اساس ریتم (Auto)" },
+    ...Object.keys(revMap).map((k) => ({ value: k, label: revMap[k].label || k })),
+  ].forEach((opt) => {
+    const o = document.createElement("option");
+    o.value = opt.value;
+    o.textContent = opt.label;
+    revSel.appendChild(o);
+  });
+  revSel.value = slide.revealMode || slide.reveal_mode || "";
+  revSel.addEventListener("change", () => {
+    delete slide.reveal_mode;
+    if (!revSel.value) delete slide.revealMode;
+    else slide.revealMode = revSel.value;
+    setDirty(true);
+    reloadStage(true);
+  });
+  revRow.appendChild(revSel);
+  paceGroup.appendChild(revRow);
+
+  // Collapsible Advanced Fine-Tune: exact speed multiplier, step delay (seconds), and Apply to All Slides
+  const paceAdv = document.createElement("details");
+  paceAdv.className = "advanced-block";
+  paceAdv.style.marginTop = "8px";
+  const paceAdvSum = document.createElement("summary");
+  paceAdvSum.textContent = "پیشرفته: سرعت دقیق و مکث گام‌به‌گام (Advanced Speed & Step Delay)";
+  paceAdvSum.style.cursor = "pointer";
+  paceAdvSum.style.fontSize = "12px";
+  paceAdvSum.style.opacity = "0.85";
+  paceAdv.appendChild(paceAdvSum);
+
+  const paceAdvBody = document.createElement("div");
+  paceAdvBody.style.display = "grid";
+  paceAdvBody.style.gap = "8px";
+  paceAdvBody.style.marginTop = "8px";
+
+  const spdWrap = document.createElement("label");
+  spdWrap.style.fontSize = "12px";
+  const curSpd = slide.motionSpeed != null ? Number(slide.motionSpeed) : 1.0;
+  spdWrap.innerHTML = `ضریب سرعت (۰.۳۵ خیلی آرام تا ۱.۸ سریع): <strong class="spd-val">${curSpd.toFixed(2)}×</strong>`;
+  const spdInput = document.createElement("input");
+  spdInput.type = "range";
+  spdInput.min = "0.35";
+  spdInput.max = "1.80";
+  spdInput.step = "0.05";
+  spdInput.value = String(curSpd);
+  spdInput.style.width = "100%";
+  spdInput.addEventListener("input", () => {
+    const v = Number(spdInput.value);
+    spdWrap.querySelector(".spd-val").textContent = v.toFixed(2) + "×";
+    if (Math.abs(v - 1.0) < 0.01) delete slide.motionSpeed;
+    else slide.motionSpeed = v;
+    setDirty(true);
+    reloadStage(true);
+  });
+  spdWrap.appendChild(spdInput);
+  paceAdvBody.appendChild(spdWrap);
+
+  const gapWrap = document.createElement("label");
+  gapWrap.style.fontSize = "12px";
+  const curGap = slide.stepDelay != null ? Number(slide.stepDelay) : 0;
+  gapWrap.innerHTML = `مکث بین هر مورد گام‌به‌گام (Step Delay): <strong class="gap-val">${curGap.toFixed(2)}s</strong>`;
+  const gapInput = document.createElement("input");
+  gapInput.type = "range";
+  gapInput.min = "0";
+  gapInput.max = "3.0";
+  gapInput.step = "0.1";
+  gapInput.value = String(curGap);
+  gapInput.style.width = "100%";
+  gapInput.addEventListener("input", () => {
+    const v = Number(gapInput.value);
+    gapWrap.querySelector(".gap-val").textContent = v.toFixed(2) + "s";
+    if (v <= 0.001) delete slide.stepDelay;
+    else slide.stepDelay = v;
+    setDirty(true);
+    reloadStage(true);
+  });
+  gapWrap.appendChild(gapInput);
+  paceAdvBody.appendChild(gapWrap);
+
+  const applyAllBtn = document.createElement("button");
+  applyAllBtn.type = "button";
+  applyAllBtn.className = "btn btn-ghost btn-sm";
+  applyAllBtn.textContent = "اعمال این ریتم روی کل ویدیو (Apply Pace to Project)";
+  applyAllBtn.addEventListener("click", () => {
+    if (!state.data) return;
+    if (slide.motionPersonality) state.data.motionPersonality = slide.motionPersonality;
+    else delete state.data.motionPersonality;
+    if (slide.motionPace) state.data.motionPace = slide.motionPace;
+    else delete state.data.motionPace;
+    if (slide.revealMode) state.data.revealMode = slide.revealMode;
+    else delete state.data.revealMode;
+    if (slide.motionSpeed != null) state.data.motionSpeed = slide.motionSpeed;
+    else delete state.data.motionSpeed;
+    if (slide.stepDelay != null) state.data.stepDelay = slide.stepDelay;
+    else delete state.data.stepDelay;
+    setDirty(true);
+    reloadStage(true);
+    if (typeof showToast === "function") showToast("ریتم انیمیشن روی کل پروژه اعمال شد");
+  });
+  paceAdvBody.appendChild(applyAllBtn);
+  paceAdv.appendChild(paceAdvBody);
+  paceGroup.appendChild(paceAdv);
+  secNar.appendChild(paceGroup);
+
   // Beginner one-click Text Animation Suite (14 RTL-safe presets, A2)
   const tmGroup = document.createElement("div");
   tmGroup.className = "field-group";
@@ -1514,10 +1655,10 @@ function renderContentTab(container, slide) {
   tmGroup.appendChild(tmSel);
   secNar.appendChild(tmGroup);
 
-  // Transition Library 2.0 (32 categorized broadcast transitions, A4)
+  // Transition Library 3.0 (40 categorized broadcast & YouTuber transitions)
   const trGroup = document.createElement("div");
   trGroup.className = "field-group";
-  trGroup.innerHTML = `<div class="field-label-row"><strong>ترنزیشن ورود اسلاید (Transition · 32)</strong></div>`;
+  trGroup.innerHTML = `<div class="field-label-row"><strong>ترنزیشن ورود اسلاید (Transition · 40)</strong></div>`;
   const trSel = document.createElement("select");
   trSel.className = "select-ctrl";
   [

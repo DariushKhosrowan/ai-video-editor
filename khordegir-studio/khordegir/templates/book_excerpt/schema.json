@@ -1,0 +1,24 @@
+{
+  "name": "book_excerpt",
+  "aliases": ["book-page", "بریده-کتاب", "صفحه-کتاب"],
+  "order": 55,
+  "category": "متن، مقاله و آموزش (Passages & Reading)",
+  "label": "بریده کتاب و حاشیه‌نویسی (Book Excerpt)",
+  "description": "نمایش صفحه‌ای از کتاب یا مقاله با خط‌کشی متحرک زیر نکته اصلی، شماره صفحه و خلاصه گوینده",
+  "fields": [
+    { "key": "book_title", "label": "نام کتاب (Book Title)", "type": "text", "editable": true },
+    { "key": "chapter", "label": "فصل و صفحه (Chapter / Page)", "type": "text", "editable": true },
+    { "key": "excerpt", "label": "متن بریده کتاب (Excerpt)", "type": "textarea", "required": true, "editable": true },
+    { "key": "key_line", "label": "جمله کلیدی برجسته (Key Highlighted Line)", "type": "textarea", "editable": true },
+    { "key": "author", "label": "نویسنده (Author)", "type": "text", "editable": true },
+    { "key": "commentary", "label": "تحلیل کوتاه (Commentary)", "type": "textarea", "editable": true }
+  ],
+  "example": {
+    "book_title": "تفکر، سریع و آهسته",
+    "chapter": "فصل ۱ · صفحه ۲۸",
+    "excerpt": "ذهن انسان دو سیستم دارد: سیستم اول سریع، خودکار و احساسی است؛ سیستم دوم کند، تحلیلی و نیازمند توجه آگاهانه است.",
+    "key_line": "وقتی سرعت اطلاعات بیش از حد زیاد شود، سیستم دوم خاموش می‌شود و قضاوت سطحی جای آن را می‌گیرد.",
+    "author": "دانیل کانمن",
+    "commentary": "همین قانون در ویدیو هم صادق است: سرعت آرام، فکر مخاطب را بیدار نگه می‌دارد."
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "passage_highlight",
+  "aliases": ["passage", "annotated-passage", "متن-تحلیلی", "هایلایت-متن"],
+  "order": 53,
+  "category": "متن، مقاله و آموزش (Passages & Reading)",
+  "label": "متن و هایلایت جمله‌به‌جمله (Passage Highlight)",
+  "description": "نمایش یک پاراگراف یا بریده مقاله که جملات کلیدی آن یکی‌یکی با ماژیک هایلایت و یادداشت حاشیه توضیح داده می‌شوند",
+  "fields": [
+    { "key": "eyebrow", "label": "برچسب منبع یا فصل (Eyebrow)", "type": "text", "editable": true },
+    { "key": "title", "label": "تیتر متن (Title)", "type": "text", "editable": true },
+    { "key": "sentences", "label": "جملات متن (هر خط یک جمله؛ برای هایلایت با ! شروع کنید)", "type": "list", "editable": true },
+    { "key": "takeaway", "label": "یادداشت تحلیلی حاشیه (Margin Note)", "type": "textarea", "editable": true },
+    { "key": "citation", "label": "مرجع و سال (Citation)", "type": "text", "editable": true }
+  ],
+  "example": {
+    "eyebrow": "تحلیل متن · مطالعه موردی",
+    "title": "چرا *ریتم آرام* درک مخاطب را دو برابر می‌کند؟",
+    "sentences": [
+      "بسیاری از ویدیوهای امروزی تمام اطلاعات را در یک ثانیه روی صفحه می‌ریزند.",
+      "!وقتی هر نکته هم‌زمان با کلام گوینده و به‌آرامی ظاهر می‌شود، مغز فرصت پردازش پیدا می‌کند.",
+      "نتیجه این رویکرد، کاهش خستگی چشم و افزایش چشمگیر ماندگاری پیام است."
+    ],
+    "takeaway": "نکته تدوین: بین هر مورد تازه حداقل ۰.۸ تا ۱.۲ ثانیه فضای تنفس بگذارید.",
+    "citation": "پژوهش شناختی رسانه · فصل ۴"
+  }
+}
