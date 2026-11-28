@@ -1,0 +1,91 @@
+{
+  "name": "stat_bars",
+  "label": "Stat Bars",
+  "label_fa": "نمودار میله‌ای افقی",
+  "description": "Horizontal comparison bars (2–7 rows) with start-aligned labels, bars growing from start, count-up values at bar ends, one highlighted bar, optional suffix and max.",
+  "category": "data",
+  "order": 65,
+  "version": 1,
+  "aliases": [
+    "stat-bars",
+    "horizontal-bars",
+    "progress-bars",
+    "میله-افقی"
+  ],
+  "fields": [
+    {
+      "key": "eyebrow",
+      "label": "Eyebrow (optional)",
+      "type": "text"
+    },
+    {
+      "key": "title",
+      "label": "Title",
+      "type": "text"
+    },
+    {
+      "key": "subtitle",
+      "label": "Subtitle (optional)",
+      "type": "text"
+    },
+    {
+      "key": "items",
+      "label": "Rows (Label: Value per line; wrap *Label* to highlight)",
+      "type": "textarea",
+      "required": true
+    },
+    {
+      "key": "highlight",
+      "label": "Highlighted Row (label or 1-based #; blank = *marked* or max)",
+      "type": "text"
+    },
+    {
+      "key": "max",
+      "label": "Max Scale Value (optional)",
+      "type": "number"
+    },
+    {
+      "key": "prefix",
+      "label": "Value Prefix (optional)",
+      "type": "text"
+    },
+    {
+      "key": "suffix",
+      "label": "Value Suffix (e.g. %)",
+      "type": "text"
+    },
+    {
+      "key": "decimals",
+      "label": "Decimal Places",
+      "type": "number",
+      "default": 0
+    },
+    {
+      "key": "unit",
+      "label": "Unit / Footnote Caption (optional)",
+      "type": "text"
+    }
+  ],
+  "example": {
+    "eyebrow": "ASCH (1955)",
+    "title": "Wrong answers grow with the *size* of the majority",
+    "items": "1 opponent: 3.6\n2 opponents: 13.6\n*3 opponents*: 31.8",
+    "highlight": "3 opponents",
+    "max": 40,
+    "suffix": "%",
+    "decimals": 1,
+    "unit": "Share of critical answers that followed the wrong majority. Larger majorities added little.",
+    "layout": "SCAM"
+  },
+  "example_fa": {
+    "eyebrow": "اش (۱۹۵۵)",
+    "title": "خطا با *بزرگ‌تر شدن* اکثریت بیشتر می‌شود",
+    "items": "۱ مخالف: 3.6\n۲ مخالف: 13.6\n*۳ مخالف*: 31.8",
+    "highlight": "۳ مخالف",
+    "max": 40,
+    "suffix": "٪",
+    "decimals": 1,
+    "unit": "سهمِ پاسخ‌های بحرانی که از اکثریتِ اشتباه پیروی کردند.",
+    "layout": "SCAM"
+  }
+}
