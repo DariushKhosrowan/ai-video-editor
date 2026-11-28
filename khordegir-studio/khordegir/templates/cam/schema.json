@@ -1,60 +1,120 @@
 {
-  "name": "cam",
-  "label": "فقط دوربین (بدون اسلاید)",
-  "description": "این قدم اسلاید ندارد؛ فقط تصویر خودت تمام‌صفحه. در خروجی OBS به‌صورت CAM ثبت می‌شود و فایل ویدیویی ساخته نمی‌شود.",
-  "aliases": [
-    "camera",
-    "دوربین"
-  ],
-  "category": "ویژه",
-  "fields": [
-    {
-      "key": "preset",
-      "label": "سبک انیمیشن",
-      "type": "select",
-      "options": [
-        ["auto", "کلاسیک / ارث‌بری"],
-        ["random", "🎲 تصادفی"],
-        ["cam-clean", "دوربین تمیز"],
-        ["cam-soft", "دوربین نرم"],
-        ["cam-pulse", "دوربین نبض‌دار"],
-        ["cam-editorial", "دوربین تحریریه"],
-        ["cam-focus", "تمرکز دوربین"],
-        ["cam-minimal", "دوربین ساده"]
-      ],
-      "default": "auto",
-      "editable": false
-    },
-    {
-      "key": "transition",
-      "label": "ترنزیشن ورود",
-      "type": "select",
-      "options": [
-        ["auto", "ارث‌بری"],
-        ["random", "🎲 تصادفی"],
-        ["soft-fade", "محو نرم"],
-        ["curtain-rtl", "پرده از راست به چپ"],
-        ["accent-slash", "نوار تأکید مورب"],
-        ["iris-rise", "باز شدن دایره‌ای"],
-        ["split-curtain", "پرده دوقسمتی"],
-        ["diagonal-wipe", "پاک‌شدن مورب"],
-        ["zoom-iris", "گشایش زوم"],
-        ["shutter-bars", "کرکره ستونی"]
-      ],
-      "default": "auto",
-      "editable": false
-    },
-    {
-      "key": "seed",
-      "label": "بذر تصادفی",
-      "type": "number",
-      "default": 0,
-      "editable": false
-    }
-  ],
-  "example": {
-    "layout": "CAM"
+ "name": "cam",
+ "label": "فقط دوربین (بدون اسلاید)",
+ "description": "این قدم اسلاید ندارد؛ فقط تصویر خودت تمام‌صفحه. در خروجی OBS به‌صورت CAM ثبت می‌شود و فایل ویدیویی ساخته نمی‌شود.",
+ "aliases": [
+  "camera",
+  "دوربین"
+ ],
+ "category": "ویژه",
+ "fields": [
+  {
+   "key": "preset",
+   "label": "سبک انیمیشن",
+   "type": "select",
+   "options": [
+    [
+     "auto",
+     "کلاسیک / ارث‌بری"
+    ],
+    [
+     "random",
+     "🎲 تصادفی"
+    ],
+    [
+     "cam-clean",
+     "دوربین تمیز"
+    ],
+    [
+     "cam-soft",
+     "دوربین نرم"
+    ],
+    [
+     "cam-pulse",
+     "دوربین نبض‌دار"
+    ],
+    [
+     "cam-editorial",
+     "دوربین تحریریه"
+    ],
+    [
+     "cam-focus",
+     "تمرکز دوربین"
+    ],
+    [
+     "cam-minimal",
+     "دوربین ساده"
+    ]
+   ],
+   "default": "auto",
+   "editable": false
   },
-  "order": 160,
-  "version": 1
+  {
+   "key": "transition",
+   "label": "ترنزیشن ورود",
+   "type": "select",
+   "options": [
+    [
+     "auto",
+     "ارث‌بری"
+    ],
+    [
+     "random",
+     "🎲 تصادفی"
+    ],
+    [
+     "soft-fade",
+     "محو نرم"
+    ],
+    [
+     "curtain-rtl",
+     "پرده از راست به چپ"
+    ],
+    [
+     "accent-slash",
+     "نوار تأکید مورب"
+    ],
+    [
+     "iris-rise",
+     "باز شدن دایره‌ای"
+    ],
+    [
+     "split-curtain",
+     "پرده دوقسمتی"
+    ],
+    [
+     "diagonal-wipe",
+     "پاک‌شدن مورب"
+    ],
+    [
+     "zoom-iris",
+     "گشایش زوم"
+    ],
+    [
+     "shutter-bars",
+     "کرکره ستونی"
+    ]
+   ],
+   "default": "auto",
+   "editable": false
+  },
+  {
+   "key": "seed",
+   "label": "بذر تصادفی",
+   "type": "number",
+   "default": 0,
+   "editable": false
+  }
+ ],
+ "example": {
+  "layout": "CAM"
+ },
+ "order": 160,
+ "version": 1,
+ "example_fa": {
+  "layout": "CAM"
+ },
+ "example_en": {
+  "layout": "CAM"
+ }
 }
