@@ -1,114 +1,180 @@
 {
-  "name": "line_chart",
-  "label": "نمودار خطی",
-  "description": "یک یا چند خط که از چپ به راست کشیده می‌شوند، با برچسب در انتهای هر خط و خط‌چین‌های رویداد.",
-  "aliases": [
-    "line-chart",
-    "line",
-    "نمودار خطی",
-    "خطی"
-  ],
-  "category": "نمودار",
-  "fields": [
-    {
-      "key": "title",
-      "label": "عنوان",
-      "type": "text",
-      "editable": true
-    },
-    {
-      "key": "subtitle",
-      "label": "زیرعنوان",
-      "type": "text",
-      "editable": true
-    },
-    {
-      "key": "series",
-      "label": "خط‌ها: «اسم: عدد، عدد، …» هر خط یک سطر",
-      "type": "series",
-      "editable": true
-    },
-    {
-      "key": "x_labels",
-      "label": "برچسب محور افقی (مثل: ۱=هفته ۱، ۵=هفته ۵)",
-      "type": "text",
-      "editable": false
-    },
-    {
-      "key": "vlines",
-      "label": "خط‌چین رویداد (مثل: ۵=شروع جریمه)",
-      "type": "text",
-      "editable": false
-    },
-    {
-      "key": "suffix",
-      "label": "واحد محور عمودی (مثل ٪)",
-      "type": "text",
-      "editable": false
-    },
-    {
-      "key": "ymax",
-      "label": "سقف محور عمودی",
-      "type": "number",
-      "editable": false
-    },
-    {
-      "key": "badge",
-      "label": "برچسب کوتاه کنار عنوان (مثل: نمودار مفهومی)",
-      "type": "text",
-      "editable": false
-    },
-    {
-      "key": "preset",
-      "label": "سبک انیمیشن",
-      "type": "select",
-      "options": [
-        ["auto", "کلاسیک / ارث‌بری"],
-        ["random", "🎲 تصادفی"],
-        ["sweep-trace", "کشش پیوسته خط"],
-        ["editorial-curve", "منحنی تحریریه"],
-        ["marker-pop", "پرش نقطه‌ها"],
-        ["glow-path", "خط نورانی"],
-        ["split-axis", "محورهای پویا"],
-        ["minimal-trace", "رسم مینیمال"]
-      ],
-      "default": "auto",
-      "editable": false
-    },
-    {
-      "key": "transition",
-      "label": "ترنزیشن ورود",
-      "type": "select",
-      "options": [
-        ["auto", "ارث‌بری"],
-        ["random", "🎲 تصادفی"],
-        ["soft-fade", "محو نرم"],
-        ["curtain-rtl", "پرده از راست به چپ"],
-        ["accent-slash", "نوار تأکید مورب"],
-        ["iris-rise", "باز شدن دایره‌ای"],
-        ["split-curtain", "پرده دوقسمتی"],
-        ["diagonal-wipe", "پاک‌شدن مورب"],
-        ["zoom-iris", "گشایش زوم"],
-        ["shutter-bars", "کرکره ستونی"]
-      ],
-      "default": "auto",
-      "editable": false
-    },
-    {
-      "key": "seed",
-      "label": "بذر تصادفی",
-      "type": "number",
-      "default": 0,
-      "editable": false
-    }
-  ],
-  "example": {
-    "title": "سهم همکاری در هر دور بازی",
-    "series": "با تنبیه: 13.5, 15.5, 16.5, 17.2, 17.6, 17.9, 18.2, 18.4, 18.5, 18.2\nبدون تنبیه: 10, 9.4, 8.9, 8.5, 8.1, 7.7, 7.2, 6.5, 5.5, 3.2",
-    "ymax": 20,
-    "source": "Fehr & Gächter, 2000 (AER)",
-    "layout": "SLIDE"
+ "name": "line_chart",
+ "label": "نمودار خطی",
+ "description": "یک یا چند خط که از چپ به راست کشیده می‌شوند، با برچسب در انتهای هر خط و خط‌چین‌های رویداد.",
+ "aliases": [
+  "line-chart",
+  "line",
+  "نمودار خطی",
+  "خطی"
+ ],
+ "category": "نمودار",
+ "fields": [
+  {
+   "key": "title",
+   "label": "عنوان",
+   "type": "text",
+   "editable": true
   },
-  "order": 50,
-  "version": 1
+  {
+   "key": "subtitle",
+   "label": "زیرعنوان",
+   "type": "text",
+   "editable": true
+  },
+  {
+   "key": "series",
+   "label": "خط‌ها: «اسم: عدد، عدد، …» هر خط یک سطر",
+   "type": "series",
+   "editable": true
+  },
+  {
+   "key": "x_labels",
+   "label": "برچسب محور افقی (مثل: ۱=هفته ۱، ۵=هفته ۵)",
+   "type": "text",
+   "editable": false
+  },
+  {
+   "key": "vlines",
+   "label": "خط‌چین رویداد (مثل: ۵=شروع جریمه)",
+   "type": "text",
+   "editable": false
+  },
+  {
+   "key": "suffix",
+   "label": "واحد محور عمودی (مثل ٪)",
+   "type": "text",
+   "editable": false
+  },
+  {
+   "key": "ymax",
+   "label": "سقف محور عمودی",
+   "type": "number",
+   "editable": false
+  },
+  {
+   "key": "badge",
+   "label": "برچسب کوتاه کنار عنوان (مثل: نمودار مفهومی)",
+   "type": "text",
+   "editable": false
+  },
+  {
+   "key": "preset",
+   "label": "سبک انیمیشن",
+   "type": "select",
+   "options": [
+    [
+     "auto",
+     "کلاسیک / ارث‌بری"
+    ],
+    [
+     "random",
+     "🎲 تصادفی"
+    ],
+    [
+     "sweep-trace",
+     "کشش پیوسته خط"
+    ],
+    [
+     "editorial-curve",
+     "منحنی تحریریه"
+    ],
+    [
+     "marker-pop",
+     "پرش نقطه‌ها"
+    ],
+    [
+     "glow-path",
+     "خط نورانی"
+    ],
+    [
+     "split-axis",
+     "محورهای پویا"
+    ],
+    [
+     "minimal-trace",
+     "رسم مینیمال"
+    ]
+   ],
+   "default": "auto",
+   "editable": false
+  },
+  {
+   "key": "transition",
+   "label": "ترنزیشن ورود",
+   "type": "select",
+   "options": [
+    [
+     "auto",
+     "ارث‌بری"
+    ],
+    [
+     "random",
+     "🎲 تصادفی"
+    ],
+    [
+     "soft-fade",
+     "محو نرم"
+    ],
+    [
+     "curtain-rtl",
+     "پرده از راست به چپ"
+    ],
+    [
+     "accent-slash",
+     "نوار تأکید مورب"
+    ],
+    [
+     "iris-rise",
+     "باز شدن دایره‌ای"
+    ],
+    [
+     "split-curtain",
+     "پرده دوقسمتی"
+    ],
+    [
+     "diagonal-wipe",
+     "پاک‌شدن مورب"
+    ],
+    [
+     "zoom-iris",
+     "گشایش زوم"
+    ],
+    [
+     "shutter-bars",
+     "کرکره ستونی"
+    ]
+   ],
+   "default": "auto",
+   "editable": false
+  },
+  {
+   "key": "seed",
+   "label": "بذر تصادفی",
+   "type": "number",
+   "default": 0,
+   "editable": false
+  }
+ ],
+ "example": {
+  "title": "سهم همکاری در هر دور بازی",
+  "series": "با تنبیه: 13.5, 15.5, 16.5, 17.2, 17.6, 17.9, 18.2, 18.4, 18.5, 18.2\nبدون تنبیه: 10, 9.4, 8.9, 8.5, 8.1, 7.7, 7.2, 6.5, 5.5, 3.2",
+  "ymax": 20,
+  "source": "Fehr & Gächter, 2000 (AER)",
+  "layout": "SLIDE"
+ },
+ "order": 50,
+ "version": 1,
+ "example_fa": {
+  "title": "سهم همکاری در هر دور بازی",
+  "series": "با تنبیه: 13.5, 15.5, 16.5, 17.2, 17.6, 17.9, 18.2, 18.4, 18.5, 18.2\nبدون تنبیه: 10, 9.4, 8.9, 8.5, 8.1, 7.7, 7.2, 6.5, 5.5, 3.2",
+  "ymax": 20,
+  "source": "Fehr & Gächter, 2000 (AER)",
+  "layout": "SLIDE"
+ },
+ "example_en": {
+  "title": "Sample line chart",
+  "series": "With feedback: 10, 12, 14, 15, 16, 17\nWithout: 10, 9.5, 9, 8.6, 8.2, 8",
+  "layout": "SLIDE"
+ }
 }
