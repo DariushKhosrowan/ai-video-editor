@@ -1,0 +1,86 @@
+{
+  "name": "doc_highlight",
+  "label": "Doc Highlight",
+  "label_fa": "برجسته‌سازی سند",
+  "description": "Paper or abstract excerpt on a document card where ==marked phrases== sweep in with a marker highlight one after another; optional link line.",
+  "category": "text",
+  "order": 105,
+  "version": 1,
+  "aliases": [
+    "doc-highlight",
+    "paper-highlight",
+    "abstract",
+    "سند"
+  ],
+  "fields": [
+    {
+      "key": "journal",
+      "label": "Journal / Publication",
+      "type": "text"
+    },
+    {
+      "key": "year",
+      "label": "Year",
+      "type": "text"
+    },
+    {
+      "key": "title",
+      "label": "Paper / Article Title",
+      "type": "text",
+      "required": true
+    },
+    {
+      "key": "excerpt",
+      "label": "Excerpt (wrap key phrases in ==like this==)",
+      "type": "textarea",
+      "required": true
+    },
+    {
+      "key": "link",
+      "label": "Source Link / DOI (optional)",
+      "type": "text"
+    },
+    {
+      "key": "tone",
+      "label": "Marker Highlight Colour",
+      "type": "select",
+      "options": [
+        [
+          "accent",
+          "Accent"
+        ],
+        [
+          "good",
+          "Good"
+        ],
+        [
+          "danger",
+          "Danger"
+        ],
+        [
+          "info",
+          "Info"
+        ]
+      ],
+      "default": "accent"
+    }
+  ],
+  "example": {
+    "journal": "JOURNAL OF PERSONALITY AND SOCIAL PSYCHOLOGY",
+    "year": "2024",
+    "title": "Saying no: The negative ramifications from invitation declines are less severe than we think",
+    "excerpt": "We demonstrate that ==invitees overestimate the negative ramifications== that arise in the eyes of inviters following an invitation decline.",
+    "link": "doi.org/10.1037/pspi0000443",
+    "tone": "accent",
+    "layout": "SCAM"
+  },
+  "example_fa": {
+    "journal": "مجله‌ی شخصیت و روان‌شناسی اجتماعی",
+    "year": "۲۰۲۴",
+    "title": "«نه» گفتن: پیامدهای ردِ دعوت از آن‌چه فکر می‌کنیم کمتر است",
+    "excerpt": "نشان می‌دهیم که ==دعوت‌شدگان پیامدهای منفیِ ردِ دعوت را بیش از حد تخمین می‌زنند== — در نگاهِ دعوت‌کننده این پیامدها کم‌رنگ‌ترند.",
+    "link": "doi.org/10.1037/pspi0000443",
+    "tone": "accent",
+    "layout": "SCAM"
+  }
+}
