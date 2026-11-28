@@ -1,101 +1,204 @@
 {
-  "name": "three_cards",
-  "label": "سه کارت",
-  "description": "سه (یا دو تا پنج) کارت کنار هم، هر کدام با عکس یا نماد و یک برچسب. اختیاری: یک عکس مشترک بالای کارت‌ها.",
-  "aliases": [
-    "three-cards",
-    "cards",
-    "کارت‌ها"
-  ],
-  "category": "تصویر",
-  "fields": [
-    {
-      "key": "title",
-      "label": "عنوان",
-      "type": "text",
-      "editable": true
-    },
-    {
-      "key": "image",
-      "label": "عکس مشترک بالا (اختیاری)",
-      "type": "image",
-      "editable": true
-    },
-    {
-      "key": "cards",
-      "label": "کارت‌ها",
-      "type": "table",
-      "columns": [
-        ["label", "برچسب"],
-        ["icon", "نماد/ایموجی"],
-        ["image", "عکس کارت"],
-        ["text", "توضیح"]
-      ],
-      "editable": true
-    },
-    {
-      "key": "preset",
-      "label": "سبک انیمیشن",
-      "type": "select",
-      "options": [
-        ["auto", "کلاسیک / ارث‌بری"],
-        ["random", "🎲 تصادفی"],
-        ["trio-cascade", "سه‌تایی آبشاری"],
-        ["elastic-fan", "بادبزن فنری"],
-        ["spotlight-cards", "کارت‌های درخشان"],
-        ["floating-trio", "کارت‌های شناور"],
-        ["sweep-grid", "ورود شبکه‌ای"],
-        ["minimal-cards", "کارت‌های ساده"]
-      ],
-      "default": "auto",
-      "editable": false
-    },
-    {
-      "key": "transition",
-      "label": "ترنزیشن ورود",
-      "type": "select",
-      "options": [
-        ["auto", "ارث‌بری"],
-        ["random", "🎲 تصادفی"],
-        ["soft-fade", "محو نرم"],
-        ["curtain-rtl", "پرده از راست به چپ"],
-        ["accent-slash", "نوار تأکید مورب"],
-        ["iris-rise", "باز شدن دایره‌ای"],
-        ["split-curtain", "پرده دوقسمتی"],
-        ["diagonal-wipe", "پاک‌شدن مورب"],
-        ["zoom-iris", "گشایش زوم"],
-        ["shutter-bars", "کرکره ستونی"]
-      ],
-      "default": "auto",
-      "editable": false
-    },
-    {
-      "key": "seed",
-      "label": "بذر تصادفی",
-      "type": "number",
-      "default": 0,
-      "editable": false
-    }
-  ],
-  "example": {
-    "title": "",
-    "image": "",
-    "cards": [
-      {
-        "label": "مشتری",
-        "icon": "🧾"
-      },
-      {
-        "label": "همکار",
-        "icon": "💼"
-      },
-      {
-        "label": "کارفرما",
-        "icon": "🏢"
-      }
-    ],
-    "layout": "SCAM"
+ "name": "three_cards",
+ "label": "سه کارت",
+ "description": "سه (یا دو تا پنج) کارت کنار هم، هر کدام با عکس یا نماد و یک برچسب. اختیاری: یک عکس مشترک بالای کارت‌ها.",
+ "aliases": [
+  "three-cards",
+  "cards",
+  "کارت‌ها"
+ ],
+ "category": "تصویر",
+ "fields": [
+  {
+   "key": "title",
+   "label": "عنوان",
+   "type": "text",
+   "editable": true
   },
-  "order": 110,
-  "version": 1
+  {
+   "key": "image",
+   "label": "عکس مشترک بالا (اختیاری)",
+   "type": "image",
+   "editable": true
+  },
+  {
+   "key": "cards",
+   "label": "کارت‌ها",
+   "type": "table",
+   "columns": [
+    [
+     "label",
+     "برچسب"
+    ],
+    [
+     "icon",
+     "نماد/ایموجی"
+    ],
+    [
+     "image",
+     "عکس کارت"
+    ],
+    [
+     "text",
+     "توضیح"
+    ]
+   ],
+   "editable": true
+  },
+  {
+   "key": "preset",
+   "label": "سبک انیمیشن",
+   "type": "select",
+   "options": [
+    [
+     "auto",
+     "کلاسیک / ارث‌بری"
+    ],
+    [
+     "random",
+     "🎲 تصادفی"
+    ],
+    [
+     "trio-cascade",
+     "سه‌تایی آبشاری"
+    ],
+    [
+     "elastic-fan",
+     "بادبزن فنری"
+    ],
+    [
+     "spotlight-cards",
+     "کارت‌های درخشان"
+    ],
+    [
+     "floating-trio",
+     "کارت‌های شناور"
+    ],
+    [
+     "sweep-grid",
+     "ورود شبکه‌ای"
+    ],
+    [
+     "minimal-cards",
+     "کارت‌های ساده"
+    ]
+   ],
+   "default": "auto",
+   "editable": false
+  },
+  {
+   "key": "transition",
+   "label": "ترنزیشن ورود",
+   "type": "select",
+   "options": [
+    [
+     "auto",
+     "ارث‌بری"
+    ],
+    [
+     "random",
+     "🎲 تصادفی"
+    ],
+    [
+     "soft-fade",
+     "محو نرم"
+    ],
+    [
+     "curtain-rtl",
+     "پرده از راست به چپ"
+    ],
+    [
+     "accent-slash",
+     "نوار تأکید مورب"
+    ],
+    [
+     "iris-rise",
+     "باز شدن دایره‌ای"
+    ],
+    [
+     "split-curtain",
+     "پرده دوقسمتی"
+    ],
+    [
+     "diagonal-wipe",
+     "پاک‌شدن مورب"
+    ],
+    [
+     "zoom-iris",
+     "گشایش زوم"
+    ],
+    [
+     "shutter-bars",
+     "کرکره ستونی"
+    ]
+   ],
+   "default": "auto",
+   "editable": false
+  },
+  {
+   "key": "seed",
+   "label": "بذر تصادفی",
+   "type": "number",
+   "default": 0,
+   "editable": false
+  }
+ ],
+ "example": {
+  "title": "",
+  "image": "",
+  "cards": [
+   {
+    "label": "مشتری",
+    "icon": "🧾"
+   },
+   {
+    "label": "همکار",
+    "icon": "💼"
+   },
+   {
+    "label": "کارفرما",
+    "icon": "🏢"
+   }
+  ],
+  "layout": "SCAM"
+ },
+ "order": 110,
+ "version": 1,
+ "example_fa": {
+  "title": "",
+  "image": "",
+  "cards": [
+   {
+    "label": "مشتری",
+    "icon": "🧾"
+   },
+   {
+    "label": "همکار",
+    "icon": "💼"
+   },
+   {
+    "label": "کارفرما",
+    "icon": "🏢"
+   }
+  ],
+  "layout": "SCAM"
+ },
+ "example_en": {
+  "title": "Who asks you?",
+  "cards": [
+   {
+    "label": "Customer",
+    "icon": "🧾"
+   },
+   {
+    "label": "Colleague",
+    "icon": "💼"
+   },
+   {
+    "label": "Boss",
+    "icon": "🏢"
+   }
+  ],
+  "layout": "SCAM"
+ }
 }
