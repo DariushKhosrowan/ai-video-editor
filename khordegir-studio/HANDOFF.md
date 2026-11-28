@@ -17,6 +17,28 @@ See also: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [REA
   Nothing was copied into `slides/studio/` (yaml has `copy: [mp4]`; run with `--copy-to` when wanted).
 * Render speed: ~0.15–0.3 s per frame (screenshot-bound). 2 parallel workers (`--jobs`).
 
+## Update 2026-11-28 — bilingual engine (RTL + LTR) + 9 new templates (product development, not video-specific)
+* **Themes are now direction-aware.** A theme may set `dir: "ltr"`, `lang`, `digits: "latin"|"persian"` and `font: {family, body, faces:[{family,file,weight}]}`.
+  `Stage.useTheme` switches `#stage` direction, `<html dir/lang>`, fonts and number formatting (`Stage.fmt` → `1,234.5` in LTR, `۱٬۲۳۴٫۵` in RTL).
+  `S.rich` has an LTR path (markup only; Persian runs inside English are isolated). Default theme is still `khordegir-dark`
+  regardless of file order (`window.DEFAULT_THEME` overrides).
+* **New theme `english-convey`** (themes/english-convey.js): brand red `#F2333B` on near-black `#0B0E14` (from the English Convey eagle logo),
+  Montserrat (headings/numbers) + Inter (body) bundled as woff2 in `fonts/` (SIL OFL 1.1, see fonts/OFL.txt), `motion.word` role for kinetic text.
+* **Direction helpers in the build API:** `A.ltr`, `A.dir`, `A.start`/`A.end` (CSS side where reading starts/ends), `A.originStart`
+  (transform-origin "grow from reading start"), `A.sign` (×x-offset), `A.mx(x,w)` (mirror an RTL-designed x). fx.js "slide"/"mask"
+  entrances now come from the reading start in both directions. Existing templates title_card, big_number, quote, section_break, timeline
+  were patched to use them (no visual change in RTL).
+* **Bug fixed in `A.fit`:** it measured children with `offsetTop`, which is relative to the nearest *positioned* ancestor, so text inside a
+  non-positioned box was always shrunk to the minimum scale. Now measured relative to the box with `getBoundingClientRect`.
+  (`stage.css` also makes `.card` inside `.col`/cards flow with `position:relative`.)
+* **9 new templates** (designed with Gemini 4 Hydrogen in AI Studio, integrated/fixed/tested here): `kinetic_text`, `quote_card`, `study_card`,
+  `split_compare`, `stat_bars`, `lower_third`, `punch_in`, `chapter_card`, `doc_highlight`. Each has `schema.json` with an English `example`
+  and a Persian `example_fa`, `template.js`, `preview.png` (Persian theme) and `preview-en.png` (english-convey theme).
+  All were test-rendered in both themes × both layouts (SCAM/SLIDE): no console errors, nothing in the camera box, no off-stage text.
+* **Gallery is bilingual:** `python3 -m khordegir gallery` now renders `example_fa` (or `example`) with the default theme → `gallery/gallery.png`,
+  and every template whose `example` is English with `english-convey` → `gallery/gallery-en.png` + `templates/<name>/preview-en.png`.
+* Use an LTR theme per video with `theme: english-convey` in `video.yaml` (example: `videos/english-convey-video1/`).
+
 ## File layout
 ```
 khordegir-studio/
