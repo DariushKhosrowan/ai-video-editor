@@ -1,0 +1,71 @@
+{
+  "name": "punch_in",
+  "label": "Punch In",
+  "label_fa": "کوبش کلمه",
+  "description": "One giant word or short phrase slamming in from 1.25× to 1× with slight blur-in, an accent impact flash behind it, and an optional caption.",
+  "category": "text",
+  "order": 85,
+  "version": 1,
+  "aliases": [
+    "punch-in",
+    "slam",
+    "big-word",
+    "کوبش"
+  ],
+  "fields": [
+    {
+      "key": "eyebrow",
+      "label": "Small Eyebrow (optional)",
+      "type": "text"
+    },
+    {
+      "key": "text",
+      "label": "Giant Word / Short Phrase",
+      "type": "text",
+      "required": true
+    },
+    {
+      "key": "caption",
+      "label": "Caption Below (optional)",
+      "type": "text"
+    },
+    {
+      "key": "tone",
+      "label": "Accent Flash Colour",
+      "type": "select",
+      "options": [
+        [
+          "accent",
+          "Accent"
+        ],
+        [
+          "danger",
+          "Danger"
+        ],
+        [
+          "good",
+          "Good"
+        ],
+        [
+          "text",
+          "White / Neutral"
+        ]
+      ],
+      "default": "accent"
+    }
+  ],
+  "example": {
+    "eyebrow": "THE ALLY EFFECT",
+    "text": "*ONE* VOICE",
+    "caption": "One truthful partner: wrong answers only one fourth as often.",
+    "tone": "accent",
+    "layout": "SCAM"
+  },
+  "example_fa": {
+    "eyebrow": "اثرِ هم‌پیمان",
+    "text": "*یک* صدا",
+    "caption": "با یک هم‌پیمانِ صادق، خطا یک‌چهارم شد.",
+    "tone": "accent",
+    "layout": "SCAM"
+  }
+}
