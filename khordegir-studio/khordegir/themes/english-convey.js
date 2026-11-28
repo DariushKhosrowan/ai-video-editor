@@ -67,11 +67,13 @@ Stage.defineTheme({
   fx: {
     variants: ["rise", "slide", "mask", "blur", "scale"],
     motions: { "breathe": 3, "zoom-out": 2, "pan-left": 1, "pan-right": 1, "depth": 2 },
-    grain: true, dust: "random", leak: "random", accent: "random"
+    grain: true, dust: "random", leak: "random", accent: "random", autoTransition: true, emphasisPop: true, handDrawn: true
   },
+  background: { style: "explainer" },
   clip: { fade: 0.3, hold: 2.5, min: 6 },
   layout: {
     margin: 80, top: 64, bottom: 64, radius: 18, badgeRadius: 8,
+    safe: { x: 96, y: 72 },
     cam: [24, 740, 584, 1055],
     scamLeft: 650
   }
