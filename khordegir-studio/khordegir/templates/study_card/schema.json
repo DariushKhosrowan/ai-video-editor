@@ -1,0 +1,75 @@
+{
+  "name": "study_card",
+  "label": "Study Card",
+  "label_fa": "کارت پژوهش علمی",
+  "description": "Research citation card with study eyebrow, authors, journal, sample-size badge, one-sentence finding, 1–3 count-up numbers, and optional caveat.",
+  "category": "data",
+  "order": 45,
+  "version": 1,
+  "aliases": [
+    "study-card",
+    "research-card",
+    "citation",
+    "پژوهش"
+  ],
+  "fields": [
+    {
+      "key": "eyebrow",
+      "label": "Eyebrow (e.g. STUDY · 2008)",
+      "type": "text"
+    },
+    {
+      "key": "sample",
+      "label": "Sample Size Badge (e.g. n = 51)",
+      "type": "text"
+    },
+    {
+      "key": "authors",
+      "label": "Authors & Year",
+      "type": "text",
+      "required": true
+    },
+    {
+      "key": "journal",
+      "label": "Journal / Institution",
+      "type": "text"
+    },
+    {
+      "key": "finding",
+      "label": "Key Finding (1 sentence)",
+      "type": "textarea",
+      "required": true
+    },
+    {
+      "key": "stats",
+      "label": "1–3 Numbers (Label: Value | tone per line)",
+      "type": "textarea",
+      "required": true
+    },
+    {
+      "key": "caveat",
+      "label": "Caveat / Limitation (optional)",
+      "type": "text"
+    }
+  ],
+  "example": {
+    "eyebrow": "STUDY · 2008",
+    "sample": "Columbia students",
+    "authors": "Flynn & Lake (2008)",
+    "journal": "Journal of Personality and Social Psychology",
+    "finding": "Asked to find one stranger who would walk them to the gym, people *overestimated* how many they'd need to ask.",
+    "stats": "Predicted asks: 7.2 | danger\nActual asks: 2.3 | accent",
+    "caveat": "Study 2 · most students already knew where the gym was.",
+    "layout": "SCAM"
+  },
+  "example_fa": {
+    "eyebrow": "پژوهش · ۲۰۰۸",
+    "sample": "دانشجویان کلمبیا",
+    "authors": "فلین و لیک (۲۰۰۸)",
+    "journal": "مجله‌ی شخصیت و روان‌شناسی اجتماعی",
+    "finding": "برای پیدا کردن یک غریبه که تا باشگاه همراهشان بیاید، تعداد درخواست‌های لازم را *بیش از حد* تخمین زدند.",
+    "stats": "پیش‌بینی: 7.2 | danger\nواقعی: 2.3 | accent",
+    "caveat": "آزمایش ۲ · بیشترِ دانشجوها جای باشگاه را می‌دانستند.",
+    "layout": "SCAM"
+  }
+}
