@@ -1,0 +1,82 @@
+{
+  "name": "kinetic_text",
+  "label": "Kinetic Text",
+  "label_fa": "تایپوگرافی متحرک",
+  "description": "Word-by-word kinetic typography with rise and blur-in; *emphasis* words punch in accent colour with an underline sweep.",
+  "category": "text",
+  "order": 25,
+  "version": 1,
+  "aliases": [
+    "kinetic-text",
+    "kinetic",
+    "word-reveal",
+    "تایپوگرافی"
+  ],
+  "fields": [
+    {
+      "key": "eyebrow",
+      "label": "Eyebrow (optional)",
+      "type": "text"
+    },
+    {
+      "key": "text",
+      "label": "Sentence (*accent* ~danger~ _muted_ ==highlight==)",
+      "type": "textarea",
+      "required": true
+    },
+    {
+      "key": "align",
+      "label": "Alignment",
+      "type": "select",
+      "options": [
+        [
+          "center",
+          "Center"
+        ],
+        [
+          "start",
+          "Start (Left in LTR / Right in RTL)"
+        ]
+      ],
+      "default": "center"
+    },
+    {
+      "key": "size",
+      "label": "Text Size",
+      "type": "select",
+      "options": [
+        [
+          "auto",
+          "Auto"
+        ],
+        [
+          "xl",
+          "Extra Large"
+        ],
+        [
+          "hero",
+          "Hero"
+        ],
+        [
+          "h1",
+          "Medium (H1)"
+        ]
+      ],
+      "default": "auto"
+    }
+  ],
+  "example": {
+    "eyebrow": "THE CORE IDEA",
+    "text": "A boundary says what *you* won't do.\nA principle makes others ~question~ what they're doing.",
+    "align": "center",
+    "size": "auto",
+    "layout": "SCAM"
+  },
+  "example_fa": {
+    "eyebrow": "ایده‌ی اصلی",
+    "text": "مرزِ شخصی می‌گوید *تو* چه کاری نمی‌کنی.\nاصلِ اخلاقی دیگران را به ~تردید~ می‌اندازد.",
+    "align": "center",
+    "size": "auto",
+    "layout": "SCAM"
+  }
+}
