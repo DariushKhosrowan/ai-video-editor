@@ -1,0 +1,67 @@
+{
+  "name": "lower_third",
+  "label": "Lower Third",
+  "label_fa": "زیرنویس معرفی",
+  "description": "Broadcast-style name and role strip with an animated accent bar wipe; safely avoids the bottom-left camera box in SCAM layout.",
+  "category": "people",
+  "order": 75,
+  "version": 1,
+  "aliases": [
+    "lower-third",
+    "chyron",
+    "name-tag",
+    "معرفی"
+  ],
+  "fields": [
+    {
+      "key": "name",
+      "label": "Name",
+      "type": "text",
+      "required": true
+    },
+    {
+      "key": "role",
+      "label": "Role / Title",
+      "type": "text"
+    },
+    {
+      "key": "tag",
+      "label": "Small Uppercase Tag (optional)",
+      "type": "text"
+    },
+    {
+      "key": "position",
+      "label": "Position",
+      "type": "select",
+      "options": [
+        [
+          "auto",
+          "Auto"
+        ],
+        [
+          "top",
+          "Top / Above Camera"
+        ],
+        [
+          "bottom",
+          "Bottom / Beside Camera"
+        ]
+      ],
+      "default": "auto"
+    }
+  ],
+  "example": {
+    "name": "Solomon Asch",
+    "role": "Social psychologist · \"Opinions and Social Pressure\", 1955",
+    "tag": "RESEARCHER",
+    "position": "auto",
+    "layout": "SCAM"
+  },
+  "example_fa": {
+    "name": "سولومون اش",
+    "role": "روان‌شناس اجتماعی · «عقاید و فشار اجتماعی»، ۱۹۵۵",
+    "tag": "پژوهشگر",
+    "position": "auto",
+    "layout": "SCAM"
+  }
+}
