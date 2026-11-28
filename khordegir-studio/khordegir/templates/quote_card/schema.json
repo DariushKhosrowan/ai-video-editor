@@ -1,0 +1,107 @@
+{
+  "name": "quote_card",
+  "label": "Quote Card",
+  "label_fa": "کارت نقل‌قول",
+  "description": "Editorial pull-quote card with oversized animated quotation mark, drawing accent rule, author attribution, and optional portrait on the end side.",
+  "category": "text",
+  "order": 35,
+  "version": 1,
+  "aliases": [
+    "quote-card",
+    "pull-quote",
+    "نقل‌قول"
+  ],
+  "fields": [
+    {
+      "key": "eyebrow",
+      "label": "Eyebrow (optional)",
+      "type": "text"
+    },
+    {
+      "key": "quote",
+      "label": "Quote",
+      "type": "textarea",
+      "required": true
+    },
+    {
+      "key": "author",
+      "label": "Author",
+      "type": "text",
+      "required": true
+    },
+    {
+      "key": "role",
+      "label": "Role / Publication / Year",
+      "type": "text"
+    },
+    {
+      "key": "image",
+      "label": "Portrait Image (optional)",
+      "type": "image"
+    },
+    {
+      "key": "tone",
+      "label": "Accent Colour",
+      "type": "select",
+      "options": [
+        [
+          "accent",
+          "Accent"
+        ],
+        [
+          "danger",
+          "Danger"
+        ],
+        [
+          "info",
+          "Info"
+        ]
+      ],
+      "default": "accent"
+    },
+    {
+      "key": "motion",
+      "label": "Portrait Motion",
+      "type": "select",
+      "options": [
+        [
+          "breathe",
+          "Breathe"
+        ],
+        [
+          "zoom-out",
+          "Zoom Out"
+        ],
+        [
+          "pan-left",
+          "Pan Left"
+        ],
+        [
+          "pan-right",
+          "Pan Right"
+        ],
+        [
+          "none",
+          "Static"
+        ]
+      ],
+      "default": "breathe"
+    }
+  ],
+  "example": {
+    "eyebrow": "MORAL REBELS",
+    "quote": "Rebels are resented when their *implicit reproach* threatens the positive self-image of individuals who did not rebel.",
+    "author": "Monin, Sawyer & Marquez",
+    "role": "Journal of Personality and Social Psychology, 2008",
+    "tone": "accent",
+    "layout": "SCAM"
+  },
+  "example_fa": {
+    "eyebrow": "یاغی‌های اخلاقی",
+    "quote": "از یاغی‌ها وقتی دلخور می‌شویم که *سرزنشِ ناگفته‌شان* تصویرِ خوبِ ما از خودمان را تهدید کند.",
+    "author": "مونین، سایر و مارکز",
+    "role": "مجله‌ی شخصیت و روان‌شناسی اجتماعی، ۲۰۰۸",
+    "tone": "accent",
+    "layout": "SCAM"
+  }
+}
