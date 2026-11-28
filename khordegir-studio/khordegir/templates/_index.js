@@ -16,34 +16,29 @@ window.TEMPLATE_INDEX = [
     {
      "key": "eyebrow",
      "label": "تیتر کوچک بالا",
-     "type": "text",
-     "editable": true
+     "type": "text"
     },
     {
      "key": "title",
      "label": "عنوان اصلی (*زرد* ، ~قرمز~)",
      "type": "text",
-     "required": true,
-     "editable": true
+     "required": true
     },
     {
      "key": "subtitle",
      "label": "زیرعنوان",
-     "type": "textarea",
-     "editable": true
+     "type": "textarea"
     },
     {
      "key": "image",
      "label": "عکس پس‌زمینه (اختیاری)",
-     "type": "image",
-     "editable": true
+     "type": "image"
     },
     {
      "key": "dim",
      "label": "تیرگی عکس (۰ تا ۱)",
      "type": "number",
-     "default": 0.55,
-     "editable": false
+     "default": 0.55
     },
     {
      "key": "align",
@@ -59,105 +54,7 @@ window.TEMPLATE_INDEX = [
        "وسط"
       ]
      ],
-     "default": "bottom",
-     "editable": false
-    },
-    {
-     "key": "preset",
-     "label": "سبک انیمیشن",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "کلاسیک / ارث‌بری از پروژه"
-      ],
-      [
-       "random",
-       "🎲 تصادفی (با بذر قطعی)"
-      ],
-      [
-       "kinetic-hero",
-       "تایپ کینتیک سینمایی"
-      ],
-      [
-       "spotlight",
-       "نورپردازی متمرکز"
-      ],
-      [
-       "curtain-editorial",
-       "پرده سردبیری"
-      ],
-      [
-       "split-contrast",
-       "کنتراست دوگانه"
-      ],
-      [
-       "minimal-type",
-       "تایپوگرافی مینیمال"
-      ],
-      [
-       "glitch-pop",
-       "پرش مدرن"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "transition",
-     "label": "ترنزیشن ورود",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "پیش‌فرض / ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "soft-fade",
-       "محو نرم (کلاسیک)"
-      ],
-      [
-       "curtain-rtl",
-       "پرده از راست به چپ"
-      ],
-      [
-       "accent-slash",
-       "نوار تأکید مورب"
-      ],
-      [
-       "iris-rise",
-       "باز شدن دایره‌ای"
-      ],
-      [
-       "split-curtain",
-       "پرده دوقسمتی"
-      ],
-      [
-       "diagonal-wipe",
-       "پاک‌شدن مورب"
-      ],
-      [
-       "zoom-iris",
-       "گشایش زوم"
-      ],
-      [
-       "shutter-bars",
-       "کرکره ستونی"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "seed",
-     "label": "بذر تصادفی",
-     "type": "number",
-     "default": 0,
-     "editable": false
+     "default": "bottom"
     }
    ],
    "example": {
@@ -170,7 +67,7 @@ window.TEMPLATE_INDEX = [
    "order": 0,
    "version": 1
   },
-  "css": "../templates/title_card/template.css"
+  "preview": "../templates/title_card/preview.png"
  },
  {
   "name": "big_number",
@@ -190,27 +87,23 @@ window.TEMPLATE_INDEX = [
      "key": "number",
      "label": "عدد",
      "type": "text",
-     "required": true,
-     "editable": true
+     "required": true
     },
     {
      "key": "prefix",
      "label": "قبل از عدد (مثل + یا حدود)",
-     "type": "text",
-     "editable": false
+     "type": "text"
     },
     {
      "key": "suffix",
      "label": "بعد از عدد (مثل ٪ یا نفر)",
-     "type": "text",
-     "editable": false
+     "type": "text"
     },
     {
      "key": "from",
      "label": "شروع شمارش از",
      "type": "number",
-     "default": 0,
-     "editable": false
+     "default": 0
     },
     {
      "key": "color",
@@ -230,32 +123,27 @@ window.TEMPLATE_INDEX = [
        "سفید"
       ]
      ],
-     "default": "accent",
-     "editable": false
+     "default": "accent"
     },
     {
      "key": "eyebrow",
      "label": "تیتر کوچک بالای عدد",
-     "type": "text",
-     "editable": true
+     "type": "text"
     },
     {
      "key": "caption",
      "label": "جمله‌ی زیر عدد",
-     "type": "textarea",
-     "editable": true
+     "type": "textarea"
     },
     {
      "key": "detail",
      "label": "توضیح کوچک",
-     "type": "text",
-     "editable": true
+     "type": "text"
     },
     {
      "key": "image",
      "label": "عکس کنار (اختیاری)",
-     "type": "image",
-     "editable": true
+     "type": "image"
     },
     {
      "key": "motion",
@@ -283,105 +171,7 @@ window.TEMPLATE_INDEX = [
        "ثابت"
       ]
      ],
-     "default": "breathe",
-     "editable": false
-    },
-    {
-     "key": "preset",
-     "label": "سبک انیمیشن",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "کلاسیک / ارث‌بری از پروژه"
-      ],
-      [
-       "random",
-       "🎲 تصادفی (با بذر قطعی)"
-      ],
-      [
-       "slam-count",
-       "شمارش کوبنده"
-      ],
-      [
-       "halo-pulse",
-       "هالهٔ نور و شمارش"
-      ],
-      [
-       "bar-meter",
-       "نوار سنجش پویا"
-      ],
-      [
-       "dual-split",
-       "چیدمان دوتایی"
-      ],
-      [
-       "kinetic-stat",
-       "آمار کینتیک"
-      ],
-      [
-       "minimal-count",
-       "شمارش تمیز"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "transition",
-     "label": "ترنزیشن ورود",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "پیش‌فرض / ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "soft-fade",
-       "محو نرم (کلاسیک)"
-      ],
-      [
-       "curtain-rtl",
-       "پرده از راست به چپ"
-      ],
-      [
-       "accent-slash",
-       "نوار تأکید مورب"
-      ],
-      [
-       "iris-rise",
-       "باز شدن دایره‌ای"
-      ],
-      [
-       "split-curtain",
-       "پرده دوقسمتی"
-      ],
-      [
-       "diagonal-wipe",
-       "پاک‌شدن مورب"
-      ],
-      [
-       "zoom-iris",
-       "گشایش زوم"
-      ],
-      [
-       "shutter-bars",
-       "کرکره ستونی"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "seed",
-     "label": "بذر تصادفی",
-     "type": "number",
-     "default": 0,
-     "editable": false
+     "default": "breathe"
     }
    ],
    "example": {
@@ -396,7 +186,7 @@ window.TEMPLATE_INDEX = [
    "order": 10,
    "version": 1
   },
-  "css": "../templates/big_number/template.css"
+  "preview": "../templates/big_number/preview.png"
  },
  {
   "name": "image_text",
@@ -415,32 +205,27 @@ window.TEMPLATE_INDEX = [
      "key": "image",
      "label": "عکس",
      "type": "image",
-     "required": true,
-     "editable": true
+     "required": true
     },
     {
      "key": "eyebrow",
      "label": "تیتر کوچک (زرد)",
-     "type": "text",
-     "editable": true
+     "type": "text"
     },
     {
      "key": "title",
      "label": "عنوان",
-     "type": "text",
-     "editable": true
+     "type": "text"
     },
     {
      "key": "text",
      "label": "متن",
-     "type": "textarea",
-     "editable": true
+     "type": "textarea"
     },
     {
      "key": "points",
      "label": "نکته‌ها / کارت‌ها (هر خط یکی)",
-     "type": "list",
-     "editable": true
+     "type": "list"
     },
     {
      "key": "motion",
@@ -468,8 +253,7 @@ window.TEMPLATE_INDEX = [
        "ثابت"
       ]
      ],
-     "default": "breathe",
-     "editable": false
+     "default": "breathe"
     },
     {
      "key": "fit",
@@ -485,8 +269,7 @@ window.TEMPLATE_INDEX = [
        "کامل دیده شود"
       ]
      ],
-     "default": "cover",
-     "editable": false
+     "default": "cover"
     },
     {
      "key": "shape",
@@ -502,105 +285,7 @@ window.TEMPLATE_INDEX = [
        "افقی (بالا)"
       ]
      ],
-     "default": "portrait",
-     "editable": false
-    },
-    {
-     "key": "preset",
-     "label": "سبک انیمیشن",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "کلاسیک / ارث‌بری از پروژه"
-      ],
-      [
-       "random",
-       "🎲 تصادفی (با بذر قطعی)"
-      ],
-      [
-       "editorial-split",
-       "قاب دو تکه سردبیری"
-      ],
-      [
-       "kenburns-drift",
-       "حرکت سینمایی تصویر"
-      ],
-      [
-       "card-float",
-       "کارت شناور"
-      ],
-      [
-       "frame-mask",
-       "پردهٔ ماسک تصویر"
-      ],
-      [
-       "accent-bar",
-       "خط تأکید پویا"
-      ],
-      [
-       "cinema-wide",
-       "کادر عریض سینمایی"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "transition",
-     "label": "ترنزیشن ورود",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "پیش‌فرض / ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "soft-fade",
-       "محو نرم (کلاسیک)"
-      ],
-      [
-       "curtain-rtl",
-       "پرده از راست به چپ"
-      ],
-      [
-       "accent-slash",
-       "نوار تأکید مورب"
-      ],
-      [
-       "iris-rise",
-       "باز شدن دایره‌ای"
-      ],
-      [
-       "split-curtain",
-       "پرده دوقسمتی"
-      ],
-      [
-       "diagonal-wipe",
-       "پاک‌شدن مورب"
-      ],
-      [
-       "zoom-iris",
-       "گشایش زوم"
-      ],
-      [
-       "shutter-bars",
-       "کرکره ستونی"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "seed",
-     "label": "بذر تصادفی",
-     "type": "number",
-     "default": 0,
-     "editable": false
+     "default": "portrait"
     }
    ],
    "example": {
@@ -614,7 +299,94 @@ window.TEMPLATE_INDEX = [
    "order": 20,
    "version": 1
   },
-  "css": "../templates/image_text/template.css"
+  "preview": "../templates/image_text/preview.png"
+ },
+ {
+  "name": "kinetic_text",
+  "js": "../templates/kinetic_text/template.js",
+  "schema": {
+   "name": "kinetic_text",
+   "label": "Kinetic Text",
+   "label_fa": "تایپوگرافی متحرک",
+   "description": "Word-by-word kinetic typography with rise and blur-in; *emphasis* words punch in accent colour with an underline sweep.",
+   "category": "text",
+   "order": 25,
+   "version": 1,
+   "aliases": [
+    "kinetic-text",
+    "kinetic",
+    "word-reveal",
+    "تایپوگرافی"
+   ],
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "Eyebrow (optional)",
+     "type": "text"
+    },
+    {
+     "key": "text",
+     "label": "Sentence (*accent* ~danger~ _muted_ ==highlight==)",
+     "type": "textarea",
+     "required": true
+    },
+    {
+     "key": "align",
+     "label": "Alignment",
+     "type": "select",
+     "options": [
+      [
+       "center",
+       "Center"
+      ],
+      [
+       "start",
+       "Start (Left in LTR / Right in RTL)"
+      ]
+     ],
+     "default": "center"
+    },
+    {
+     "key": "size",
+     "label": "Text Size",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "Auto"
+      ],
+      [
+       "xl",
+       "Extra Large"
+      ],
+      [
+       "hero",
+       "Hero"
+      ],
+      [
+       "h1",
+       "Medium (H1)"
+      ]
+     ],
+     "default": "auto"
+    }
+   ],
+   "example": {
+    "eyebrow": "THE CORE IDEA",
+    "text": "A boundary says what *you* won't do.\nA principle makes others ~question~ what they're doing.",
+    "align": "center",
+    "size": "auto",
+    "layout": "SCAM"
+   },
+   "example_fa": {
+    "eyebrow": "ایده‌ی اصلی",
+    "text": "مرزِ شخصی می‌گوید *تو* چه کاری نمی‌کنی.\nاصلِ اخلاقی دیگران را به ~تردید~ می‌اندازد.",
+    "align": "center",
+    "size": "auto",
+    "layout": "SCAM"
+   }
+  },
+  "preview": "../templates/kinetic_text/preview.png"
  },
  {
   "name": "bar_chart",
@@ -634,14 +406,12 @@ window.TEMPLATE_INDEX = [
     {
      "key": "title",
      "label": "عنوان",
-     "type": "text",
-     "editable": true
+     "type": "text"
     },
     {
      "key": "subtitle",
      "label": "زیرعنوان",
-     "type": "text",
-     "editable": true
+     "type": "text"
     },
     {
      "key": "data",
@@ -664,26 +434,22 @@ window.TEMPLATE_INDEX = [
        "display",
        "متن به‌جای عدد"
       ]
-     ],
-     "editable": true
+     ]
     },
     {
      "key": "prefix",
      "label": "قبل از عدد (مثل +)",
-     "type": "text",
-     "editable": false
+     "type": "text"
     },
     {
      "key": "suffix",
      "label": "بعد از عدد (مثل ٪)",
-     "type": "text",
-     "editable": false
+     "type": "text"
     },
     {
      "key": "highlight",
      "label": "میله‌ی برجسته (برچسب یا شماره)",
-     "type": "text",
-     "editable": false
+     "type": "text"
     },
     {
      "key": "orientation",
@@ -699,14 +465,12 @@ window.TEMPLATE_INDEX = [
        "افقی"
       ]
      ],
-     "default": "vertical",
-     "editable": false
+     "default": "vertical"
     },
     {
      "key": "ymax",
      "label": "سقف محور (اختیاری)",
-     "type": "number",
-     "editable": false
+     "type": "number"
     },
     {
      "key": "axis",
@@ -722,105 +486,7 @@ window.TEMPLATE_INDEX = [
        "پنهان"
       ]
      ],
-     "default": "true",
-     "editable": false
-    },
-    {
-     "key": "preset",
-     "label": "سبک انیمیشن",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "کلاسیک / ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "surge-bars",
-       "جهش میله‌ها"
-      ],
-      [
-       "editorial-bars",
-       "میله‌های تحریریه"
-      ],
-      [
-       "pulse-highlight",
-       "درخشش میلهٔ برجسته"
-      ],
-      [
-       "elastic-rise",
-       "رشد فنری"
-      ],
-      [
-       "cascade-grid",
-       "آبشاری شبکه"
-      ],
-      [
-       "minimal-bars",
-       "میله‌های تمیز"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "transition",
-     "label": "ترنزیشن ورود",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "soft-fade",
-       "محو نرم"
-      ],
-      [
-       "curtain-rtl",
-       "پرده از راست به چپ"
-      ],
-      [
-       "accent-slash",
-       "نوار تأکید مورب"
-      ],
-      [
-       "iris-rise",
-       "باز شدن دایره‌ای"
-      ],
-      [
-       "split-curtain",
-       "پرده دوقسمتی"
-      ],
-      [
-       "diagonal-wipe",
-       "پاک‌شدن مورب"
-      ],
-      [
-       "zoom-iris",
-       "گشایش زوم"
-      ],
-      [
-       "shutter-bars",
-       "کرکره ستونی"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "seed",
-     "label": "بذر تصادفی",
-     "type": "number",
-     "default": 0,
-     "editable": false
+     "default": "true"
     }
    ],
    "example": {
@@ -842,7 +508,120 @@ window.TEMPLATE_INDEX = [
    },
    "order": 30,
    "version": 1
-  }
+  },
+  "preview": "../templates/bar_chart/preview.png"
+ },
+ {
+  "name": "quote_card",
+  "js": "../templates/quote_card/template.js",
+  "schema": {
+   "name": "quote_card",
+   "label": "Quote Card",
+   "label_fa": "کارت نقل‌قول",
+   "description": "Editorial pull-quote card with oversized animated quotation mark, drawing accent rule, author attribution, and optional portrait on the end side.",
+   "category": "text",
+   "order": 35,
+   "version": 1,
+   "aliases": [
+    "quote-card",
+    "pull-quote",
+    "نقل‌قول"
+   ],
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "Eyebrow (optional)",
+     "type": "text"
+    },
+    {
+     "key": "quote",
+     "label": "Quote",
+     "type": "textarea",
+     "required": true
+    },
+    {
+     "key": "author",
+     "label": "Author",
+     "type": "text",
+     "required": true
+    },
+    {
+     "key": "role",
+     "label": "Role / Publication / Year",
+     "type": "text"
+    },
+    {
+     "key": "image",
+     "label": "Portrait Image (optional)",
+     "type": "image"
+    },
+    {
+     "key": "tone",
+     "label": "Accent Colour",
+     "type": "select",
+     "options": [
+      [
+       "accent",
+       "Accent"
+      ],
+      [
+       "danger",
+       "Danger"
+      ],
+      [
+       "info",
+       "Info"
+      ]
+     ],
+     "default": "accent"
+    },
+    {
+     "key": "motion",
+     "label": "Portrait Motion",
+     "type": "select",
+     "options": [
+      [
+       "breathe",
+       "Breathe"
+      ],
+      [
+       "zoom-out",
+       "Zoom Out"
+      ],
+      [
+       "pan-left",
+       "Pan Left"
+      ],
+      [
+       "pan-right",
+       "Pan Right"
+      ],
+      [
+       "none",
+       "Static"
+      ]
+     ],
+     "default": "breathe"
+    }
+   ],
+   "example": {
+    "eyebrow": "MORAL REBELS",
+    "quote": "Rebels are resented when their *implicit reproach* threatens the positive self-image of individuals who did not rebel.",
+    "author": "Monin, Sawyer & Marquez",
+    "role": "Journal of Personality and Social Psychology, 2008",
+    "tone": "accent",
+    "layout": "SCAM"
+   },
+   "example_fa": {
+    "eyebrow": "یاغی‌های اخلاقی",
+    "quote": "از یاغی‌ها وقتی دلخور می‌شویم که *سرزنشِ ناگفته‌شان* تصویرِ خوبِ ما از خودمان را تهدید کند.",
+    "author": "مونین، سایر و مارکز",
+    "role": "مجله‌ی شخصیت و روان‌شناسی اجتماعی، ۲۰۰۸",
+    "tone": "accent",
+    "layout": "SCAM"
+   }
+  },
+  "preview": "../templates/quote_card/preview.png"
  },
  {
   "name": "bullet_list",
@@ -861,21 +640,18 @@ window.TEMPLATE_INDEX = [
     {
      "key": "eyebrow",
      "label": "تیتر کوچک",
-     "type": "text",
-     "editable": true
+     "type": "text"
     },
     {
      "key": "title",
      "label": "عنوان",
-     "type": "text",
-     "editable": true
+     "type": "text"
     },
     {
      "key": "items",
      "label": "موردها (هر خط یکی؛ *زرد* ~قرمز~)",
      "type": "list",
-     "required": true,
-     "editable": true
+     "required": true
     },
     {
      "key": "numbered",
@@ -891,8 +667,7 @@ window.TEMPLATE_INDEX = [
        "نه"
       ]
      ],
-     "default": "true",
-     "editable": false
+     "default": "true"
     },
     {
      "key": "columns",
@@ -908,105 +683,7 @@ window.TEMPLATE_INDEX = [
        "۲"
       ]
      ],
-     "default": "1",
-     "editable": false
-    },
-    {
-     "key": "preset",
-     "label": "سبک انیمیشن",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "کلاسیک / ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "stagger-cards",
-       "ورود پلکانی کارت‌ها"
-      ],
-      [
-       "cascade-rows",
-       "آبشاری از راست"
-      ],
-      [
-       "timeline-rail",
-       "خط راهنمای عمودی"
-      ],
-      [
-       "pill-grid",
-       "شبکه مدرن"
-      ],
-      [
-       "spotlight-focus",
-       "تأکید نوری روی مورد"
-      ],
-      [
-       "minimal-clean",
-       "ورود نرم و تمیز"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "transition",
-     "label": "ترنزیشن ورود",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "soft-fade",
-       "محو نرم"
-      ],
-      [
-       "curtain-rtl",
-       "پرده از راست به چپ"
-      ],
-      [
-       "accent-slash",
-       "نوار تأکید مورب"
-      ],
-      [
-       "iris-rise",
-       "باز شدن دایره‌ای"
-      ],
-      [
-       "split-curtain",
-       "پرده دوقسمتی"
-      ],
-      [
-       "diagonal-wipe",
-       "پاک‌شدن مورب"
-      ],
-      [
-       "zoom-iris",
-       "گشایش زوم"
-      ],
-      [
-       "shutter-bars",
-       "کرکره ستونی"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "seed",
-     "label": "بذر تصادفی",
-     "type": "number",
-     "default": 0,
-     "editable": false
+     "default": "1"
     }
    ],
    "example": {
@@ -1021,7 +698,87 @@ window.TEMPLATE_INDEX = [
    "order": 40,
    "version": 1
   },
-  "css": "../templates/bullet_list/template.css"
+  "preview": "../templates/bullet_list/preview.png"
+ },
+ {
+  "name": "study_card",
+  "js": "../templates/study_card/template.js",
+  "schema": {
+   "name": "study_card",
+   "label": "Study Card",
+   "label_fa": "کارت پژوهش علمی",
+   "description": "Research citation card with study eyebrow, authors, journal, sample-size badge, one-sentence finding, 1–3 count-up numbers, and optional caveat.",
+   "category": "data",
+   "order": 45,
+   "version": 1,
+   "aliases": [
+    "study-card",
+    "research-card",
+    "citation",
+    "پژوهش"
+   ],
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "Eyebrow (e.g. STUDY · 2008)",
+     "type": "text"
+    },
+    {
+     "key": "sample",
+     "label": "Sample Size Badge (e.g. n = 51)",
+     "type": "text"
+    },
+    {
+     "key": "authors",
+     "label": "Authors & Year",
+     "type": "text",
+     "required": true
+    },
+    {
+     "key": "journal",
+     "label": "Journal / Institution",
+     "type": "text"
+    },
+    {
+     "key": "finding",
+     "label": "Key Finding (1 sentence)",
+     "type": "textarea",
+     "required": true
+    },
+    {
+     "key": "stats",
+     "label": "1–3 Numbers (Label: Value | tone per line)",
+     "type": "textarea",
+     "required": true
+    },
+    {
+     "key": "caveat",
+     "label": "Caveat / Limitation (optional)",
+     "type": "text"
+    }
+   ],
+   "example": {
+    "eyebrow": "STUDY · 2008",
+    "sample": "Columbia students",
+    "authors": "Flynn & Lake (2008)",
+    "journal": "Journal of Personality and Social Psychology",
+    "finding": "Asked to find one stranger who would walk them to the gym, people *overestimated* how many they'd need to ask.",
+    "stats": "Predicted asks: 7.2 | danger\nActual asks: 2.3 | accent",
+    "caveat": "Study 2 · most students already knew where the gym was.",
+    "layout": "SCAM"
+   },
+   "example_fa": {
+    "eyebrow": "پژوهش · ۲۰۰۸",
+    "sample": "دانشجویان کلمبیا",
+    "authors": "فلین و لیک (۲۰۰۸)",
+    "journal": "مجله‌ی شخصیت و روان‌شناسی اجتماعی",
+    "finding": "برای پیدا کردن یک غریبه که تا باشگاه همراهشان بیاید، تعداد درخواست‌های لازم را *بیش از حد* تخمین زدند.",
+    "stats": "پیش‌بینی: 7.2 | danger\nواقعی: 2.3 | accent",
+    "caveat": "آزمایش ۲ · بیشترِ دانشجوها جای باشگاه را می‌دانستند.",
+    "layout": "SCAM"
+   }
+  },
+  "preview": "../templates/study_card/preview.png"
  },
  {
   "name": "line_chart",
@@ -1041,147 +798,42 @@ window.TEMPLATE_INDEX = [
     {
      "key": "title",
      "label": "عنوان",
-     "type": "text",
-     "editable": true
+     "type": "text"
     },
     {
      "key": "subtitle",
      "label": "زیرعنوان",
-     "type": "text",
-     "editable": true
+     "type": "text"
     },
     {
      "key": "series",
      "label": "خط‌ها: «اسم: عدد، عدد، …» هر خط یک سطر",
-     "type": "series",
-     "editable": true
+     "type": "series"
     },
     {
      "key": "x_labels",
      "label": "برچسب محور افقی (مثل: ۱=هفته ۱، ۵=هفته ۵)",
-     "type": "text",
-     "editable": false
+     "type": "text"
     },
     {
      "key": "vlines",
      "label": "خط‌چین رویداد (مثل: ۵=شروع جریمه)",
-     "type": "text",
-     "editable": false
+     "type": "text"
     },
     {
      "key": "suffix",
      "label": "واحد محور عمودی (مثل ٪)",
-     "type": "text",
-     "editable": false
+     "type": "text"
     },
     {
      "key": "ymax",
      "label": "سقف محور عمودی",
-     "type": "number",
-     "editable": false
+     "type": "number"
     },
     {
      "key": "badge",
      "label": "برچسب کوتاه کنار عنوان (مثل: نمودار مفهومی)",
-     "type": "text",
-     "editable": false
-    },
-    {
-     "key": "preset",
-     "label": "سبک انیمیشن",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "کلاسیک / ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "sweep-trace",
-       "کشش پیوسته خط"
-      ],
-      [
-       "editorial-curve",
-       "منحنی تحریریه"
-      ],
-      [
-       "marker-pop",
-       "پرش نقطه‌ها"
-      ],
-      [
-       "glow-path",
-       "خط نورانی"
-      ],
-      [
-       "split-axis",
-       "محورهای پویا"
-      ],
-      [
-       "minimal-trace",
-       "رسم مینیمال"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "transition",
-     "label": "ترنزیشن ورود",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "soft-fade",
-       "محو نرم"
-      ],
-      [
-       "curtain-rtl",
-       "پرده از راست به چپ"
-      ],
-      [
-       "accent-slash",
-       "نوار تأکید مورب"
-      ],
-      [
-       "iris-rise",
-       "باز شدن دایره‌ای"
-      ],
-      [
-       "split-curtain",
-       "پرده دوقسمتی"
-      ],
-      [
-       "diagonal-wipe",
-       "پاک‌شدن مورب"
-      ],
-      [
-       "zoom-iris",
-       "گشایش زوم"
-      ],
-      [
-       "shutter-bars",
-       "کرکره ستونی"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "seed",
-     "label": "بذر تصادفی",
-     "type": "number",
-     "default": 0,
-     "editable": false
+     "type": "text"
     }
    ],
    "example": {
@@ -1193,7 +845,187 @@ window.TEMPLATE_INDEX = [
    },
    "order": 50,
    "version": 1
-  }
+  },
+  "preview": "../templates/line_chart/preview.png"
+ },
+ {
+  "name": "split_compare",
+  "js": "../templates/split_compare/template.js",
+  "schema": {
+   "name": "split_compare",
+   "label": "Split Compare",
+   "label_fa": "مقایسه دوتایی",
+   "description": "Two side-by-side panels following reading direction with tone, optional icon/emoji, headline, body, drawing center divider, popping VS badge, and optional verdict.",
+   "category": "compare",
+   "order": 55,
+   "version": 1,
+   "aliases": [
+    "split-compare",
+    "versus",
+    "vs",
+    "مقایسه-دوتایی"
+   ],
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "Eyebrow (optional)",
+     "type": "text"
+    },
+    {
+     "key": "title",
+     "label": "Header Title (optional)",
+     "type": "text"
+    },
+    {
+     "key": "a_icon",
+     "label": "Side A — Icon / Emoji (optional)",
+     "type": "text"
+    },
+    {
+     "key": "a_title",
+     "label": "Side A — Headline",
+     "type": "text",
+     "required": true
+    },
+    {
+     "key": "a_body",
+     "label": "Side A — Body (lines or paragraph)",
+     "type": "textarea"
+    },
+    {
+     "key": "a_tone",
+     "label": "Side A — Tone",
+     "type": "select",
+     "options": [
+      [
+       "danger",
+       "Danger"
+      ],
+      [
+       "accent",
+       "Accent"
+      ],
+      [
+       "good",
+       "Good"
+      ],
+      [
+       "muted",
+       "Muted"
+      ]
+     ],
+     "default": "danger"
+    },
+    {
+     "key": "b_icon",
+     "label": "Side B — Icon / Emoji (optional)",
+     "type": "text"
+    },
+    {
+     "key": "b_title",
+     "label": "Side B — Headline",
+     "type": "text",
+     "required": true
+    },
+    {
+     "key": "b_body",
+     "label": "Side B — Body (lines or paragraph)",
+     "type": "textarea"
+    },
+    {
+     "key": "b_tone",
+     "label": "Side B — Tone",
+     "type": "select",
+     "options": [
+      [
+       "accent",
+       "Accent"
+      ],
+      [
+       "good",
+       "Good"
+      ],
+      [
+       "danger",
+       "Danger"
+      ],
+      [
+       "muted",
+       "Muted"
+      ]
+     ],
+     "default": "accent"
+    },
+    {
+     "key": "vs_label",
+     "label": "Center Badge Label",
+     "type": "text",
+     "default": "VS"
+    },
+    {
+     "key": "verdict",
+     "label": "Verdict Line (optional)",
+     "type": "text"
+    },
+    {
+     "key": "verdict_tone",
+     "label": "Verdict Tone",
+     "type": "select",
+     "options": [
+      [
+       "accent",
+       "Accent"
+      ],
+      [
+       "good",
+       "Good"
+      ],
+      [
+       "danger",
+       "Danger"
+      ],
+      [
+       "muted",
+       "Muted"
+      ]
+     ],
+     "default": "accent"
+    }
+   ],
+   "example": {
+    "eyebrow": "TWO KINDS OF NO",
+    "title": "Same word, *different* weight",
+    "a_icon": "🍦",
+    "a_title": "Personal boundary",
+    "a_body": "\"I'm skipping coffee tonight.\"\nSays what you won't do\nNo verdict on anyone else",
+    "a_tone": "accent",
+    "b_icon": "⚖️",
+    "b_title": "Principled refusal",
+    "b_body": "\"I won't join this.\"\nCan feel like a verdict\nMay make others question themselves",
+    "b_tone": "danger",
+    "vs_label": "VS",
+    "verdict": "Most everyday refusals land *softer* than we fear.",
+    "verdict_tone": "accent",
+    "layout": "SCAM"
+   },
+   "example_fa": {
+    "eyebrow": "دو نوع «نه»",
+    "title": "یک کلمه، *دو* وزن",
+    "a_icon": "🍦",
+    "a_title": "مرز شخصی",
+    "a_body": "«امشب قهوه نمی‌خورم.»\nفقط حدِ خودت را می‌گوید\nدرباره‌ی کسی قضاوت نمی‌کند",
+    "a_tone": "accent",
+    "b_icon": "⚖️",
+    "b_title": "امتناعِ اصولی",
+    "b_body": "«من در این کار شریک نمی‌شوم.»\nمثل حکم به نظر می‌رسد\nدیگران را به فکر وامی‌دارد",
+    "b_tone": "danger",
+    "vs_label": "در برابر",
+    "verdict": "بیشترِ «نه»‌های روزمره *نرم‌تر* از ترسِ ما فرود می‌آیند.",
+    "verdict_tone": "accent",
+    "layout": "SCAM"
+   }
+  },
+  "preview": "../templates/split_compare/preview.png"
  },
  {
   "name": "compare",
@@ -1211,8 +1043,7 @@ window.TEMPLATE_INDEX = [
     {
      "key": "title",
      "label": "عنوان",
-     "type": "text",
-     "editable": true
+     "type": "text"
     },
     {
      "key": "steps",
@@ -1239,111 +1070,12 @@ window.TEMPLATE_INDEX = [
        "suffix",
        "بعد"
       ]
-     ],
-     "editable": true
+     ]
     },
     {
      "key": "suffix",
      "label": "واحد مشترک (مثل ٪)",
-     "type": "text",
-     "editable": false
-    },
-    {
-     "key": "preset",
-     "label": "سبک انیمیشن",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "کلاسیک / ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "versus-clash",
-       "مقایسه کوبنده"
-      ],
-      [
-       "editorial-delta",
-       "تفاوت تحریریه"
-      ],
-      [
-       "sweep-compare",
-       "فلش کشیده"
-      ],
-      [
-       "pop-badges",
-       "پرش نشان‌ها"
-      ],
-      [
-       "mirror-flip",
-       "چرخش متقارن"
-      ],
-      [
-       "minimal-compare",
-       "مقایسه تمیز"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "transition",
-     "label": "ترنزیشن ورود",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "soft-fade",
-       "محو نرم"
-      ],
-      [
-       "curtain-rtl",
-       "پرده از راست به چپ"
-      ],
-      [
-       "accent-slash",
-       "نوار تأکید مورب"
-      ],
-      [
-       "iris-rise",
-       "باز شدن دایره‌ای"
-      ],
-      [
-       "split-curtain",
-       "پرده دوقسمتی"
-      ],
-      [
-       "diagonal-wipe",
-       "پاک‌شدن مورب"
-      ],
-      [
-       "zoom-iris",
-       "گشایش زوم"
-      ],
-      [
-       "shutter-bars",
-       "کرکره ستونی"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "seed",
-     "label": "بذر تصادفی",
-     "type": "number",
-     "default": 0,
-     "editable": false
+     "type": "text"
     }
    ],
    "example": {
@@ -1372,7 +1104,104 @@ window.TEMPLATE_INDEX = [
    },
    "order": 60,
    "version": 1
-  }
+  },
+  "preview": "../templates/compare/preview.png"
+ },
+ {
+  "name": "stat_bars",
+  "js": "../templates/stat_bars/template.js",
+  "schema": {
+   "name": "stat_bars",
+   "label": "Stat Bars",
+   "label_fa": "نمودار میله‌ای افقی",
+   "description": "Horizontal comparison bars (2–7 rows) with start-aligned labels, bars growing from start, count-up values at bar ends, one highlighted bar, optional suffix and max.",
+   "category": "data",
+   "order": 65,
+   "version": 1,
+   "aliases": [
+    "stat-bars",
+    "horizontal-bars",
+    "progress-bars",
+    "میله-افقی"
+   ],
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "Eyebrow (optional)",
+     "type": "text"
+    },
+    {
+     "key": "title",
+     "label": "Title",
+     "type": "text"
+    },
+    {
+     "key": "subtitle",
+     "label": "Subtitle (optional)",
+     "type": "text"
+    },
+    {
+     "key": "items",
+     "label": "Rows (Label: Value per line; wrap *Label* to highlight)",
+     "type": "textarea",
+     "required": true
+    },
+    {
+     "key": "highlight",
+     "label": "Highlighted Row (label or 1-based #; blank = *marked* or max)",
+     "type": "text"
+    },
+    {
+     "key": "max",
+     "label": "Max Scale Value (optional)",
+     "type": "number"
+    },
+    {
+     "key": "prefix",
+     "label": "Value Prefix (optional)",
+     "type": "text"
+    },
+    {
+     "key": "suffix",
+     "label": "Value Suffix (e.g. %)",
+     "type": "text"
+    },
+    {
+     "key": "decimals",
+     "label": "Decimal Places",
+     "type": "number",
+     "default": 0
+    },
+    {
+     "key": "unit",
+     "label": "Unit / Footnote Caption (optional)",
+     "type": "text"
+    }
+   ],
+   "example": {
+    "eyebrow": "ASCH (1955)",
+    "title": "Wrong answers grow with the *size* of the majority",
+    "items": "1 opponent: 3.6\n2 opponents: 13.6\n*3 opponents*: 31.8",
+    "highlight": "3 opponents",
+    "max": 40,
+    "suffix": "%",
+    "decimals": 1,
+    "unit": "Share of critical answers that followed the wrong majority. Larger majorities added little.",
+    "layout": "SCAM"
+   },
+   "example_fa": {
+    "eyebrow": "اش (۱۹۵۵)",
+    "title": "خطا با *بزرگ‌تر شدن* اکثریت بیشتر می‌شود",
+    "items": "۱ مخالف: 3.6\n۲ مخالف: 13.6\n*۳ مخالف*: 31.8",
+    "highlight": "۳ مخالف",
+    "max": 40,
+    "suffix": "٪",
+    "decimals": 1,
+    "unit": "سهمِ پاسخ‌های بحرانی که از اکثریتِ اشتباه پیروی کردند.",
+    "layout": "SCAM"
+   }
+  },
+  "preview": "../templates/stat_bars/preview.png"
  },
  {
   "name": "counter_grid",
@@ -1391,8 +1220,7 @@ window.TEMPLATE_INDEX = [
     {
      "key": "title",
      "label": "عنوان",
-     "type": "text",
-     "editable": true
+     "type": "text"
     },
     {
      "key": "cards",
@@ -1423,105 +1251,7 @@ window.TEMPLATE_INDEX = [
        "color",
        "رنگ"
       ]
-     ],
-     "editable": true
-    },
-    {
-     "key": "preset",
-     "label": "سبک انیمیشن",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "کلاسیک / ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "stagger-counters",
-       "شمارش پلکانی"
-      ],
-      [
-       "pulse-tiles",
-       "کارت‌های نبض‌دار"
-      ],
-      [
-       "editorial-grid",
-       "شبکه تحریریه"
-      ],
-      [
-       "spring-cards",
-       "کارت‌های فنری"
-      ],
-      [
-       "sweep-row",
-       "ردیف کشیده"
-      ],
-      [
-       "minimal-grid",
-       "شبکه مینیمال"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "transition",
-     "label": "ترنزیشن ورود",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "soft-fade",
-       "محو نرم"
-      ],
-      [
-       "curtain-rtl",
-       "پرده از راست به چپ"
-      ],
-      [
-       "accent-slash",
-       "نوار تأکید مورب"
-      ],
-      [
-       "iris-rise",
-       "باز شدن دایره‌ای"
-      ],
-      [
-       "split-curtain",
-       "پرده دوقسمتی"
-      ],
-      [
-       "diagonal-wipe",
-       "پاک‌شدن مورب"
-      ],
-      [
-       "zoom-iris",
-       "گشایش زوم"
-      ],
-      [
-       "shutter-bars",
-       "کرکره ستونی"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "seed",
-     "label": "بذر تصادفی",
-     "type": "number",
-     "default": 0,
-     "editable": false
+     ]
     }
    ],
    "example": {
@@ -1549,7 +1279,80 @@ window.TEMPLATE_INDEX = [
    },
    "order": 70,
    "version": 1
-  }
+  },
+  "preview": "../templates/counter_grid/preview.png"
+ },
+ {
+  "name": "lower_third",
+  "js": "../templates/lower_third/template.js",
+  "schema": {
+   "name": "lower_third",
+   "label": "Lower Third",
+   "label_fa": "زیرنویس معرفی",
+   "description": "Broadcast-style name and role strip with an animated accent bar wipe; safely avoids the bottom-left camera box in SCAM layout.",
+   "category": "people",
+   "order": 75,
+   "version": 1,
+   "aliases": [
+    "lower-third",
+    "chyron",
+    "name-tag",
+    "معرفی"
+   ],
+   "fields": [
+    {
+     "key": "name",
+     "label": "Name",
+     "type": "text",
+     "required": true
+    },
+    {
+     "key": "role",
+     "label": "Role / Title",
+     "type": "text"
+    },
+    {
+     "key": "tag",
+     "label": "Small Uppercase Tag (optional)",
+     "type": "text"
+    },
+    {
+     "key": "position",
+     "label": "Position",
+     "type": "select",
+     "options": [
+      [
+       "auto",
+       "Auto"
+      ],
+      [
+       "top",
+       "Top / Above Camera"
+      ],
+      [
+       "bottom",
+       "Bottom / Beside Camera"
+      ]
+     ],
+     "default": "auto"
+    }
+   ],
+   "example": {
+    "name": "Solomon Asch",
+    "role": "Social psychologist · \"Opinions and Social Pressure\", 1955",
+    "tag": "RESEARCHER",
+    "position": "auto",
+    "layout": "SCAM"
+   },
+   "example_fa": {
+    "name": "سولومون اش",
+    "role": "روان‌شناس اجتماعی · «عقاید و فشار اجتماعی»، ۱۹۵۵",
+    "tag": "پژوهشگر",
+    "position": "auto",
+    "layout": "SCAM"
+   }
+  },
+  "preview": "../templates/lower_third/preview.png"
  },
  {
   "name": "quote",
@@ -1569,14 +1372,12 @@ window.TEMPLATE_INDEX = [
      "key": "text",
      "label": "جمله (*زرد* ، ~قرمز~)",
      "type": "textarea",
-     "required": true,
-     "editable": true
+     "required": true
     },
     {
      "key": "highlight",
      "label": "خط دوم بزرگ‌تر (اختیاری)",
-     "type": "text",
-     "editable": true
+     "type": "text"
     },
     {
      "key": "highlight_color",
@@ -1596,117 +1397,17 @@ window.TEMPLATE_INDEX = [
        "سفید"
       ]
      ],
-     "default": "accent",
-     "editable": false
+     "default": "accent"
     },
     {
      "key": "caption",
      "label": "توضیح کوچک",
-     "type": "textarea",
-     "editable": true
+     "type": "textarea"
     },
     {
      "key": "author",
      "label": "گوینده (اختیاری)",
-     "type": "text",
-     "editable": true
-    },
-    {
-     "key": "preset",
-     "label": "سبک انیمیشن",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "کلاسیک / ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "editorial-mark",
-       "نشان نقل‌قول تحریریه"
-      ],
-      [
-       "kinetic-words",
-       "کلمه‌به‌کلمه زنده"
-      ],
-      [
-       "accent-brace",
-       "کروشهٔ تأکید"
-      ],
-      [
-       "glass-panel",
-       "پنل شیشه‌ای"
-      ],
-      [
-       "spotlight-serif",
-       "کلاسیک برجسته"
-      ],
-      [
-       "bold-contrast",
-       "کنتراست پررنگ"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "transition",
-     "label": "ترنزیشن ورود",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "soft-fade",
-       "محو نرم"
-      ],
-      [
-       "curtain-rtl",
-       "پرده از راست به چپ"
-      ],
-      [
-       "accent-slash",
-       "نوار تأکید مورب"
-      ],
-      [
-       "iris-rise",
-       "باز شدن دایره‌ای"
-      ],
-      [
-       "split-curtain",
-       "پرده دوقسمتی"
-      ],
-      [
-       "diagonal-wipe",
-       "پاک‌شدن مورب"
-      ],
-      [
-       "zoom-iris",
-       "گشایش زوم"
-      ],
-      [
-       "shutter-bars",
-       "کرکره ستونی"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "seed",
-     "label": "بذر تصادفی",
-     "type": "number",
-     "default": 0,
-     "editable": false
+     "type": "text"
     }
    ],
    "example": {
@@ -1718,7 +1419,83 @@ window.TEMPLATE_INDEX = [
    "order": 80,
    "version": 1
   },
-  "css": "../templates/quote/template.css"
+  "preview": "../templates/quote/preview.png"
+ },
+ {
+  "name": "punch_in",
+  "js": "../templates/punch_in/template.js",
+  "schema": {
+   "name": "punch_in",
+   "label": "Punch In",
+   "label_fa": "کوبش کلمه",
+   "description": "One giant word or short phrase slamming in from 1.25× to 1× with slight blur-in, an accent impact flash behind it, and an optional caption.",
+   "category": "text",
+   "order": 85,
+   "version": 1,
+   "aliases": [
+    "punch-in",
+    "slam",
+    "big-word",
+    "کوبش"
+   ],
+   "fields": [
+    {
+     "key": "eyebrow",
+     "label": "Small Eyebrow (optional)",
+     "type": "text"
+    },
+    {
+     "key": "text",
+     "label": "Giant Word / Short Phrase",
+     "type": "text",
+     "required": true
+    },
+    {
+     "key": "caption",
+     "label": "Caption Below (optional)",
+     "type": "text"
+    },
+    {
+     "key": "tone",
+     "label": "Accent Flash Colour",
+     "type": "select",
+     "options": [
+      [
+       "accent",
+       "Accent"
+      ],
+      [
+       "danger",
+       "Danger"
+      ],
+      [
+       "good",
+       "Good"
+      ],
+      [
+       "text",
+       "White / Neutral"
+      ]
+     ],
+     "default": "accent"
+    }
+   ],
+   "example": {
+    "eyebrow": "THE ALLY EFFECT",
+    "text": "*ONE* VOICE",
+    "caption": "One truthful partner: wrong answers only one fourth as often.",
+    "tone": "accent",
+    "layout": "SCAM"
+   },
+   "example_fa": {
+    "eyebrow": "اثرِ هم‌پیمان",
+    "text": "*یک* صدا",
+    "caption": "با یک هم‌پیمانِ صادق، خطا یک‌چهارم شد.",
+    "tone": "accent",
+    "layout": "SCAM"
+   }
+  },
+  "preview": "../templates/punch_in/preview.png"
  },
  {
   "name": "section_break",
@@ -1737,118 +1514,18 @@ window.TEMPLATE_INDEX = [
     {
      "key": "eyebrow",
      "label": "بالای عنوان (مثل: بخش ۲)",
-     "type": "text",
-     "editable": true
+     "type": "text"
     },
     {
      "key": "title",
      "label": "عنوان",
      "type": "text",
-     "required": true,
-     "editable": true
+     "required": true
     },
     {
      "key": "subtitle",
      "label": "زیرعنوان",
-     "type": "text",
-     "editable": true
-    },
-    {
-     "key": "preset",
-     "label": "سبک انیمیشن",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "کلاسیک / ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "chapter-banner",
-       "بنر فصل سینمایی"
-      ],
-      [
-       "curtain-drop",
-       "فرود پردهٔ فصل"
-      ],
-      [
-       "numeral-watermark",
-       "واترمارک عدد بزرگ"
-      ],
-      [
-       "axis-sweep",
-       "خط محور کشیده"
-      ],
-      [
-       "split-headline",
-       "تیتر دوپاره"
-      ],
-      [
-       "minimal-divider",
-       "جداکنندهٔ مینیمال"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "transition",
-     "label": "ترنزیشن ورود",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "soft-fade",
-       "محو نرم"
-      ],
-      [
-       "curtain-rtl",
-       "پرده از راست به چپ"
-      ],
-      [
-       "accent-slash",
-       "نوار تأکید مورب"
-      ],
-      [
-       "iris-rise",
-       "باز شدن دایره‌ای"
-      ],
-      [
-       "split-curtain",
-       "پرده دوقسمتی"
-      ],
-      [
-       "diagonal-wipe",
-       "پاک‌شدن مورب"
-      ],
-      [
-       "zoom-iris",
-       "گشایش زوم"
-      ],
-      [
-       "shutter-bars",
-       "کرکره ستونی"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "seed",
-     "label": "بذر تصادفی",
-     "type": "number",
-     "default": 0,
-     "editable": false
+     "type": "text"
     }
    ],
    "example": {
@@ -1859,7 +1536,91 @@ window.TEMPLATE_INDEX = [
    "order": 90,
    "version": 1
   },
-  "css": "../templates/section_break/template.css"
+  "preview": "../templates/section_break/preview.png"
+ },
+ {
+  "name": "chapter_card",
+  "js": "../templates/chapter_card/template.js",
+  "schema": {
+   "name": "chapter_card",
+   "label": "Chapter Card",
+   "label_fa": "کارت فصل",
+   "description": "Section transition card with a full-width wiping accent band, big part number, title, and subtitle; stays clear of the camera box in SCAM.",
+   "category": "transition",
+   "order": 95,
+   "version": 1,
+   "aliases": [
+    "chapter-card",
+    "chapter",
+    "part-card",
+    "فصل"
+   ],
+   "fields": [
+    {
+     "key": "prefix",
+     "label": "Number Prefix (e.g. PART )",
+     "type": "text"
+    },
+    {
+     "key": "number",
+     "label": "Part Number (e.g. 2 or PART 2)",
+     "type": "text",
+     "required": true
+    },
+    {
+     "key": "title",
+     "label": "Chapter Title",
+     "type": "text",
+     "required": true
+    },
+    {
+     "key": "subtitle",
+     "label": "Subtitle (optional)",
+     "type": "text"
+    },
+    {
+     "key": "tone",
+     "label": "Band Accent Tone",
+     "type": "select",
+     "options": [
+      [
+       "accent",
+       "Accent"
+      ],
+      [
+       "danger",
+       "Danger"
+      ],
+      [
+       "good",
+       "Good"
+      ],
+      [
+       "info",
+       "Info"
+      ]
+     ],
+     "default": "accent"
+    }
+   ],
+   "example": {
+    "prefix": "PART ",
+    "number": "2",
+    "title": "The Discomfort *Inside* Your Own Head",
+    "subtitle": "Why saying no feels heavier than it is.",
+    "tone": "accent",
+    "layout": "SCAM"
+   },
+   "example_fa": {
+    "prefix": "بخش ",
+    "number": "۲",
+    "title": "ناراحتیِ *درونِ* ذهنِ خودت",
+    "subtitle": "چرا «نه» گفتن سنگین‌تر از واقعیت به نظر می‌رسد.",
+    "tone": "accent",
+    "layout": "SCAM"
+   }
+  },
+  "preview": "../templates/chapter_card/preview.png"
  },
  {
   "name": "image_full",
@@ -1879,33 +1640,28 @@ window.TEMPLATE_INDEX = [
      "key": "image",
      "label": "عکس",
      "type": "image",
-     "required": true,
-     "editable": true
+     "required": true
     },
     {
      "key": "title",
      "label": "زیرنویس / عنوان (*زرد*)",
-     "type": "text",
-     "editable": true
+     "type": "text"
     },
     {
      "key": "text",
      "label": "متن کوچک",
-     "type": "text",
-     "editable": true
+     "type": "text"
     },
     {
      "key": "dim",
      "label": "تیرگی عکس (۰ تا ۱)",
      "type": "number",
-     "default": 0.25,
-     "editable": false
+     "default": 0.25
     },
     {
      "key": "dots",
      "label": "نقطه‌ها روی عکس: x,y,رنگ (درصد) هر خط یکی",
-     "type": "list",
-     "editable": false
+     "type": "list"
     },
     {
      "key": "motion",
@@ -1933,8 +1689,7 @@ window.TEMPLATE_INDEX = [
        "ثابت"
       ]
      ],
-     "default": "breathe",
-     "editable": false
+     "default": "breathe"
     },
     {
      "key": "title_position",
@@ -1950,105 +1705,7 @@ window.TEMPLATE_INDEX = [
        "بالا"
       ]
      ],
-     "default": "bottom",
-     "editable": false
-    },
-    {
-     "key": "preset",
-     "label": "سبک انیمیشن",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "کلاسیک / ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "cinema-zoom",
-       "زوم سینمایی"
-      ],
-      [
-       "curtain-reveal",
-       "پرده تصویر"
-      ],
-      [
-       "radar-dots",
-       "نقاط راداری"
-      ],
-      [
-       "parallax-caption",
-       "زیرنویس پارالاکس"
-      ],
-      [
-       "noir-vignette",
-       "کنتراست تیره"
-      ],
-      [
-       "minimal-frame",
-       "قاب مینیمال"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "transition",
-     "label": "ترنزیشن ورود",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "soft-fade",
-       "محو نرم"
-      ],
-      [
-       "curtain-rtl",
-       "پرده از راست به چپ"
-      ],
-      [
-       "accent-slash",
-       "نوار تأکید مورب"
-      ],
-      [
-       "iris-rise",
-       "باز شدن دایره‌ای"
-      ],
-      [
-       "split-curtain",
-       "پرده دوقسمتی"
-      ],
-      [
-       "diagonal-wipe",
-       "پاک‌شدن مورب"
-      ],
-      [
-       "zoom-iris",
-       "گشایش زوم"
-      ],
-      [
-       "shutter-bars",
-       "کرکره ستونی"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "seed",
-     "label": "بذر تصادفی",
-     "type": "number",
-     "default": 0,
-     "editable": false
+     "default": "bottom"
     }
    ],
    "example": {
@@ -2066,7 +1723,99 @@ window.TEMPLATE_INDEX = [
    },
    "order": 100,
    "version": 1
-  }
+  },
+  "preview": "../templates/image_full/preview.png"
+ },
+ {
+  "name": "doc_highlight",
+  "js": "../templates/doc_highlight/template.js",
+  "schema": {
+   "name": "doc_highlight",
+   "label": "Doc Highlight",
+   "label_fa": "برجسته‌سازی سند",
+   "description": "Paper or abstract excerpt on a document card where ==marked phrases== sweep in with a marker highlight one after another; optional link line.",
+   "category": "text",
+   "order": 105,
+   "version": 1,
+   "aliases": [
+    "doc-highlight",
+    "paper-highlight",
+    "abstract",
+    "سند"
+   ],
+   "fields": [
+    {
+     "key": "journal",
+     "label": "Journal / Publication",
+     "type": "text"
+    },
+    {
+     "key": "year",
+     "label": "Year",
+     "type": "text"
+    },
+    {
+     "key": "title",
+     "label": "Paper / Article Title",
+     "type": "text",
+     "required": true
+    },
+    {
+     "key": "excerpt",
+     "label": "Excerpt (wrap key phrases in ==like this==)",
+     "type": "textarea",
+     "required": true
+    },
+    {
+     "key": "link",
+     "label": "Source Link / DOI (optional)",
+     "type": "text"
+    },
+    {
+     "key": "tone",
+     "label": "Marker Highlight Colour",
+     "type": "select",
+     "options": [
+      [
+       "accent",
+       "Accent"
+      ],
+      [
+       "good",
+       "Good"
+      ],
+      [
+       "danger",
+       "Danger"
+      ],
+      [
+       "info",
+       "Info"
+      ]
+     ],
+     "default": "accent"
+    }
+   ],
+   "example": {
+    "journal": "JOURNAL OF PERSONALITY AND SOCIAL PSYCHOLOGY",
+    "year": "2024",
+    "title": "Saying no: The negative ramifications from invitation declines are less severe than we think",
+    "excerpt": "We demonstrate that ==invitees overestimate the negative ramifications== that arise in the eyes of inviters following an invitation decline.",
+    "link": "doi.org/10.1037/pspi0000443",
+    "tone": "accent",
+    "layout": "SCAM"
+   },
+   "example_fa": {
+    "journal": "مجله‌ی شخصیت و روان‌شناسی اجتماعی",
+    "year": "۲۰۲۴",
+    "title": "«نه» گفتن: پیامدهای ردِ دعوت از آن‌چه فکر می‌کنیم کمتر است",
+    "excerpt": "نشان می‌دهیم که ==دعوت‌شدگان پیامدهای منفیِ ردِ دعوت را بیش از حد تخمین می‌زنند== — در نگاهِ دعوت‌کننده این پیامدها کم‌رنگ‌ترند.",
+    "link": "doi.org/10.1037/pspi0000443",
+    "tone": "accent",
+    "layout": "SCAM"
+   }
+  },
+  "preview": "../templates/doc_highlight/preview.png"
  },
  {
   "name": "three_cards",
@@ -2085,14 +1834,12 @@ window.TEMPLATE_INDEX = [
     {
      "key": "title",
      "label": "عنوان",
-     "type": "text",
-     "editable": true
+     "type": "text"
     },
     {
      "key": "image",
      "label": "عکس مشترک بالا (اختیاری)",
-     "type": "image",
-     "editable": true
+     "type": "image"
     },
     {
      "key": "cards",
@@ -2115,105 +1862,7 @@ window.TEMPLATE_INDEX = [
        "text",
        "توضیح"
       ]
-     ],
-     "editable": true
-    },
-    {
-     "key": "preset",
-     "label": "سبک انیمیشن",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "کلاسیک / ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "trio-cascade",
-       "سه‌تایی آبشاری"
-      ],
-      [
-       "elastic-fan",
-       "بادبزن فنری"
-      ],
-      [
-       "spotlight-cards",
-       "کارت‌های درخشان"
-      ],
-      [
-       "floating-trio",
-       "کارت‌های شناور"
-      ],
-      [
-       "sweep-grid",
-       "ورود شبکه‌ای"
-      ],
-      [
-       "minimal-cards",
-       "کارت‌های ساده"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "transition",
-     "label": "ترنزیشن ورود",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "soft-fade",
-       "محو نرم"
-      ],
-      [
-       "curtain-rtl",
-       "پرده از راست به چپ"
-      ],
-      [
-       "accent-slash",
-       "نوار تأکید مورب"
-      ],
-      [
-       "iris-rise",
-       "باز شدن دایره‌ای"
-      ],
-      [
-       "split-curtain",
-       "پرده دوقسمتی"
-      ],
-      [
-       "diagonal-wipe",
-       "پاک‌شدن مورب"
-      ],
-      [
-       "zoom-iris",
-       "گشایش زوم"
-      ],
-      [
-       "shutter-bars",
-       "کرکره ستونی"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "seed",
-     "label": "بذر تصادفی",
-     "type": "number",
-     "default": 0,
-     "editable": false
+     ]
     }
    ],
    "example": {
@@ -2237,7 +1886,8 @@ window.TEMPLATE_INDEX = [
    },
    "order": 110,
    "version": 1
-  }
+  },
+  "preview": "../templates/three_cards/preview.png"
  },
  {
   "name": "chat",
@@ -2256,8 +1906,7 @@ window.TEMPLATE_INDEX = [
     {
      "key": "title",
      "label": "عنوان بالای گفتگو",
-     "type": "text",
-     "editable": true
+     "type": "text"
     },
     {
      "key": "messages",
@@ -2280,105 +1929,7 @@ window.TEMPLATE_INDEX = [
        "tag",
        "برچسب کوچک"
       ]
-     ],
-     "editable": true
-    },
-    {
-     "key": "preset",
-     "label": "سبک انیمیشن",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "کلاسیک / ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "pop-bubbles",
-       "پرش حباب‌ها"
-      ],
-      [
-       "rapid-thread",
-       "رشته گفتگوی سریع"
-      ],
-      [
-       "editorial-dialog",
-       "گفتگوی تحریریه"
-      ],
-      [
-       "slide-thread",
-       "ورود از طرفین"
-      ],
-      [
-       "focus-alert",
-       "تأکید پیام مهم"
-      ],
-      [
-       "minimal-chat",
-       "گفتگوی آرام"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "transition",
-     "label": "ترنزیشن ورود",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "soft-fade",
-       "محو نرم"
-      ],
-      [
-       "curtain-rtl",
-       "پرده از راست به چپ"
-      ],
-      [
-       "accent-slash",
-       "نوار تأکید مورب"
-      ],
-      [
-       "iris-rise",
-       "باز شدن دایره‌ای"
-      ],
-      [
-       "split-curtain",
-       "پرده دوقسمتی"
-      ],
-      [
-       "diagonal-wipe",
-       "پاک‌شدن مورب"
-      ],
-      [
-       "zoom-iris",
-       "گشایش زوم"
-      ],
-      [
-       "shutter-bars",
-       "کرکره ستونی"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "seed",
-     "label": "بذر تصادفی",
-     "type": "number",
-     "default": 0,
-     "editable": false
+     ]
     }
    ],
    "example": {
@@ -2410,7 +1961,8 @@ window.TEMPLATE_INDEX = [
    },
    "order": 120,
    "version": 1
-  }
+  },
+  "preview": "../templates/chat/preview.png"
  },
  {
   "name": "timeline",
@@ -2427,8 +1979,7 @@ window.TEMPLATE_INDEX = [
     {
      "key": "title",
      "label": "عنوان",
-     "type": "text",
-     "editable": true
+     "type": "text"
     },
     {
      "key": "events",
@@ -2447,105 +1998,7 @@ window.TEMPLATE_INDEX = [
        "tone",
        "لحن (bad/good)"
       ]
-     ],
-     "editable": true
-    },
-    {
-     "key": "preset",
-     "label": "سبک انیمیشن",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "کلاسیک / ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "track-sweep",
-       "کشش خط زمان"
-      ],
-      [
-       "milestone-pop",
-       "پرش رویدادها"
-      ],
-      [
-       "editorial-arc",
-       "قوس تحریریه"
-      ],
-      [
-       "elastic-nodes",
-       "نقاط فنری"
-      ],
-      [
-       "stagger-eras",
-       "دوره‌های پلکانی"
-      ],
-      [
-       "minimal-rail",
-       "ریل مینیمال"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "transition",
-     "label": "ترنزیشن ورود",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "soft-fade",
-       "محو نرم"
-      ],
-      [
-       "curtain-rtl",
-       "پرده از راست به چپ"
-      ],
-      [
-       "accent-slash",
-       "نوار تأکید مورب"
-      ],
-      [
-       "iris-rise",
-       "باز شدن دایره‌ای"
-      ],
-      [
-       "split-curtain",
-       "پرده دوقسمتی"
-      ],
-      [
-       "diagonal-wipe",
-       "پاک‌شدن مورب"
-      ],
-      [
-       "zoom-iris",
-       "گشایش زوم"
-      ],
-      [
-       "shutter-bars",
-       "کرکره ستونی"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "seed",
-     "label": "بذر تصادفی",
-     "type": "number",
-     "default": 0,
-     "editable": false
+     ]
     }
    ],
    "example": {
@@ -2565,12 +2018,12 @@ window.TEMPLATE_INDEX = [
       "text": "فقط ۳۸ مورد در ۷ سال"
      }
     ],
-    "source": "Bohlen / NYT, 1998; Avraham & Porat, 2023",
     "layout": "SLIDE"
    },
    "order": 130,
    "version": 1
-  }
+  },
+  "preview": "../templates/timeline/preview.png"
  },
  {
   "name": "chart",
@@ -2587,117 +2040,7 @@ window.TEMPLATE_INDEX = [
     {
      "key": "spec",
      "label": "مسیر فایل spec (JSON)",
-     "type": "text",
-     "editable": true
-    },
-    {
-     "key": "title",
-     "label": "عنوان",
-     "type": "text",
-     "editable": true
-    },
-    {
-     "key": "subtitle",
-     "label": "زیرعنوان",
-     "type": "text",
-     "editable": true
-    },
-    {
-     "key": "preset",
-     "label": "سبک انیمیشن",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "کلاسیک / ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "sweep-chart",
-       "ورود پویا"
-      ],
-      [
-       "editorial-spec",
-       "نمودار تحریریه"
-      ],
-      [
-       "elastic-spec",
-       "نمودار فنری"
-      ],
-      [
-       "spotlight-spec",
-       "تمرکز داده‌ها"
-      ],
-      [
-       "cascade-spec",
-       "رسم آبشاری"
-      ],
-      [
-       "minimal-spec",
-       "نمودار مینیمال"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "transition",
-     "label": "ترنزیشن ورود",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "soft-fade",
-       "محو نرم"
-      ],
-      [
-       "curtain-rtl",
-       "پرده از راست به چپ"
-      ],
-      [
-       "accent-slash",
-       "نوار تأکید مورب"
-      ],
-      [
-       "iris-rise",
-       "باز شدن دایره‌ای"
-      ],
-      [
-       "split-curtain",
-       "پرده دوقسمتی"
-      ],
-      [
-       "diagonal-wipe",
-       "پاک‌شدن مورب"
-      ],
-      [
-       "zoom-iris",
-       "گشایش زوم"
-      ],
-      [
-       "shutter-bars",
-       "کرکره ستونی"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "seed",
-     "label": "بذر تصادفی",
-     "type": "number",
-     "default": 0,
-     "editable": false
+     "type": "text"
     }
    ],
    "example": {
@@ -2720,7 +2063,8 @@ window.TEMPLATE_INDEX = [
    },
    "order": 140,
    "version": 1
-  }
+  },
+  "preview": "../templates/chart/preview.png"
  },
  {
   "name": "layers",
@@ -2737,105 +2081,7 @@ window.TEMPLATE_INDEX = [
     {
      "key": "file",
      "label": "مسیر فایل لایه‌ای JSON",
-     "type": "text",
-     "editable": true
-    },
-    {
-     "key": "preset",
-     "label": "سبک انیمیشن",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "کلاسیک / ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "layered-depth",
-       "عمق چندلایه"
-      ],
-      [
-       "kinetic-stage",
-       "صحنه کینتیک"
-      ],
-      [
-       "sweep-compose",
-       "ترکیب کشیده"
-      ],
-      [
-       "elastic-nodes",
-       "نقاط فنری"
-      ],
-      [
-       "cinematic-pass",
-       "گذر سینمایی"
-      ],
-      [
-       "minimal-layers",
-       "لایه‌های مینیمال"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "transition",
-     "label": "ترنزیشن ورود",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "soft-fade",
-       "محو نرم"
-      ],
-      [
-       "curtain-rtl",
-       "پرده از راست به چپ"
-      ],
-      [
-       "accent-slash",
-       "نوار تأکید مورب"
-      ],
-      [
-       "iris-rise",
-       "باز شدن دایره‌ای"
-      ],
-      [
-       "split-curtain",
-       "پرده دوقسمتی"
-      ],
-      [
-       "diagonal-wipe",
-       "پاک‌شدن مورب"
-      ],
-      [
-       "zoom-iris",
-       "گشایش زوم"
-      ],
-      [
-       "shutter-bars",
-       "کرکره ستونی"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "seed",
-     "label": "بذر تصادفی",
-     "type": "number",
-     "default": 0,
-     "editable": false
+     "type": "text"
     }
    ],
    "example": {
@@ -2868,7 +2114,8 @@ window.TEMPLATE_INDEX = [
    },
    "order": 150,
    "version": 1
-  }
+  },
+  "preview": "../templates/layers/preview.png"
  },
  {
   "name": "cam",
@@ -2882,312 +2129,13 @@ window.TEMPLATE_INDEX = [
     "دوربین"
    ],
    "category": "ویژه",
-   "fields": [
-    {
-     "key": "preset",
-     "label": "سبک انیمیشن",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "کلاسیک / ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "cam-clean",
-       "دوربین تمیز"
-      ],
-      [
-       "cam-soft",
-       "دوربین نرم"
-      ],
-      [
-       "cam-pulse",
-       "دوربین نبض‌دار"
-      ],
-      [
-       "cam-editorial",
-       "دوربین تحریریه"
-      ],
-      [
-       "cam-focus",
-       "تمرکز دوربین"
-      ],
-      [
-       "cam-minimal",
-       "دوربین ساده"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "transition",
-     "label": "ترنزیشن ورود",
-     "type": "select",
-     "options": [
-      [
-       "auto",
-       "ارث‌بری"
-      ],
-      [
-       "random",
-       "🎲 تصادفی"
-      ],
-      [
-       "soft-fade",
-       "محو نرم"
-      ],
-      [
-       "curtain-rtl",
-       "پرده از راست به چپ"
-      ],
-      [
-       "accent-slash",
-       "نوار تأکید مورب"
-      ],
-      [
-       "iris-rise",
-       "باز شدن دایره‌ای"
-      ],
-      [
-       "split-curtain",
-       "پرده دوقسمتی"
-      ],
-      [
-       "diagonal-wipe",
-       "پاک‌شدن مورب"
-      ],
-      [
-       "zoom-iris",
-       "گشایش زوم"
-      ],
-      [
-       "shutter-bars",
-       "کرکره ستونی"
-      ]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "seed",
-     "label": "بذر تصادفی",
-     "type": "number",
-     "default": 0,
-     "editable": false
-    }
-   ],
+   "fields": [],
    "example": {
     "layout": "CAM"
    },
    "order": 160,
    "version": 1
-  }
- },
- {
-  "name": "guest_intro",
-  "js": "../templates/guest_intro/template.js",
-  "schema": {
-   "name": "guest_intro",
-   "label": "معرفی مهمان / میزبان پادکست",
-   "description": "کارت معرفی مهمان یا میزبان پادکست با تصویر قاب‌دار، سمت/نقش، توضیح کوتاه و شبکه اجتماعی.",
-   "aliases": ["guest-intro", "guest", "معرفی مهمان", "مهمان"],
-   "category": "پادکست",
-   "fields": [
-    { "key": "badge", "label": "نشان نقش (مثل: مهمان ویژه / میزبان)", "type": "text", "editable": false },
-    { "key": "title", "label": "نام و نام خانوادگی", "type": "text", "required": true, "editable": true },
-    { "key": "subtitle", "label": "عنوان شغلی یا تخصص", "type": "text", "editable": true },
-    { "key": "text", "label": "معرفی کوتاه یا نکتهٔ کلیدی", "type": "textarea", "editable": true },
-    { "key": "handle", "label": "آیدی شبکه‌ها (مثل @dariush)", "type": "text", "editable": false },
-    { "key": "image", "label": "تصویر مهمان", "type": "image", "editable": true },
-    {
-     "key": "preset",
-     "label": "سبک انیمیشن",
-     "type": "select",
-     "options": [
-      ["auto", "کلاسیک / ارث‌بری"],
-      ["random", "🎲 تصادفی"],
-      ["editorial-split", "قاب دو تکه سردبیری"],
-      ["card-float", "کارت شناور"],
-      ["spotlight", "نورپردازی متمرکز"]
-     ],
-     "default": "auto",
-     "editable": false
-    }
-   ],
-   "example": {
-    "badge": "مهمان ویژهٔ قسمت ۱۲",
-    "title": "دکتر سارا *رادمنش*",
-    "subtitle": "پژوهشگر علوم اعصاب و تصمیم‌گیری",
-    "text": "بررسی علمی این‌که چرا پاداش‌های نامطمئن مغز ما را درگیرتر نگه می‌دارند.",
-    "handle": "@sarah.radmanesh",
-    "layout": "SCAM"
-   },
-   "order": 15,
-   "version": 1
-  }
- },
- {
-  "name": "podcast_question",
-  "js": "../templates/podcast_question/template.js",
-  "schema": {
-   "name": "podcast_question",
-   "label": "کارت سؤال / موضوع داغ پادکست",
-   "description": "نمایش پرسش مخاطب، موضوع بحث یا چالش اصلی اپیزود با هایلایت وکتور و نکات پاسخ.",
-   "aliases": ["podcast-question", "qa", "سؤال مخاطب", "پرسش"],
-   "category": "پادکست",
-   "fields": [
-    { "key": "badge", "label": "برچسب بالا (مثل: سؤال مخاطب / موضوع داغ)", "type": "text", "editable": false },
-    { "key": "author", "label": "نام پرسش‌گر (اختیاری)", "type": "text", "editable": true },
-    { "key": "title", "label": "متن پرسش (*زرد* ، ==هایلایت==)", "type": "textarea", "required": true, "editable": true },
-    { "key": "items", "label": "نکته‌های پاسخ (هر خط یکی، اختیاری)", "type": "list", "editable": true },
-    {
-     "key": "preset",
-     "label": "سبک انیمیشن",
-     "type": "select",
-     "options": [
-      ["auto", "کلاسیک / ارث‌بری"],
-      ["random", "🎲 تصادفی"],
-      ["kinetic-words", "کلمه‌به‌کلمه زنده"],
-      ["spotlight", "نورپردازی متمرکز"],
-      ["glitch-pop", "پرش مدرن"]
-     ],
-     "default": "auto",
-     "editable": false
-    }
-   ],
-   "example": {
-    "badge": "پرسش کلیدی اپیزود",
-    "author": "ارسالی از شنوندگان پادکست",
-    "title": "چرا با وجود ==هوشمندتر شدن==، هنوز در دام باج‌گیری عاطفی می‌افتیم؟",
-    "items": [
-     "واکنش فوری مغز به تهدید کوتاه‌مدت",
-     "خطای هزینهٔ غرق‌شده در روابط کاری"
-    ],
-    "layout": "SCAM"
-   },
-   "order": 16,
-   "version": 1
-  }
- },
- {
-  "name": "podcast_end",
-  "js": "../templates/podcast_end/template.js",
-  "schema": {
-   "name": "podcast_end",
-   "label": "صفحهٔ پایان پادکست و سابسکرایب",
-   "description": "کارت پایانی یوتیوب با جایگاه دو ویدیوی پیشنهادی، دکمهٔ انیمیشنی سابسکرایب و آیدی کانال.",
-   "aliases": ["podcast-end", "outro", "end-screen", "پایان پادکست", "پایان"],
-   "category": "پادکست",
-   "fields": [
-    { "key": "eyebrow", "label": "تیتر کوچک بالا", "type": "text", "editable": true },
-    { "key": "title", "label": "جملهٔ خداحافظی / دعوت", "type": "text", "required": true, "editable": true },
-    { "key": "subtitle", "label": "لینک یا آیدی کانال", "type": "text", "editable": true },
-    { "key": "cta", "label": "متن دکمهٔ سابسکرایب", "type": "text", "editable": false },
-    {
-     "key": "preset",
-     "label": "سبک انیمیشن",
-     "type": "select",
-     "options": [
-      ["auto", "کلاسیک / ارث‌بری"],
-      ["random", "🎲 تصادفی"],
-      ["spotlight", "نورپردازی متمرکز"],
-      ["kinetic-hero", "تایپ کینتیک سینمایی"]
-     ],
-     "default": "auto",
-     "editable": false
-    }
-   ],
-   "example": {
-    "eyebrow": "ممنون که تا اینجا همراه بودید",
-    "title": "اگر این بحث برایتان مفید بود، *سابسکرایب* یادتان نرود",
-    "subtitle": "اپیزود بعدی هر پنج‌شنبه ساعت ۲۰ منتشر می‌شود",
-    "cta": "عضویت در کانال + زنگوله 🔔",
-    "layout": "SLIDE"
-   },
-   "order": 17,
-   "version": 1
-  }
- },
- {
-  "name": "article_zoom",
-  "js": "../templates/article_zoom/template.js",
-  "schema": {
-   "name": "article_zoom",
-   "label": "مقاله و زوم روی متن",
-   "description": "نمایش برگهٔ مقاله، پژوهش یا تصویر سند و زوم سینمایی روی جملهٔ کلیدی همراه با هایلایت ماژیکی (سبک یوتیوبرهای مستند).",
-   "aliases": ["article-zoom", "article", "مقاله", "زوم مقاله"],
-   "category": "پادکست",
-   "fields": [
-    { "key": "eyebrow", "label": "تیتر کوچک بالای صحنه (اختیاری)", "type": "text", "editable": true },
-    { "key": "title", "label": "تیتر توضیحی کنار یا بالای مقاله (اختیاری)", "type": "text", "editable": true },
-    { "key": "publication", "label": "نام نشریه یا منبع مقاله", "type": "text", "editable": false },
-    { "key": "article_title", "label": "تیتر اصلی مقاله / پژوهش", "type": "text", "editable": true },
-    { "key": "author", "label": "نویسنده و تاریخ انتشار", "type": "text", "editable": false },
-    { "key": "article_body", "label": "متن زمینهٔ مقاله (پاراگراف‌ها با Enter جدا شوند)", "type": "textarea", "editable": true },
-    { "key": "focus_text", "label": "جملهٔ کانونی برای زوم و هایلایت ماژیکی", "type": "textarea", "editable": true },
-    { "key": "image", "label": "تصویر سند یا پس‌زمینهٔ محو مقاله (اختیاری)", "type": "image", "editable": true },
-    {
-     "key": "zoom_mode",
-     "label": "حالت نمایش",
-     "type": "select",
-     "options": [
-      ["auto", "خودکار (برگهٔ مقاله + پس‌زمینه محو)"],
-      ["article", "برگهٔ مقاله و زوم روی جمله"],
-      ["image", "زوم مستقیم روی تصویر مقاله / سند"]
-     ],
-     "default": "auto",
-     "editable": false
-    },
-    {
-     "key": "paper_theme",
-     "label": "جنس و رنگ برگهٔ مقاله",
-     "type": "select",
-     "options": [
-      ["warm-paper", "کاغذ کرم پژوهشی (کلاسیک)"],
-      ["newsprint", "برش روزنامهٔ آرشیوی"],
-      ["editorial-dark", "کارت شیشه‌ای تیره (مدرن)"]
-     ],
-     "default": "warm-paper",
-     "editable": false
-    },
-    { "key": "zoom_scale", "label": "بزرگنمایی زوم (مثلاً 1.38)", "type": "number", "default": 1.38, "editable": false },
-    { "key": "zoom_x", "label": "موقعیت افقی زوم روی تصویر (۰ تا ۱۰۰٪)", "type": "number", "default": 50, "editable": false },
-    { "key": "zoom_y", "label": "موقعیت عمودی زوم روی تصویر (۰ تا ۱۰۰٪)", "type": "number", "default": 48, "editable": false },
-    {
-     "key": "preset",
-     "label": "سبک انیمیشن زوم",
-     "type": "select",
-     "options": [
-      ["auto", "ارث‌بری / خودکار"],
-      ["random", "🎲 تصادفی"],
-      ["cinematic-push", "زوم سینمایی روی جمله"],
-      ["tilt-glide", "نمای سه‌بعدی مورب و زوم"],
-      ["marker-sweep", "ماژیک هایلایت زنده + زوم نزدیک"],
-      ["split-paper", "برگهٔ مقاله + توضیح کناری"]
-     ],
-     "default": "auto",
-     "editable": false
-    }
-   ],
-   "example": {
-    "eyebrow": "بررسی پژوهش علمی",
-    "publication": "Journal of Behavioral Economics · 2024",
-    "article_title": "چرا پاداش‌های نامطمئن بیش از پاداش ثابت رفتار ما را شرطی می‌کنند؟",
-    "author": "تیم پژوهشی دانشگاه زوریخ · صفحهٔ ۱۴",
-    "article_body": "در آزمایش‌های متعدد طی دو دههٔ گذشته مشخص شد که وقتی سیستم تشویق کاملاً قابل پیش‌بینی است، مغز به سرعت به آن عادت می‌کند.\nاما به محض اینکه فاصلهٔ زمانی پاداش تغییر می‌کند، سطح دوپامین پیش‌بینی‌کننده جهش چشمگیری دارد.",
-    "focus_text": "پاداشِ گاه‌به‌گاه و غیرقابل‌پیش‌بینی تا ۳ برابر ماندگاری رفتار را افزایش می‌دهد.",
-    "image": "/assets/archive-newspaper.jpg",
-    "paper_theme": "warm-paper",
-    "zoom_scale": 1.36,
-    "layout": "SCAM"
-   },
-   "order": 25,
-   "version": 1
-  }
+  },
+  "preview": "../templates/cam/preview.png"
  }
 ];
