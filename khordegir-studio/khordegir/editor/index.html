@@ -46,6 +46,7 @@
         <button id="btnSave" type="button" class="btn btn-primary" data-i18n="saveYaml" disabled>ذخیره video.yaml</button>
         <button id="btnSendLive" type="button" class="btn btn-live" data-i18n="sendLive" title="پخش فوری این اسلاید روی OBS Browser Source">📡 ارسال زنده OBS</button>
         <a id="linkObs" href="/obs/" class="btn btn-amber-outline" data-i18n="obsConsole">کنسول OBS و پرامپتر</a>
+        <button id="btnOpenGuide" type="button" class="btn btn-ghost" data-i18n="guide" title="راهنمای کامل استودیو، میکروفن و ارسال به OBS">📖 راهنما</button>
       </div>
     </header>
 
@@ -100,7 +101,7 @@
 
         <div id="stageViewport" class="stage-viewport">
           <div id="stageFrameBox" class="stage-frame-box">
-            <iframe id="stageFrame" src="../stage/stage.html" title="پیش‌نمایش صحنه"></iframe>
+            <iframe id="stageFrame" src="../stage/stage.html" allow="microphone; autoplay" title="پیش‌نمایش صحنه"></iframe>
             <div id="stageCanvasPicker" class="stage-canvas-picker hidden">
               <div class="picker-banner">روی نقطهٔ دلخواه بوم کلیک کنید تا مختصات ثبت شود (Esc برای لغو)</div>
             </div>
@@ -324,6 +325,7 @@
   <script src="../stage/motion-tokens.js"></script>
   <script src="../stage/fx.js"></script>
   <script src="../stage/sfx.js"></script>
+  <script src="../stage/live-mic.js"></script>
   <script src="./importer.js"></script>
   <script>
     (window.THEME_FILES || []).forEach((f) => document.write('<script src="../themes/' + f + '"><\/script>'));

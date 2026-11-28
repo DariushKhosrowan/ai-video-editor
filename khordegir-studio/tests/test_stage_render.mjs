@@ -2425,6 +2425,145 @@ test("14 Visual Themes, Viral SFX 2.0 (26 cues, transition auto-sync) & 5 Karaok
   assert.equal(capInner.innerHTML, htmlEarly, "Karaoke highlighting must be 100% deterministic when seeking backwards");
 });
 
+test("StageLiveMic: quiet & normal speech move loudness smoothly, resumes suspended AudioContext, connects silent sink, and drives Stage puppet live", async () => {
+  const { sandbox, loadScript } = createFullStageEngineSandbox();
+  loadScript("stage/live-mic.js");
+  assert.ok(sandbox.StageLiveMic, "StageLiveMic must load");
+
+  const proc = sandbox.StageLiveMic.createLiveVoiceProcessor({
+    noiseSuppression: true,
+    noiseGateDb: -56,
+    inputGain: 1.8,
+  });
+
+  const sr = 48000;
+  const makeSine = (amp, freq = 185, len = 1024) => {
+    const b = new Float32Array(len);
+    for (let i = 0; i < len; i += 1) b[i] = amp * Math.sin((2 * Math.PI * freq * i) / sr);
+    return b;
+  };
+  const silence = new Float32Array(1024);
+
+  // 1) Silence stays near 0%
+  const fSil = proc(silence, null, sr, 1 / 60);
+  assert.equal(fSil.loudness, 0, "Silence must stay at 0 loudness");
+  assert.equal(fSil.isSpeaking, false);
+
+  // 2) Quiet laptop mic (-44 dB, amp ~ 0.009) MUST visibly register loudness & speaking!
+  let fQuiet = null;
+  for (let k = 0; k < 8; k += 1) {
+    fQuiet = proc(makeSine(0.009, 190), null, sr, 1 / 60);
+  }
+  assert.ok(fQuiet.loudness > 0.20, `Quiet mic must produce visible loudness (>0.20), got ${fQuiet.loudness}`);
+  assert.equal(fQuiet.isSpeaking, true, "Quiet mic speech must trigger isSpeaking");
+  assert.ok(fQuiet.f0Hz > 160 && fQuiet.f0Hz < 220, `YIN pitch must track quiet voice (~190Hz), got ${fQuiet.f0Hz}`);
+
+  // 3) Louder speech produces even higher loudness
+  let fLoud = null;
+  for (let k = 0; k < 8; k += 1) {
+    fLoud = proc(makeSine(0.12, 220), null, sr, 1 / 60);
+  }
+  assert.ok(fLoud.loudness > fQuiet.loudness, `Louder speech (${fLoud.loudness}) must exceed quiet speech (${fQuiet.loudness})`);
+
+  // 4) PTT mute zeroes out loudness
+  proc.setOptions({ pttEnabled: true, pttActive: false });
+  let fMuted = null;
+  for (let k = 0; k < 25; k += 1) {
+    fMuted = proc(makeSine(0.15, 200), null, sr, 1 / 60);
+  }
+  assert.ok(fMuted.loudness < 0.02 && fMuted.pttMuted === true, `PTT mute must silence loudness, got ${fMuted.loudness}`);
+
+  // 5) Error diagnostics are localized fa/en
+  const errDesc = sandbox.StageLiveMic.describeMicError({ name: "NotAllowedError" });
+  assert.ok(errDesc.fa.includes("میکروفن") && errDesc.en.includes("denied"));
+
+  // 6) Suspended AudioContext is explicitly resumed & silent zero-gain sink connects to destination
+  let resumedCalled = false;
+  let connectedToDestination = false;
+  let silentGainVal = null;
+  const fakeDest = { isDest: true };
+  class FakeAudioContext {
+    constructor() {
+      this.state = "suspended";
+      this.sampleRate = 48000;
+      this.currentTime = 0;
+      this.destination = fakeDest;
+    }
+    async resume() {
+      resumedCalled = true;
+      this.state = "running";
+    }
+    close() {}
+    createMediaStreamSource() {
+      return { connect() {}, disconnect() {} };
+    }
+    createGain() {
+      const node = {
+        gain: { value: 1, setTargetAtTime(v) { this.value = v; } },
+        connect(target) {
+          if (target === fakeDest) {
+            connectedToDestination = true;
+            silentGainVal = node.gain.value;
+          }
+        },
+        disconnect() {},
+      };
+      return node;
+    }
+    createBiquadFilter() {
+      return { type: "highpass", frequency: { value: 75 }, Q: { value: 0.7 }, connect() {}, disconnect() {} };
+    }
+    createAnalyser() {
+      return {
+        fftSize: 1024,
+        frequencyBinCount: 512,
+        smoothingTimeConstant: 0,
+        connect() {},
+        disconnect() {},
+        getFloatTimeDomainData(arr) { arr.set(makeSine(0.06, 200, arr.length)); },
+        getFloatFrequencyData(arr) { arr.fill(-50); },
+      };
+    }
+  }
+  sandbox.AudioContext = FakeAudioContext;
+  sandbox.navigator = {
+    mediaDevices: {
+      async getUserMedia() {
+        return { getAudioTracks: () => [{ label: "Test USB Mic", stop() {} }], getTracks: () => [{ stop() {} }] };
+      },
+    },
+  };
+  let capturedFrame = null;
+  sandbox.requestAnimationFrame = (cb) => {
+    if (!capturedFrame) cb(16);
+    return 1;
+  };
+  sandbox.cancelAnimationFrame = () => {};
+
+  const session = sandbox.StageLiveMic.createLiveMicSession({
+    onFrame(frame) { if (frame && frame.active) capturedFrame = frame; },
+  });
+  const startRes = await session.start({ inputGain: 2.0 });
+  assert.equal(startRes.ok, true, "LiveMicSession must start cleanly");
+  assert.equal(resumedCalled, true, "AudioContext.resume() MUST be called when suspended");
+  assert.equal(connectedToDestination, true, "Silent GainNode(0) MUST connect to destination so Chromium pulls mic frames");
+  assert.equal(silentGainVal, 0, "Silent sink gain MUST be 0 to prevent speaker feedback");
+  assert.ok(capturedFrame && capturedFrame.loudness > 0.1, `LiveMicSession frame must report live loudness > 0.1, got ${capturedFrame && capturedFrame.loudness}`);
+
+  // 7) Stage.setLiveVoice drives Red Eagle puppet & resets cleanly when turned off
+  const S = sandbox.Stage;
+  loadScript("templates/mascot_talk/template.js");
+  await S.load({ template: "mascot_talk", title: "تست زنده میکروفن", say: "سلام" }, { format: "16:9" });
+  const stLive = S.setLiveVoice(capturedFrame, 1 / 60);
+  assert.ok(stLive && stLive.loudness > 0.1, "Stage.setLiveVoice must drive mascot loudness");
+  assert.equal(S._liveVoiceActive, true);
+  S.setLiveVoice({ active: false }, 1 / 60);
+  assert.equal(S._liveVoiceActive, false);
+
+  session.stop();
+});
+
+
 
 
 

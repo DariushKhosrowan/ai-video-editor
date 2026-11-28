@@ -13,6 +13,7 @@
   <script src="../stage/charts.js"></script>
   <script src="../stage/fx.js"></script>
   <script src="../stage/mascot-rig.js"></script>
+  <script src="../stage/live-mic.js"></script>
   <script src="../themes/_list.js"></script>
   <script src="../stage/template-lib.js"></script>
   <script src="../templates/_index.js"></script>
@@ -66,6 +67,21 @@
         <button id="hudNsBtn" type="button" class="hud-btn active">حذف نویز: روشن</button>
         <button id="hudPttBtn" type="button" class="hud-btn">PTT (Space): خاموش</button>
       </div>
+      <div class="hud-vu-wrap">
+        <div class="hud-vu-head">
+          <span id="hudLoudLabel">بلندی صدا (Loudness)</span>
+          <span id="hudLoudVal" class="mono-num" dir="ltr">0% (-80 dB)</span>
+        </div>
+        <div class="hud-vu-track">
+          <div id="hudLoudFill" class="hud-vu-fill" style="width:0%"></div>
+        </div>
+        <div class="hud-gain-row">
+          <label for="hudGainSlider" id="hudGainLabel">تقویت میکروفن (Gain):</label>
+          <input id="hudGainSlider" type="range" min="0.5" max="6" step="0.1" value="1.8" aria-label="تقویت میکروفن">
+          <span id="hudGainVal" class="mono-num" dir="ltr">1.8×</span>
+        </div>
+      </div>
+      <div id="hudMicNotice" class="hud-mic-notice hidden" role="status"></div>
       <div class="hud-row">
         <span id="hudEmoChip" class="hud-chip">احساس: neutral</span>
         <span id="hudGestChip" class="hud-chip">ژست: —</span>

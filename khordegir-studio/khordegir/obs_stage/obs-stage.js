@@ -38,6 +38,11 @@
   const hudDebugBtn = document.getElementById("hudDebugBtn");
   const hudLangBtn = document.getElementById("hudLangBtn");
   const hudExportMapBtn = document.getElementById("hudExportMapBtn");
+  const hudLoudFill = document.getElementById("hudLoudFill");
+  const hudLoudVal = document.getElementById("hudLoudVal");
+  const hudGainSlider = document.getElementById("hudGainSlider");
+  const hudGainVal = document.getElementById("hudGainVal");
+  const hudMicNotice = document.getElementById("hudMicNotice");
 
   const projectName = (q.get("project") || "").trim() || "default";
   const forceTransparent = q.get("transparent") === "1" || q.get("transparent") === "true";
@@ -59,6 +64,8 @@
   let lastSfxSeq = -1;
   let lastLtVisible = false;
   let micStarted = false;
+  let userManualMic = false;
+  let micSession = null;
   let micRaf = null;
   let micStream = null;
   let micAudioCtx = null;
@@ -70,6 +77,9 @@
   let activeEmotionLabel = "neutral";
   let activeGestureLabel = "—";
   let midiConnectedCount = 0;
+  let lastVoiceLoudness = 0;
+  let lastVoiceDb = -80;
+  let lastMicNotice = null;
 
   function clamp(v, lo, hi) {
     return v < lo ? lo : v > hi ? hi : v;
@@ -203,15 +213,19 @@
 
   /* Live Voice Tracker with Software Noise Suppression, Calibrated Noise Gate, Hold, & Push-To-Talk */
   function createLiveVoiceTracker(initOpts = {}) {
+    if (window.StageLiveMic && typeof window.StageLiveMic.createLiveVoiceProcessor === "function") {
+      return window.StageLiveMic.createLiveVoiceProcessor(initOpts);
+    }
     const opts = Object.assign({
       noiseSuppression: true,
-      noiseGateDb: -46,
-      gateHoldMs: 140,
+      noiseGateDb: -56,
+      gateHoldMs: 160,
+      inputGain: 1.8,
       pttEnabled: false,
       pttActive: false,
       medianF0Hz: 0,
       pitchSpanSemitones: 6.0,
-      p95Rms: 0.08,
+      p95Rms: 0.045,
     }, initOpts || {});
 
     const pitchRing = new Float32Array(60);
@@ -420,6 +434,10 @@
         cfg.onCalibration(cmd.calibration);
         return { handled: true, type: "calibration" };
       }
+      if ((type === "puppet:live_voice" || type === "liveVoice") && cmd.sample && cfg.onRemoteVoice) {
+        cfg.onRemoteVoice(cmd.sample, cmd.dt || 1 / 60);
+        return { handled: true, type: "live_voice" };
+      }
       return null;
     }
 
@@ -529,15 +547,39 @@
 
   const latencyTracker = createLatencyTracker();
   const storedCal = loadStoredCalibration();
+  const savedMicPrefs = (window.StageLiveMic && window.StageLiveMic.loadMicPrefs) ? window.StageLiveMic.loadMicPrefs() : {};
   let trackerConfig = {
-    noiseSuppression: true,
-    noiseGateDb: (storedCal && storedCal.noiseGateDb != null) ? storedCal.noiseGateDb : -46,
+    noiseSuppression: savedMicPrefs.noiseSuppression !== false,
+    autoGainControl: savedMicPrefs.autoGainControl !== false,
+    inputGain: clamp(Number(savedMicPrefs.inputGain ?? 1.8), 0.5, 8.0),
+    noiseGateDb: clamp(Number(savedMicPrefs.noiseGateDb ?? (storedCal && storedCal.noiseGateDb != null ? Math.min(storedCal.noiseGateDb, -48) : -56)), -72, -20),
     medianF0Hz: (storedCal && storedCal.medianF0Hz) ? storedCal.medianF0Hz : 0,
     pitchSpanSemitones: (storedCal && storedCal.pitchSpanSemitones) ? storedCal.pitchSpanSemitones : 6.0,
-    p95Rms: (storedCal && storedCal.p95Rms) ? storedCal.p95Rms : 0.08,
+    p95Rms: (storedCal && storedCal.p95Rms) ? storedCal.p95Rms : 0.045,
     pttEnabled: forcePtt,
     pttActive: false,
   };
+  if (hudGainSlider) hudGainSlider.value = String(trackerConfig.inputGain);
+  if (hudGainVal) hudGainVal.textContent = `${trackerConfig.inputGain.toFixed(1)}×`;
+
+  function updateHudLoudnessBar(loudness, db) {
+    lastVoiceLoudness = clamp(Number(loudness) || 0, 0, 1);
+    lastVoiceDb = Number.isFinite(Number(db)) ? Number(db) : -80;
+    if (hudLoudFill) hudLoudFill.style.width = `${Math.round(lastVoiceLoudness * 100)}%`;
+    if (hudLoudVal) hudLoudVal.textContent = `${Math.round(lastVoiceLoudness * 100)}% (${lastVoiceDb.toFixed(0)} dB)`;
+  }
+
+  function renderMicNotice() {
+    if (!hudMicNotice) return;
+    if (!lastMicNotice) {
+      hudMicNotice.classList.add("hidden");
+      hudMicNotice.textContent = "";
+      return;
+    }
+    hudMicNotice.classList.remove("hidden");
+    hudMicNotice.classList.toggle("is-warn", Boolean(lastMicNotice.warn));
+    hudMicNotice.textContent = uiLang === "en" ? (lastMicNotice.en || lastMicNotice.fa) : (lastMicNotice.fa || lastMicNotice.en);
+  }
 
   function syncHudUi(latStats) {
     if (!hudEl) return;
@@ -630,6 +672,15 @@
       trackerConfig.pitchSpanSemitones = cal.pitchSpanSemitones ?? trackerConfig.pitchSpanSemitones;
       trackerConfig.p95Rms = cal.p95Rms ?? trackerConfig.p95Rms;
       if (activeVoiceTracker) activeVoiceTracker.setOptions(trackerConfig);
+      if (micSession) micSession.setConfig(trackerConfig);
+    },
+    onRemoteVoice(sample, dt) {
+      if (micStarted) return; // local mic takes priority when directly active
+      updateHudLoudnessBar(sample.loudness, sample.db);
+      if (window.Stage) {
+        if (window.Stage.setLiveVoice) window.Stage.setLiveVoice(sample, dt);
+        else if (window.Stage.setMicLevel) window.Stage.setMicLevel(sample.loudness || 0);
+      }
     },
     onToggleHud() {
       hudVisible = !hudVisible;
@@ -693,8 +744,13 @@
   // HUD interactive buttons
   if (hudMicBtn && typeof hudMicBtn.addEventListener === "function") {
     hudMicBtn.addEventListener("click", () => {
-      if (micStarted) disableMicReactivity();
-      else void enableMicReactivity();
+      if (micStarted) {
+        userManualMic = false;
+        disableMicReactivity();
+      } else {
+        userManualMic = true;
+        void enableMicReactivity();
+      }
       syncHudUi(latencyTracker.get());
     });
   }
@@ -702,6 +758,7 @@
     hudNsBtn.addEventListener("click", () => {
       trackerConfig.noiseSuppression = !trackerConfig.noiseSuppression;
       if (activeVoiceTracker) activeVoiceTracker.setOptions({ noiseSuppression: trackerConfig.noiseSuppression });
+      if (micSession) micSession.setConfig({ noiseSuppression: trackerConfig.noiseSuppression });
       syncHudUi(latencyTracker.get());
     });
   }
@@ -710,7 +767,17 @@
       trackerConfig.pttEnabled = !trackerConfig.pttEnabled;
       trackerConfig.pttActive = false;
       if (activeVoiceTracker) activeVoiceTracker.setOptions({ pttEnabled: trackerConfig.pttEnabled, pttActive: false });
+      if (micSession) micSession.setConfig({ pttEnabled: trackerConfig.pttEnabled, pttActive: false });
       syncHudUi(latencyTracker.get());
+    });
+  }
+  if (hudGainSlider && typeof hudGainSlider.addEventListener === "function") {
+    hudGainSlider.addEventListener("input", () => {
+      const g = clamp(parseFloat(hudGainSlider.value) || 1.8, 0.5, 6.0);
+      trackerConfig.inputGain = g;
+      if (hudGainVal) hudGainVal.textContent = `${g.toFixed(1)}×`;
+      if (activeVoiceTracker) activeVoiceTracker.setOptions({ inputGain: g });
+      if (micSession) micSession.setConfig({ inputGain: g });
     });
   }
   if (hudDebugBtn && typeof hudDebugBtn.addEventListener === "function") {
@@ -744,6 +811,7 @@
   // Audio unlock helper
   const unlockAudio = () => {
     if (window.StageSFX && !forceMuted) window.StageSFX.resume();
+    if (micSession && micSession.resumeIfSuspended) void micSession.resumeIfSuspended();
     if (micAudioCtx && micAudioCtx.state === "suspended") {
       micAudioCtx.resume().catch(() => {});
     }
@@ -752,6 +820,10 @@
   window.addEventListener("keydown", unlockAudio, { passive: true });
 
   function disableMicReactivity() {
+    if (micSession) {
+      micSession.stop();
+      micSession = null;
+    }
     if (micRaf) cancelAnimationFrame(micRaf);
     micRaf = null;
     if (micStream) {
@@ -764,6 +836,9 @@
     }
     micStarted = false;
     activeVoiceTracker = null;
+    lastMicNotice = null;
+    updateHudLoudnessBar(0, -80);
+    renderMicNotice();
     if (window.Stage && window.Stage.setLiveVoice) {
       window.Stage.setLiveVoice({ active: false });
     }
@@ -771,100 +846,82 @@
   }
 
   async function enableMicReactivity() {
-    if (micStarted || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+    if (micStarted) {
+      if (micSession && micSession.resumeIfSuspended) await micSession.resumeIfSuspended();
+      return;
+    }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      lastMicNotice = window.StageLiveMic ? window.StageLiveMic.describeMicError(new Error("getUserMedia unavailable")) : { fa: "میکروفن در دسترس نیست", en: "Microphone unavailable" };
+      renderMicNotice();
+      syncHudUi(latencyTracker.get());
+      return;
+    }
     micStarted = true;
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: trackerConfig.noiseSuppression,
-          autoGainControl: false,
+    lastMicNotice = null;
+    renderMicNotice();
+    latencyTracker.reset();
+    let hudFrameCounter = 0;
+
+    if (window.StageLiveMic && typeof window.StageLiveMic.createLiveMicSession === "function") {
+      micSession = window.StageLiveMic.createLiveMicSession({
+        onFrame(voiceFrame, dt) {
+          if (!voiceFrame || voiceFrame.active === false) {
+            updateHudLoudnessBar(0, -80);
+            if (window.Stage && window.Stage.setLiveVoice) window.Stage.setLiveVoice({ active: false });
+            return;
+          }
+          updateHudLoudnessBar(voiceFrame.loudness, voiceFrame.db);
+          if (window.Stage) {
+            if (window.Stage.setLiveVoice) window.Stage.setLiveVoice(voiceFrame, dt);
+            else if (window.Stage.setMicLevel) window.Stage.setMicLevel(voiceFrame.loudness);
+          }
+          const lat = latencyTracker.record((voiceFrame.baseLatencyMs || 0) + (voiceFrame.windowMs || 10.6) + (voiceFrame.procMs || 0));
+          voiceFrame.latencyMs = lat.avgMs;
+          hudFrameCounter += 1;
+          if (hudVisible && hudFrameCounter % 6 === 0) syncHudUi(lat);
+        },
+        onStateChange(st) {
+          if (st.error) {
+            lastMicNotice = st.error;
+            micStarted = false;
+            userManualMic = false;
+          } else if (st.suspended) {
+            lastMicNotice = {
+              warn: true,
+              fa: "صدای مرورگر معلق است — یک‌بار روی صفحه کلیک کنید تا میکروفن فعال شود.",
+              en: "Browser audio suspended — click anywhere once to activate mic.",
+            };
+          } else if (st.silentWarning) {
+            lastMicNotice = {
+              warn: true,
+              fa: "ورودی میکروفن صفر است — تقویت (Gain) را زیاد کنید یا میکروفن درست را در ویرایشگر انتخاب کنید.",
+              en: "Mic input reads zero — raise Gain or pick the right microphone in the Editor.",
+            };
+          } else {
+            lastMicNotice = null;
+          }
+          renderMicNotice();
+          syncHudUi(latencyTracker.get());
         },
       });
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if (!AC) {
+      const res = await micSession.start(trackerConfig);
+      if (!res.ok) {
         micStarted = false;
-        return;
-      }
-      micStream = stream;
-      const ac = new AC({ latencyHint: "interactive" });
-      micAudioCtx = ac;
-      const src = ac.createMediaStreamSource(stream);
-
-      // Clean broadcast mic chain: 85 Hz High-Pass Filter -> Gentle Compressor -> Analyser
-      let headNode = src;
-      if (typeof ac.createBiquadFilter === "function") {
-        const hpf = ac.createBiquadFilter();
-        hpf.type = "highpass";
-        hpf.frequency.value = 85;
-        hpf.Q.value = 0.707;
-        headNode.connect(hpf);
-        headNode = hpf;
-      }
-      if (typeof ac.createDynamicsCompressor === "function") {
-        const comp = ac.createDynamicsCompressor();
-        comp.threshold.value = -24;
-        comp.knee.value = 18;
-        comp.ratio.value = 3.0;
-        comp.attack.value = 0.005;
-        comp.release.value = 0.12;
-        headNode.connect(comp);
-        headNode = comp;
-      }
-
-      const analyser = ac.createAnalyser();
-      analyser.fftSize = 1024;
-      analyser.smoothingTimeConstant = 0;
-      headNode.connect(analyser);
-
-      const timeBuf = new Float32Array(analyser.fftSize);
-      const freqBuf = new Float32Array(analyser.frequencyBinCount);
-      activeVoiceTracker = createLiveVoiceTracker(trackerConfig);
-      latencyTracker.reset();
-      let lastTs = performance.now();
-      let hudFrameCounter = 0;
-
-      const tick = (now) => {
-        if (!micStarted) return;
-        const t0 = performance.now();
-        const dt = clamp((now - lastTs) / 1000, 0.006, 0.08);
-        lastTs = now;
-        analyser.getFloatTimeDomainData(timeBuf);
-        analyser.getFloatFrequencyData(freqBuf);
-        const voiceFrame = activeVoiceTracker(timeBuf, freqBuf, ac.sampleRate || 48000, dt);
-
-        if (window.Stage) {
-          if (window.Stage.setLiveVoice) {
-            window.Stage.setLiveVoice(voiceFrame, dt);
-          } else if (window.Stage.setMicLevel) {
-            window.Stage.setMicLevel(voiceFrame.loudness);
-          }
-        }
-        const procMs = performance.now() - t0;
-        const baseLatMs = ((Number(ac.baseLatency) || 0) + (Number(ac.outputLatency) || 0)) * 1000;
-        const winMs = (analyser.fftSize / (ac.sampleRate || 48000)) * 500;
-        const lat = latencyTracker.record(baseLatMs + winMs + procMs);
-        voiceFrame.latencyMs = lat.avgMs;
-
-        hudFrameCounter += 1;
-        if (hudVisible && hudFrameCounter % 6 === 0) {
-          syncHudUi(lat);
-        }
-        micRaf = requestAnimationFrame(tick);
-      };
-      syncHudUi(latencyTracker.get());
-      micRaf = requestAnimationFrame(tick);
-    } catch {
-      micStarted = false;
-      activeVoiceTracker = null;
-      if (window.Stage && window.Stage.setLiveVoice) {
-        window.Stage.setLiveVoice({ active: false });
+        userManualMic = false;
+        micSession = null;
+        lastMicNotice = res.error || { fa: "خطا در باز کردن میکروفن", en: "Could not open microphone" };
+        renderMicNotice();
       }
       syncHudUi(latencyTracker.get());
+      return;
     }
+    micStarted = false;
   }
 
-  if (forceMic) void enableMicReactivity();
+  if (forceMic) {
+    userManualMic = true;
+    void enableMicReactivity();
+  }
   syncHudUi(latencyTracker.get());
 
   function renderOverlays(state) {
@@ -875,7 +932,7 @@
       window.StageSFX.setMuted(!sfxAllowed);
     }
 
-    if (ov.micReactive || forceMic) {
+    if (ov.micReactive || forceMic || userManualMic) {
       void enableMicReactivity();
     } else if (micStarted) {
       disableMicReactivity();

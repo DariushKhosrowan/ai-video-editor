@@ -1255,3 +1255,231 @@ body.focus-mode .prompter-text {
   background: rgba(245, 158, 11, 0.2);
 }
 
+/* OBS Console Live Mic Bridge VU Meter */
+.obs-mic-bridge {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.obs-mic-bridge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: #e2e8f0;
+  font-weight: 700;
+}
+
+.obs-mic-vu-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: #0b0d11;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.obs-mic-vu-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #10b981 0%, #f5b700 68%, #ef4444 100%);
+  transition: width 45ms linear;
+}
+
+.obs-mic-notice {
+  font-size: 11px;
+  line-height: 1.5;
+  color: #fecaca;
+}
+
+/* Shared Guide Modal Styles for OBS Console */
+.modal-card.modal-xl {
+  width: min(920px, 94vw);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.modal-head h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.guide-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 10px;
+}
+
+.guide-tab-btn {
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.guide-tab-btn.active {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: var(--amber);
+  color: #fde68a;
+}
+
+.guide-body {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-inline-end: 4px;
+  padding-bottom: 12px;
+}
+
+.guide-footer {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+.guide-hero {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.32);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.guide-hero h4 {
+  margin: 0 0 6px;
+  color: #fde68a;
+}
+
+.guide-hero p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.65;
+}
+
+.guide-section h5 {
+  margin: 0 0 8px;
+  font-size: 13.5px;
+}
+
+.guide-cards-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.guide-card {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 9px 11px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.guide-card strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #fde68a;
+}
+
+.guide-steps,
+.guide-bullets {
+  margin: 0;
+  padding-inline-start: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12.5px;
+  line-height: 1.65;
+}
+
+.guide-url-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.guide-url-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 8px 10px;
+}
+
+.guide-url-row > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.guide-url-row strong {
+  font-size: 11.5px;
+  color: #fde68a;
+}
+
+.guide-shortcuts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 10px;
+}
+
+.guide-shortcuts-grid > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 9px;
+  font-size: 12px;
+}
+
+.guide-shortcuts-grid kbd {
+  background: rgba(245, 158, 11, 0.16);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fde68a;
+  padding: 2px 6px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.modal-actions.between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.muted-hint {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+

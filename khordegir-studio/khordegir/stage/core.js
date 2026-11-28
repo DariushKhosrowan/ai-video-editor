@@ -33,8 +33,16 @@
       return S.getMascotState();
     },
     setLiveVoice(sample, dt = 1 / 60) {
-      S._liveVoiceActive = Boolean(sample && sample.active !== false);
-      if (!S._liveVoiceActive) return null;
+      const nextActive = Boolean(sample && sample.active !== false);
+      const wasActive = S._liveVoiceActive;
+      S._liveVoiceActive = nextActive;
+      if (!nextActive) {
+        if (S.setMicLevel) S.setMicLevel(0);
+        if (wasActive) {
+          S._mascots.forEach((m) => { if (m && m.seek) m.seek(S._t || 0); });
+        }
+        return S.getMascotState();
+      }
       if (sample && sample.loudness != null && S.setMicLevel) S.setMicLevel(sample.loudness);
       let st = null;
       for (let i = 0; i < S._mascots.length; i += 1) {
@@ -1579,6 +1587,22 @@
     } else if (d.cmd === "puppetDebug") {
       S.setPuppetDebug(d.debug !== undefined ? d.debug : d.enabled);
       S.seek(S._t || 0, false);
+    } else if (d.cmd === "liveVoice") {
+      const st = S.setLiveVoice(d.sample || { active: false }, d.dt || 1 / 60);
+      if (st && parent && parent !== window) {
+        const now = performance.now ? performance.now() : 0;
+        if (!S._lastLiveTelAt || (now - S._lastLiveTelAt) >= 40) {
+          S._lastLiveTelAt = now;
+          parent.postMessage({ cmd: "mascotTelemetry", state: st }, "*");
+        }
+      }
+    } else if (d.cmd === "liveEmotion") {
+      const st = S.setLiveEmotion(d.emotion, d.intensity);
+      if (st && parent && parent !== window) {
+        parent.postMessage({ cmd: "mascotTelemetry", state: st }, "*");
+      }
+    } else if (d.cmd === "liveGesture") {
+      S.triggerLiveGesture(d.gesture, d.opts || {});
     }
   });
 })();

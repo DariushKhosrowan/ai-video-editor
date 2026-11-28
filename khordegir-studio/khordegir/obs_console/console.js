@@ -16,6 +16,7 @@ import {
   formatMMSS,
   toPersianDigits,
 } from './prompter.js';
+import { createStudioGuideModal } from '../editor/guide-modal.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -35,6 +36,11 @@ const els = {
   liveFloatModeSelect: $('liveFloatModeSelect'),
   chkShowLiveBadge: $('chkShowLiveBadge'),
   chkMicReactive: $('chkMicReactive'),
+  btnObsGuide: $('btnObsGuide'),
+  obsMicBridgeBox: $('obsMicBridgeBox'),
+  obsMicVal: $('obsMicVal'),
+  obsMicFill: $('obsMicFill'),
+  obsMicNotice: $('obsMicNotice'),
   ltActiveBadge: $('ltActiveBadge'),
   ltRoleInput: $('ltRoleInput'),
   ltStyleSelect: $('ltStyleSelect'),
@@ -936,6 +942,57 @@ function connectOptionalObs() {
   obs.connect(els.wsUrlInput.value, els.wsPassInput.value);
 }
 
+let obsConsoleMicSession = null;
+let obsConsoleMicChannel = null;
+
+async function syncObsConsoleMicBridge(enabled) {
+  if (!els.obsMicBridgeBox) return;
+  if (!enabled) {
+    if (obsConsoleMicSession) {
+      obsConsoleMicSession.stop();
+      obsConsoleMicSession = null;
+    }
+    els.obsMicBridgeBox.classList.add('hidden');
+    if (els.obsMicFill) els.obsMicFill.style.width = '0%';
+    if (els.obsMicVal) els.obsMicVal.textContent = '0% (-80 dB)';
+    if (els.obsMicNotice) { els.obsMicNotice.classList.add('hidden'); els.obsMicNotice.textContent = ''; }
+    return;
+  }
+  els.obsMicBridgeBox.classList.remove('hidden');
+  const LM = window.StageLiveMic;
+  if (!LM || typeof LM.createLiveMicSession !== 'function') return;
+  if (!obsConsoleMicChannel && typeof BroadcastChannel === 'function') {
+    try { obsConsoleMicChannel = new BroadcastChannel('khordegir-obs-puppet'); } catch (_) {}
+  }
+  if (!obsConsoleMicSession) {
+    obsConsoleMicSession = LM.createLiveMicSession({
+      onFrame(frame, dt) {
+        const pct = Math.round(Math.max(0, Math.min(1, Number(frame.loudness) || 0)) * 100);
+        const db = Number.isFinite(Number(frame.db)) ? Number(frame.db) : -80;
+        if (els.obsMicFill) els.obsMicFill.style.width = `${pct}%`;
+        if (els.obsMicVal) els.obsMicVal.textContent = `${pct}% (${db.toFixed(0)} dB)`;
+        if (obsConsoleMicChannel) {
+          try { obsConsoleMicChannel.postMessage({ type: 'puppet:live_voice', sample: frame, dt }); } catch (_) {}
+        }
+      },
+      onStateChange(st) {
+        if (!els.obsMicNotice) return;
+        if (st.error) {
+          els.obsMicNotice.classList.remove('hidden');
+          els.obsMicNotice.textContent = st.error.fa || st.error.en || 'خطا در میکروفن';
+        } else if (st.silentWarning) {
+          els.obsMicNotice.classList.remove('hidden');
+          els.obsMicNotice.textContent = 'صدایی از میکروفن دریافت نمی‌شود — در تب عروسک ویرایشگر، دستگاه میکروفن یا Gain را تنظیم کنید.';
+        } else {
+          els.obsMicNotice.classList.add('hidden');
+          els.obsMicNotice.textContent = '';
+        }
+      },
+    });
+  }
+  await obsConsoleMicSession.start();
+}
+
 function sendOverlayUpdate() {
   const floatMode = els.liveFloatModeSelect ? els.liveFloatModeSelect.value : 'images-only';
   const nextLiving = Object.assign({}, projectLivingStage || {}, {
@@ -946,6 +1003,7 @@ function sendOverlayUpdate() {
     micReactive: els.chkMicReactive.checked,
   });
   projectLivingStage = nextLiving;
+  void syncObsConsoleMicBridge(els.chkMicReactive.checked);
   sendLiveCommand('overlay:set', {
     transparentBg: liveUrlTransparent,
     showLiveBadge: els.chkShowLiveBadge.checked,
@@ -1233,6 +1291,15 @@ async function init() {
 
   buildSoundboard();
   wireEvents();
+
+  const obsGuideModal = createStudioGuideModal({
+    defaultTab: 'obs',
+    getLang: () => 'fa',
+    getProjectName: () => currentProjectName || 'default',
+  });
+  if (els.btnObsGuide) {
+    els.btnObsGuide.addEventListener('click', () => obsGuideModal.open('obs'));
+  }
 
   const initialStep = q.get('s') ? Number(q.get('s')) : null;
   try {

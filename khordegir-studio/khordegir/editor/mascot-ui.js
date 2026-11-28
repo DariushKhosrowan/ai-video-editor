@@ -534,6 +534,8 @@ export function renderMascotControls({
   onToneChange,
   onLoadAudioFile,
   onClearAudio,
+  onToggleLiveMic,
+  isLiveMicRunning,
   setStatus,
 }) {
   activeMeterEls = null;
@@ -667,10 +669,14 @@ export function renderMascotControls({
     });
     toneBox.appendChild(presetRow);
 
-    // 2) Live Preview Meter (Loudness + Pitch + Emphasis + Rig outputs)
+    // 2) Live Preview Meter (Loudness + Pitch + Emphasis + Rig outputs + Quick Live Mic Button)
     const meterCard = document.createElement("div");
     meterCard.className = "tone-meter-card";
     meterCard.innerHTML = `
+      <div class="live-mic-head" style="margin-bottom:6px">
+        <button type="button" class="btn-mic-live" data-el="quickMicBtn">🎙️ تست زنده میکروفن (Live Mic)</button>
+        <span class="live-mic-status" data-el="quickMicStat">برای تست صحبت کلیک کنید</span>
+      </div>
       <div class="tone-meter-row">
         <span class="tone-meter-label">بلندی صدا (Loudness)</span>
         <span class="tone-meter-val mono-num" dir="ltr" data-el="loudVal">0% (-80 dB)</span>
@@ -692,6 +698,25 @@ export function renderMascotControls({
       </div>
     `;
     toneBox.appendChild(meterCard);
+    const quickMicBtn = meterCard.querySelector('[data-el="quickMicBtn"]');
+    const quickMicStat = meterCard.querySelector('[data-el="quickMicStat"]');
+    if (quickMicBtn && typeof onToggleLiveMic === "function") {
+      const syncQuick = (running) => {
+        quickMicBtn.classList.toggle("is-live", running);
+        quickMicBtn.textContent = running ? "⏹ توقف میکروفن زنده ●" : "🎙️ تست زنده میکروفن (Live Mic)";
+        if (quickMicStat) {
+          quickMicStat.classList.toggle("is-live", running);
+          quickMicStat.textContent = running ? "● در حال گوش‌دادن" : "خاموش";
+        }
+      };
+      syncQuick(Boolean(isLiveMicRunning && isLiveMicRunning()));
+      quickMicBtn.addEventListener("click", async () => {
+        await onToggleLiveMic();
+        syncQuick(Boolean(isLiveMicRunning && isLiveMicRunning()));
+      });
+    } else if (quickMicBtn) {
+      quickMicBtn.parentElement.style.display = "none";
+    }
     activeMeterEls = {
       loudFill: meterCard.querySelector('[data-el="loudFill"]'),
       loudVal: meterCard.querySelector('[data-el="loudVal"]'),

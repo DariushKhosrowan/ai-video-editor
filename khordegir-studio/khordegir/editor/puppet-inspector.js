@@ -31,6 +31,67 @@ let compareSlots = { A: null, B: null, active: "A" };
 let activeSelectedPart = "head";
 let activePuppetMeterEls = null;
 let calRecordingCancel = null;
+let editorMicSession = null;
+let editorMicChannel = null;
+let editorLiveVoiceSink = null;
+let editorMicUiListeners = new Set();
+
+function notifyMicUiListeners(st) {
+  editorMicUiListeners.forEach((fn) => {
+    try { fn(st); } catch (_) {}
+  });
+}
+
+export function setEditorLiveVoiceSink(fn) {
+  editorLiveVoiceSink = typeof fn === "function" ? fn : null;
+}
+
+export function isEditorLiveMicRunning() {
+  return Boolean(editorMicSession && editorMicSession.isRunning && editorMicSession.isRunning());
+}
+
+export function stopEditorLiveMic() {
+  if (editorMicSession) {
+    editorMicSession.stop();
+  }
+  if (editorLiveVoiceSink) {
+    editorLiveVoiceSink({ active: false, loudness: 0, db: -80, f0Hz: 0, pitchNorm: 0, emphasis: 0, isSpeaking: false, viseme: "rest" }, 1 / 60);
+  }
+}
+
+export async function toggleEditorLiveMic(overrideCfg = null) {
+  const LM = window.StageLiveMic;
+  if (!LM || typeof LM.createLiveMicSession !== "function") {
+    return { ok: false, error: { fa: "موتور میکروفن زنده بارگذاری نشده است.", en: "StageLiveMic not loaded." } };
+  }
+  if (editorMicSession && editorMicSession.isRunning()) {
+    stopEditorLiveMic();
+    return { ok: true, running: false };
+  }
+  if (!editorMicChannel && typeof BroadcastChannel === "function") {
+    try { editorMicChannel = new BroadcastChannel("khordegir-obs-puppet"); } catch (_) {}
+  }
+  if (!editorMicSession) {
+    editorMicSession = LM.createLiveMicSession({
+      onFrame(frame, dt) {
+        updatePuppetMeter(frame);
+        if (editorLiveVoiceSink) editorLiveVoiceSink(frame, dt);
+        if (editorMicChannel) {
+          try { editorMicChannel.postMessage({ type: "puppet:live_voice", sample: frame, dt }); } catch (_) {}
+        }
+      },
+      onStateChange(st) {
+        notifyMicUiListeners(st);
+      },
+    });
+  }
+  return editorMicSession.start(overrideCfg);
+}
+
+export function updateEditorLiveMicConfig(patch) {
+  if (editorMicSession) editorMicSession.setConfig(patch);
+  else if (window.StageLiveMic && window.StageLiveMic.saveMicPrefs) window.StageLiveMic.saveMicPrefs(patch);
+}
 
 function detectPitchYINEditor(buf, sampleRate, fMin = 65, fMax = 500, threshold = 0.16) {
   const n = buf.length;
@@ -41,7 +102,7 @@ function detectPitchYINEditor(buf, sampleRate, fMin = 65, fMax = 500, threshold 
   if (tauMax <= tauMin) return 0;
   let sumSq = 0;
   for (let i = 0; i < n; i += 1) sumSq += buf[i] * buf[i];
-  if (Math.sqrt(sumSq / n) < 0.008) return 0;
+  if (Math.sqrt(sumSq / n) < 0.0025) return 0;
 
   const cmndf = new Float32Array(tauMax + 2);
   cmndf[0] = 1;
@@ -269,6 +330,7 @@ export function renderPuppetInspector({
   setStatus,
 }) {
   activePuppetMeterEls = null;
+  editorMicUiListeners.clear();
   container.innerHTML = "";
 
   const tpl = String(slide.template || "").replace(/-/g, "_");
@@ -686,10 +748,42 @@ export function renderPuppetInspector({
   }
   rootSec.appendChild(toolBar);
 
-  /* ---------------- 3. Live Telemetry Meter */
+  /* ---------------- 3. Live Telemetry Meter + Direct Live Microphone Test */
+  const LM = window.StageLiveMic || null;
+  const savedMic = (LM && LM.loadMicPrefs) ? LM.loadMicPrefs() : {};
+  const initGain = clamp(Number(savedMic.inputGain ?? 1.8), 0.5, 6.0);
+  const initGate = clamp(Number(savedMic.noiseGateDb ?? -56), -72, -20);
+  const initAgc = savedMic.autoGainControl !== false;
+
   const meterCard = document.createElement("div");
   meterCard.className = "tone-meter-card";
   meterCard.innerHTML = `
+    <div class="live-mic-bar">
+      <div class="live-mic-head">
+        <button type="button" class="btn-mic-live" data-p="micToggleBtn">🎙️ روشن کردن میکروفن زنده (Live Mic)</button>
+        <span class="live-mic-status" data-p="micStatusBadge">خاموش</span>
+      </div>
+      <div class="live-mic-controls">
+        <select class="select-ctrl compact" data-p="micDeviceSel" aria-label="انتخاب دستگاه میکروفن / Microphone Device">
+          <option value="">میکروفن پیش‌فرض سیستم (Default Mic)</option>
+        </select>
+        <div class="live-mic-sliders">
+          <label class="live-mic-mini-slider">
+            <span>تقویت (Gain): <strong class="mono-num" dir="ltr" data-p="micGainOut">${initGain.toFixed(1)}×</strong></span>
+            <input type="range" min="0.5" max="6" step="0.1" value="${initGain}" data-p="micGainInp" aria-label="تقویت میکروفن">
+          </label>
+          <label class="live-mic-mini-slider">
+            <span>نویز گیت: <strong class="mono-num" dir="ltr" data-p="micGateOut">${initGate} dB</strong></span>
+            <input type="range" min="-72" max="-20" step="1" value="${initGate}" data-p="micGateInp" aria-label="نویز گیت میکروفن">
+          </label>
+        </div>
+        <label class="toggle-chip" style="font-size:11px">
+          <input type="checkbox" data-p="micAgcChk" ${initAgc ? "checked" : ""}>
+          <span>تنظیم خودکار بلندی میکروفن (Auto Gain · AGC)</span>
+        </label>
+      </div>
+      <div class="live-mic-notice hidden" data-p="micNotice" role="status"></div>
+    </div>
     <div class="tone-meter-row">
       <span class="tone-meter-label">بلندی صدا (Loudness)</span>
       <span class="tone-meter-val mono-num" dir="ltr" data-p="loudVal">0% (-80 dB)</span>
@@ -721,6 +815,115 @@ export function renderPuppetInspector({
     gestChip: meterCard.querySelector('[data-p="gestChip"]'),
     physChip: meterCard.querySelector('[data-p="physChip"]'),
   };
+
+  const micToggleBtn = meterCard.querySelector('[data-p="micToggleBtn"]');
+  const micStatusBadge = meterCard.querySelector('[data-p="micStatusBadge"]');
+  const micDeviceSel = meterCard.querySelector('[data-p="micDeviceSel"]');
+  const micGainInp = meterCard.querySelector('[data-p="micGainInp"]');
+  const micGainOut = meterCard.querySelector('[data-p="micGainOut"]');
+  const micGateInp = meterCard.querySelector('[data-p="micGateInp"]');
+  const micGateOut = meterCard.querySelector('[data-p="micGateOut"]');
+  const micAgcChk = meterCard.querySelector('[data-p="micAgcChk"]');
+  const micNotice = meterCard.querySelector('[data-p="micNotice"]');
+
+  const populateMicDevices = async () => {
+    if (!LM || !LM.listAudioInputDevices || !micDeviceSel) return;
+    const list = await LM.listAudioInputDevices();
+    const prev = micDeviceSel.value || savedMic.deviceId || "";
+    micDeviceSel.innerHTML = `<option value="">میکروفن پیش‌فرض سیستم (Default Mic)</option>`;
+    list.forEach((d) => {
+      const o = document.createElement("option");
+      o.value = d.deviceId;
+      o.textContent = d.label;
+      micDeviceSel.appendChild(o);
+    });
+    if (prev && list.some((d) => d.deviceId === prev)) micDeviceSel.value = prev;
+  };
+  void populateMicDevices();
+
+  const syncMicBarUi = (st = {}) => {
+    const running = st.running !== undefined ? Boolean(st.running) : isEditorLiveMicRunning();
+    if (micToggleBtn) {
+      micToggleBtn.classList.toggle("is-live", running);
+      micToggleBtn.textContent = running ? "⏹ توقف میکروفن زنده ●" : "🎙️ روشن کردن میکروفن زنده (Live Mic)";
+    }
+    if (micStatusBadge) {
+      micStatusBadge.classList.toggle("is-live", running && !st.error);
+      micStatusBadge.classList.toggle("is-err", Boolean(st.error));
+      micStatusBadge.textContent = st.error ? "خطا" : (running ? "● زنده" : "خاموش");
+    }
+    if (micNotice) {
+      if (st.error) {
+        micNotice.classList.remove("hidden", "is-warn");
+        micNotice.textContent = st.error.fa || st.error.en || "خطا در میکروفن";
+      } else if (st.suspended) {
+        micNotice.classList.remove("hidden");
+        micNotice.classList.add("is-warn");
+        micNotice.textContent = "صدای مرورگر معلق است — یک‌بار روی صفحه کلیک کنید تا میکروفن فعال شود.";
+      } else if (st.silentWarning) {
+        micNotice.classList.remove("hidden");
+        micNotice.classList.add("is-warn");
+        micNotice.textContent = "صدایی از میکروفن انتخاب‌شده دریافت نمی‌شود — میکروفن دیگری انتخاب کنید یا تقویت (Gain) را بیشتر کنید.";
+      } else {
+        micNotice.classList.add("hidden");
+        micNotice.textContent = "";
+      }
+    }
+  };
+  editorMicUiListeners.add(syncMicBarUi);
+  syncMicBarUi({ running: isEditorLiveMicRunning() });
+
+  if (micToggleBtn) {
+    micToggleBtn.addEventListener("click", async () => {
+      const res = await toggleEditorLiveMic({
+        deviceId: micDeviceSel ? micDeviceSel.value : "",
+        inputGain: parseFloat(micGainInp.value) || 1.8,
+        noiseGateDb: parseFloat(micGateInp.value) || -56,
+        autoGainControl: Boolean(micAgcChk && micAgcChk.checked),
+      });
+      await populateMicDevices();
+      if (res && !res.ok && res.error) {
+        syncMicBarUi({ running: false, error: res.error });
+        setStatus(res.error.fa || "خطا در میکروفن");
+      } else if (isEditorLiveMicRunning()) {
+        setStatus("میکروفن زنده فعال شد — صحبت کنید تا بلندی صدا و عروسک حرکت کنند 🎙️");
+      } else {
+        setStatus("میکروفن زنده متوقف شد");
+      }
+    });
+  }
+  if (micGainInp) {
+    micGainInp.addEventListener("input", () => {
+      const g = clamp(parseFloat(micGainInp.value) || 1.8, 0.5, 6.0);
+      if (micGainOut) micGainOut.textContent = `${g.toFixed(1)}×`;
+      updateEditorLiveMicConfig({ inputGain: g });
+    });
+  }
+  if (micGateInp) {
+    micGateInp.addEventListener("input", () => {
+      const db = clamp(parseFloat(micGateInp.value) || -56, -72, -20);
+      if (micGateOut) micGateOut.textContent = `${db} dB`;
+      updateEditorLiveMicConfig({ noiseGateDb: db });
+    });
+  }
+  if (micAgcChk) {
+    micAgcChk.addEventListener("change", async () => {
+      updateEditorLiveMicConfig({ autoGainControl: micAgcChk.checked });
+      if (isEditorLiveMicRunning()) {
+        stopEditorLiveMic();
+        await toggleEditorLiveMic({ autoGainControl: micAgcChk.checked });
+      }
+    });
+  }
+  if (micDeviceSel) {
+    micDeviceSel.addEventListener("change", async () => {
+      updateEditorLiveMicConfig({ deviceId: micDeviceSel.value });
+      if (isEditorLiveMicRunning()) {
+        stopEditorLiveMic();
+        await toggleEditorLiveMic({ deviceId: micDeviceSel.value });
+      }
+    });
+  }
 
   /* ---------------- 4. Quick Emotion (15) & Gesture (9) Controls (Phase 2 Items 5–6) */
   const actBox = document.createElement("div");
@@ -1381,15 +1584,22 @@ export function renderPuppetInspector({
     }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: false },
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
       });
       const AC = window.AudioContext || window.webkitAudioContext;
       const ac = new AC();
+      if (ac.state === "suspended") {
+        try { await ac.resume(); } catch (_) {}
+      }
       const src = ac.createMediaStreamSource(stream);
       const analyser = ac.createAnalyser();
       analyser.fftSize = 1024;
       analyser.smoothingTimeConstant = 0;
+      const silentGain = ac.createGain();
+      silentGain.gain.value = 0;
       src.connect(analyser);
+      analyser.connect(silentGain);
+      silentGain.connect(ac.destination);
 
       const buf = new Float32Array(analyser.fftSize);
       const sampled = [];
@@ -1424,8 +1634,17 @@ export function renderPuppetInspector({
         for (let i = 0; i < buf.length; i += 1) sq += buf[i] * buf[i];
         const rms = Math.sqrt(sq / buf.length);
         const db = rms > 1e-6 ? clamp(20 * Math.log10(rms), -80, 0) : -80;
-        const f0Hz = db > -52 ? detectPitchYINEditor(buf, ac.sampleRate || 48000) : 0;
+        const f0Hz = db > -56 ? detectPitchYINEditor(buf, ac.sampleRate || 48000) : 0;
         sampled.push({ rms, db, f0Hz, pitchConf: f0Hz > 0 ? 0.85 : 0 });
+        btnRec10.textContent = `⏹ در حال ضبط (${Math.ceil((durationMs - elapsed) / 1000)}s · ${db.toFixed(0)} dB)`;
+        updatePuppetMeter({
+          loudness: clamp((db + 62) / 52, 0, 1),
+          db,
+          f0Hz,
+          pitchNorm: 0,
+          emphasis: 0,
+          isSpeaking: db > -52,
+        });
 
         if (elapsed >= durationMs) {
           calProgFill.style.width = "100%";

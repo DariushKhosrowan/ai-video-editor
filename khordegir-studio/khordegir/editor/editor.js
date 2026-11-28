@@ -6,7 +6,14 @@
 import { renderCurvesTab } from "./curve-studio.js";
 import { renderAnnotationsTab } from "./annotations-ui.js";
 import { analyzeAudioWithProsodyOffline, renderMascotControls, updateVoiceToneMeter } from "./mascot-ui.js";
-import { renderPuppetInspector, updatePuppetMeter } from "./puppet-inspector.js";
+import {
+  renderPuppetInspector,
+  updatePuppetMeter,
+  setEditorLiveVoiceSink,
+  toggleEditorLiveMic,
+  isEditorLiveMicRunning,
+} from "./puppet-inspector.js";
+import { createStudioGuideModal } from "./guide-modal.js";
 
 const FORMAT_DIMS = {
   "16:9": { w: 1920, h: 1080 },
@@ -79,6 +86,7 @@ const els = {
   btnRedo: document.getElementById("btnRedo"),
   btnSave: document.getElementById("btnSave"),
   btnSendLive: document.getElementById("btnSendLive"),
+  btnOpenGuide: document.getElementById("btnOpenGuide"),
   dirtyBadge: document.getElementById("dirtyBadge"),
   linkObs: document.getElementById("linkObs"),
   slidesCount: document.getElementById("slidesCount"),
@@ -1978,6 +1986,12 @@ function renderContentTab(container, slide) {
         els.stageFrame.contentWindow.postMessage({ cmd: "mascotTone", tone: toneCfg }, "*");
       }
     },
+    onToggleLiveMic: async () => {
+      const res = await toggleEditorLiveMic();
+      if (res && !res.ok && res.error) setStatus(res.error.fa || "خطا در میکروفن");
+      else setStatus(isEditorLiveMicRunning() ? "میکروفن زنده فعال شد 🎙️" : "میکروفن زنده متوقف شد");
+    },
+    isLiveMicRunning: isEditorLiveMicRunning,
     onLoadAudioFile: async (file) => {
       setStatus(`در حال تحلیل صدای «${file.name}» برای لیپ‌سینک و لحن صدا...`);
       try {
@@ -2480,6 +2494,22 @@ els.themeSelect.addEventListener("change", () => {
 els.btnUndo.addEventListener("click", undo);
 els.btnRedo.addEventListener("click", redo);
 els.btnSendLive.addEventListener("click", sendActiveSlideToLiveObs);
+
+const studioGuideModal = createStudioGuideModal({
+  getLang: () => state.lang,
+  getProjectName: () => state.projectName || "default",
+});
+window.__khordegirEditorGuide = studioGuideModal;
+if (els.btnOpenGuide) {
+  els.btnOpenGuide.addEventListener("click", () => studioGuideModal.open("quickstart"));
+}
+
+setEditorLiveVoiceSink((frame, dt) => {
+  updateVoiceToneMeter(frame);
+  if (els.stageFrame && els.stageFrame.contentWindow) {
+    els.stageFrame.contentWindow.postMessage({ cmd: "liveVoice", sample: frame, dt }, "*");
+  }
+});
 
 els.btnProjectStyle.addEventListener("click", openStyleModal);
 els.btnCloseStyleModal.addEventListener("click", () => els.styleModal.classList.add("hidden"));

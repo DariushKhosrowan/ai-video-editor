@@ -42,6 +42,10 @@
           خروجی بستهٔ آفلاین OBS
         </button>
 
+        <button id="btnObsGuide" type="button" class="btn btn-ghost" title="راهنمای کامل ارسال به OBS و میکروفن زنده">
+          📖 راهنمای OBS
+        </button>
+
         <a id="linkBackEditor" href="/editor/" class="btn btn-ghost">بازگشت به ویرایشگر</a>
       </div>
     </header>
@@ -207,7 +211,7 @@
           </div>
 
           <div class="live-monitor-wrap">
-            <iframe id="liveMonitorFrame" class="live-monitor-frame" title="مانیتور خروجی زنده OBS" src="about:blank"></iframe>
+            <iframe id="liveMonitorFrame" class="live-monitor-frame" allow="microphone; autoplay" title="مانیتور خروجی زنده OBS" src="about:blank"></iframe>
             <div class="live-monitor-pill">مانیتور خروجی زنده</div>
           </div>
 
@@ -281,8 +285,18 @@
             </label>
             <label class="check-inline">
               <input id="chkMicReactive" type="checkbox">
-              <span>واکنش موج پس‌زمینه به صدای میکروفون</span>
+              <span>واکنش موج پس‌زمینه و عروسک به صدای میکروفون</span>
             </label>
+          </div>
+          <div id="obsMicBridgeBox" class="obs-mic-bridge hidden">
+            <div class="obs-mic-bridge-row">
+              <span>بلندی میکروفن (Loudness):</span>
+              <span id="obsMicVal" class="mono-num" dir="ltr">0% (-80 dB)</span>
+            </div>
+            <div class="obs-mic-vu-track">
+              <div id="obsMicFill" class="obs-mic-vu-fill" style="width:0%"></div>
+            </div>
+            <div id="obsMicNotice" class="obs-mic-notice hidden"></div>
           </div>
         </section>
 
@@ -512,6 +526,7 @@
   </div>
 
   <script src="../stage/sfx.js"></script>
+  <script src="../stage/live-mic.js"></script>
   <script type="module" src="./console.js"></script>
 </body>
 </html>
