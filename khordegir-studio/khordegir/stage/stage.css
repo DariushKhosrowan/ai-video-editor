@@ -10,48 +10,32 @@ body{width:1920px;height:1080px}
    radial-gradient(ellipse 70% 60% at 70% 20%, rgba(255,255,255,.045), transparent 70%),
    radial-gradient(ellipse 120% 90% at 50% 50%, transparent 55%, rgba(0,0,0,.45) 100%),
    var(--c-bg)}
-#stage[data-theme-mode="light"] .bg{background:
-   radial-gradient(ellipse 75% 65% at 70% 18%, rgba(255,255,255,.35), transparent 70%),
-   radial-gradient(ellipse 120% 90% at 50% 50%, transparent 60%, rgba(0,0,0,.06) 100%),
-   var(--c-bg)}
 .bg::after{content:"";position:absolute;inset:0;opacity:.06;mix-blend-mode:screen;
    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>")}
-#stage[data-theme-mode="light"] .bg::after{opacity:.025;mix-blend-mode:multiply}
 .bgimg{position:absolute;inset:0;overflow:hidden}
 .bgimg img{width:100%;height:100%;object-fit:cover;transform-origin:50% 50%}
 .bgimg .dim,.frame .dim{position:absolute;inset:0;background:#000}
 .glow{position:absolute;border-radius:50%;pointer-events:none;mix-blend-mode:screen}
-#stage[data-theme-mode="light"] .glow{mix-blend-mode:multiply}
-.light-sweep{position:absolute;top:-20%;bottom:-20%;right:20%;width:520px;transform:skewX(-18deg);pointer-events:none;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.07),transparent);filter:blur(26px)}
-.content{position:absolute;inset:0;z-index:10}
-.fadein{position:absolute;inset:0;background:#000;pointer-events:none;z-index:90}
+.content{position:absolute;inset:0}
+.fadein{position:absolute;inset:0;background:#000;pointer-events:none}
 .abs{position:absolute}
 .acc{color:var(--c-accent)} .dng{color:var(--c-dangerText);font-weight:700} .mut{color:var(--c-muted)}
 .lat{unicode-bidi:isolate;font-family:"Vazirmatn",sans-serif}
 .t-hero,.t-h1,.t-quote{text-wrap:balance}
 .t-body,.t-caption{color:var(--c-body)}
 .t-eyebrow{color:var(--c-accent)}
-.k-line{display:inline}
-.k-word{display:inline-block;will-change:transform,opacity}
-[data-field-wrap]{will-change:transform}
 .num{white-space:nowrap;display:inline-flex;align-items:baseline;gap:.12em;direction:rtl}
 .num-core{display:inline-block;text-align:right;direction:ltr;unicode-bidi:isolate;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;letter-spacing:-0.025em}
 .num-word{font-size:.32em;font-weight:700}
-.frame{position:absolute;border-radius:var(--radius);will-change:transform,opacity,translate}
+.frame{position:absolute;border-radius:var(--radius);will-change:transform,opacity}
 .frame.shadow{box-shadow:0 18px 50px rgba(0,0,0,.55),0 4px 14px rgba(0,0,0,.4)}
-#stage[data-theme-mode="light"] .frame.shadow{box-shadow:0 18px 44px rgba(0,0,0,.16),0 4px 14px rgba(0,0,0,.08)}
 .frame-inner{position:absolute;inset:0;overflow:hidden;border-radius:inherit;background:#1b1b1d}
-#stage[data-theme-mode="light"] .frame-inner{background:var(--c-surface)}
-.frame-cam{position:absolute;inset:0;width:100%;height:100%;transform-origin:50% 50%;will-change:transform}
 .frame.bordered::after{content:"";position:absolute;inset:0;border-radius:inherit;border:3px solid var(--frame-border);pointer-events:none}
-.frame img{position:absolute;inset:0;width:100%;height:100%;transform-origin:50% 50%;will-change:transform}
+.frame img{position:absolute;inset:0;width:100%;height:100%;transform-origin:50% 50%}
 .ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
   background:repeating-linear-gradient(45deg,#1c1c1e 0 14px,#202023 14px 28px);color:#7a7a7a;font-size:22px}
-#stage[data-theme-mode="light"] .ph{background:repeating-linear-gradient(45deg,#ece8df 0 14px,#e3ded4 14px 28px);color:#6e685f}
 .ph-name{font-size:22px;direction:ltr}
-.card{position:absolute;background:var(--c-card);border:1.5px solid var(--c-cardBorder);border-radius:var(--radius);
-  box-shadow:0 22px 58px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.07);backdrop-filter:blur(18px)}
+.card{position:absolute;background:var(--c-card);border:2px solid var(--c-cardBorder);border-radius:var(--radius)}
 .card.acc-b{border-color:var(--c-accent)} .card.dng-b{border-color:var(--c-danger);background:var(--c-bubbleRed)}
 .badge{display:inline-block;border-radius:var(--badge-radius);padding:.15em .55em;font-weight:700}
 .badge.dng{background:var(--c-dangerBadge);color:var(--c-dangerText)}
@@ -68,73 +52,14 @@ body{width:1920px;height:1080px}
 .rule{height:6px;width:120px;background:var(--c-accent);border-radius:3px}
 
 body.measuring #stage .content *{transform:none!important}
-.leak{position:absolute;border-radius:50%;pointer-events:none;mix-blend-mode:screen;filter:blur(48px)}
+.leak{position:absolute;border-radius:50%;pointer-events:none;mix-blend-mode:screen;filter:blur(40px)}
 .dust{position:absolute;inset:0;pointer-events:none}
 .dust i{position:absolute;border-radius:50%;background:#fff8dc}
 .grain{position:absolute;inset:-2px;pointer-events:none;opacity:.045;mix-blend-mode:overlay;background-repeat:repeat;z-index:40}
-.depth{position:absolute;inset:-60px;overflow:hidden;opacity:.22;filter:blur(44px) saturate(.95)}
+.depth{position:absolute;inset:-60px;overflow:hidden;opacity:.2;filter:blur(38px) saturate(.8)}
 .depth img{width:100%;height:100%;object-fit:cover}
 .hl{background-image:linear-gradient(transparent,transparent);background-image:linear-gradient(rgba(255,214,0,.38),rgba(255,214,0,.38));
   background-repeat:no-repeat;background-position:100% 88%;background-size:100% 42%;padding:0 .08em;border-radius:3px}
 .ul,.ul-on{background-image:linear-gradient(var(--c-accent),var(--c-accent));background-repeat:no-repeat;background-position:100% 100%;background-size:100% 6px;padding-bottom:4px}
-
-/* Always-On Living Ambient Stage & Dreamy Blurred YouTuber Depth */
-#stage.stage-transparent,
-body.stage-transparent,
-html.stage-transparent{background:transparent!important}
-#stage.stage-transparent .bg,
-#stage.stage-transparent .bgimg,
-#stage.stage-transparent .fadein,
-#stage.stage-transparent .transition-overlay,
-#stage.stage-transparent .living-grid,
-#stage.stage-transparent .living-aurora,
-#stage.stage-transparent .living-editorial-blur,
-#stage.stage-transparent .az-backdrop-blur{display:none!important}
-#stage.stage-transparent .t-hero,
-#stage.stage-transparent .t-h1,
-#stage.stage-transparent .t-h2,
-#stage.stage-transparent .t-body,
-#stage.stage-transparent .t-quote,
-#stage.stage-transparent .t-eyebrow,
-#stage.stage-transparent .t-caption,
-#stage.stage-transparent .source{text-shadow:0 3px 18px rgba(0,0,0,.92),0 1px 4px rgba(0,0,0,.95)}
-#stage.stage-transparent .content > .col{background:rgba(11,14,20,.62);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:24px 32px;box-shadow:0 18px 48px rgba(0,0,0,.45)}
-
-.living-stage{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1;contain:layout paint}
-.living-aurora{position:absolute;inset:-10%;pointer-events:none;mix-blend-mode:screen}
-#stage[data-theme-mode="light"] .living-aurora{mix-blend-mode:multiply;opacity:.42}
-.living-aurora-orb{position:absolute;border-radius:50%;will-change:transform,opacity}
-.living-bokeh-wash{position:absolute;inset:-8%;pointer-events:none}
-.living-bokeh-disc{position:absolute;border-radius:50%;will-change:transform,opacity}
-.living-editorial-blur{position:absolute;inset:-40px;pointer-events:none;overflow:hidden;contain:strict}
-.living-editorial-blur img{width:100%;height:100%;object-fit:cover;filter:blur(24px) saturate(1.16) brightness(.44);transform:scale(1.14) translateZ(0)}
-#stage[data-theme-mode="light"] .living-editorial-blur img{filter:blur(24px) saturate(.9) brightness(1.08);opacity:.32}
-.living-velvet-scrim{position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(ellipse 90% 85% at 50% 45%, rgba(8,12,20,.14), rgba(6,9,15,.72))}
-#stage[data-theme-mode="light"] .living-velvet-scrim{
-  background:radial-gradient(ellipse 90% 85% at 50% 45%, rgba(255,255,255,.08), rgba(235,230,220,.38))}
-.living-grid{position:absolute;inset:0;pointer-events:none;opacity:.14;
-  background-image:
-    linear-gradient(to right, rgba(255,255,255,.06) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255,255,255,.06) 1px, transparent 1px);
-  background-size:96px 96px;
-  mask-image:radial-gradient(ellipse 80% 75% at 50% 45%, #000 30%, transparent 95%);
-  -webkit-mask-image:radial-gradient(ellipse 80% 75% at 50% 45%, #000 30%, transparent 95%)}
-#stage[data-theme-mode="light"] .living-grid{
-  background-image:
-    linear-gradient(to right, rgba(0,0,0,.06) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0,0,0,.06) 1px, transparent 1px)}
-.living-wave{position:absolute;left:0;right:0;bottom:0;height:210px;pointer-events:none;z-index:3;opacity:.7}
-.living-wave svg{width:100%;height:100%;display:block}
-.podcast-card-surface{box-shadow:0 26px 68px rgba(0,0,0,.44),inset 0 1px 0 rgba(255,255,255,.09);overflow:hidden;backdrop-filter:blur(14px)}
-.card-sheen{position:absolute;top:-30%;bottom:-30%;width:45%;right:-60%;transform:skewX(-20deg);pointer-events:none;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent)}
-.stage-annotations{position:absolute;inset:0;pointer-events:none;z-index:38}
-.stage-callout-box{position:absolute;display:inline-flex;align-items:center;gap:12px;padding:14px 24px;border-radius:16px;
-  font-size:28px;font-weight:800;line-height:1.3;box-shadow:0 18px 44px rgba(0,0,0,.45);backdrop-filter:blur(12px)}
-.stage-spotlight-mask{position:absolute;inset:0;pointer-events:none;z-index:34}
-.az-viewport{box-shadow:0 32px 84px rgba(0,0,0,.55),0 8px 24px rgba(0,0,0,.35)}
-.az-paper-rig,.az-camera-rig{will-change:transform}
-.az-dim-para{will-change:opacity,filter}
-.az-marker-hl{box-decoration-break:clone;-webkit-box-decoration-break:clone}
-
+/* cards nested in flex/grid layouts flow (templates may still set position explicitly) */
+.col .card,.card .card,.flow>.card{position:relative}

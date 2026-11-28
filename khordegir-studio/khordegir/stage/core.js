@@ -1,53 +1,63 @@
 /* Khordegir Studio — stage runtime.
    One shared stage for: the offline editor preview (iframe) and the MP4 renderer (Playwright).
-   Everything is driven by two paused GSAP 3 timelines that are *seeked*, never played by the clock:
-     Stage.tl  : entrances, kinetic typography, transitions, animated logo
-     Stage.amb : ambient motion (Ken Burns inside image frames, background glow/drift, dust, light sweep)
-   so frame i of the video is strictly deterministic: Stage.seek(i / fps).                        */
+   Everything is driven by two paused GSAP timelines that are *seeked*, never played by the clock:
+     Stage.tl  : entrances (text, cards, charts, counters) — they never move after entering
+     Stage.amb : ambient motion (Ken Burns inside image frames, background glow/drift)
+   so frame i of the video is exactly Stage.seek(i / fps).                                   */
 (function () {
   "use strict";
   const W = 1920, H = 1080;
   const S = window.Stage = {
     W, H, fps: 30, themes: {}, templates: {}, theme: null, tl: null, amb: null, slide: null,
-    ready: false, _dur: 6, _base: "", _clipSeq: 0,
+    ready: false, _dur: 6, _base: "",
   };
 
   /* ---------------------------------------------------------------- utils */
   const FA = "۰۱۲۳۴۵۶۷۸۹";
-  const fa = S.fa = (s) => String(s).replace(/[0-9]/g, (d) => FA[+d]);
+  /* direction / digits come from the theme: theme.dir "rtl" (default, Persian) | "ltr" (English etc.),
+     theme.digits "persian" (default for rtl) | "latin" (default for ltr) */
+  S.isLTR = () => !!(S.theme && S.theme.dir === "ltr");
+  S.latinDigits = () => !!(S.theme && (S.theme.digits ? S.theme.digits === "latin" : S.theme.dir === "ltr"));
+  const fa = S.fa = (s) => S.latinDigits() ? String(s) : String(s).replace(/[0-9]/g, (d) => FA[+d]);
   const toNum = S.toNum = (v) => {
     if (typeof v === "number") return v;
     let s = String(v ?? "").replace(/[۰-۹]/g, (d) => FA.indexOf(d)).replace(/[٠-٩]/g, (d) => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
     s = s.replace(/٫/g, ".").replace(/[٬,]/g, "").replace(/[^0-9.\-]/g, "");
-    const n = parseFloat(s);
-    return isNaN(n) ? 0 : n;
+    const n = parseFloat(s); return isNaN(n) ? 0 : n;
   };
-  const decOf = S.decOf = (v) => {
-    const s = String(v ?? "").replace(/[۰-۹]/g, "0").replace("٫", ".");
-    const m = s.match(/\.(\d+)/);
-    return m ? m[1].length : 0;
-  };
+  const decOf = S.decOf = (v) => { const s = String(v ?? "").replace(/[۰-۹]/g, "0").replace("٫", "."); const m = s.match(/\.(\d+)/); return m ? m[1].length : 0; };
   S.fmt = function (v, dec = 0, thousands = true) {
     const neg = v < 0; v = Math.abs(v);
-    const s = v.toFixed(dec);
+    let s = v.toFixed(dec);
     let [i, f] = s.split(".");
-    if (thousands && i.length > 3) i = i.replace(/\B(?=(\d{3})+(?!\d))/g, "٬");
-    return (neg ? "-" : "") + fa(i + (f ? "٫" + f : ""));
+    const lat = S.latinDigits();
+    if (thousands && i.length > 3) i = i.replace(/\B(?=(\d{3})+(?!\d))/g, lat ? "," : "٬");
+    return (neg ? "-" : "") + fa(i + (f ? (lat ? "." : "٫") + f : ""));
   };
   const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const hasFa = S.hasFa = (s) => /[\u0620-\u064A\u0671-\u06D3\u06FA-\u06FF]/.test(String(s ?? ""));
 
-  /* Rich text: *accent*  ~danger~  _muted_  ==highlight==  __underline__  newline -> <br>;
-     Latin runs isolated LTR (keep latin digits); other digits become Persian. */
+  /* Rich text: *accent*  ~danger~  _muted_  newline -> <br>; Latin runs isolated LTR (keep latin digits);
+     other digits become Persian. A string with no Persian letters is shown LTR as is. */
+  const markup = (h) => h.replace(/==([^=]+)==/g, '<span class="hl">$1</span>').replace(/__([^_]+)__/g, '<span class="ul">$1</span>')
+         .replace(/\*([^*]+)\*/g, '<span class="acc">$1</span>')
+         .replace(/~([^~]+)~/g, '<span class="dng">$1</span>')
+         .replace(/(^|[\s(«“"])_([^_]+)_/g, '$1<span class="mut">$2</span>')
+         .replace(/\n/g, "<br>");
   S.rich = function (s) {
     s = String(s ?? "");
+    /* LTR themes: plain markup, latin digits, no bidi isolation (a Persian run still gets isolated) */
+    if (S.isLTR()) {
+      let h = esc(s);
+      const fa2 = [];
+      h = h.replace(/[\u0600-\u06FF][\u0600-\u06FF\s‌]*/g, (m) => { fa2.push(m); return String.fromCharCode(0xE000 + fa2.length - 1); });
+      h = markup(h);
+      return h.replace(/[\uE000-\uE0FF]/g, (m) => `<bdi dir="rtl">${fa2[m.charCodeAt(0) - 0xE000]}</bdi>`);
+    }
     if (!hasFa(s) && /[A-Za-z]/.test(s)) return `<bdi dir="ltr" class="lat">${esc(s)}</bdi>`;
     let h = esc(s);
     const lat = [];
-    h = h.replace(/\(?[A-Za-z][A-Za-z0-9.,&;:'’\-\/() ]*[A-Za-z0-9.)]|[A-Za-z]/g, (m) => {
-      lat.push(m);
-      return String.fromCharCode(0xE000 + lat.length - 1);
-    });
+    h = h.replace(/\(?[A-Za-z][A-Za-z0-9.,&;:'’\-\/() ]*[A-Za-z0-9.)]|[A-Za-z]/g, (m) => { lat.push(m); return String.fromCharCode(0xE000 + lat.length - 1); });
     h = fa(h);
     h = h.replace(/==([^=]+)==/g, '<span class="hl">$1</span>').replace(/__([^_]+)__/g, '<span class="ul">$1</span>')
          .replace(/\*([^*]+)\*/g, '<span class="acc">$1</span>')
@@ -58,93 +68,54 @@
     h = h.replace(/[\uE000-\uE0FF]/g, (m) => `<bdi dir="ltr" class="lat">${lat[m.charCodeAt(0) - 0xE000]}</bdi>`);
     return h;
   };
-  S.plain = (s) => String(s ?? "").replace(/[*~=]/g, "");
+  S.plain = (s) => String(s ?? "").replace(/[*~]/g, "");
 
-  /* Deterministic say-duration estimation (Persian speech ~2.25 words/sec + pause weight) */
-  const estimateSayDuration = S.estimateSayDuration = function (slide) {
-    if (!slide || slide.sync_say === false) return null;
-    const parts = [];
-    if (typeof slide.say === "string" && slide.say.trim()) parts.push(slide.say.trim());
-    if (Array.isArray(slide.steps)) {
-      slide.steps.forEach((st) => {
-        if (typeof st === "string" && st.trim()) parts.push(st.trim());
-        else if (st && typeof st.say === "string" && st.say.trim()) parts.push(st.say.trim());
-      });
-    }
-    const txt = parts.join(" ").trim();
-    if (!txt) return null;
-    const words = txt.split(/\s+/).filter(Boolean).length;
-    const pauses = (txt.match(/[.!؟؛\n]/g) || []).length * 0.25;
-    return +(Math.max(4.5, Math.min(26, words / 2.25 + 1.15 + pauses))).toFixed(2);
-  };
-
-  /* cubic-bezier ease function compatible with real GSAP 3 ease callbacks */
+  /* cubic-bezier ease for GSAP */
   function bezier(x1, y1, x2, y2) {
     const bx = (t) => 3 * x1 * t * (1 - t) ** 2 + 3 * x2 * t * t * (1 - t) + t ** 3;
     const by = (t) => 3 * y1 * t * (1 - t) ** 2 + 3 * y2 * t * t * (1 - t) + t ** 3;
     return (x) => {
       if (x <= 0) return 0; if (x >= 1) return 1;
       let lo = 0, hi = 1, t = x;
-      for (let i = 0; i < 30; i++) {
-        const v = bx(t);
-        if (Math.abs(v - x) < 1e-5) break;
-        if (v < x) lo = t; else hi = t;
-        t = (lo + hi) / 2;
-      }
+      for (let i = 0; i < 30; i++) { const v = bx(t); if (Math.abs(v - x) < 1e-5) break; if (v < x) lo = t; else hi = t; t = (lo + hi) / 2; }
       return by(t);
     };
   }
-  S.bezier = bezier;
-  const DEFAULT_EASES = {
-    power4: [0.16, 1, 0.3, 1],
-    power3: [0.22, 1, 0.36, 1],
-    editorial: [0.22, 1, 0.36, 1],
-    vox: [0.19, 1, 0.22, 1],
-    fluid: [0.25, 1, 0.35, 1],
-    silk: [0.33, 1, 0.68, 1],
-    snappy: [0.16, 1, 0.3, 1],
-    expo: [0.19, 1, 0.22, 1],
-    back: "back.out(1.18)",
-    spring: "back.out(1.32)",
-  };
   S.ease = function (name) {
-    if (name === "none") return "none";
-    const mc = S.slide && S.slide.motionCurve;
-    if (mc && Array.isArray(mc.points) && mc.points.length === 4 && mc.type !== "none") {
-      return bezier(
-        Number(mc.points[0]) || 0,
-        Number(mc.points[1]) || 0,
-        Number(mc.points[2]) || 1,
-        Number(mc.points[3]) || 1
-      );
-    }
-    const e = ((S.theme && S.theme.ease) || {})[name] ?? DEFAULT_EASES[name] ?? name;
+    const e = (S.theme.ease || {})[name] ?? name;
     if (Array.isArray(e)) return bezier(...e);
     return e || "power3.out";
   };
 
   /* ---------------------------------------------------------------- themes */
-  S.defineTheme = function (t) {
-    S.themes[t.name] = t;
-    if (!S.theme || t.name === "khordegir-dark") S.useTheme(t.name);
-  };
+  /* the default theme stays khordegir-dark (Persian) whatever the file order; override with window.DEFAULT_THEME */
+  S.defineTheme = function (t) { S.themes[t.name] = t; if (!S.theme || t.name === (window.DEFAULT_THEME || "khordegir-dark")) S.useTheme(t.name); };
   S.useTheme = function (name) {
-    const t = S.themes[name] || S.themes["khordegir-dark"] || Object.values(S.themes)[0];
-    if (!t) return;
+    const t = S.themes[name] || Object.values(S.themes)[0];
     S.theme = t;
-    const c = t.colors || t.tokens || {}, ty = t.type || {}, lay = t.layout || { radius: 16, badgeRadius: 8 };
+    const c = t.colors, ty = t.type;
     let css = `:root{`;
     for (const k in c) if (typeof c[k] === "string") css += `--c-${k}:${c[k]};`;
-    css += `--radius:${lay.radius}px;--badge-radius:${lay.badgeRadius}px;}`;
+    css += `--radius:${t.layout.radius}px;--badge-radius:${t.layout.badgeRadius}px;}`;
+    /* direction + fonts per theme (theme.dir, theme.font = {family, body, faces:[{family,file,weight}]}) */
+    const ltr = t.dir === "ltr";
+    const fnt = t.font || {};
+    (fnt.faces || []).forEach((f) => { css += `@font-face{font-family:"${f.family}";src:url("../fonts/${f.file}") format("woff2");font-weight:${f.weight};}`; });
+    const fam = fnt.family ? `"${fnt.family}",` : "";
+    css += `#stage{direction:${ltr ? "ltr" : "rtl"};${fam ? `font-family:${fam}"Vazirmatn",sans-serif;` : ""}}`;
+    if (fnt.body) css += `#stage .t-body,#stage .t-caption,#stage .t-axis{font-family:"${fnt.body}",${fam}"Vazirmatn",sans-serif}`;
+    if (ltr) css += `.lat{font-family:inherit}.num{direction:ltr}.num-core{text-align:left}.source{right:80px;left:auto;text-align:right}`;
+    document.documentElement.setAttribute("dir", ltr ? "ltr" : "rtl");
+    document.documentElement.setAttribute("lang", t.lang || (ltr ? "en" : "fa"));
     for (const k in ty) css += `.t-${k}{font-size:${ty[k].size}px;font-weight:${ty[k].weight};line-height:${ty[k].lh};}`;
     let st = document.getElementById("theme-vars");
     if (!st) { st = document.createElement("style"); st.id = "theme-vars"; document.head.appendChild(st); }
     st.textContent = css;
-    const stageEl = document.getElementById("stage");
-    if (stageEl) stageEl.setAttribute("data-theme-mode", c.isDark === false ? "light" : "dark");
   };
 
   /* ---------------------------------------------------------------- templates */
+  /* A template folder = schema.json (label, fields, example, aliases…) + template.js (build).
+     The schema arrives through templates/_index.js and is merged here. */
   S.template = function (t) {
     const e = (window.TEMPLATE_INDEX || []).find((x) => x.name === t.name);
     const full = Object.assign({}, e ? e.schema : {}, t);
@@ -152,6 +123,7 @@
     (full.aliases || []).forEach((a) => (S.templates[a] = full));
   };
   S.templateList = () => Object.values(S.templates).filter((t, i, a) => a.indexOf(t) === i);
+  /* loader used by stage.html and the editor: writes <script>/<link> tags for themes and templates */
   S.writeIncludes = function (prefix = "") {
     (window.THEME_FILES || []).forEach((f) => document.write(`<script src="${prefix}../themes/${f}"><\/script>`));
     (window.TEMPLATE_INDEX || []).forEach((t) => {
@@ -161,48 +133,25 @@
   };
 
   /* ---------------------------------------------------------------- build API given to templates */
-  function wrapHtmlWords(html) {
-    const lines = String(html || "").split(/<br\s*\/?>/i);
-    return lines.map((line) => {
-      const tokens = line.match(/(<[^>]+>|\s+|[^\s<]+)/g) || [];
-      let openTag = "";
-      let depth = 0;
-      const out = [];
-      for (const tok of tokens) {
-        if (tok.startsWith("<")) {
-          if (tok.startsWith("</")) {
-            depth = Math.max(0, depth - 1);
-            if (depth === 0) openTag = "";
-            out.push(tok);
-          } else {
-            out.push(tok);
-            if (!tok.endsWith("/>") && !/^<(br|img|hr)\b/i.test(tok)) {
-              depth += 1;
-              if (depth === 1) openTag = tok;
-            }
-          }
-        } else if (/^\s+$/.test(tok)) {
-          out.push(" ");
-        } else {
-          // Wrap whole Persian/Latin word intact (never split glyphs or ZWNJ)
-          out.push(`<span class="k-word">${tok}</span>`);
-        }
-      }
-      return `<span class="k-line">${out.join("")}</span>`;
-    }).join("<br>");
-  }
-
   function makeAPI(slide, root) {
     const th = S.theme, L = th.layout, M = th.motion;
     const scam = (slide.layout || "SLIDE").toUpperCase() === "SCAM";
     const base = 0.1;
     const A = {
       slide, root, th, scam, W, H, L,
+      /* direction helpers so one template works for RTL (Persian) and LTR (English) themes */
+      ltr: S.isLTR(), dir: S.isLTR() ? "ltr" : "rtl",
+      start: S.isLTR() ? "left" : "right", end: S.isLTR() ? "right" : "left",   // CSS side where reading starts / ends
+      originStart: S.isLTR() ? "0% 50%" : "100% 50%",                           // transform-origin for "grow from reading start"
+      sign: S.isLTR() ? -1 : 1,                                                 // multiply an x offset that means "from the reading start"
+      /* mirror an x-position designed for RTL (box at x with width w) when the theme is LTR */
+      mx(x, w = 0) { return S.isLTR() ? W - x - w : x; },
+      /* main content area. In SCAM the lower part left of scamLeft belongs to the camera. */
       area: {
         x: L.margin, y: L.top, w: W - 2 * L.margin, h: H - L.top - L.bottom,
         right: W - L.margin, bottom: H - L.bottom,
-        left: scam ? L.scamLeft : L.margin,
-        camTop: L.cam[1] - 40,
+        left: scam ? L.scamLeft : L.margin,       // safe left edge for anything that reaches the bottom
+        camTop: L.cam[1] - 40,                    // in SCAM, content left of scamLeft must end above this
       },
       el(tag, cls, parent, style) {
         const e = document.createElement(tag || "div");
@@ -211,96 +160,14 @@
         (parent || root).appendChild(e);
         return e;
       },
-      css(e, st) {
-        for (const k in st) {
-          const v = st[k];
-          e.style[k] = (typeof v === "number" && !/opacity|zIndex|fontWeight|lineHeight|flex/.test(k)) ? v + "px" : v;
-        }
-        return e;
-      },
-      box(parent, x, y, w, h, cls) {
-        return A.el("div", "abs " + (cls || ""), parent, { left: x, top: y, width: w, height: h });
-      },
+      css(e, st) { for (const k in st) { const v = st[k]; e.style[k] = (typeof v === "number" && !/opacity|zIndex|fontWeight|lineHeight|flex/.test(k)) ? v + "px" : v; } return e; },
+      box(parent, x, y, w, h, cls) { return A.el("div", "abs " + (cls || ""), parent, { left: x, top: y, width: w, height: h }); },
       text(parent, str, role, cls, style) {
         const e = A.el("div", `t-${role || "body"} ${cls || ""}`, parent, style);
         e.innerHTML = S.rich(str);
-        if (!hasFa(str) && /[A-Za-z]/.test(String(str))) e.setAttribute("dir", "ltr");
+        if (S.isLTR()) e.setAttribute("dir", hasFa(str) && !/[A-Za-z]/.test(String(str)) ? "rtl" : "ltr");
+        else if (!hasFa(str) && /[A-Za-z]/.test(String(str))) e.setAttribute("dir", "ltr");
         return e;
-      },
-      /* Wrap an editable element in an outer [data-field-wrap=key] container that holds user
-         overrides (x, y, scale) from slide.overrides[key], while GSAP entrance animations act on
-         the inner node so user transforms and animation transforms never collide. */
-      field(key, el) {
-        if (!el) return el;
-        if (el.parentElement && el.parentElement.dataset && el.parentElement.dataset.fieldWrap === String(key)) {
-          return el.parentElement;
-        }
-        const wrap = document.createElement("div");
-        wrap.dataset.fieldWrap = String(key);
-        el.dataset.field = String(key);
-
-        const parent = el.parentNode;
-        if (parent) parent.insertBefore(wrap, el);
-        wrap.appendChild(el);
-
-        const st = el.style;
-        const hasInlinePos = !!(st.left || st.top || st.right || st.bottom);
-        const isAbs = st.position === "absolute" ||
-          (el.classList && (el.classList.contains("abs") || el.classList.contains("frame") || el.classList.contains("col"))) ||
-          (typeof getComputedStyle === "function" && el.isConnected && getComputedStyle(el).position === "absolute");
-
-        if (isAbs || hasInlinePos) {
-          wrap.style.position = "absolute";
-          for (const p of ["left", "top", "right", "bottom", "zIndex"]) {
-            if (st[p]) {
-              wrap.style[p] = st[p];
-              st[p] = "";
-            }
-          }
-          if (st.width) wrap.style.width = st.width;
-          if (st.height) wrap.style.height = st.height;
-          if (!wrap.style.width && !wrap.style.height && !hasInlinePos) {
-            wrap.style.inset = "0";
-          }
-          el.style.position = "relative";
-        } else if (!isAbs) {
-          for (const p of ["flex", "flexGrow", "flexShrink", "flexBasis", "alignSelf", "order", "gridArea", "gridColumn", "gridRow", "marginTop", "marginRight", "marginBottom", "marginLeft"]) {
-            if (st[p]) {
-              wrap.style[p] = st[p];
-              st[p] = "";
-            }
-          }
-          if (st.width && (/%$/.test(st.width) || wrap.style.marginLeft === "auto" || wrap.style.marginRight === "auto")) {
-            wrap.style.width = st.width;
-            st.width = "100%";
-          }
-        }
-
-        const allOv = slide && slide.overrides;
-        const layoutKey = scam ? "SCAM" : "SLIDE";
-        let ov = null;
-        if (allOv && typeof allOv === "object") {
-          if (allOv[layoutKey] && typeof allOv[layoutKey] === "object" && allOv[layoutKey][key] != null) {
-            ov = allOv[layoutKey][key];
-          } else if (allOv[key] != null) {
-            const raw = allOv[key];
-            if (raw && typeof raw === "object" && (raw[layoutKey] != null || raw.SLIDE != null || raw.SCAM != null)) {
-              ov = raw[layoutKey] || null;
-            } else {
-              ov = raw;
-            }
-          }
-        }
-        if (ov && typeof ov === "object") {
-          const x = (ov.x != null && ov.x !== "" && Number.isFinite(+ov.x)) ? +ov.x : 0;
-          const y = (ov.y != null && ov.y !== "" && Number.isFinite(+ov.y)) ? +ov.y : 0;
-          const sc = (ov.scale != null && ov.scale !== "" && Number.isFinite(+ov.scale)) ? +ov.scale : 1;
-          if (x !== 0 || y !== 0 || sc !== 1) {
-            wrap.style.transform = `translate(${x}px, ${y}px) scale(${sc})`;
-          }
-        }
-
-        return wrap;
       },
       /* shrink every text inside box until nothing overflows */
       fit(box, min = 0.55) {
@@ -309,160 +176,48 @@
         let k = 1;
         document.body.classList.add("measuring");
         const done = () => document.body.classList.remove("measuring");
+        /* layout boxes of the direct children (ignores glyph ink / shadows that overflow line boxes) */
         const over = () => {
           const kids2 = [...box.children]; if (!kids2.length) return false;
           const st = getComputedStyle(box);
           const pb = parseFloat(st.paddingBottom) || 0, pr = parseFloat(st.paddingRight) || 0, pl = parseFloat(st.paddingLeft) || 0, pt = parseFloat(st.paddingTop) || 0;
           let top = Infinity, bot = -Infinity, wide = 0;
-          kids2.forEach((k2) => { top = Math.min(top, k2.offsetTop); bot = Math.max(bot, k2.offsetTop + k2.offsetHeight); wide = Math.max(wide, k2.scrollWidth); });
+          /* positions relative to the box itself (works whether or not the box is positioned; offsetTop is
+             relative to the nearest positioned ancestor, which made fit() over-shrink text in static boxes) */
+          const br = box.getBoundingClientRect(), bt = br.top + box.clientTop;
+          kids2.forEach((k2) => { const r2 = k2.getBoundingClientRect(); const t2 = r2.top - bt + box.scrollTop;
+            top = Math.min(top, t2); bot = Math.max(bot, t2 + k2.offsetHeight); wide = Math.max(wide, k2.scrollWidth); });
           return (bot - Math.min(top, pt)) > box.clientHeight - pb + 2 || top < pt - 2 || wide > box.clientWidth - pl - pr + 2;
         };
-        while (over() && k > min) {
-          k -= 0.04;
-          kids.forEach((e) => (e.style.fontSize = (e.dataset.fs * k).toFixed(1) + "px"));
-        }
+        while (over() && k > min) { k -= 0.04; kids.forEach((e) => (e.style.fontSize = (e.dataset.fs * k).toFixed(1) + "px")); }
         done();
         return k;
       },
-      at(role, i = 0, extra = 0) {
-        const m = M[role] || M.body || { delay: 0.2, stagger: 0.08 };
-        const mc = S.slide && S.slide.motionCurve;
-        const stScale = mc && Number.isFinite(+mc.staggerScale) ? Math.max(0.25, Math.min(2.5, +mc.staggerScale)) : 1;
-        return base + (m.delay || 0) + i * (m.stagger || 0) * stScale + extra;
-      },
+      at(role, i = 0, extra = 0) { const m = M[role] || M.body; return base + (m.delay || 0) + i * (m.stagger || 0) + extra; },
       /* entrance by role: eyebrow | title | body | card | bubble | badge | image | note */
       enter(e, role, i = 0, extra = 0, over) {
         if (!e) return 0;
-        if (e.dataset && e.dataset.fieldWrap && e.firstElementChild) e = e.firstElementChild;
         const m = Object.assign({}, M[role] || M.body, over || {});
-        const mc = S.slide && S.slide.motionCurve;
-        const durScale = mc && Number.isFinite(+mc.durationScale) ? Math.max(0.3, Math.min(2.5, +mc.durationScale)) : 1;
-        const dur = (m.dur || 0.55) * durScale;
-        const explicit = over && (over.x != null || over.y != null || over.scale != null || over.clipPath != null || over.filter != null || over.rotation != null);
+        const explicit = over && (over.x != null || over.y != null || over.scale != null);
         let from;
-        if (explicit || !S.fx) {
-          from = { opacity: 0 };
-          if (m.x) from.x = m.x;
-          if (m.y) from.y = m.y;
-          if (m.scale) from.scale = m.scale;
-          if (m.clipPath) from.clipPath = m.clipPath;
-          if (m.filter) from.filter = m.filter;
-          if (m.rotation) from.rotation = m.rotation;
-        } else {
-          from = S.fx.from(role, m);
-        }
+        if (explicit || !S.fx) { from = { opacity: 0 }; if (m.x) from.x = m.x; if (m.y) from.y = m.y; if (m.scale) from.scale = m.scale; }
+        else from = S.fx.from(role, m);
         const t = (over && over.at != null) ? over.at : A.at(role, i, extra);
-        const to = Object.assign({ opacity: 1, x: 0, y: 0, scale: 1, rotation: 0 }, S.fx ? S.fx.to(from) : {});
+        const to = Object.assign({ opacity: 1, x: 0, y: 0, scale: 1 }, S.fx ? S.fx.to(from) : {});
         Object.keys(to).forEach((k) => { if (!(k in from)) delete to[k]; });
-        if (over && over.toClipPath) to.clipPath = over.toClipPath;
-
-        // Decouple opacity settle (~52% of duration) from motion settle for crisp, non-ghostly entrances
-        const motionKeys = Object.keys(from).filter((k) => k !== "opacity");
-        if ("opacity" in from && motionKeys.length > 0) {
-          const opDur = Math.max(0.18, Math.min(dur * 0.65, dur * 0.54));
-          S.tl.fromTo(e, { opacity: from.opacity }, { opacity: to.opacity ?? 1, duration: opDur, ease: "power2.out", immediateRender: true }, t);
-          const mFrom = {};
-          const mTo = {};
-          motionKeys.forEach((k) => { mFrom[k] = from[k]; mTo[k] = to[k]; });
-          S.tl.fromTo(e, mFrom, Object.assign(mTo, { duration: dur, ease: S.ease(m.ease), immediateRender: true }), t);
-        } else {
-          S.tl.fromTo(e, from, Object.assign(to, { duration: dur, ease: S.ease(m.ease), immediateRender: true }), t);
-        }
-
-        e.dataset.end = (t + dur).toFixed(3);
+        S.tl.fromTo(e, from, Object.assign(to, { duration: m.dur, ease: S.ease(m.ease), immediateRender: true }), t);
+        e.dataset.end = (t + m.dur).toFixed(3);
         if (S.fx) {
           if (role === "title") S.fx.cue(t, "whoosh", e.textContent.slice(0, 30));
-          else if (role === "bubble") S.fx.cue(t, "bubble", e.textContent.slice(0, 30), { index: i, pitch: i });
-          else if (role === "badge") S.fx.cue(t, "ding", e.textContent.slice(0, 30), { index: i, pitch: i });
-          else if (role === "card") S.fx.cue(t, "card", e.textContent.slice(0, 30), { index: i, pitch: i });
-          else if (role === "eyebrow") S.fx.cue(t, "tick", e.textContent.slice(0, 30));
-          else if (role === "image") S.fx.cue(t, "shutter", e.textContent.slice(0, 30));
-          else if (role === "bar") S.fx.cue(t, "bar", e.textContent.slice(0, 30), { index: i, pitch: i });
-          else if (role === "note") S.fx.cue(t, "whoosh-subtle", e.textContent.slice(0, 30));
+          else if (role === "bubble" || role === "badge") S.fx.cue(t, "pop", e.textContent.slice(0, 30));
+          else if (role === "card" && i === 0) S.fx.cue(t, "soft", "");
         }
-        return t + dur;
+        return t + m.dur;
       },
-      /* Kinetic Persian RTL word-by-word animation (NEVER splits words into letters; preserves ZWNJ) */
-      kinetic(e, opts = {}) {
-        if (!e) return 0;
-        if (e.dataset && e.dataset.fieldWrap && e.firstElementChild) e = e.firstElementChild;
-        const mc = S.slide && S.slide.motionCurve;
-        const durScale = mc && Number.isFinite(+mc.durationScale) ? Math.max(0.35, Math.min(2.2, +mc.durationScale)) : 1;
-        const stScale = mc && Number.isFinite(+mc.staggerScale) ? Math.max(0.35, Math.min(2.2, +mc.staggerScale)) : 1;
-        const mode = opts.mode || "rise-mask";
-        const at = opts.at ?? A.at(opts.role || "title", 0, opts.extra || 0);
-        const dur = (opts.dur ?? 0.46) * durScale;
-        const stagger = (opts.stagger ?? (mode === "glide-rtl" ? 0.042 : 0.036)) * stScale;
-
-        let fromBase;
-        let easeName = opts.ease;
-        if (mode === "editorial-blur") {
-          fromBase = { y: opts.y ?? 14, x: opts.x ?? 0, scale: opts.scale ?? 0.985, filter: "blur(8px)" };
-          easeName = easeName || "expo";
-        } else if (mode === "glide-rtl") {
-          fromBase = { x: opts.x ?? 26, y: opts.y ?? 0, scale: opts.scale ?? 1 };
-          easeName = easeName || "expo";
-        } else if (mode === "pop-clean") {
-          fromBase = { y: opts.y ?? 16, x: opts.x ?? 0, scale: opts.scale ?? 0.9 };
-          easeName = easeName || "back";
-        } else if (mode === "cascade-3d") {
-          fromBase = { y: opts.y ?? 18, x: opts.x ?? 0, scale: opts.scale ?? 0.97, rotationX: -22 };
-          easeName = easeName || "power4";
-        } else {
-          // rise-mask: natural vertical glide with zero lateral wobble
-          fromBase = { y: opts.y ?? 20, x: opts.x ?? 0, scale: opts.scale ?? 0.98 };
-          easeName = easeName || "power4";
-        }
-        const ease = S.ease(easeName);
-
-        e.innerHTML = wrapHtmlWords(e.innerHTML);
-        const words = [...e.querySelectorAll(".k-word")];
-        if (!words.length) return A.enter(e, opts.role || "title", 0, opts.extra || 0);
-
-        if (mode === "cascade-3d") {
-          e.style.perspective = "900px";
-        }
-        const opDur = Math.max(0.16, dur * 0.5);
-        words.forEach((w, idx) => {
-          const wt = at + idx * stagger;
-          if (mode === "cascade-3d") w.style.transformOrigin = "50% 100%";
-          S.tl.fromTo(w, { opacity: 0 }, { opacity: 1, duration: opDur, ease: "power2.out", immediateRender: true }, wt);
-          const toVars = { y: 0, x: 0, scale: 1, duration: dur, ease, immediateRender: true };
-          if ("filter" in fromBase) toVars.filter = "blur(0px)";
-          if ("rotationX" in fromBase) toVars.rotationX = 0;
-          S.tl.fromTo(w, fromBase, toVars, wt);
-        });
-        const end = at + Math.max(0, words.length - 1) * stagger + dur;
-        e.dataset.end = end.toFixed(3);
-        if (S.fx) S.fx.cue(at, "whoosh", e.textContent.slice(0, 30));
-        return end;
-      },
-      /* Animated accent rule / sweep line */
-      sweepLine(parent, opts = {}) {
-        const cls = "rule " + (opts.cls || "");
-        const r = A.el("div", cls.trim(), parent, Object.assign({
-          width: (opts.width || 160) + "px",
-          height: (opts.height || 6) + "px",
-          transformOrigin: opts.origin || (A.scam ? "100% 50%" : "50% 50%"),
-        }, opts.style || {}));
-        const at = opts.at ?? A.at("body", 1);
-        S.tl.fromTo(r, { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: opts.dur || 0.58, ease: S.ease(opts.ease || "expo"), immediateRender: true }, at);
-        if (S.fx) S.fx.cue(at, "whoosh-subtle", "line");
-        return r;
-      },
-      /* Imperceptible secondary ambient optical glide (never jittery) */
-      drift(el, opts = {}) {
-        if (!el) return;
-        const dx = opts.x ?? 2.0, dy = opts.y ?? 1.2, dur = opts.dur ?? 18;
-        S.amb.fromTo(el, { x: -dx, y: -dy }, { x: dx, y: dy, duration: dur, ease: "sine.inOut", yoyo: true, repeat: 99, force3D: true }, 0);
-      },
-      stagger(list, role, extra = 0) {
-        list.forEach((e, i) => A.enter(e, role, i, extra));
-      },
+      stagger(list, role, extra = 0) { list.forEach((e, i) => A.enter(e, role, i, extra)); },
       /* number counting up; tabular Persian digits; scale .92 -> 1 */
       count(e, o) {
-        if (e && e.dataset && e.dataset.fieldWrap && e.firstElementChild) e = e.firstElementChild;
-        const m = M.number || { delay: 0.2, dur: 1.15, scale: 0.92, ease: "power3" };
+        const m = M.number;
         const to = toNum(o.to), from = toNum(o.from ?? 0), dec = o.decimals ?? decOf(o.to), th1 = o.thousands !== false;
         const pre = o.prefix ?? "", suf = o.suffix ?? "";
         const html = (v) => {
@@ -472,72 +227,37 @@
         e.classList.add("num");
         e.innerHTML = html(to);
         const core = e.querySelector(".num-core");
-        if (core) core.style.minWidth = (core.getBoundingClientRect().width || 120) + "px";
+        core.style.minWidth = core.getBoundingClientRect().width + "px";   // fixed box: units digit stays put
         const obj = { v: from };
         const t = o.at ?? A.at("number");
         const dur = o.dur ?? m.dur;
-        S.tl.to(obj, {
-          v: to, duration: dur, ease: S.ease(o.ease || m.ease),
-          onUpdate: () => {
-            const c = e.querySelector(".num-core");
-            if (c) c.innerHTML = esc(fa(hasFa(pre) ? "" : pre)) + S.fmt(obj.v, dec, th1) + esc(fa(hasFa(suf) ? "" : suf));
-          },
-        }, t);
-        if (core) core.innerHTML = esc(fa(hasFa(pre) ? "" : pre)) + S.fmt(from, dec, th1) + esc(fa(hasFa(suf) ? "" : suf));
-        if (o.enter !== false) {
-          S.tl.from(e, { opacity: 0, scale: o.scale ?? m.scale ?? 1, duration: Math.min(0.55, dur), ease: S.ease(o.enterEase || m.ease), immediateRender: true }, t);
-        }
+        S.tl.to(obj, { v: to, duration: dur, ease: S.ease(m.ease), onUpdate: () => { e.querySelector(".num-core").innerHTML = esc(fa(hasFa(pre) ? "" : pre)) + S.fmt(obj.v, dec, th1) + esc(fa(hasFa(suf) ? "" : suf)); } }, t);
+        e.querySelector(".num-core").innerHTML = esc(fa(hasFa(pre) ? "" : pre)) + S.fmt(from, dec, th1) + esc(fa(hasFa(suf) ? "" : suf));
+        if (o.enter !== false) S.tl.from(e, { opacity: 0, scale: m.scale || 1, duration: Math.min(0.5, dur), ease: S.ease(m.ease), immediateRender: true }, t);
         e.dataset.end = (t + dur).toFixed(3);
         if (S.fx) { S.fx.cue(t, "count-start", String(o.to)); S.fx.cue(t + dur * 0.85, "count-end", String(o.to)); }
         return t + dur;
       },
-      /* image in a rounded frame + counter-scale reveal + continuous silky Ken Burns inside the frame */
+      /* image in a rounded frame + Ken Burns inside the frame */
       image(parent, src, x, y, w, h, o = {}) {
-        const rad = o.radius ?? L.radius;
         const f = A.el("div", "frame" + (o.shadow === false ? "" : " shadow") + (o.border ? " bordered" : ""), parent,
-          { left: x, top: y, width: w, height: h, borderRadius: rad + "px" });
+          { left: x, top: y, width: w, height: h, borderRadius: (o.radius ?? L.radius) + "px" });
         if (o.border) f.style.setProperty("--frame-border", S.color(o.border));
         const inner = A.el("div", "frame-inner", f);
-        const cam = A.el("div", "frame-cam", inner);
         if (src) {
-          const im = A.el("img", "", cam);
+          const im = A.el("img", "", inner);
           im.src = src; im.alt = "";
           im.style.objectFit = o.fit || "cover";
           if (o.focus) im.style.objectPosition = o.focus;
-          im.onerror = () => { im.remove(); A.placeholder(cam, src); };
+          im.onerror = () => { im.remove(); A.placeholder(inner, src); };
           S._imgs.push(im);
           A._imgIndex = (A._imgIndex || 0) + 1;
           let mo = S.fx ? S.fx.imageMotion(o.motion, A._imgIndex) : o.motion;
-          if (mo === "depth") { if (o.depth !== false && w * h > 200000 && S.fx) S.fx.depth(src); mo = "breathe"; }
+          if (mo === "depth") { if (o.depth !== false && w * h > 200000) S.fx.depth(src); mo = "breathe"; }
           A.kenburns(im, mo);
-        } else A.placeholder(cam, o.name || "");
+        } else A.placeholder(inner, o.name || "");
         if (o.dim) A.el("div", "dim", inner, { opacity: o.dim });
-        if (o.enter !== false) {
-          const entAt = o.at ?? A.at("image", 0, o.delay || 0);
-          let enterOver = o.enterOver || null;
-          if (o.reveal === "wipe") {
-            enterOver = Object.assign({
-              clipPath: `inset(0% 0% 0% 100% round ${rad}px)`,
-              toClipPath: `inset(0% 0% 0% 0% round ${rad}px)`,
-              dur: 0.72,
-              ease: "expo",
-              at: entAt,
-            }, enterOver || {});
-          } else if (o.reveal === "curtain") {
-            enterOver = Object.assign({
-              clipPath: `inset(7% 7% 7% 7% round ${rad}px)`,
-              toClipPath: `inset(0% 0% 0% 0% round ${rad}px)`,
-              dur: 0.75,
-              ease: "power4",
-              at: entAt,
-            }, enterOver || {});
-          } else if (o.delay) {
-            enterOver = Object.assign({ at: entAt }, enterOver || {});
-          }
-          A.enter(f, "image", 0, o.delay || 0, enterOver);
-          // Smooth inner optical counter-scale settle (separate .frame-cam node avoids GSAP conflict with .frame & <img>)
-          S.tl.fromTo(cam, { scale: o.counterScale || 1.072 }, { scale: 1, duration: 0.92, ease: S.ease("power4"), immediateRender: true }, entAt);
-        }
+        if (o.enter !== false) A.enter(f, "image", 0, o.delay || 0);
         return f;
       },
       placeholder(parent, name) {
@@ -547,18 +267,16 @@
         return p;
       },
       kenburns(im, motion) {
-        const kb = th.kenburns || { period: 28, scale: 0.036, x: -9 }; motion = motion || "breathe";
+        const kb = th.kenburns; motion = motion || "breathe";
         if (motion === "none") return;
-        const period = Math.max(24, Number(kb.period) || 28);
-        const sc = Math.min(0.042, Number(kb.scale) || 0.034);
-        let a = { scale: 1.0, x: 0, y: 0 }, b = { scale: 1 + sc, x: -7, y: -3 };
-        if (motion === "zoom-out") { a = { scale: 1 + sc + 0.006, x: 4, y: 2 }; b = { scale: 1.004, x: -4, y: -2 }; }
-        else if (motion === "pan-left") { a = { scale: 1.04, x: 16, y: 0 }; b = { scale: 1.04, x: -16, y: -2 }; }
-        else if (motion === "pan-right") { a = { scale: 1.04, x: -16, y: 0 }; b = { scale: 1.04, x: 16, y: 2 }; }
-        else if (motion === "gentle-drift") { a = { scale: 1.016, x: -9, y: 4 }; b = { scale: 1.036, x: 9, y: -4 }; }
-        S.amb.fromTo(im, a, Object.assign(b, { duration: period, ease: "sine.inOut", yoyo: true, repeat: 99, force3D: true }), 0);
+        let a = { scale: 1, x: 0 }, b = { scale: 1 + kb.scale, x: kb.x };
+        if (motion === "zoom-out") { a = { scale: 1 + kb.scale + 0.005, x: 0 }; b = { scale: 1, x: 0 }; }
+        if (motion === "pan-left") { a = { scale: 1.07, x: 30 }; b = { scale: 1.07, x: -30 }; }
+        if (motion === "pan-right") { a = { scale: 1.07, x: -30 }; b = { scale: 1.07, x: 30 }; }
+        S.amb.fromTo(im, a, Object.assign(b, { duration: kb.period, ease: "none" }), 0);
       },
       color: (c) => S.color(c),
+      /* SVG helpers for diagrams, maps, curves */
       svg(parent, x, y, w, h, viewBox) {
         const ns = "http://www.w3.org/2000/svg", e = document.createElementNS(ns, "svg");
         e.setAttribute("width", w); e.setAttribute("height", h); e.setAttribute("viewBox", viewBox || `0 0 ${w} ${h}`);
@@ -570,17 +288,17 @@
         for (const k in attrs || {}) e.setAttribute(k, attrs[k]);
         svg.appendChild(e); return e;
       },
+      /* draw a stroked SVG path/line/circle in (stroke-dashoffset); stays still afterwards */
       draw(el, at, dur = 0.9, ease = "power3") {
-        const L1 = el.getTotalLength ? el.getTotalLength() : 1000;
-        el.style.strokeDasharray = L1; el.style.strokeDashoffset = L1;
+        const L = el.getTotalLength ? el.getTotalLength() : 1000;
+        el.style.strokeDasharray = L; el.style.strokeDashoffset = L;
         S.tl.to(el, { strokeDashoffset: 0, duration: dur, ease: S.ease(ease) }, at ?? A.at("body"));
-        if (S.fx) S.fx.cue(at ?? A.at("body"), "swish", "draw");
         return (at ?? A.at("body")) + dur;
       },
+      /* pop-in for badges/dots/icons (back.out) */
       pop(el, at, i = 0) { return A.enter(el, "badge", i, 0, at != null ? { at } : null); },
-      list: (v) => (S.T ? S.T.list(v) : (Array.isArray(v) ? v : [])),
-      data: (v) => (S.T ? S.T.data(v) : (Array.isArray(v) ? v : [])),
-      tone: (v) => (S.T ? S.T.tone(v) : null),
+      /* list helpers shared by all templates */
+      list: (v) => S.T.list(v), data: (v) => S.T.data(v), tone: (v) => S.T.tone(v),
     };
     return A;
   }
@@ -602,19 +320,10 @@
     if (S.tl) S.tl.kill(); if (S.amb) S.amb.kill();
     S.tl = gsap.timeline({ paused: true }); S.amb = gsap.timeline({ paused: true });
     S._imgs = [];
-    S._clipSeq = 0;
-
     const stage = document.getElementById("stage");
     stage.innerHTML = "";
-    const isTrans = !!(opts.transparent || S._transparent);
-    stage.classList.toggle("stage-transparent", isTrans);
-    document.body.classList.toggle("stage-transparent", isTrans);
-    document.documentElement.classList.toggle("stage-transparent", isTrans);
-
     const layout = (slide.layout || "SLIDE").toUpperCase();
-    stage.className = "layout-" + layout.toLowerCase() + (isTrans ? " stage-transparent" : "");
-    stage.setAttribute("data-theme-mode", (th.colors && th.colors.isDark === false) ? "light" : "dark");
-
+    stage.className = "layout-" + layout.toLowerCase();
     // background
     const bg = document.createElement("div"); bg.className = "bg"; stage.appendChild(bg);
     const bgs = slide.background || {};
@@ -625,25 +334,20 @@
       const im = document.createElement("img"); im.src = bgimg; wrap.appendChild(im); S._imgs.push(im);
       im.onerror = () => wrap.remove();
       const d = document.createElement("div"); d.className = "dim"; d.style.opacity = bgs.dim ?? slide.bg_dim ?? 0.55; wrap.appendChild(d);
-      S.amb.fromTo(im, { scale: 1 }, { scale: 1.028, duration: Math.max(24, th.kenburns.period || 26), ease: "sine.inOut", yoyo: true, repeat: 99, force3D: true }, 0);
+      S.amb.fromTo(im, { scale: 1 }, { scale: 1.03, duration: th.kenburns.period, ease: "none" }, 0);
     }
     const FXC = S.fx ? S.fx.setup(slide) : null;
     const g = th.glow ? Object.assign({}, th.glow, FXC ? { x: FXC.glowPos[0], y: FXC.glowPos[1] } : {}) : null;
     if (g && slide.glow !== false) {
       const gl = document.createElement("div"); gl.className = "glow"; stage.appendChild(gl);
       const sz = Math.min(W, H) * g.size;
-      Object.assign(gl.style, {
-        width: sz + "px", height: sz + "px", left: (W * g.x - sz / 2) + "px", top: (H * g.y - sz / 2) + "px",
-        background: `radial-gradient(circle, ${th.colors.glow} 0%, transparent 68%)`,
-      });
+      Object.assign(gl.style, { width: sz + "px", height: sz + "px", left: (W * g.x - sz / 2) + "px", top: (H * g.y - sz / 2) + "px",
+        background: `radial-gradient(circle, ${th.colors.glow} 0%, transparent 68%)` });
       const half = g.period / 2;
       S.amb.fromTo(gl, { opacity: g.opacity[0], x: -g.move, y: -g.move * 0.6 },
         { opacity: g.opacity[1], x: g.move, y: g.move * 0.6, duration: half, ease: "sine.inOut", yoyo: true, repeat: 99 }, 0);
     }
-    if (S.fx) {
-      if (S.fx.livingStage) S.fx.livingStage(stage, slide);
-      S.fx.atmosphere(stage, slide);
-    }
+    if (S.fx) S.fx.atmosphere(stage, slide);
     const content = document.createElement("div"); content.className = "content"; stage.appendChild(content);
     const A = makeAPI(slide, content);
     const tname = (slide.template || "layers").replace(/-/g, "_");
@@ -655,147 +359,39 @@
       try { tpl.build(slide, A); }
       catch (err) { console.error(err); A.text(content, "خطا در قالب " + tname + ": " + err.message, "body", "abs err"); }
     }
-    if (S.fx) {
-      if (S.fx.logo) S.fx.logo(content, slide, A);
-      if (S.fx.annotations) S.fx.annotations(content, slide, A);
-      S.fx.post(content);
-      if (S.fx.applyMicroMotion) S.fx.applyMicroMotion(content, slide);
-      S.fx.grain(stage);
-    }
+    if (S.fx) { S.fx.post(content); S.fx.grain(stage); }
     // common extras: source credit + note
     if (slide.source) { const s = A.text(content, slide.source, "caption", "source"); A.enter(s, "note"); }
     if (slide.note) { const n = A.text(content, slide.note, "caption", "note " + (A.scam ? "note-scam" : "")); A.enter(n, "note"); }
     if (opts.camGuide || S._camGuide) {
       const c = th.layout.cam; const cg = document.createElement("div"); cg.className = "camguide";
-      Object.assign(cg.style, {
-        left: c[0] + "px", top: c[1] + "px", width: (c[2] - c[0]) + "px", height: (c[3] - c[1]) + "px",
-        display: layout === "SCAM" ? "flex" : "none",
-      });
-      cg.textContent = "جای دوربین"; stage.appendChild(cg);
+      Object.assign(cg.style, { left: c[0] + "px", top: c[1] + "px", width: (c[2] - c[0]) + "px", height: (c[3] - c[1]) + "px", display: layout === "SCAM" ? "flex" : "none" });
+      cg.textContent = S.isLTR() ? "camera" : "جای دوربین"; stage.appendChild(cg);
     }
-    // Transition in (default "soft-fade" matches classic .fadein)
-    if (!isTrans) {
-      if (S.fx && S.fx.transitionIn) {
-        S.fx.transitionIn(stage, slide, th);
-      } else {
-        const fade = document.createElement("div"); fade.className = "fadein"; stage.appendChild(fade);
-        if (th.clip.fade > 0) S.tl.fromTo(fade, { opacity: 1 }, { opacity: 0, duration: th.clip.fade, ease: "power1.out", immediateRender: true }, 0);
-        else fade.remove();
-      }
-    }
-
+    // fade in from black
+    const fade = document.createElement("div"); fade.className = "fadein"; stage.appendChild(fade);
+    if (th.clip.fade > 0) S.tl.fromTo(fade, { opacity: 1 }, { opacity: 0, duration: th.clip.fade, ease: "power1.out" }, 0);
+    else fade.remove();
     await Promise.all(S._imgs.map((im) => im.decode().catch(() => {})));
     const ent = S.tl.duration();
     S._entrances = ent;
-    const sayDur = estimateSayDuration(slide);
-    const baseMin = +slide.duration ? +slide.duration : Math.max(th.clip.min, sayDur || 0);
-    S._dur = Math.max(baseMin, ent + th.clip.hold);
-    S._lastCueIdx = -1;
-    S._liveLoop = Boolean(opts.liveLoop || S._liveLoop);
+    S._dur = Math.max(+slide.duration || th.clip.min, ent + th.clip.hold);
     S.seek(0);
     S.ready = true;
-    const fxi = S.fx ? {
-      variant: S.fx.cur.variant,
-      preset: S.fx.cur.preset,
-      motion: S.fx.cur.motion,
-      transition: S.fx.cur.transition,
-      logoMotion: S.fx.cur.logoMotion,
-      leak: S.fx.cur.leak,
-      dust: S.fx.cur.dust,
-    } : {};
-    return {
-      duration: S._dur,
-      entrances: ent,
-      sayDuration: sayDur,
-      fps: S.fps,
-      frames: Math.round(S._dur * S.fps),
-      fx: fxi,
-      cues: (S.cues || []).sort((a, b) => a.t - b.t),
-    };
+    const fxi = S.fx ? { variant: S.fx.cur.variant, motion: S.fx.cur.motion, leak: S.fx.cur.leak, dust: S.fx.cur.dust } : {};
+    return { duration: S._dur, entrances: ent, fps: S.fps, frames: Math.round(S._dur * S.fps), fx: fxi,
+             cues: (S.cues || []).sort((a, b) => a.t - b.t) };
   };
-  S.setTransparent = function (flag) {
-    S._transparent = Boolean(flag);
-    const stage = document.getElementById("stage");
-    if (stage) stage.classList.toggle("stage-transparent", S._transparent);
-    document.body.classList.toggle("stage-transparent", S._transparent);
-    document.documentElement.classList.toggle("stage-transparent", S._transparent);
-  };
-  S.setMicLevel = function (level) {
-    const stage = document.getElementById("stage");
-    if (!stage) return;
-    const lvl = Math.max(0, Math.min(1, Number(level) || 0));
-    stage.style.setProperty("--mic-level", lvl.toFixed(3));
-    const wave = stage.querySelector(".living-wave");
-    if (wave) {
-      wave.style.transform = `scaleY(${(1 + lvl * 0.65).toFixed(3)})`;
-      wave.style.opacity = (0.55 + lvl * 0.45).toFixed(2);
-    }
-  };
-  S.updateFloat = function (t) {
-    const items = S._floats;
-    if (!Array.isArray(items) || !items.length) return;
-    const cfg = S._floatCfg || { enabled: false, baseAmp: 2, speed: 0.45, style: "silk-glide" };
-    if (!cfg.enabled || cfg.baseAmp <= 0) {
-      for (let i = 0; i < items.length; i += 1) {
-        items[i].el.style.translate = "0px 0px 0px";
-        items[i].el.style.rotate = "0deg";
-        items[i].el.style.scale = "1";
-      }
-      return;
-    }
-    const speed = cfg.speed || 0.45;
-    for (let i = 0; i < items.length; i += 1) {
-      const it = items[i];
-      if (t <= it.startAt) {
-        it.el.style.translate = "0px 0px 0px";
-        it.el.style.rotate = "0deg";
-        it.el.style.scale = "1";
-        continue;
-      }
-      // Quintic C2 smootherstep fade-in over 2.8s so entrance transitions imperceptibly into optical glide
-      const u = Math.min(1, (t - it.startAt) / 2.8);
-      const fade = u * u * u * (10 - u * (15 - 6 * u));
-      const wt = (t - it.startAt) * speed;
-      const dx = fade * it.ampX * Math.sin(wt * it.w2 + it.p2);
-      const dy = fade * it.ampY * Math.sin(wt * it.w1 + it.p1);
-      it.el.style.translate = `${dx.toFixed(3)}px ${dy.toFixed(3)}px 0px`;
-      it.el.style.rotate = "0deg";
-      if (it.ampScale) {
-        const sc = 1 + fade * it.ampScale * Math.sin(wt * it.w3 + it.p3);
-        it.el.style.scale = sc.toFixed(5);
-      } else {
-        it.el.style.scale = "1";
-      }
-    }
-  };
-  S.seek = function (t, fireSfx = false) {
-    if (S.tl) S.tl.time(Math.min(t, S.tl.duration()), false);
-    if (S.amb) {
-      const ambDur = S.amb.duration();
-      const ambTime = S._liveLoop && ambDur > 0 ? (t % Math.max(20, ambDur)) : t;
-      S.amb.time(ambTime, false);
-    }
-    S.updateFloat(t);
-    if (fireSfx && window.StageSFX && Array.isArray(S.cues) && S.cues.length) {
-      const prevT = S._t || 0;
-      if (t >= prevT) {
-        S.cues.forEach((c) => {
-          if (c.t > prevT && c.t <= t && (t - prevT) < 0.25) {
-            window.StageSFX.play(c.type, c.vol ?? 0.55, c.opts || {});
-          }
-        });
-      }
-    }
-    S._t = t;
-  };
+  S.seek = function (t) { if (S.tl) S.tl.time(Math.min(t, S.tl.duration()), false); if (S.amb) S.amb.time(t, false); S._t = t; };
   S.duration = () => S._dur;
   S.camOverlap = function () {
+    // returns list of content elements intersecting the camera box (for the SCAM check)
     if ((S.slide.layout || "").toUpperCase() !== "SCAM") return [];
     const c = S.theme.layout.cam, st = document.getElementById("stage").getBoundingClientRect();
     const bad = [];
     document.querySelectorAll("#stage .content *").forEach((e) => {
-      if (e.closest(".fullbleed") || e.closest(".stage-annotations")) return;
-      if (e.children.length && !e.matches(".frame,.card,.bubble,.bar,.t-body,.t-h1,.t-hero,.t-label,.t-caption,.t-eyebrow,.t-quote,.num,.stage-logo")) return;
+      if (e.closest(".fullbleed")) return;
+      if (e.children.length && !e.matches(".frame,.card,.bubble,.bar,.t-body,.t-h1,.t-hero,.t-label,.t-caption,.t-eyebrow,.t-quote,.num")) return;
       const r = e.getBoundingClientRect(); if (!r.width || !r.height) return;
       const x0 = r.left - st.left, y0 = r.top - st.top, x1 = x0 + r.width, y1 = y0 + r.height;
       if (x0 < c[2] && x1 > c[0] && y0 < c[3] && y1 > c[1]) bad.push((e.className || e.tagName) + " " + (e.textContent || "").slice(0, 30));
@@ -803,23 +399,12 @@
     return bad;
   };
 
-  /* preview playback (editor + live OBS loop): drives the same seek() from the clock */
+  /* preview playback (editor): drives the same seek() from the clock */
   let raf = null;
-  S.play = function (from = 0, opts = {}) {
+  S.play = function (from = 0) {
     cancelAnimationFrame(raf);
-    const keepLiving = Boolean(opts.liveLoop || S._liveLoop);
     const t0 = performance.now() - from * 1000;
-    const loop = () => {
-      const t = (performance.now() - t0) / 1000;
-      if (keepLiving) {
-        S.seek(t, true);
-        raf = requestAnimationFrame(loop);
-      } else {
-        S.seek(Math.min(t, S._dur), true);
-        if (t < S._dur) raf = requestAnimationFrame(loop);
-        else S.onEnd && S.onEnd();
-      }
-    };
+    const loop = () => { const t = (performance.now() - t0) / 1000; S.seek(Math.min(t, S._dur)); if (t < S._dur) raf = requestAnimationFrame(loop); else S.onEnd && S.onEnd(); };
     raf = requestAnimationFrame(loop);
   };
   S.stop = () => cancelAnimationFrame(raf);
@@ -829,44 +414,10 @@
     const d = e.data || {};
     if (d.cmd === "load") {
       S._camGuide = !!d.camGuide;
-      if (d.sfxMuted !== undefined && window.StageSFX) window.StageSFX.setMuted(d.sfxMuted);
-      if (d.sfxVolume !== undefined && window.StageSFX) window.StageSFX.setVolume(d.sfxVolume);
-      const info = await S.load(d.slide, {
-        theme: d.theme,
-        camGuide: d.camGuide,
-        transparent: d.transparent,
-        liveLoop: d.liveLoop,
-      });
-      if (d.at != null) {
-        const seekT = (d.at === 0) ? Math.max(1.8, (info && info.entrances) || 1.8) : d.at;
-        S.seek(seekT, false);
-      } else {
-        S.play(0, { liveLoop: d.liveLoop });
-      }
+      const info = await S.load(d.slide, { theme: d.theme, camGuide: d.camGuide });
+      if (d.at != null) S.seek(d.at); else S.play(0);
       parent.postMessage({ cmd: "loaded", info, cam: S.camOverlap() }, "*");
-    } else if (d.cmd === "seek") {
-      S.stop();
-      S.seek(d.t, Boolean(d.fireSfx));
-    } else if (d.cmd === "play") {
-      S.play(d.from || 0, { liveLoop: d.liveLoop });
-    } else if (d.cmd === "sfxConfig" && window.StageSFX) {
-      if (d.muted !== undefined) window.StageSFX.setMuted(d.muted);
-      if (d.volume !== undefined) window.StageSFX.setVolume(d.volume);
-    } else if (d.cmd === "livingConfig" && d.livingStage && S.slide) {
-      S.slide.livingStage = Object.assign({}, S.slide.livingStage || {}, d.livingStage);
-      if (Array.isArray(S._floats)) {
-        S._floats.forEach((it) => {
-          it.el.style.translate = "0px 0px 0px";
-          it.el.style.rotate = "0deg";
-          it.el.style.scale = "1";
-        });
-      }
-      const content = document.querySelector("#stage .content");
-      if (content && S.fx && S.fx.applyMicroMotion) {
-        content.querySelectorAll(".card-sheen").forEach((el) => el.remove());
-        S.fx.applyMicroMotion(content, S.slide);
-        S.updateFloat(S._t || 0);
-      }
-    }
+    } else if (d.cmd === "seek") { S.stop(); S.seek(d.t); }
+    else if (d.cmd === "play") S.play(d.from || 0);
   });
 })();
